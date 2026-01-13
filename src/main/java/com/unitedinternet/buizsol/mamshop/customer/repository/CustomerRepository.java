@@ -10,24 +10,30 @@ import java.util.UUID;
 
 public interface CustomerRepository {
 
-    @NotNull
-    static CustomerRepository getInstance() {
-        return CustomerRepositoryImpl.getInstance();
-    }
+        @NotNull
+        static CustomerRepository getInstance() {
+                return CustomerRepositoryImpl.getInstance();
+        }
 
-    void save(
-            @NotNull final Customer customer);
+        void save(
+                        @NotNull final Customer customer);
 
-    @NotNull
-    Optional<Customer> findById(
-            @NotNull final UUID id);
+        @NotNull
+        Optional<Customer> findById(
+                        @NotNull final UUID id);
 
-    @NotNull
-    Collection<Customer> findAll();
+        @NotNull
+        default Customer getById(@NotNull final UUID id) throws CustomerNotFoundException {
+                return findById(id).orElseThrow(
+                                () -> new CustomerNotFoundException("Customer with ID " + id + " not found"));
+        }
 
-    void delete(
-            @NotNull final UUID id) throws CustomerNotFoundException;
+        @NotNull
+        Collection<Customer> findAll();
 
-    void update(
-            @NotNull final Customer customer) throws CustomerNotFoundException;
+        void delete(
+                        @NotNull final UUID id) throws CustomerNotFoundException;
+
+        void update(
+                        @NotNull final Customer customer) throws CustomerNotFoundException;
 }

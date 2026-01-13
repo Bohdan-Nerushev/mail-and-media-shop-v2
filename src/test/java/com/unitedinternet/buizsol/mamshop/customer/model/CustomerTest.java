@@ -1,8 +1,5 @@
 package com.unitedinternet.buizsol.mamshop.customer.model;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +9,6 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 class CustomerTest {
 
@@ -195,53 +191,8 @@ class CustomerTest {
         Assertions.assertNotEquals(customer1.getId(), customer3.getId(), "IDs should be unique");
     }
 
-    @Test
-    @DisplayName("14. Positive: ID equality check")
-    void shouldCorrectlyIdentifyWhenIdsAreSame() {
-        UUID sharedId = UUID.randomUUID();
-        Customer customer1 = createWithId(sharedId);
-        Customer customer2 = createWithId(sharedId);
-        Customer differentCustomer = createWithId(UUID.randomUUID());
-
-        Assertions.assertTrue(customer1.hasSameId(customer2), "IDs should be considered same");
-        Assertions.assertFalse(customer1.hasSameId(differentCustomer), "IDs should be considered different");
-    }
-
-    @Test
-    @DisplayName("15. Negative: Error when IDs are duplicate during uniqueness check")
-    void shouldThrowExceptionWhenIdsAreDuplicateDuringUniquenessCheck() {
-        UUID duplicateId = UUID.randomUUID();
-        Customer customer1 = createWithId(duplicateId);
-        Customer customer2 = createWithId(duplicateId);
-
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> customer1.verifyIdentificationUniqueness(customer2));
-        Assertions.assertTrue(exception.getMessage().contains("Duplicate customer ID"));
-    }
-
-    @Test
-    @DisplayName("16. Positive: Uniqueness check passes for different IDs")
-    void shouldNotThrowExceptionWhenIdsAreDifferentDuringUniquenessCheck() {
-        Customer customer1 = createWithId(UUID.randomUUID());
-        Customer customer2 = createWithId(UUID.randomUUID());
-
-        Assertions.assertDoesNotThrow(() -> customer1.verifyIdentificationUniqueness(customer2));
-    }
-
     private Customer createDefaultCustomer() {
         return new Customer(
-                "John",
-                "Doe",
-                LocalDate.of(1990, 1, 1),
-                mainAddress,
-                null,
-                communicationDetails,
-                Brand.GMX);
-    }
-
-    private Customer createWithId(final UUID id) {
-        return Customer.createForTesting(
-                id,
                 "John",
                 "Doe",
                 LocalDate.of(1990, 1, 1),

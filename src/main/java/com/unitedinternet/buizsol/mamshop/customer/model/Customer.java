@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Customer {
@@ -22,7 +23,7 @@ public class Customer {
     @NotNull
     private Address invoiceAddress;
     @NotNull
-    private final CommunicationDetails communicationDetails;
+    private CommunicationDetails communicationDetails;
     @NotNull
     private final Brand brand;
     @NotNull
@@ -37,21 +38,6 @@ public class Customer {
             @NotNull(message = "Communication details must not be null") final CommunicationDetails communicationDetails,
             @NotNull(message = "Brand must not be null") final Brand brand) {
 
-        this(UUID.randomUUID(), firstName, lastName, birthDate, address, invoiceAddress,
-                communicationDetails, brand);
-    }
-
-    private Customer(
-            @NotNull final UUID id,
-            @NotBlank final String firstName,
-            @NotBlank final String lastName,
-            @NotNull final LocalDate birthDate,
-            @NotNull final Address address,
-            @Nullable final Address invoiceAddress,
-            @NotNull final CommunicationDetails communicationDetails,
-            @NotNull final Brand brand) {
-
-        validateNotNull(id, "ID");
         validateNotBlank(firstName, "First name");
         validateNotBlank(lastName, "Last name");
         validateNotNull(birthDate, "Birth date");
@@ -59,7 +45,7 @@ public class Customer {
         validateNotNull(communicationDetails, "Communication details");
         validateNotNull(brand, "Brand");
 
-        this.id = id;
+        this.id = UUID.randomUUID();
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
@@ -95,7 +81,7 @@ public class Customer {
         return address;
     }
 
-    void setAddress(
+    public void setAddress(
             @NotNull(message = "Address must not be null") final Address address) {
         validateNotNull(address, "Address");
         this.address = address;
@@ -106,7 +92,7 @@ public class Customer {
         return invoiceAddress;
     }
 
-    void setInvoiceAddress(
+    public void setInvoiceAddress(
             @NotNull(message = "Invoice address must not be null") final Address invoiceAddress) {
         validateNotNull(invoiceAddress, "Invoice address");
         this.invoiceAddress = invoiceAddress;
@@ -115,6 +101,12 @@ public class Customer {
     @NotNull
     public CommunicationDetails getCommunicationDetails() {
         return communicationDetails;
+    }
+
+    public void setCommunicationDetails(
+            @NotNull(message = "Communication details must not be null") final CommunicationDetails communicationDetails) {
+        validateNotNull(communicationDetails, "Communication details");
+        this.communicationDetails = communicationDetails;
     }
 
     @NotNull
@@ -139,32 +131,6 @@ public class Customer {
 
     public void deactivate() {
         this.status = CustomerStatus.INACTIVE;
-    }
-
-    public boolean hasSameId(
-            @NotNull(message = "Other customer must not be null") final Customer other) {
-        validateNotNull(other, "Other customer");
-        return this.id.equals(other.getId());
-    }
-
-    public void verifyIdentificationUniqueness(
-            @NotNull(message = "Other customer must not be null") final Customer other) {
-        if (hasSameId(other)) {
-            throw new IllegalArgumentException("Duplicate customer ID detected: " + id);
-        }
-    }
-
-    static Customer createForTesting(
-            @NotNull final UUID id,
-            @NotBlank final String firstName,
-            @NotBlank final String lastName,
-            @NotNull final LocalDate birthDate,
-            @NotNull final Address address,
-            @Nullable final Address invoiceAddress,
-            @NotNull final CommunicationDetails communicationDetails,
-            @NotNull final Brand brand) {
-        return new Customer(id, firstName, lastName, birthDate, address, invoiceAddress,
-                communicationDetails, brand);
     }
 
     private void validateNotBlank(final String value, final String fieldName) {

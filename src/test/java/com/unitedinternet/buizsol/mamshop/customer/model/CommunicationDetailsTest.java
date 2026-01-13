@@ -13,8 +13,8 @@ class CommunicationDetailsTest {
     @DisplayName("1. Positive: Successful creation with valid data")
     void shouldCreateCommunicationDetailsWhenDataIsValid() {
         CommunicationDetails details = new CommunicationDetails("test@example.com", "+123456789");
-        Assertions.assertEquals("test@example.com", details.getEmail());
-        Assertions.assertEquals("+123456789", details.getTelephone());
+        Assertions.assertEquals("test@example.com", details.email());
+        Assertions.assertEquals("+123456789", details.telephone());
     }
 
     @ParameterizedTest
@@ -40,14 +40,14 @@ class CommunicationDetailsTest {
     void shouldHandleExtremelyLongEmail() {
         String longEmail = "a".repeat(250) + "@example.com";
         CommunicationDetails details = new CommunicationDetails(longEmail, "123");
-        Assertions.assertEquals(longEmail, details.getEmail());
+        Assertions.assertEquals(longEmail, details.email());
     }
 
     @Test
     @DisplayName("5. Boundary: Shortest valid phone number")
     void shouldHandleShortTelephone() {
         CommunicationDetails details = new CommunicationDetails("a@b.c", "0");
-        Assertions.assertEquals("0", details.getTelephone());
+        Assertions.assertEquals("0", details.telephone());
     }
 
     @ParameterizedTest
@@ -55,7 +55,7 @@ class CommunicationDetailsTest {
     @DisplayName("6. Positive: Support for various email formats")
     void shouldHandleVariousEmailFormats(String email) {
         CommunicationDetails details = new CommunicationDetails(email, "12345");
-        Assertions.assertEquals(email, details.getEmail());
+        Assertions.assertEquals(email, details.email());
     }
 
     @ParameterizedTest
@@ -63,6 +63,6 @@ class CommunicationDetailsTest {
     @DisplayName("7. Positive: Support for various telephone formats")
     void shouldHandleVariousTelephoneFormats(String phone) {
         CommunicationDetails details = new CommunicationDetails("test@test.com", phone);
-        Assertions.assertEquals(phone, details.getTelephone());
+        Assertions.assertEquals(phone, details.telephone());
     }
 }

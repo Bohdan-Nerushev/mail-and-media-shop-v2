@@ -13,11 +13,11 @@ class AddressTest {
     @DisplayName("1. Positive: Successful creation with valid data")
     void shouldCreateAddressInstanceWhenDataIsValid() {
         Address address = new Address("Main St", "10", "12345", "Berlin", "Germany");
-        Assertions.assertEquals("Main St", address.getStreet());
-        Assertions.assertEquals("10", address.getNumber());
-        Assertions.assertEquals("12345", address.getPostcode());
-        Assertions.assertEquals("Berlin", address.getCity());
-        Assertions.assertEquals("Germany", address.getCountry());
+        Assertions.assertEquals("Main St", address.street());
+        Assertions.assertEquals("10", address.number());
+        Assertions.assertEquals("12345", address.postcode());
+        Assertions.assertEquals("Berlin", address.city());
+        Assertions.assertEquals("Germany", address.country());
     }
 
     @ParameterizedTest
@@ -70,18 +70,18 @@ class AddressTest {
     void shouldHandleExtremelyLongStreet() {
         String longStreet = "A".repeat(1000);
         Address address = new Address(longStreet, "1", "12345", "Berlin", "Germany");
-        Assertions.assertEquals(longStreet, address.getStreet());
+        Assertions.assertEquals(longStreet, address.street());
     }
 
     @Test
     @DisplayName("8. Boundary: Minimal valid input (single characters)")
     void shouldHandleSingleCharacterInputs() {
         Address address = new Address("S", "1", "1", "B", "G");
-        Assertions.assertEquals("S", address.getStreet());
-        Assertions.assertEquals("1", address.getNumber());
-        Assertions.assertEquals("1", address.getPostcode());
-        Assertions.assertEquals("B", address.getCity());
-        Assertions.assertEquals("G", address.getCountry());
+        Assertions.assertEquals("S", address.street());
+        Assertions.assertEquals("1", address.number());
+        Assertions.assertEquals("1", address.postcode());
+        Assertions.assertEquals("B", address.city());
+        Assertions.assertEquals("G", address.country());
     }
 
     @Test
