@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class CommunicationDetailsTest {
 
     @Test
-    @DisplayName("1. Successful creation with valid data")
+    @DisplayName("1. Positive: Successful creation with valid data")
     void shouldCreateCommunicationDetailsWhenDataIsValid() {
         CommunicationDetails details = new CommunicationDetails("test@example.com", "+123456789");
         Assertions.assertEquals("test@example.com", details.getEmail());
@@ -48,5 +48,21 @@ class CommunicationDetailsTest {
     void shouldHandleShortTelephone() {
         CommunicationDetails details = new CommunicationDetails("a@b.c", "0");
         Assertions.assertEquals("0", details.getTelephone());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "user@domain.com", "user.name@sub.domain.org", "123@456.789" })
+    @DisplayName("6. Positive: Support for various email formats")
+    void shouldHandleVariousEmailFormats(String email) {
+        CommunicationDetails details = new CommunicationDetails(email, "12345");
+        Assertions.assertEquals(email, details.getEmail());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "+4912345678", "004912345678", "123", "0151-1234567" })
+    @DisplayName("7. Positive: Support for various telephone formats")
+    void shouldHandleVariousTelephoneFormats(String phone) {
+        CommunicationDetails details = new CommunicationDetails("test@test.com", phone);
+        Assertions.assertEquals(phone, details.getTelephone());
     }
 }

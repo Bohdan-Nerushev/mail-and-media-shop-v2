@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class AddressTest {
 
     @Test
-    @DisplayName("1. Successful creation with valid data")
+    @DisplayName("1. Positive: Successful creation with valid data")
     void shouldCreateAddressInstanceWhenDataIsValid() {
         Address address = new Address("Main St", "10", "12345", "Berlin", "Germany");
         Assertions.assertEquals("Main St", address.getStreet());
@@ -22,7 +22,7 @@ class AddressTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n"})
+    @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("2. Negative: Validation of 'street' field")
     void shouldThrowExceptionWhenStreetIsInvalid(String invalidStreet) {
         Assertions.assertThrows(IllegalArgumentException.class,
@@ -31,7 +31,7 @@ class AddressTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n"})
+    @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("3. Negative: Validation of 'number' field")
     void shouldThrowExceptionWhenNumberIsInvalid(String invalidNumber) {
         Assertions.assertThrows(IllegalArgumentException.class,
@@ -40,7 +40,7 @@ class AddressTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n"})
+    @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("4. Negative: Validation of 'postcode' field")
     void shouldThrowExceptionWhenPostcodeIsInvalid(String invalidPostcode) {
         Assertions.assertThrows(IllegalArgumentException.class,
@@ -49,7 +49,7 @@ class AddressTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n"})
+    @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("5. Negative: Validation of 'city' field")
     void shouldThrowExceptionWhenCityIsInvalid(String invalidCity) {
         Assertions.assertThrows(IllegalArgumentException.class,
@@ -58,7 +58,7 @@ class AddressTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n"})
+    @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("6. Negative: Validation of 'country' field")
     void shouldThrowExceptionWhenCountryIsInvalid(String invalidCountry) {
         Assertions.assertThrows(IllegalArgumentException.class,
@@ -78,5 +78,28 @@ class AddressTest {
     void shouldHandleSingleCharacterInputs() {
         Address address = new Address("S", "1", "1", "B", "G");
         Assertions.assertEquals("S", address.getStreet());
+        Assertions.assertEquals("1", address.getNumber());
+        Assertions.assertEquals("1", address.getPostcode());
+        Assertions.assertEquals("B", address.getCity());
+        Assertions.assertEquals("G", address.getCountry());
+    }
+
+    @Test
+    @DisplayName("9. Positive: Equals and HashCode consistency")
+    void shouldBeEqualWhenContentIsSame() {
+        Address address1 = new Address("St", "1", "123", "City", "Country");
+        Address address2 = new Address("St", "1", "123", "City", "Country");
+
+        Assertions.assertEquals(address1, address2);
+        Assertions.assertEquals(address1.hashCode(), address2.hashCode());
+    }
+
+    @Test
+    @DisplayName("10. Positive: Inequality check")
+    void shouldNotBeEqualWhenContentIsDifferent() {
+        Address address1 = new Address("St1", "1", "123", "City", "Country");
+        Address address2 = new Address("St2", "1", "123", "City", "Country");
+
+        Assertions.assertNotEquals(address1, address2);
     }
 }

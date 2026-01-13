@@ -5,7 +5,9 @@ import jakarta.validation.constraints.NotNull;
 
 public class CommunicationDetails {
 
+    @NotNull
     private final String email;
+    @NotNull
     private final String telephone;
 
     public CommunicationDetails(
@@ -32,5 +34,13 @@ public class CommunicationDetails {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(fieldName + " cannot be null or empty");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "CommunicationDetails{" +
+                "email='" + email + '\'' +
+                ", telephone='" + telephone + '\'' +
+                '}';
     }
 }
