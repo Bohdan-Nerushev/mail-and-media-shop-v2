@@ -7,51 +7,60 @@ import com.unitedinternet.buizsol.mamshop.customer.model.CommunicationDetails;
 import com.unitedinternet.buizsol.mamshop.customer.model.Customer;
 import com.unitedinternet.buizsol.mamshop.customer.model.CustomerStatus;
 import com.unitedinternet.buizsol.mamshop.customer.repository.CustomerRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
 
-    private CustomerService customerService;
+    @Mock
+    private Address address;
+
+    @Mock
+    private CommunicationDetails communicationDetails;
+
+    @Mock
     private CustomerRepository customerRepository;
 
-    @BeforeEach
-    void setUp() {
-        customerRepository = new InMemoryCustomerRepository();
-        customerService = new CustomerServiceImpl(customerRepository);
-    }
+    @InjectMocks
+    private CustomerServiceImpl customerService;
 
     @Test
     @DisplayName("01: Create customer with valid data should succeed")
     void test01_createCustomer_withValidData_shouldSucceed() {
-        final Address address = createDefaultAddress();
-        final CommunicationDetails comms = createDefaultCommunicationDetails();
-
         final Customer customer = customerService.createCustomer(
                 "John", "Doe", LocalDate.of(1990, 1, 1),
-                address, null, comms, Brand.GMX);
+                address, null, communicationDetails, Brand.GMX);
 
         assertNotNull(customer.getId());
         assertEquals("John", customer.getFirstName());
         assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
-        assertEquals(1, customerRepository.findAll().size());
+        verify(customerRepository).save(any(Customer.class));
     }
 
     @ParameterizedTest
@@ -60,9 +69,10 @@ class CustomerServiceTest {
     void test02_createCustomer_withDifferentBrands_shouldSucceed(final Brand brand) {
         final Customer customer = customerService.createCustomer(
                 "John", "Doe", LocalDate.of(1990, 1, 1),
-                createDefaultAddress(), null, createDefaultCommunicationDetails(), brand);
+                address, null, communicationDetails, brand);
 
         assertEquals(brand, customer.getBrand());
+        verify(customerRepository).save(any(Customer.class));
     }
 
     @ParameterizedTest
@@ -72,7 +82,7 @@ class CustomerServiceTest {
     void test03_createCustomer_withInvalidFirstName_shouldThrowException(final String firstName) {
         assertThrows(IllegalArgumentException.class, () -> customerService.createCustomer(
                 firstName, "Doe", LocalDate.of(1990, 1, 1),
-                createDefaultAddress(), null, createDefaultCommunicationDetails(), Brand.WEB_DE));
+                address, null, communicationDetails, Brand.WEB_DE));
     }
 
     @ParameterizedTest
@@ -82,7 +92,7 @@ class CustomerServiceTest {
     void test04_createCustomer_withInvalidLastName_shouldThrowException(final String lastName) {
         assertThrows(IllegalArgumentException.class, () -> customerService.createCustomer(
                 "John", lastName, LocalDate.of(1990, 1, 1),
-                createDefaultAddress(), null, createDefaultCommunicationDetails(), Brand.WEB_DE));
+                address, null, communicationDetails, Brand.WEB_DE));
     }
 
     @ParameterizedTest
@@ -96,143 +106,147 @@ class CustomerServiceTest {
 
         final Customer customer = customerService.createCustomer(
                 "John", "Doe", birthDate,
-                createDefaultAddress(), null, createDefaultCommunicationDetails(), Brand.GMX);
+                address, null, communicationDetails, Brand.GMX);
 
         assertEquals(birthDate, customer.getBirthDate());
+        verify(customerRepository).save(any(Customer.class));
     }
 
     @Test
     @DisplayName("06: Update address should update customer address but keep unique invoice address")
     void test06_updateAddress_shouldUpdateAddressSuccessfully() throws CustomerNotFoundException {
-        final Customer customer = createAndSaveDefaultCustomer();
-        final Address newAddress = new Address("New St", "2", "67890", "New City", "USA");
+        final UUID customerId = UUID.randomUUID();
+        final Customer customerMock = mock(Customer.class);
+        final Address newAddressMock = mock(Address.class);
 
-        customerService.updateAddress(customer.getId(), newAddress);
+        when(customerRepository.getById(customerId)).thenReturn(customerMock);
 
-        final Customer updated = customerRepository.findById(customer.getId()).orElseThrow();
-        assertEquals(newAddress, updated.getAddress());
-        assertEquals("Main St", updated.getInvoiceAddress().street());
+        customerService.updateAddress(customerId, newAddressMock);
+
+        verify(customerMock).setAddress(newAddressMock);
+        verify(customerRepository).update(customerMock);
     }
 
     @Test
     @DisplayName("07: Update invoice address should update only invoice address")
     void test07_updateInvoiceAddress_shouldUpdateInvoiceAddressSuccessfully() throws CustomerNotFoundException {
-        final Customer customer = createAndSaveDefaultCustomer();
-        final Address newInvoiceAddress = new Address("Bill St", "3", "11223", "Bill City", "UK");
+        final UUID customerId = UUID.randomUUID();
+        final Customer customerMock = mock(Customer.class);
+        final Address newInvoiceAddressMock = mock(Address.class);
 
-        customerService.updateInvoiceAddress(customer.getId(), newInvoiceAddress);
+        when(customerRepository.getById(customerId)).thenReturn(customerMock);
 
-        final Customer updated = customerRepository.findById(customer.getId()).orElseThrow();
-        assertEquals(newInvoiceAddress, updated.getInvoiceAddress());
-        assertEquals("Main St", updated.getAddress().street());
+        customerService.updateInvoiceAddress(customerId, newInvoiceAddressMock);
+
+        verify(customerMock).setInvoiceAddress(newInvoiceAddressMock);
+        verify(customerRepository).update(customerMock);
     }
 
     @Test
     @DisplayName("08: Update communication details should update successfully")
     void test08_updateCommunicationDetails_shouldUpdateSuccessfully() throws CustomerNotFoundException {
-        final Customer customer = createAndSaveDefaultCustomer();
-        final CommunicationDetails newDetails = new CommunicationDetails("new@test.com", "0987654321");
+        final UUID customerId = UUID.randomUUID();
+        final Customer customerMock = mock(Customer.class);
+        final CommunicationDetails newDetailsMock = mock(CommunicationDetails.class);
 
-        customerService.updateCommunicationDetails(customer.getId(), newDetails);
+        when(customerRepository.getById(customerId)).thenReturn(customerMock);
 
-        final Customer updated = customerRepository.findById(customer.getId()).orElseThrow();
-        assertEquals(newDetails, updated.getCommunicationDetails());
+        customerService.updateCommunicationDetails(customerId, newDetailsMock);
+
+        verify(customerMock).setCommunicationDetails(newDetailsMock);
+        verify(customerRepository).update(customerMock);
     }
 
     @Test
     @DisplayName("09: Activate customer should change status to ACTIVE")
     void test09_activateCustomer_shouldChangeStatusToActive() throws CustomerNotFoundException {
+        final UUID customerId = UUID.randomUUID();
+        final Customer customerMock = mock(Customer.class);
 
-        final Customer customer = createAndSaveDefaultCustomer();
+        when(customerRepository.getById(customerId)).thenReturn(customerMock);
 
-        customerService.activateCustomer(customer.getId());
+        customerService.activateCustomer(customerId);
 
-        final Customer updated = customerRepository.findById(customer.getId()).orElseThrow();
-        assertEquals(CustomerStatus.ACTIVE, updated.getStatus());
+        verify(customerMock).activate();
+        verify(customerRepository).update(customerMock);
     }
 
     @Test
     @DisplayName("10: Deactivate customer should change status to INACTIVE")
     void test10_deactivateCustomer_shouldChangeStatusToInactive() throws CustomerNotFoundException {
+        final UUID customerId = UUID.randomUUID();
+        final Customer customerMock = mock(Customer.class);
 
-        final Customer customer = createAndSaveDefaultCustomer();
-        customerService.activateCustomer(customer.getId());
+        when(customerRepository.getById(customerId)).thenReturn(customerMock);
 
-        customerService.deactivateCustomer(customer.getId());
+        customerService.deactivateCustomer(customerId);
 
-        final Customer updated = customerRepository.findById(customer.getId()).orElseThrow();
-        assertEquals(CustomerStatus.INACTIVE, updated.getStatus());
+        verify(customerMock).deactivate();
+        verify(customerRepository).update(customerMock);
     }
 
     @Test
     @DisplayName("11: Delete customer should remove customer from repository")
     void test11_deleteCustomer_shouldRemoveFromRepository() throws CustomerNotFoundException {
+        final UUID customerId = UUID.randomUUID();
 
-        final Customer customer = createAndSaveDefaultCustomer();
+        customerService.deleteCustomer(customerId);
 
-        customerService.deleteCustomer(customer.getId());
-
-        assertEquals(0, customerRepository.findAll().size());
+        verify(customerRepository).delete(customerId);
     }
 
     @Test
     @DisplayName("12: Operations on non-existent customer should throw CustomerNotFoundException")
-    void test12_opsOnNonExistentCustomer_shouldThrowException() {
-
+    void test12_opsOnNonExistentCustomer_shouldThrowException() throws CustomerNotFoundException {
         final UUID randomId = UUID.randomUUID();
+
+        when(customerRepository.getById(randomId)).thenThrow(new CustomerNotFoundException("Not found"));
+        doThrow(new CustomerNotFoundException("Not found")).when(customerRepository).delete(randomId);
 
         assertThrows(CustomerNotFoundException.class, () -> customerService.activateCustomer(randomId));
         assertThrows(CustomerNotFoundException.class, () -> customerService.deactivateCustomer(randomId));
         assertThrows(CustomerNotFoundException.class, () -> customerService.deleteCustomer(randomId));
         assertThrows(CustomerNotFoundException.class,
-                () -> customerService.updateAddress(randomId, createDefaultAddress()));
+                () -> customerService.updateAddress(randomId, address));
     }
 
-    private Customer createAndSaveDefaultCustomer() {
-        return customerService.createCustomer(
-                "John", "Doe", LocalDate.of(1990, 1, 1),
-                createDefaultAddress(), null, createDefaultCommunicationDetails(), Brand.GMX);
+    @ParameterizedTest
+    @MethodSource("provideNullMandatoryFields")
+    @DisplayName("13: Create customer with any null mandatory field should throw exception")
+    void test13_createCustomer_withNullFields_shouldThrowException(
+            final String fn, final String ln, final LocalDate bd,
+            final Address addr, final CommunicationDetails cd, final Brand b) {
+        assertThrows(IllegalArgumentException.class,
+                () -> customerService.createCustomer(fn, ln, bd, addr, null, cd, b));
     }
 
-    private Address createDefaultAddress() {
-        return new Address("Main St", "1", "12345", "City", "Germany");
+    private static Stream<Arguments> provideNullMandatoryFields() {
+        final Address a = mock(Address.class);
+        final CommunicationDetails c = mock(CommunicationDetails.class);
+        final LocalDate d = LocalDate.now();
+        return Stream.of(
+                Arguments.of(null, "Doe", d, a, c, Brand.GMX),
+                Arguments.of("John", null, d, a, c, Brand.GMX),
+                Arguments.of("John", "Doe", null, a, c, Brand.GMX),
+                Arguments.of("John", "Doe", d, null, c, Brand.GMX),
+                Arguments.of("John", "Doe", d, a, null, Brand.GMX),
+                Arguments.of("John", "Doe", d, a, c, null));
     }
 
-    private CommunicationDetails createDefaultCommunicationDetails() {
-        return new CommunicationDetails("test@test.com", "1234567890");
-    }
-
-    private static class InMemoryCustomerRepository implements CustomerRepository {
-        private final Map<UUID, Customer> storage = new HashMap<>();
-
-        @Override
-        public void save(final Customer customer) {
-            storage.put(customer.getId(), customer);
-        }
-
-        @Override
-        public Optional<Customer> findById(final UUID id) {
-            return Optional.ofNullable(storage.get(id));
-        }
-
-        @Override
-        public Collection<Customer> findAll() {
-            return storage.values();
-        }
-
-        @Override
-        public void delete(final UUID id) throws CustomerNotFoundException {
-            if (storage.remove(id) == null) {
-                throw new CustomerNotFoundException("Not found");
-            }
-        }
-
-        @Override
-        public void update(final Customer customer) throws CustomerNotFoundException {
-            if (!storage.containsKey(customer.getId())) {
-                throw new CustomerNotFoundException("Not found");
-            }
-            storage.put(customer.getId(), customer);
+    @ParameterizedTest
+    @ValueSource(strings = { "activate", "deactivate", "delete", "updateAddress", "updateInvoiceAddress",
+            "updateCommunicationDetails" })
+    @DisplayName("14: All ID-based methods should throw exception if ID is null")
+    void test14_idBasedMethods_withNullId_shouldThrowException(final String methodName) {
+        switch (methodName) {
+            case "activate" -> assertThrows(Exception.class, () -> customerService.activateCustomer(null));
+            case "deactivate" -> assertThrows(Exception.class, () -> customerService.deactivateCustomer(null));
+            case "delete" -> assertThrows(Exception.class, () -> customerService.deleteCustomer(null));
+            case "updateAddress" -> assertThrows(Exception.class, () -> customerService.updateAddress(null, address));
+            case "updateInvoiceAddress" ->
+                assertThrows(Exception.class, () -> customerService.updateInvoiceAddress(null, address));
+            case "updateCommunicationDetails" -> assertThrows(Exception.class,
+                    () -> customerService.updateCommunicationDetails(null, communicationDetails));
         }
     }
 }

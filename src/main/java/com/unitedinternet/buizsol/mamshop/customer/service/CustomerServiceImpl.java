@@ -58,6 +58,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateAddress(@NotNull final UUID id, @NotNull final Address address) throws CustomerNotFoundException {
+        validateNotNull(id, "ID");
         final Customer customer = customerRepository.getById(id);
         customer.setAddress(address);
         customerRepository.update(customer);
@@ -66,6 +67,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void updateInvoiceAddress(@NotNull final UUID id, @NotNull final Address address)
             throws CustomerNotFoundException {
+        validateNotNull(id, "ID");
         final Customer customer = customerRepository.getById(id);
         customer.setInvoiceAddress(address);
         customerRepository.update(customer);
@@ -74,6 +76,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void updateCommunicationDetails(@NotNull final UUID id,
             @NotNull final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
+        validateNotNull(id, "ID");
         final Customer customer = customerRepository.getById(id);
         customer.setCommunicationDetails(communicationDetails);
         customerRepository.update(customer);
@@ -81,6 +84,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void activateCustomer(@NotNull final UUID id) throws CustomerNotFoundException {
+        validateNotNull(id, "ID");
         final Customer customer = customerRepository.getById(id);
         customer.activate();
         customerRepository.update(customer);
@@ -88,6 +92,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deactivateCustomer(@NotNull final UUID id) throws CustomerNotFoundException {
+        validateNotNull(id, "ID");
         final Customer customer = customerRepository.getById(id);
         customer.deactivate();
         customerRepository.update(customer);
@@ -95,7 +100,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomer(@NotNull final UUID id) throws CustomerNotFoundException {
+       validateNotNull(id, "ID");
         customerRepository.delete(id);
+    }
+
+    private void validateNotNull(final Object value, final String fieldName) {
+        if (value == null) {
+            throw new IllegalArgumentException(fieldName + " must not be null");
+        }
     }
 
     private static final class Holder {

@@ -1,18 +1,20 @@
 package com.unitedinternet.buizsol.mamshop.customer.repository;
 
 import com.unitedinternet.buizsol.mamshop.customer.exception.CustomerNotFoundException;
-import com.unitedinternet.buizsol.mamshop.customer.model.Address;
 import com.unitedinternet.buizsol.mamshop.customer.model.Brand;
-import com.unitedinternet.buizsol.mamshop.customer.model.CommunicationDetails;
 import com.unitedinternet.buizsol.mamshop.customer.model.Customer;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,34 +23,58 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CustomerRepositoryTest {
+
+    @Mock
+    private Customer customer;
 
     private CustomerRepository repository;
 
     @BeforeEach
     void setUp() {
         repository = CustomerRepository.getInstance();
-        cleanStorage();
+        if (customer != null) {
+            clearInvocations(customer);
+        }
+    }
+
+    @AfterEach
+    public void cleanStorage() {
+        repository.findAll().forEach(c -> {
+            try {
+                repository.delete(c.getId());
+            } catch (final CustomerNotFoundException e) {
+            }
+        });
     }
 
     @Test
     @DisplayName("01: Should successfully save and retrieve a single customer by its identifier")
     void test01_saveAndRetrieveCustomer() {
-        final Customer customer = createTestCustomer("John", "Doe", Brand.GMX);
+        final UUID customerId = UUID.randomUUID();
+        when(customer.getId()).thenReturn(customerId);
+
         repository.save(customer);
 
-        final Optional<Customer> found = repository.findById(customer.getId());
+        final Optional<Customer> found = repository.findById(customerId);
 
         assertTrue(found.isPresent());
-        assertEquals(customer.getId(), found.get().getId());
+        assertEquals(customer, found.get());
     }
 
     @ParameterizedTest
     @EnumSource(Brand.class)
     @DisplayName("02: Should find all customers even when they belong to different brands")
     void test02_findAllWithDifferentBrands(final Brand brand) {
-        final Customer customer = createTestCustomer("FirstName", "LastName", brand);
+        final UUID customerId = UUID.randomUUID();
+        when(customer.getId()).thenReturn(customerId);
+        when(customer.getBrand()).thenReturn(brand);
+
         repository.save(customer);
 
         final Collection<Customer> all = repository.findAll();
@@ -66,24 +92,27 @@ class CustomerRepositoryTest {
     @Test
     @DisplayName("04: Should successfully update existing customer data in storage")
     void test04_updateExistingCustomer() throws CustomerNotFoundException {
-        final Customer customer = createTestCustomer("John", "Doe", Brand.WEB_DE);
-        repository.save(customer);
+        final UUID customerId = UUID.randomUUID();
+        when(customer.getId()).thenReturn(customerId);
 
+        repository.save(customer);
         repository.update(customer);
 
-        final Optional<Customer> found = repository.findById(customer.getId());
+        final Optional<Customer> found = repository.findById(customerId);
         assertTrue(found.isPresent());
+        assertEquals(customer, found.get());
     }
 
     @Test
     @DisplayName("05: Should successfully delete an existing customer from storage")
     void test05_deleteExistingCustomer() throws CustomerNotFoundException {
-        final Customer customer = createTestCustomer("John", "Doe", Brand.GMX);
+        final UUID customerId = UUID.randomUUID();
+        when(customer.getId()).thenReturn(customerId);
+
         repository.save(customer);
+        repository.delete(customerId);
 
-        repository.delete(customer.getId());
-
-        final Optional<Customer> found = repository.findById(customer.getId());
+        final Optional<Customer> found = repository.findById(customerId);
         assertFalse(found.isPresent());
     }
 
@@ -97,7 +126,7 @@ class CustomerRepositoryTest {
     @Test
     @DisplayName("07: Should throw CustomerNotFoundException when attempting to update a non-existent customer")
     void test07_throwExceptionOnUpdateNonExistent() {
-        final Customer customer = createTestCustomer("Ghost", "User", Brand.MAIL_COM);
+        when(customer.getId()).thenReturn(UUID.randomUUID());
         assertThrows(CustomerNotFoundException.class, () -> repository.update(customer));
     }
 
@@ -121,31 +150,14 @@ class CustomerRepositoryTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 1, 5, 50 })
+    @ValueSource(ints = { 1, 5, 20 })
     @DisplayName("11: Should handle multiple concurrent-like entries and maintain correct size (Boundary)")
     void test11_multipleEntriesSize(final int count) {
-        cleanStorage(); // Ensure fresh state for count test
         for (int i = 0; i < count; i++) {
-            repository.save(createTestCustomer("User", "Nr" + i, Brand.WEB_DE));
+            final Customer c = mock(Customer.class);
+            when(c.getId()).thenReturn(UUID.randomUUID());
+            repository.save(c);
         }
         assertEquals(count, repository.findAll().size());
-    }
-
-    private void cleanStorage() {
-        repository.findAll().forEach(customer -> {
-            try {
-                repository.delete(customer.getId());
-            } catch (CustomerNotFoundException e) {
-            }
-        });
-    }
-
-    private Customer createTestCustomer(
-            final String firstName,
-            final String lastName,
-            final Brand brand) {
-        final Address address = new Address("Street", "1", "12345", "City", "Country");
-        final CommunicationDetails details = new CommunicationDetails("test@email.com", "987654321");
-        return new Customer(firstName, lastName, LocalDate.of(1985, 5, 20), address, null, details, brand);
     }
 }

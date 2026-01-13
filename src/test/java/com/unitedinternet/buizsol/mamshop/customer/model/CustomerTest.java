@@ -21,6 +21,24 @@ class CustomerTest {
         communicationDetails = new CommunicationDetails("test@gmx.de", "0123456789");
     }
 
+    private Customer createDefaultCustomer(
+            String firstName,
+            String lastName,
+            LocalDate birthDate,
+            Address address,
+            Address invoiAddress,
+            CommunicationDetails communicationDetails,
+            Brand brand) {
+        return new Customer(
+                firstName,
+                lastName,
+                birthDate,
+                address,
+                invoiAddress,
+                communicationDetails,
+                brand);
+    }
+
     @Test
     @DisplayName("1. Positive: Successful creation with all required data and generated ID")
     void shouldCreateCustomerWhenDataIsValid() {
@@ -112,7 +130,8 @@ class CustomerTest {
     @Test
     @DisplayName("8. Positive: Activate customer changes status to ACTIVE")
     void shouldActivateCustomerAndChangeStatus() {
-        Customer customer = createDefaultCustomer();
+        Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                communicationDetails, Brand.GMX);
         Assertions.assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
 
         customer.activate();
@@ -123,7 +142,8 @@ class CustomerTest {
     @Test
     @DisplayName("9. Positive: Deactivate customer changes status to INACTIVE")
     void shouldDeactivateCustomerAndChangeStatus() {
-        Customer customer = createDefaultCustomer();
+        Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                communicationDetails, Brand.GMX);
         customer.activate();
         Assertions.assertEquals(CustomerStatus.ACTIVE, customer.getStatus());
 
@@ -181,24 +201,16 @@ class CustomerTest {
     @Test
     @DisplayName("13. Boundary: ID generation uniqueness")
     void shouldGenerateUniqueIdsForDifferentCustomers() {
-        Customer customer1 = createDefaultCustomer();
-        Customer customer2 = createDefaultCustomer();
-        Customer customer3 = createDefaultCustomer();
+        Customer customer1 = createDefaultCustomer("John1", "Doe1", LocalDate.of(1991, 1, 1), mainAddress, null,
+                communicationDetails, Brand.GMX);
+        Customer customer2 = createDefaultCustomer("John2", "Doe2", LocalDate.of(1992, 1, 2), mainAddress, null,
+                communicationDetails, Brand.MAIL_COM);
+        Customer customer3 = createDefaultCustomer("John3", "Doe3", LocalDate.of(1993, 1, 3), mainAddress, null,
+                communicationDetails, Brand.WEB_DE);
 
         Assertions.assertNotNull(customer1.getId(), "ID should not be null");
         Assertions.assertNotEquals(customer1.getId(), customer2.getId(), "IDs should be unique");
         Assertions.assertNotEquals(customer2.getId(), customer3.getId(), "IDs should be unique");
         Assertions.assertNotEquals(customer1.getId(), customer3.getId(), "IDs should be unique");
-    }
-
-    private Customer createDefaultCustomer() {
-        return new Customer(
-                "John",
-                "Doe",
-                LocalDate.of(1990, 1, 1),
-                mainAddress,
-                null,
-                communicationDetails,
-                Brand.GMX);
     }
 }
