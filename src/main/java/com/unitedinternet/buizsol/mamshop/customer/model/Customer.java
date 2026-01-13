@@ -5,12 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
-import java.util.Random;
+import java.util.UUID;
 
 public class Customer {
 
     @NotNull
-    private final Long id;
+    private final UUID id;
     @NotNull
     private final String firstName;
     @NotNull
@@ -29,28 +29,27 @@ public class Customer {
     private CustomerStatus status;
 
     public Customer(
-            @NotBlank(message = "First name must not be blank") String firstName,
-            @NotBlank(message = "Last name must not be blank") String lastName,
-            @NotNull(message = "Birth date must not be null") LocalDate birthDate,
-            @NotNull(message = "Address must not be null") Address address,
-            @Nullable Address invoiceAddress,
-            @NotNull(message = "Communication details must not be null") CommunicationDetails communicationDetails,
-            @NotNull(message = "Brand must not be null") Brand brand) {
+            @NotBlank(message = "First name must not be blank") final String firstName,
+            @NotBlank(message = "Last name must not be blank") final String lastName,
+            @NotNull(message = "Birth date must not be null") final LocalDate birthDate,
+            @NotNull(message = "Address must not be null") final Address address,
+            @Nullable final Address invoiceAddress,
+            @NotNull(message = "Communication details must not be null") final CommunicationDetails communicationDetails,
+            @NotNull(message = "Brand must not be null") final Brand brand) {
 
-        this(new Random().nextLong(1, Long.MAX_VALUE), firstName, lastName, birthDate, address, invoiceAddress,
+        this(UUID.randomUUID(), firstName, lastName, birthDate, address, invoiceAddress,
                 communicationDetails, brand);
     }
 
-
-    Customer(
-            @NotNull Long id,
-            @NotBlank String firstName,
-            @NotBlank String lastName,
-            @NotNull LocalDate birthDate,
-            @NotNull Address address,
-            @Nullable Address invoiceAddress,
-            @NotNull CommunicationDetails communicationDetails,
-            @NotNull Brand brand) {
+    private Customer(
+            @NotNull final UUID id,
+            @NotBlank final String firstName,
+            @NotBlank final String lastName,
+            @NotNull final LocalDate birthDate,
+            @NotNull final Address address,
+            @Nullable final Address invoiceAddress,
+            @NotNull final CommunicationDetails communicationDetails,
+            @NotNull final Brand brand) {
 
         validateNotNull(id, "ID");
         validateNotBlank(firstName, "First name");
@@ -72,7 +71,7 @@ public class Customer {
     }
 
     @NotNull
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -96,8 +95,8 @@ public class Customer {
         return address;
     }
 
-    public void setAddress(
-            @NotNull(message = "Address must not be null") Address address) {
+    void setAddress(
+            @NotNull(message = "Address must not be null") final Address address) {
         validateNotNull(address, "Address");
         this.address = address;
     }
@@ -107,8 +106,8 @@ public class Customer {
         return invoiceAddress;
     }
 
-    public void setInvoiceAddress(
-            @NotNull(message = "Invoice address must not be null") Address invoiceAddress) {
+    void setInvoiceAddress(
+            @NotNull(message = "Invoice address must not be null") final Address invoiceAddress) {
         validateNotNull(invoiceAddress, "Invoice address");
         this.invoiceAddress = invoiceAddress;
     }
@@ -128,34 +127,53 @@ public class Customer {
         return status;
     }
 
-    public void setStatus(
-            @NotNull(message = "Status must not be null") CustomerStatus status) {
+    void setStatus(
+            @NotNull(message = "Status must not be null") final CustomerStatus status) {
         validateNotNull(status, "Status");
         this.status = status;
     }
 
+    public void activate() {
+        this.status = CustomerStatus.ACTIVE;
+    }
+
+    public void deactivate() {
+        this.status = CustomerStatus.INACTIVE;
+    }
 
     public boolean hasSameId(
-            @NotNull(message = "Other customer must not be null") Customer other) {
+            @NotNull(message = "Other customer must not be null") final Customer other) {
         validateNotNull(other, "Other customer");
         return this.id.equals(other.getId());
     }
 
-
     public void verifyIdentificationUniqueness(
-            @NotNull(message = "Other customer must not be null") Customer other) {
+            @NotNull(message = "Other customer must not be null") final Customer other) {
         if (hasSameId(other)) {
             throw new IllegalArgumentException("Duplicate customer ID detected: " + id);
         }
     }
 
-    private void validateNotBlank(String value, String fieldName) {
+    static Customer createForTesting(
+            @NotNull final UUID id,
+            @NotBlank final String firstName,
+            @NotBlank final String lastName,
+            @NotNull final LocalDate birthDate,
+            @NotNull final Address address,
+            @Nullable final Address invoiceAddress,
+            @NotNull final CommunicationDetails communicationDetails,
+            @NotNull final Brand brand) {
+        return new Customer(id, firstName, lastName, birthDate, address, invoiceAddress,
+                communicationDetails, brand);
+    }
+
+    private void validateNotBlank(final String value, final String fieldName) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(fieldName + " must not be null or empty");
         }
     }
 
-    private void validateNotNull(Object value, String fieldName) {
+    private void validateNotNull(final Object value, final String fieldName) {
         if (value == null) {
             throw new IllegalArgumentException(fieldName + " must not be null");
         }
@@ -165,12 +183,6 @@ public class Customer {
     public String toString() {
         return "Customer{" +
                 "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", birthDate=" + birthDate +
-                ", address=" + address +
-                ", invoiceAddress=" + invoiceAddress +
-                ", communicationDetails=" + communicationDetails +
                 ", brand=" + brand +
                 ", status=" + status +
                 '}';
