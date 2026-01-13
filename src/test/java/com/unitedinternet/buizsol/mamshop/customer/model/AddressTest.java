@@ -1,11 +1,16 @@
 package com.unitedinternet.buizsol.mamshop.customer.model;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class AddressTest {
 
     @Test
+    @DisplayName("1. Successful creation with valid data")
     void shouldCreateAddressInstanceWhenDataIsValid() {
         Address address = new Address("Main St", "10", "12345", "Berlin", "Germany");
         Assertions.assertEquals("Main St", address.getStreet());
@@ -15,15 +20,63 @@ class AddressTest {
         Assertions.assertEquals("Germany", address.getCountry());
     }
 
-    @Test
-    void shouldThrowExceptionWhenStreetIsBlank() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { " ", "\t", "\n"})
+    @DisplayName("2. Negative: Validation of 'street' field")
+    void shouldThrowExceptionWhenStreetIsInvalid(String invalidStreet) {
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new Address("", "10", "12345", "Berlin", "Germany"));
+                () -> new Address(invalidStreet, "10", "12345", "Berlin", "Germany"));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { " ", "\t", "\n"})
+    @DisplayName("3. Negative: Validation of 'number' field")
+    void shouldThrowExceptionWhenNumberIsInvalid(String invalidNumber) {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new Address("Main St", invalidNumber, "12345", "Berlin", "Germany"));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { " ", "\t", "\n"})
+    @DisplayName("4. Negative: Validation of 'postcode' field")
+    void shouldThrowExceptionWhenPostcodeIsInvalid(String invalidPostcode) {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new Address("Main St", "10", invalidPostcode, "Berlin", "Germany"));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { " ", "\t", "\n"})
+    @DisplayName("5. Negative: Validation of 'city' field")
+    void shouldThrowExceptionWhenCityIsInvalid(String invalidCity) {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new Address("Main St", "10", "12345", invalidCity, "Germany"));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { " ", "\t", "\n"})
+    @DisplayName("6. Negative: Validation of 'country' field")
+    void shouldThrowExceptionWhenCountryIsInvalid(String invalidCountry) {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new Address("Main St", "10", "12345", "Berlin", invalidCountry));
     }
 
     @Test
-    void shouldThrowExceptionWhenNumberIsNull() {
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new Address("Main St", null, "12345", "Berlin", "Germany"));
+    @DisplayName("7. Boundary: Extremely long string for street")
+    void shouldHandleExtremelyLongStreet() {
+        String longStreet = "A".repeat(1000);
+        Address address = new Address(longStreet, "1", "12345", "Berlin", "Germany");
+        Assertions.assertEquals(longStreet, address.getStreet());
+    }
+
+    @Test
+    @DisplayName("8. Boundary: Minimal valid input (single characters)")
+    void shouldHandleSingleCharacterInputs() {
+        Address address = new Address("S", "1", "1", "B", "G");
+        Assertions.assertEquals("S", address.getStreet());
     }
 }
