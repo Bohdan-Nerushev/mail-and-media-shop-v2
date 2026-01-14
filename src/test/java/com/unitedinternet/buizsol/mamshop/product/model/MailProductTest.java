@@ -16,10 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MailProductTest {
 
-        private static final String DEFAULT_NAME = "Standard Mail";
-        private static final Brand DEFAULT_BRAND = Brand.GMX;
-        private static final BigDecimal DEFAULT_FEE = new BigDecimal("1.99");
-
         private StandardMailProduct createDefaultStandardMailProduct(
                         String name,
                         Brand brand,
@@ -44,9 +40,9 @@ class MailProductTest {
         @DisplayName("1. Verify StandardMailProduct fixed attributes (Setup Fee, Storage)")
         void test1_CreateStandardMailProduct_VerifyFixedFeesAndStorage() {
                 final StandardMailProduct product = createDefaultStandardMailProduct(
-                                DEFAULT_NAME,
-                                DEFAULT_BRAND,
-                                DEFAULT_FEE);
+                                "Standard Mail Base",
+                                Brand.GMX,
+                                new BigDecimal("1.99"));
 
                 assertNotNull(product.getId());
                 assertEquals(new BigDecimal("4.99"), product.getSetupFee());
@@ -57,7 +53,7 @@ class MailProductTest {
         @DisplayName("2. Verify PremiumMailProduct fixed attributes (Setup Fee, Storage)")
         void test2_CreatePremiumMailProduct_VerifyFixedFeesAndStorage() {
                 final PremiumMailProduct product = createDefaultPremiumMailProduct(
-                                "Premium Mail",
+                                "Premium Mail Pro",
                                 Brand.WEB_DE,
                                 new BigDecimal("5.99"));
 
@@ -73,8 +69,8 @@ class MailProductTest {
                 final BigDecimal minFee = new BigDecimal("0.11");
 
                 final StandardMailProduct product = createDefaultStandardMailProduct(
-                                DEFAULT_NAME,
-                                DEFAULT_BRAND,
+                                "Budget Mail",
+                                Brand.GMX,
                                 minFee);
 
                 assertEquals(minFee, product.getMonthlyFee());
@@ -91,8 +87,8 @@ class MailProductTest {
                 final IllegalArgumentException exception = assertThrows(
                                 IllegalArgumentException.class,
                                 () -> createDefaultStandardMailProduct(
-                                                DEFAULT_NAME,
-                                                DEFAULT_BRAND,
+                                                "Invalid Fee Mail",
+                                                Brand.WEB_DE,
                                                 invalidFee));
 
                 assertEquals("Monthly fee must be greater than 0.10 €", exception.getMessage());
@@ -109,8 +105,8 @@ class MailProductTest {
                                 IllegalArgumentException.class,
                                 () -> createDefaultStandardMailProduct(
                                                 invalidName,
-                                                DEFAULT_BRAND,
-                                                DEFAULT_FEE));
+                                                Brand.GMX,
+                                                new BigDecimal("2.50")));
 
                 assertEquals("Product name must not be null or empty", exception.getMessage());
         }
@@ -122,9 +118,9 @@ class MailProductTest {
                 final IllegalArgumentException exception = assertThrows(
                                 IllegalArgumentException.class,
                                 () -> createDefaultStandardMailProduct(
-                                                DEFAULT_NAME,
+                                                "No Brand Mail",
                                                 null,
-                                                DEFAULT_FEE));
+                                                new BigDecimal("3.00")));
 
                 assertEquals("Brand must not be null", exception.getMessage());
         }
@@ -136,8 +132,8 @@ class MailProductTest {
                 final IllegalArgumentException exception = assertThrows(
                                 IllegalArgumentException.class,
                                 () -> createDefaultStandardMailProduct(
-                                                DEFAULT_NAME,
-                                                DEFAULT_BRAND,
+                                                "No Fee Mail",
+                                                Brand.GMX,
                                                 null));
 
                 assertEquals("Monthly fee must not be null", exception.getMessage());
@@ -156,8 +152,8 @@ class MailProductTest {
                         final BigDecimal validFee) {
 
                 final StandardMailProduct product = createDefaultStandardMailProduct(
-                                DEFAULT_NAME,
-                                DEFAULT_BRAND,
+                                "Dynamic Pricing Mail",
+                                Brand.WEB_DE,
                                 validFee);
 
                 assertEquals(validFee, product.getMonthlyFee());
@@ -174,7 +170,7 @@ class MailProductTest {
                 final IllegalArgumentException exception = assertThrows(
                                 IllegalArgumentException.class,
                                 () -> createDefaultPremiumMailProduct(
-                                                "Premium Mail",
+                                                "Premium Invalid Fee",
                                                 Brand.WEB_DE,
                                                 invalidFee));
 
@@ -193,7 +189,7 @@ class MailProductTest {
                                 () -> createDefaultPremiumMailProduct(
                                                 invalidName,
                                                 Brand.WEB_DE,
-                                                DEFAULT_FEE));
+                                                new BigDecimal("9.99")));
 
                 assertEquals("Product name must not be null or empty", exception.getMessage());
         }
@@ -212,7 +208,7 @@ class MailProductTest {
                         final BigDecimal validFee) {
 
                 final PremiumMailProduct product = createDefaultPremiumMailProduct(
-                                "Premium Mail",
+                                "Premium High Tier",
                                 Brand.WEB_DE,
                                 validFee);
 
@@ -220,14 +216,14 @@ class MailProductTest {
         }
 
         @ParameterizedTest(name = "[{index}] Brand: {0}")
-        @ValueSource(strings = {"GMX", "WEB_DE"})
+        @ValueSource(strings = { "GMX", "WEB_DE" })
         @DisplayName("14. Verify StandardMailProduct creation with all available brands")
         void test14_CreateStandardMailProduct_AllBrands(String brandName) {
                 Brand brand = Brand.valueOf(brandName);
                 final StandardMailProduct product = createDefaultStandardMailProduct(
-                                DEFAULT_NAME,
+                                "Brand Test Mail",
                                 brand,
-                                DEFAULT_FEE);
+                                new BigDecimal("4.50"));
 
                 assertEquals(brand, product.getBrand());
         }
@@ -239,9 +235,9 @@ class MailProductTest {
                 final IllegalArgumentException exception = assertThrows(
                                 IllegalArgumentException.class,
                                 () -> createDefaultPremiumMailProduct(
-                                                "Premium Mail",
+                                                "Premium Null Brand",
                                                 null,
-                                                DEFAULT_FEE));
+                                                new BigDecimal("12.00")));
 
                 assertEquals("Brand must not be null", exception.getMessage());
         }
@@ -253,7 +249,7 @@ class MailProductTest {
                 final BigDecimal minFee = new BigDecimal("0.11");
 
                 final PremiumMailProduct product = createDefaultPremiumMailProduct(
-                                "Premium Mail",
+                                "Premium Budget",
                                 Brand.WEB_DE,
                                 minFee);
 
