@@ -39,6 +39,7 @@ class ProductServiceTest {
     @BeforeEach
     void setUp() {
         productService = ProductService.getInstance();
+        ((ProductRepositoryImpl) ProductRepositoryImpl.getInstance()).clearStorage();
     }
 
     @Test
@@ -86,53 +87,53 @@ class ProductServiceTest {
                 () -> productService.findById(null));
     }
 
-//    @Test
-//    @DisplayName("05: Should find all products of specific brand")
-//    void shouldFindAllProductsOfSpecificBrand() {
-//        final Product gmxProduct1 = createDefaultProduct(
-//                "GMX Product 1",
-//                Brand.GMX,
-//                "1.00",
-//                "0.50");
-//        final Product gmxProduct2 = createDefaultProduct(
-//                "GMX Product 2",
-//                Brand.GMX,
-//                "2.00",
-//                "0.60");
-//        final Product webDeProduct = createDefaultProduct(
-//                "WEB.DE Product",
-//                Brand.WEB_DE,
-//                "3.00",
-//                "0.70");
-//
-//        productService.createProduct(gmxProduct1);
-//        productService.createProduct(gmxProduct2);
-//        productService.createProduct(webDeProduct);
-//
-//        final Collection<Product> gmxProducts = productService.findByBrand(Brand.GMX);
-//
-//        assertEquals(2, gmxProducts.size());
-//        assertTrue(gmxProducts.contains(gmxProduct1));
-//        assertTrue(gmxProducts.contains(gmxProduct2));
-//        assertFalse(gmxProducts.contains(webDeProduct));
-//        assertTrue(gmxProducts.stream().allMatch(p -> p.getBrand() == Brand.GMX));
-//    }
-//
-//    @Test
-//    @DisplayName("06: Should return empty collection when no products exist for brand")
-//    void shouldReturnEmptyCollectionWhenNoProductsExistForBrand() {
-//        final Product gmxProduct = createDefaultProduct(
-//                "GMX Product",
-//                Brand.GMX,
-//                "1.00",
-//                "0.50");
-//        productService.createProduct(gmxProduct);
-//
-//        final Collection<Product> mailComProducts = productService.findByBrand(Brand.MAIL_COM);
-//
-//        assertNotNull(mailComProducts);
-//        assertTrue(mailComProducts.isEmpty());
-//    }
+    @Test
+    @DisplayName("05: Should find all products of specific brand")
+    void shouldFindAllProductsOfSpecificBrand() {
+        final Product gmxProduct1 = createDefaultProduct(
+                "GMX Product 1",
+                Brand.GMX,
+                "1.00",
+                "0.50");
+        final Product gmxProduct2 = createDefaultProduct(
+                "GMX Product 2",
+                Brand.GMX,
+                "2.00",
+                "0.60");
+        final Product webDeProduct = createDefaultProduct(
+                "WEB.DE Product",
+                Brand.WEB_DE,
+                "3.00",
+                "0.70");
+
+        productService.createProduct(gmxProduct1);
+        productService.createProduct(gmxProduct2);
+        productService.createProduct(webDeProduct);
+
+        final Collection<Product> gmxProducts = productService.findByBrand(Brand.GMX);
+
+        assertEquals(2, gmxProducts.size());
+        assertTrue(gmxProducts.contains(gmxProduct1));
+        assertTrue(gmxProducts.contains(gmxProduct2));
+        assertFalse(gmxProducts.contains(webDeProduct));
+        assertTrue(gmxProducts.stream().allMatch(p -> p.getBrand() == Brand.GMX));
+    }
+
+    @Test
+    @DisplayName("06: Should return empty collection when no products exist for brand")
+    void shouldReturnEmptyCollectionWhenNoProductsExistForBrand() {
+        final Product gmxProduct = createDefaultProduct(
+                "GMX Product",
+                Brand.GMX,
+                "1.00",
+                "0.50");
+        productService.createProduct(gmxProduct);
+
+        final Collection<Product> mailComProducts = productService.findByBrand(Brand.MAIL_COM);
+
+        assertNotNull(mailComProducts);
+        assertTrue(mailComProducts.isEmpty());
+    }
 
     @ParameterizedTest
     @EnumSource(Brand.class)

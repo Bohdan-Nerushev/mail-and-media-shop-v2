@@ -60,6 +60,12 @@ final class ProductRepositoryImpl implements ProductRepository {
         return Collections.unmodifiableCollection(storage.values());
     }
 
+    @Override
+    @NotNull
+    public void clearStorage() {
+        storage.clear();
+    }
+
     private void validateNotNull(
             final Object value,
             final String fieldName) {

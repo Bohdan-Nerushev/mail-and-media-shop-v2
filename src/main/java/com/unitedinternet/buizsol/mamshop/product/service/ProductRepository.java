@@ -23,4 +23,6 @@ interface ProductRepository {
 
     @NotNull
     Collection<Product> findAll();
+
+    void clearStorage();
 }
