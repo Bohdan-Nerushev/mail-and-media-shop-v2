@@ -25,18 +25,6 @@ public class BundleProduct extends Product {
         this.partnerProduct = partnerProduct;
     }
 
-    @Override
-    @NotNull
-    public BigDecimal getSetupFee() {
-        return mailProduct.getSetupFee().add(partnerProduct.getSetupFee());
-    }
-
-    @Override
-    @NotNull
-    public BigDecimal getMonthlyFee() {
-        return mailProduct.getMonthlyFee().add(partnerProduct.getMonthlyFee());
-    }
-
     private static String generateName(
             final MailProduct mail,
             final PartnerProduct partner) {
