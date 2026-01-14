@@ -36,6 +36,21 @@ class MailProductTest {
                                 monthlyFee);
         }
 
+        private MailProduct createDefaultMailProduct(
+                        String name,
+                        Brand brand,
+                        BigDecimal setupFee,
+                        BigDecimal monthlyFee,
+                        Long storageSize) {
+                return new MailProduct(
+                                name,
+                                brand,
+                                setupFee,
+                                monthlyFee,
+                                storageSize) {
+                };
+        }
+
         @Test
         @DisplayName("1. Verify StandardMailProduct fixed attributes (Setup Fee, Storage)")
         void test1_CreateStandardMailProduct_VerifyFixedFeesAndStorage() {
@@ -254,5 +269,16 @@ class MailProductTest {
                                 minFee);
 
                 assertEquals(minFee, product.getMonthlyFee());
+        }
+
+        @Test
+        @DisplayName("15. Negative: Failure with invalid storage size (< 1GB)")
+        void test15_CreateMailProduct_InvalidStorageSize() {
+                final IllegalArgumentException exception = assertThrows(
+                                IllegalArgumentException.class,
+                                () -> createDefaultMailProduct("Small Storage", Brand.GMX, BigDecimal.ZERO,
+                                                BigDecimal.ONE, 0L));
+
+                assertEquals("Storage size must be at least 1GB", exception.getMessage());
         }
 }

@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-
 public abstract class Product {
 
     @NotNull
@@ -39,6 +38,7 @@ public abstract class Product {
         validateNotNull(brand, "Brand");
         validateNotNull(setupFee, "Setup fee");
         validateNotNull(monthlyFee, "Monthly fee");
+        validateSetupFee(setupFee);
         validateMonthlyFee(monthlyFee);
 
         this.id = UUID.randomUUID();
@@ -80,7 +80,14 @@ public abstract class Product {
         }
     }
 
-    private void validateNotBlank(
+    private void validateSetupFee(
+            final BigDecimal setupFee) {
+        if (setupFee.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Setup fee must not be negative");
+        }
+    }
+
+    protected void validateNotBlank(
             @Nullable final String value,
             @NotNull final String fieldName) {
         if (value == null || value.isBlank()) {
@@ -88,7 +95,7 @@ public abstract class Product {
         }
     }
 
-    private void validateNotNull(
+    protected void validateNotNull(
             @Nullable final Object value,
             @NotNull final String fieldName) {
         if (value == null) {

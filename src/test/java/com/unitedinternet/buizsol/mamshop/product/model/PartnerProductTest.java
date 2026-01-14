@@ -16,6 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PartnerProductTest {
 
+    private PartnerProduct createPartnerProduct(
+            final String name,
+            final Brand brand,
+            final BigDecimal setupFee,
+            final BigDecimal monthlyFee) {
+        return new PartnerProduct(name, brand, setupFee, monthlyFee);
+    }
+
     @ParameterizedTest(name = "[{index}] Name: {0}, Brand: {1}")
     @CsvSource({
             "Cloud Storage, GMX",
@@ -28,7 +36,7 @@ class PartnerProductTest {
         BigDecimal setupFee = new BigDecimal("9.99");
         BigDecimal monthlyFee = new BigDecimal("4.99");
 
-        PartnerProduct product = new PartnerProduct(name, brand, setupFee, monthlyFee);
+        PartnerProduct product = createPartnerProduct(name, brand, setupFee, monthlyFee);
 
         assertNotNull(product.getId());
         assertEquals(name, product.getName());
@@ -41,7 +49,7 @@ class PartnerProductTest {
     @DisplayName("2. Boundary: Success with minimum allowed monthly fee (0.11 €)")
     void test2_CreatePartnerProduct_Boundary_MinMonthlyFee_Success() {
         BigDecimal minFee = new BigDecimal("0.11");
-        PartnerProduct product = new PartnerProduct(
+        PartnerProduct product = createPartnerProduct(
                 "Budget Cloud",
                 Brand.GMX,
                 BigDecimal.ZERO,
@@ -58,7 +66,7 @@ class PartnerProductTest {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> new PartnerProduct("Invalid Fee Product", Brand.WEB_DE, BigDecimal.ONE, invalidFee));
+                () -> createPartnerProduct("Invalid Fee Product", Brand.WEB_DE, BigDecimal.ONE, invalidFee));
 
         assertEquals("Monthly fee must be greater than 0.10 €", exception.getMessage());
     }
@@ -70,7 +78,7 @@ class PartnerProductTest {
     void test4_CreatePartnerProduct_InvalidName_ThrowsException(String name) {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> new PartnerProduct(name, Brand.GMX, BigDecimal.ZERO, new BigDecimal("1.00")));
+                () -> createPartnerProduct(name, Brand.GMX, BigDecimal.ZERO, new BigDecimal("1.00")));
 
         assertEquals("Product name must not be null or empty", exception.getMessage());
     }
@@ -80,7 +88,7 @@ class PartnerProductTest {
     void test5_CreatePartnerProduct_NullBrand_ThrowsException() {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> new PartnerProduct("No Brand", null, BigDecimal.ZERO, new BigDecimal("1.00")));
+                () -> createPartnerProduct("No Brand", null, BigDecimal.ZERO, new BigDecimal("1.00")));
 
         assertEquals("Brand must not be null", exception.getMessage());
     }
@@ -90,7 +98,7 @@ class PartnerProductTest {
     void test6_CreatePartnerProduct_NullSetupFee_ThrowsException() {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> new PartnerProduct("No Setup Fee", Brand.WEB_DE, null, new BigDecimal("1.00")));
+                () -> createPartnerProduct("No Setup Fee", Brand.WEB_DE, null, new BigDecimal("1.00")));
 
         assertEquals("Setup fee must not be null", exception.getMessage());
     }
@@ -100,8 +108,20 @@ class PartnerProductTest {
     void test7_CreatePartnerProduct_NullMonthlyFee_ThrowsException() {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> new PartnerProduct("No Monthly Fee", Brand.GMX, BigDecimal.ZERO, null));
+                () -> createPartnerProduct("No Monthly Fee", Brand.GMX, BigDecimal.ZERO, null));
 
         assertEquals("Monthly fee must not be null", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("8. Negative: Failure with negative setup fee")
+    void test8_CreatePartnerProduct_NegativeSetupFee_ThrowsException() {
+        BigDecimal negativeFee = new BigDecimal("-1.00");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> createPartnerProduct("Bad Setup Fee", Brand.GMX, negativeFee, new BigDecimal("1.00")));
+
+        assertEquals("Setup fee must not be negative", exception.getMessage());
     }
 }

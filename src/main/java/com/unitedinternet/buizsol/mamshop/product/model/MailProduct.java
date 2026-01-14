@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
-
 public abstract class MailProduct extends Product {
 
     @Min(value = 1, message = "Storage size must be at least 1GB")
@@ -20,6 +19,10 @@ public abstract class MailProduct extends Product {
             @NotNull(message = "Monthly fee must not be null") final BigDecimal monthlyFee,
             @NotNull(message = "Storage size must not be null") final Long storageSize) {
         super(name, brand, setupFee, monthlyFee);
+        validateNotNull(storageSize, "Storage size");
+        if (storageSize < 1L) {
+            throw new IllegalArgumentException("Storage size must be at least 1GB");
+        }
         this.storageSize = storageSize;
     }
 

@@ -25,6 +25,16 @@ public class BundleProduct extends Product {
         this.partnerProduct = partnerProduct;
     }
 
+    @NotNull
+    public MailProduct getMailProduct() {
+        return mailProduct;
+    }
+
+    @NotNull
+    public PartnerProduct getPartnerProduct() {
+        return partnerProduct;
+    }
+
     private static String generateName(
             final MailProduct mail,
             final PartnerProduct partner) {
