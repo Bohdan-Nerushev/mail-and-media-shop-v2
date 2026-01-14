@@ -27,6 +27,10 @@ public class CustomerServiceImpl implements CustomerService {
         this.customerRepository = customerRepository;
     }
 
+    private static final class Holder {
+        private static final CustomerServiceImpl INSTANCE = new CustomerServiceImpl();
+    }
+
     @NotNull
     public static CustomerService getInstance() {
         return Holder.INSTANCE;
@@ -108,9 +112,5 @@ public class CustomerServiceImpl implements CustomerService {
         if (value == null) {
             throw new IllegalArgumentException(fieldName + " must not be null");
         }
-    }
-
-    private static final class Holder {
-        private static final CustomerServiceImpl INSTANCE = new CustomerServiceImpl();
     }
 }

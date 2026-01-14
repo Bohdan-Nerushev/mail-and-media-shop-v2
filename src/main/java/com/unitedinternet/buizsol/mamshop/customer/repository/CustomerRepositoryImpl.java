@@ -19,6 +19,10 @@ final class CustomerRepositoryImpl implements CustomerRepository {
         this.storage = new ConcurrentHashMap<>();
     }
 
+    private static final class Holder {
+        private static final CustomerRepositoryImpl INSTANCE = new CustomerRepositoryImpl();
+    }
+
     @NotNull
     static CustomerRepository getInstance() {
         return Holder.INSTANCE;
@@ -49,14 +53,16 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     public void delete(
             @NotNull final UUID id) throws CustomerNotFoundException {
         validateNotNull(id, "ID");
-        if (storage.remove(id) == null) {
+        Customer deletObject = storage.remove(id);
+        if (deletObject == null) {
             throw new CustomerNotFoundException("Customer with ID " + id + " not found");
         }
     }
 
     @Override
     public void update(
-            @NotNull final Customer customer) throws CustomerNotFoundException {
+            @NotNull final Customer customer
+    ) throws CustomerNotFoundException {
         validateNotNull(customer, "Customer");
         if (!storage.containsKey(customer.getId())) {
             throw new CustomerNotFoundException("Customer with ID " + customer.getId() + " not found");
@@ -72,7 +78,4 @@ final class CustomerRepositoryImpl implements CustomerRepository {
         }
     }
 
-    private static final class Holder {
-        private static final CustomerRepositoryImpl INSTANCE = new CustomerRepositoryImpl();
-    }
 }
