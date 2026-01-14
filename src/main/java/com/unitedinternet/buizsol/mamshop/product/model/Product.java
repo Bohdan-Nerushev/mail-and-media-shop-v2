@@ -26,7 +26,7 @@ public abstract class Product {
 
     @NotNull
     @DecimalMin(value = "0.11", message = "Monthly fee must be at least 0.11")
-    private final BigDecimal monthlyFee;
+    private BigDecimal monthlyFee;
 
     protected Product(
             @NotBlank(message = "Product name must not be blank") final String name,
@@ -71,6 +71,13 @@ public abstract class Product {
     @NotNull
     public BigDecimal getMonthlyFee() {
         return monthlyFee;
+    }
+
+    public void setMonthlyFee(
+            @NotNull final BigDecimal monthlyFee) {
+        validateNotNull(monthlyFee, "Monthly fee");
+        validateMonthlyFee(monthlyFee);
+        this.monthlyFee = monthlyFee;
     }
 
     private void validateMonthlyFee(

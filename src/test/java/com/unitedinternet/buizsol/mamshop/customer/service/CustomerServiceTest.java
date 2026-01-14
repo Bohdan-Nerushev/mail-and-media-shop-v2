@@ -6,7 +6,6 @@ import com.unitedinternet.buizsol.mamshop.customer.model.Brand;
 import com.unitedinternet.buizsol.mamshop.customer.model.CommunicationDetails;
 import com.unitedinternet.buizsol.mamshop.customer.model.Customer;
 import com.unitedinternet.buizsol.mamshop.customer.model.CustomerStatus;
-import com.unitedinternet.buizsol.mamshop.customer.repository.CustomerRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,10 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.UUID;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -210,33 +205,100 @@ class CustomerServiceTest {
                 () -> customerService.updateAddress(randomId, address));
     }
 
-    @ParameterizedTest
-    @MethodSource("provideNullMandatoryFields")
-    @DisplayName("13: Create customer with any null mandatory field should throw exception")
-    void test13_createCustomer_withNullFields_shouldThrowException(
-            final String fn, final String ln, final LocalDate bd,
-            final Address addr, final CommunicationDetails cd, final Brand b) {
-        assertThrows(IllegalArgumentException.class,
-                () -> customerService.createCustomer(fn, ln, bd, addr, null, cd, b));
+    @Test
+    @DisplayName("13: Create customer with null first name should throw exception")
+    void test13_1_createCustomer_withNullFirstName_shouldThrowException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> customerService.createCustomer(
+                        null,
+                        "Doe",
+                        LocalDate.now(),
+                        address,
+                        null,
+                        communicationDetails,
+                        Brand.GMX));
     }
 
-    private static Stream<Arguments> provideNullMandatoryFields() {
-        final Address a = mock(Address.class);
-        final CommunicationDetails c = mock(CommunicationDetails.class);
-        final LocalDate d = LocalDate.now();
-        return Stream.of(
-                Arguments.of(null, "Doe", d, a, c, Brand.GMX),
-                Arguments.of("John", null, d, a, c, Brand.GMX),
-                Arguments.of("John", "Doe", null, a, c, Brand.GMX),
-                Arguments.of("John", "Doe", d, null, c, Brand.GMX),
-                Arguments.of("John", "Doe", d, a, null, Brand.GMX),
-                Arguments.of("John", "Doe", d, a, c, null));
+    @Test
+    @DisplayName("14: Create customer with null last name should throw exception")
+    void test13_2_createCustomer_withNullLastName_shouldThrowException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> customerService.createCustomer(
+                        "John",
+                        null,
+                        LocalDate.now(),
+                        address,
+                        null,
+                        communicationDetails,
+                        Brand.GMX));
+    }
+
+    @Test
+    @DisplayName("15: Create customer with null birth date should throw exception")
+    void test13_3_createCustomer_withNullBirthDate_shouldThrowException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> customerService.createCustomer(
+                        "John",
+                        "Doe",
+                        null,
+                        address,
+                        null,
+                        communicationDetails,
+                        Brand.GMX));
+    }
+
+    @Test
+    @DisplayName("16: Create customer with null address should throw exception")
+    void test13_4_createCustomer_withNullAddress_shouldThrowException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> customerService.createCustomer(
+                        "John",
+                        "Doe",
+                        LocalDate.now(),
+                        null,
+                        null,
+                        communicationDetails,
+                        Brand.GMX));
+    }
+
+    @Test
+    @DisplayName("17: Create customer with null communication details should throw exception")
+    void test13_5_createCustomer_withNullCommunicationDetails_shouldThrowException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> customerService.createCustomer(
+                        "John",
+                        "Doe",
+                        LocalDate.now(),
+                        address,
+                        null,
+                        null,
+                        Brand.GMX));
+    }
+
+    @Test
+    @DisplayName("18: Create customer with null brand should throw exception")
+    void test13_6_createCustomer_withNullBrand_shouldThrowException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> customerService.createCustomer(
+                        "John",
+                        "Doe",
+                        LocalDate.now(),
+                        address,
+                        null,
+                        communicationDetails,
+                        null));
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "activate", "deactivate", "delete", "updateAddress", "updateInvoiceAddress",
             "updateCommunicationDetails" })
-    @DisplayName("14: All ID-based methods should throw exception if ID is null")
+    @DisplayName("19: All ID-based methods should throw exception if ID is null")
     void test14_idBasedMethods_withNullId_shouldThrowException(final String methodName) {
         switch (methodName) {
             case "activate" -> assertThrows(Exception.class, () -> customerService.activateCustomer(null));

@@ -1,4 +1,4 @@
-package com.unitedinternet.buizsol.mamshop.customer.repository;
+package com.unitedinternet.buizsol.mamshop.customer.service;
 
 import com.unitedinternet.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import com.unitedinternet.buizsol.mamshop.customer.model.Brand;

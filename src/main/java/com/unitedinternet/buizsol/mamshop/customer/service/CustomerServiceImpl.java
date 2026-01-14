@@ -5,7 +5,6 @@ import com.unitedinternet.buizsol.mamshop.customer.model.Address;
 import com.unitedinternet.buizsol.mamshop.customer.model.Brand;
 import com.unitedinternet.buizsol.mamshop.customer.model.CommunicationDetails;
 import com.unitedinternet.buizsol.mamshop.customer.model.Customer;
-import com.unitedinternet.buizsol.mamshop.customer.repository.CustomerRepository;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
