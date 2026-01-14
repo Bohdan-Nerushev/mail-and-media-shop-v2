@@ -9,10 +9,18 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class CommunicationDetailsTest {
 
+    private CommunicationDetails createDefaultCommunicationDetails(
+            String email,
+            String telephone) {
+        return new CommunicationDetails(
+                email,
+                telephone);
+    }
+
     @Test
     @DisplayName("1. Positive: Successful creation with valid data")
     void shouldCreateCommunicationDetailsWhenDataIsValid() {
-        CommunicationDetails details = new CommunicationDetails("test@example.com", "+123456789");
+        CommunicationDetails details = createDefaultCommunicationDetails("test@example.com", "+123456789");
         Assertions.assertEquals("test@example.com", details.email());
         Assertions.assertEquals("+123456789", details.telephone());
     }
@@ -23,7 +31,7 @@ class CommunicationDetailsTest {
     @DisplayName("2. Negative: Validation of 'email' field")
     void shouldThrowExceptionWhenEmailIsInvalid(String invalidEmail) {
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new CommunicationDetails(invalidEmail, "+123456789"));
+                () -> createDefaultCommunicationDetails(invalidEmail, "+123456789"));
     }
 
     @ParameterizedTest
@@ -32,21 +40,21 @@ class CommunicationDetailsTest {
     @DisplayName("3. Negative: Validation of 'telephone' field")
     void shouldThrowExceptionWhenTelephoneIsInvalid(String invalidPhone) {
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new CommunicationDetails("test@example.com", invalidPhone));
+                () -> createDefaultCommunicationDetails("test@example.com", invalidPhone));
     }
 
     @Test
     @DisplayName("4. Boundary: Extremely long email string")
     void shouldHandleExtremelyLongEmail() {
         String longEmail = "a".repeat(250) + "@example.com";
-        CommunicationDetails details = new CommunicationDetails(longEmail, "123");
+        CommunicationDetails details = createDefaultCommunicationDetails(longEmail, "123");
         Assertions.assertEquals(longEmail, details.email());
     }
 
     @Test
     @DisplayName("5. Boundary: Shortest valid phone number")
     void shouldHandleShortTelephone() {
-        CommunicationDetails details = new CommunicationDetails("a@b.c", "0");
+        CommunicationDetails details = createDefaultCommunicationDetails("a@b.c", "0");
         Assertions.assertEquals("0", details.telephone());
     }
 
@@ -54,7 +62,7 @@ class CommunicationDetailsTest {
     @ValueSource(strings = { "user@domain.com", "user.name@sub.domain.org", "123@456.789" })
     @DisplayName("6. Positive: Support for various email formats")
     void shouldHandleVariousEmailFormats(String email) {
-        CommunicationDetails details = new CommunicationDetails(email, "12345");
+        CommunicationDetails details = createDefaultCommunicationDetails(email, "12345");
         Assertions.assertEquals(email, details.email());
     }
 
@@ -62,7 +70,7 @@ class CommunicationDetailsTest {
     @ValueSource(strings = { "+4912345678", "004912345678", "123", "0151-1234567" })
     @DisplayName("7. Positive: Support for various telephone formats")
     void shouldHandleVariousTelephoneFormats(String phone) {
-        CommunicationDetails details = new CommunicationDetails("test@test.com", phone);
+        CommunicationDetails details = createDefaultCommunicationDetails("test@test.com", phone);
         Assertions.assertEquals(phone, details.telephone());
     }
 }
