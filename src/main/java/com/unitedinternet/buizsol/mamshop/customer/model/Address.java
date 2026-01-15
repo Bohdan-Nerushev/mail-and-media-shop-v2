@@ -1,5 +1,6 @@
 package com.unitedinternet.buizsol.mamshop.customer.model;
 
+import com.unitedinternet.buizsol.mamshop.customer.exception.CustomerValidationException;
 import jakarta.validation.constraints.NotBlank;
 
 public record Address(
@@ -19,7 +20,7 @@ public record Address(
 
     private void validate(String value, String fieldName) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must not be null or empty");
+            throw new CustomerValidationException(fieldName + " must not be null or empty");
         }
     }
 }

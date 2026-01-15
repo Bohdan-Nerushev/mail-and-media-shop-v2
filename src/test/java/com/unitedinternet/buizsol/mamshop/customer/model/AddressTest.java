@@ -1,5 +1,6 @@
 package com.unitedinternet.buizsol.mamshop.customer.model;
 
+import com.unitedinternet.buizsol.mamshop.customer.exception.CustomerValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ class AddressTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("2. Negative: Validation of 'street' field")
     void shouldThrowExceptionWhenStreetIsInvalid(String invalidStreet) {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(CustomerValidationException.class,
                 () -> createDefaultAddress(invalidStreet, "10", "12345", "Berlin", "Germany"));
     }
 
@@ -48,7 +49,7 @@ class AddressTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("3. Negative: Validation of 'number' field")
     void shouldThrowExceptionWhenNumberIsInvalid(String invalidNumber) {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", invalidNumber, "12345", "Berlin", "Germany"));
     }
 
@@ -57,7 +58,7 @@ class AddressTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("4. Negative: Validation of 'postcode' field")
     void shouldThrowExceptionWhenPostcodeIsInvalid(String invalidPostcode) {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", invalidPostcode, "Berlin", "Germany"));
     }
 
@@ -66,7 +67,7 @@ class AddressTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("5. Negative: Validation of 'city' field")
     void shouldThrowExceptionWhenCityIsInvalid(String invalidCity) {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", "12345", invalidCity, "Germany"));
     }
 
@@ -75,7 +76,7 @@ class AddressTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("6. Negative: Validation of 'country' field")
     void shouldThrowExceptionWhenCountryIsInvalid(String invalidCountry) {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", "12345", "Berlin", invalidCountry));
     }
 

@@ -1,5 +1,6 @@
 package com.unitedinternet.buizsol.mamshop.customer.model;
 
+import com.unitedinternet.buizsol.mamshop.customer.exception.CustomerValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,11 +55,11 @@ class CustomerTest {
         }
 
         private CommunicationDetails createDefaultCommunicationDetails(
-                String email,
-                String telephone) {
+                        String email,
+                        String telephone) {
                 return new CommunicationDetails(
-                        email,
-                        telephone);
+                                email,
+                                telephone);
         }
 
         @Test
@@ -122,7 +123,7 @@ class CustomerTest {
         @ValueSource(strings = { " ", "\t", "\n" })
         @DisplayName("4. Negative: Validation of first name field in constructor")
         void shouldThrowExceptionWhenFirstNameIsInvalid(String invalidName) {
-                Assertions.assertThrows(IllegalArgumentException.class,
+                Assertions.assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer(invalidName, "Doe", LocalDate.now(),
                                                 mainAddress, null, communicationDetails, Brand.GMX));
         }
@@ -132,7 +133,7 @@ class CustomerTest {
         @ValueSource(strings = { " ", "\t", "\n" })
         @DisplayName("5. Negative: Validation of last name field in constructor")
         void shouldThrowExceptionWhenLastNameIsInvalid(String invalidName) {
-                Assertions.assertThrows(IllegalArgumentException.class,
+                Assertions.assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer("John", invalidName, LocalDate.now(),
                                                 mainAddress, null, communicationDetails, Brand.GMX));
         }
@@ -140,7 +141,7 @@ class CustomerTest {
         @Test
         @DisplayName("6. Negative: Validation of birth date (null check)")
         void shouldThrowExceptionWhenBirthDateIsNull() {
-                Assertions.assertThrows(IllegalArgumentException.class,
+                Assertions.assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer("John", "Doe", null, mainAddress, null,
                                                 communicationDetails, Brand.GMX));
         }
@@ -148,7 +149,7 @@ class CustomerTest {
         @Test
         @DisplayName("7. Negative: Validation of address (null check)")
         void shouldThrowExceptionWhenAddressIsNull() {
-                Assertions.assertThrows(IllegalArgumentException.class,
+                Assertions.assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer("John", "Doe", LocalDate.now(), null, null,
                                                 communicationDetails, Brand.GMX));
         }

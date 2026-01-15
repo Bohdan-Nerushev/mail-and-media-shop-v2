@@ -1,5 +1,6 @@
 package com.unitedinternet.buizsol.mamshop.customer.model;
 
+import com.unitedinternet.buizsol.mamshop.customer.exception.CustomerValidationException;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -134,13 +135,13 @@ public class Customer {
 
     private void validateNotBlank(final String value, final String fieldName) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must not be null or empty");
+            throw new CustomerValidationException(fieldName + " must not be null or empty");
         }
     }
 
     private void validateNotNull(final Object value, final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new CustomerValidationException(fieldName + " must not be null");
         }
     }
 

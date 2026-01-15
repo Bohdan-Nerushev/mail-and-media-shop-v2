@@ -1,5 +1,6 @@
 package com.unitedinternet.buizsol.mamshop.customer.model;
 
+import com.unitedinternet.buizsol.mamshop.customer.exception.CustomerValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class CommunicationDetailsTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("2. Negative: Validation of 'email' field")
     void shouldThrowExceptionWhenEmailIsInvalid(String invalidEmail) {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(CustomerValidationException.class,
                 () -> createDefaultCommunicationDetails(invalidEmail, "+123456789"));
     }
 
@@ -39,7 +40,7 @@ class CommunicationDetailsTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("3. Negative: Validation of 'telephone' field")
     void shouldThrowExceptionWhenTelephoneIsInvalid(String invalidPhone) {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(CustomerValidationException.class,
                 () -> createDefaultCommunicationDetails("test@example.com", invalidPhone));
     }
 

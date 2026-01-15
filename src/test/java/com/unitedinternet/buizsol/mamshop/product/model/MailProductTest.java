@@ -111,7 +111,7 @@ class MailProductTest {
 
         @ParameterizedTest(name = "[{index}] Name: ''{0}''")
         @NullAndEmptySource
-        @ValueSource(strings = { " ", "  ", "\t", "\n" })
+        @ValueSource(strings = { " ", "  ", "", "\t", "\n" })
         @DisplayName("5. Verify MailProduct failure with null, empty or blank name")
         void test5_CreateMailProduct_ThrowsException_InvalidName(
                         final String invalidName) {

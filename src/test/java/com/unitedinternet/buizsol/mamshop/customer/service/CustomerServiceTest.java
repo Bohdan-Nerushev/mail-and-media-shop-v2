@@ -1,6 +1,7 @@
 package com.unitedinternet.buizsol.mamshop.customer.service;
 
 import com.unitedinternet.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+import com.unitedinternet.buizsol.mamshop.customer.exception.CustomerValidationException;
 import com.unitedinternet.buizsol.mamshop.customer.model.Address;
 import com.unitedinternet.buizsol.mamshop.customer.model.Brand;
 import com.unitedinternet.buizsol.mamshop.customer.model.CommunicationDetails;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -75,7 +77,7 @@ class CustomerServiceTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("03: Create customer with invalid first name should throw exception")
     void test03_createCustomer_withInvalidFirstName_shouldThrowException(final String firstName) {
-        assertThrows(IllegalArgumentException.class, () -> customerService.createCustomer(
+        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(
                 firstName, "Doe", LocalDate.of(1990, 1, 1),
                 address, null, communicationDetails, Brand.WEB_DE));
     }
@@ -85,7 +87,7 @@ class CustomerServiceTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("04: Create customer with invalid last name should throw exception")
     void test04_createCustomer_withInvalidLastName_shouldThrowException(final String lastName) {
-        assertThrows(IllegalArgumentException.class, () -> customerService.createCustomer(
+        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(
                 "John", lastName, LocalDate.of(1990, 1, 1),
                 address, null, communicationDetails, Brand.WEB_DE));
     }
@@ -209,7 +211,7 @@ class CustomerServiceTest {
     @DisplayName("13: Create customer with null first name should throw exception")
     void test13_1_createCustomer_withNullFirstName_shouldThrowException() {
         assertThrows(
-                IllegalArgumentException.class,
+                CustomerValidationException.class,
                 () -> customerService.createCustomer(
                         null,
                         "Doe",
@@ -224,7 +226,7 @@ class CustomerServiceTest {
     @DisplayName("14: Create customer with null last name should throw exception")
     void test13_2_createCustomer_withNullLastName_shouldThrowException() {
         assertThrows(
-                IllegalArgumentException.class,
+                CustomerValidationException.class,
                 () -> customerService.createCustomer(
                         "John",
                         null,
@@ -239,7 +241,7 @@ class CustomerServiceTest {
     @DisplayName("15: Create customer with null birth date should throw exception")
     void test13_3_createCustomer_withNullBirthDate_shouldThrowException() {
         assertThrows(
-                IllegalArgumentException.class,
+                CustomerValidationException.class,
                 () -> customerService.createCustomer(
                         "John",
                         "Doe",
@@ -254,7 +256,7 @@ class CustomerServiceTest {
     @DisplayName("16: Create customer with null address should throw exception")
     void test13_4_createCustomer_withNullAddress_shouldThrowException() {
         assertThrows(
-                IllegalArgumentException.class,
+                CustomerValidationException.class,
                 () -> customerService.createCustomer(
                         "John",
                         "Doe",
@@ -269,7 +271,7 @@ class CustomerServiceTest {
     @DisplayName("17: Create customer with null communication details should throw exception")
     void test13_5_createCustomer_withNullCommunicationDetails_shouldThrowException() {
         assertThrows(
-                IllegalArgumentException.class,
+                CustomerValidationException.class,
                 () -> customerService.createCustomer(
                         "John",
                         "Doe",
@@ -284,7 +286,7 @@ class CustomerServiceTest {
     @DisplayName("18: Create customer with null brand should throw exception")
     void test13_6_createCustomer_withNullBrand_shouldThrowException() {
         assertThrows(
-                IllegalArgumentException.class,
+                CustomerValidationException.class,
                 () -> customerService.createCustomer(
                         "John",
                         "Doe",
@@ -310,5 +312,32 @@ class CustomerServiceTest {
             case "updateCommunicationDetails" -> assertThrows(Exception.class,
                     () -> customerService.updateCommunicationDetails(null, communicationDetails));
         }
+    }
+
+    @Test
+    @DisplayName("20: Find customer by ID should return customer from repository")
+    void test15_findCustomerById_shouldReturnCustomer() {
+        final UUID id = UUID.randomUUID();
+        final Customer customer = mock(Customer.class);
+        when(customerRepository.findById(id)).thenReturn(java.util.Optional.of(customer));
+
+        final java.util.Optional<Customer> result = customerService.findCustomerById(id);
+
+        assertTrue(result.isPresent());
+        assertEquals(customer, result.get());
+        verify(customerRepository).findById(id);
+    }
+
+    @Test
+    @DisplayName("21: Find all customers should return all customers from repository")
+    void test16_findAllCustomers_shouldReturnAllCustomers() {
+        final java.util.Collection<Customer> customers = java.util.List.of(mock(Customer.class));
+        when(customerRepository.findAll()).thenReturn(customers);
+
+        final java.util.Collection<Customer> result = customerService.findAllCustomers();
+
+        assertEquals(customers.size(), result.size());
+        assertEquals(customers, result);
+        verify(customerRepository).findAll();
     }
 }

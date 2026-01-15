@@ -9,9 +9,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
-public class CustomerServiceImpl implements CustomerService {
+final class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
 
@@ -31,7 +33,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @NotNull
-    public static CustomerService getInstance() {
+    static CustomerService getInstance() {
         return Holder.INSTANCE;
     }
 
@@ -103,8 +105,21 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomer(@NotNull final UUID id) throws CustomerNotFoundException {
-       validateNotNull(id, "ID");
+        validateNotNull(id, "ID");
         customerRepository.delete(id);
+    }
+
+    @Override
+    @NotNull
+    public Optional<Customer> findCustomerById(@NotNull final UUID id) {
+        validateNotNull(id, "ID");
+        return customerRepository.findById(id);
+    }
+
+    @Override
+    @NotNull
+    public Collection<Customer> findAllCustomers() {
+        return customerRepository.findAll();
     }
 
     private void validateNotNull(final Object value, final String fieldName) {
