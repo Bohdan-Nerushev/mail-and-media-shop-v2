@@ -119,18 +119,10 @@ public class Customer {
         return status;
     }
 
-    void setStatus(
+    public void setStatus(
             @NotNull final CustomerStatus status) {
         validateNotNull(status, "Status");
         this.status = status;
-    }
-
-    public void activate() {
-        this.status = CustomerStatus.ACTIVE;
-    }
-
-    public void deactivate() {
-        this.status = CustomerStatus.INACTIVE;
     }
 
     private void validateNotBlank(final String value, final String fieldName) {

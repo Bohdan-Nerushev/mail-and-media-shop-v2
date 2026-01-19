@@ -36,6 +36,19 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
 
+    public Customer createDefaultCustomer(
+            final String firstName,
+            final String lastName,
+            final LocalDate birthDate,
+            final Address address,
+            final Address invoiceAddress,
+            final CommunicationDetails communicationDetails,
+            final Brand brand) {
+        return new Customer(
+                firstName, lastName, birthDate,
+                address, invoiceAddress, communicationDetails, brand);
+    }
+
     @Mock
     private Address address;
 
@@ -51,9 +64,9 @@ class CustomerServiceTest {
     @Test
     @DisplayName("01: Create customer with valid data should succeed")
     void test01_createCustomer_withValidData_shouldSucceed() {
-        final Customer customer = customerService.createCustomer(
+        final Customer customer = customerService.createCustomer(createDefaultCustomer(
                 "John", "Doe", LocalDate.of(1990, 1, 1),
-                address, null, communicationDetails, Brand.GMX);
+                address, null, communicationDetails, Brand.GMX));
 
         assertNotNull(customer.getId());
         assertEquals("John", customer.getFirstName());
@@ -65,9 +78,9 @@ class CustomerServiceTest {
     @EnumSource(Brand.class)
     @DisplayName("02: Create customer with different brands should succeed")
     void test02_createCustomer_withDifferentBrands_shouldSucceed(final Brand brand) {
-        final Customer customer = customerService.createCustomer(
+        final Customer customer = customerService.createCustomer(createDefaultCustomer(
                 "John", "Doe", LocalDate.of(1990, 1, 1),
-                address, null, communicationDetails, brand);
+                address, null, communicationDetails, brand));
 
         assertEquals(brand, customer.getBrand());
         verify(customerRepository).save(any(Customer.class));
@@ -78,9 +91,9 @@ class CustomerServiceTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("03: Create customer with invalid first name should throw exception")
     void test03_createCustomer_withInvalidFirstName_shouldThrowException(final String firstName) {
-        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(
+        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(createDefaultCustomer(
                 firstName, "Doe", LocalDate.of(1990, 1, 1),
-                address, null, communicationDetails, Brand.WEB_DE));
+                address, null, communicationDetails, Brand.WEB_DE)));
     }
 
     @ParameterizedTest
@@ -88,9 +101,9 @@ class CustomerServiceTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("04: Create customer with invalid last name should throw exception")
     void test04_createCustomer_withInvalidLastName_shouldThrowException(final String lastName) {
-        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(
+        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(createDefaultCustomer(
                 "John", lastName, LocalDate.of(1990, 1, 1),
-                address, null, communicationDetails, Brand.WEB_DE));
+                address, null, communicationDetails, Brand.WEB_DE)));
     }
 
     @ParameterizedTest
@@ -102,9 +115,9 @@ class CustomerServiceTest {
     void test05_createCustomer_withBoundaryBirthDates_shouldSucceed(final String dateStr) {
         final LocalDate birthDate = LocalDate.parse(dateStr);
 
-        final Customer customer = customerService.createCustomer(
+        final Customer customer = customerService.createCustomer(createDefaultCustomer(
                 "John", "Doe", birthDate,
-                address, null, communicationDetails, Brand.GMX);
+                address, null, communicationDetails, Brand.GMX));
 
         assertEquals(birthDate, customer.getBirthDate());
         verify(customerRepository).save(any(Customer.class));
@@ -165,7 +178,7 @@ class CustomerServiceTest {
 
         customerService.activateCustomer(customerId);
 
-        verify(customerMock).activate();
+        verify(customerMock).setStatus(CustomerStatus.ACTIVE);
         verify(customerRepository).update(customerMock);
     }
 
@@ -179,7 +192,7 @@ class CustomerServiceTest {
 
         customerService.deactivateCustomer(customerId);
 
-        verify(customerMock).deactivate();
+        verify(customerMock).setStatus(CustomerStatus.INACTIVE);
         verify(customerRepository).update(customerMock);
     }
 
@@ -213,14 +226,14 @@ class CustomerServiceTest {
     void test13_1_createCustomer_withNullFirstName_shouldThrowException() {
         assertThrows(
                 CustomerValidationException.class,
-                () -> customerService.createCustomer(
+                () -> customerService.createCustomer(createDefaultCustomer(
                         null,
                         "Doe",
                         LocalDate.now(),
                         address,
                         null,
                         communicationDetails,
-                        Brand.GMX));
+                        Brand.GMX)));
     }
 
     @Test
@@ -228,14 +241,14 @@ class CustomerServiceTest {
     void test13_2_createCustomer_withNullLastName_shouldThrowException() {
         assertThrows(
                 CustomerValidationException.class,
-                () -> customerService.createCustomer(
+                () -> customerService.createCustomer(createDefaultCustomer(
                         "John",
                         null,
                         LocalDate.now(),
                         address,
                         null,
                         communicationDetails,
-                        Brand.GMX));
+                        Brand.GMX)));
     }
 
     @Test
@@ -243,14 +256,14 @@ class CustomerServiceTest {
     void test13_3_createCustomer_withNullBirthDate_shouldThrowException() {
         assertThrows(
                 CustomerValidationException.class,
-                () -> customerService.createCustomer(
+                () -> customerService.createCustomer(createDefaultCustomer(
                         "John",
                         "Doe",
                         null,
                         address,
                         null,
                         communicationDetails,
-                        Brand.GMX));
+                        Brand.GMX)));
     }
 
     @Test
@@ -258,14 +271,14 @@ class CustomerServiceTest {
     void test13_4_createCustomer_withNullAddress_shouldThrowException() {
         assertThrows(
                 CustomerValidationException.class,
-                () -> customerService.createCustomer(
+                () -> customerService.createCustomer(createDefaultCustomer(
                         "John",
                         "Doe",
                         LocalDate.now(),
                         null,
                         null,
                         communicationDetails,
-                        Brand.GMX));
+                        Brand.GMX)));
     }
 
     @Test
@@ -273,14 +286,14 @@ class CustomerServiceTest {
     void test13_5_createCustomer_withNullCommunicationDetails_shouldThrowException() {
         assertThrows(
                 CustomerValidationException.class,
-                () -> customerService.createCustomer(
+                () -> customerService.createCustomer(createDefaultCustomer(
                         "John",
                         "Doe",
                         LocalDate.now(),
                         address,
                         null,
                         null,
-                        Brand.GMX));
+                        Brand.GMX)));
     }
 
     @Test
@@ -288,14 +301,14 @@ class CustomerServiceTest {
     void test13_6_createCustomer_withNullBrand_shouldThrowException() {
         assertThrows(
                 CustomerValidationException.class,
-                () -> customerService.createCustomer(
+                () -> customerService.createCustomer(createDefaultCustomer(
                         "John",
                         "Doe",
                         LocalDate.now(),
                         address,
                         null,
                         communicationDetails,
-                        null));
+                        null)));
     }
 
     @ParameterizedTest
