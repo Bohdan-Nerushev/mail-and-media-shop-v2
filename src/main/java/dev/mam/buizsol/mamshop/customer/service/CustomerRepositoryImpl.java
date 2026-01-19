@@ -31,7 +31,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     public void save(
-            @Valid final Customer customer) {
+            @Valid @NotNull final Customer customer) {
         validateNotNull(customer, "Customer");
         storage.put(customer.getId(), customer);
     }
@@ -62,7 +62,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     public void update(
-            @Valid final Customer customer) throws CustomerNotFoundException {
+            @Valid @NotNull final Customer customer) throws CustomerNotFoundException {
         validateNotNull(customer, "Customer");
         if (!storage.containsKey(customer.getId())) {
             throw new CustomerNotFoundException("Customer with ID " + customer.getId() + " not found");

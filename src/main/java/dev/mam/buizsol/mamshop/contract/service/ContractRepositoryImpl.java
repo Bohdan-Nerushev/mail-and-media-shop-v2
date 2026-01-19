@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
 import dev.mam.buizsol.mamshop.contract.model.Contract;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @Override
     @NotNull
     public Contract save(
-            @NotNull final Contract contract) {
+            @NotNull @Valid final Contract contract) {
         validateNotNull(contract, "Contract");
         storage.put(contract.getId(), contract);
         return contract;
@@ -41,7 +42,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @Override
     @NotNull
     public Contract update(
-            @NotNull final Contract contract) {
+            @NotNull @Valid final Contract contract) {
         validateNotNull(contract, "Contract");
         storage.put(contract.getId(), contract);
         return contract;

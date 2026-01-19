@@ -5,6 +5,7 @@ import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -20,8 +21,8 @@ public interface ContractService {
 
         @NotNull
         Contract createContract(
-                        @NotNull final Customer customer,
-                        @NotNull final Product product);
+                        @NotNull @Valid final Customer customer,
+                        @NotNull @Valid final Product product);
 
         @NotNull
         Optional<Contract> findContractById(

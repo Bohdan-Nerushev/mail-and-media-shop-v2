@@ -6,6 +6,7 @@ import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
@@ -29,8 +30,8 @@ public class Contract {
     private ContractStatus status;
 
     public Contract(
-            @NotNull final Customer customer,
-            @NotNull final Product product) {
+            @NotNull @Valid final Customer customer,
+            @NotNull @Valid final Product product) {
 
         validateNotNull(customer, "Customer");
         validateNotNull(product, "Product");

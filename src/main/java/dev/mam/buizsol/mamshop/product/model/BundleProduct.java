@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
@@ -8,14 +9,16 @@ import java.math.BigDecimal;
 public class BundleProduct extends Product {
 
     @NotNull
+    @Valid
     private final MailProduct mailProduct;
 
     @NotNull
+    @Valid
     private final PartnerProduct partnerProduct;
 
     public BundleProduct(
-            @NotNull final MailProduct mailProduct,
-            @NotNull final PartnerProduct partnerProduct) {
+            @NotNull @Valid final MailProduct mailProduct,
+            @NotNull @Valid final PartnerProduct partnerProduct) {
         super(
                 generateName(mailProduct, partnerProduct),
                 validateMatchingBrands(mailProduct, partnerProduct),

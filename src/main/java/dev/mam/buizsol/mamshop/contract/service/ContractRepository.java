@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
 import dev.mam.buizsol.mamshop.contract.model.Contract;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -16,11 +17,11 @@ interface ContractRepository {
 
         @NotNull
         Contract save(
-                        @NotNull final Contract contract);
+                        @NotNull @Valid final Contract contract);
 
         @NotNull
         Contract update(
-                        @NotNull final Contract contract);
+                        @NotNull @Valid final Contract contract);
 
         @NotNull
         Optional<Contract> findById(

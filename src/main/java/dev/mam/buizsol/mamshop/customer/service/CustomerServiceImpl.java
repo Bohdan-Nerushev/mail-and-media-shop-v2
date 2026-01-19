@@ -41,7 +41,7 @@ final class CustomerServiceImpl implements CustomerService {
 
     @Override
     @NotNull
-    public Customer createCustomer(@Valid final Customer customer) {
+    public Customer createCustomer(@Valid @NotNull final Customer customer) {
 
         validateNotNull(customer, "Customer");
         customerRepository.save(customer);
@@ -49,7 +49,7 @@ final class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateAddress(@NotNull final UUID customerId, @Valid final Address address)
+    public void updateAddress(@NotNull final UUID customerId, @Valid @NotNull final Address address)
             throws CustomerNotFoundException {
         validateNotNull(customerId, "Customer ID");
         final var customer = customerRepository.getById(customerId);
@@ -58,7 +58,7 @@ final class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateInvoiceAddress(@NotNull final UUID customerId, @Valid final Address address)
+    public void updateInvoiceAddress(@NotNull final UUID customerId, @Valid @NotNull final Address address)
             throws CustomerNotFoundException {
         validateNotNull(customerId, "Customer ID");
         final var customer = customerRepository.getById(customerId);
@@ -68,7 +68,7 @@ final class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCommunicationDetails(@NotNull final UUID customerId,
-            @Valid final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
+            @Valid @NotNull final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
         validateNotNull(customerId, "Customer ID");
         final Customer customer = customerRepository.getById(customerId);
         customer.setCommunicationDetails(communicationDetails);

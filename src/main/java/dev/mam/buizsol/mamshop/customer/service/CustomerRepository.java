@@ -16,7 +16,7 @@ interface CustomerRepository {
                 return CustomerRepositoryImpl.getInstance();
         }
 
-        void save(@Valid final Customer customer);
+        void save(@Valid @NotNull final Customer customer);
 
         @NotNull
         Optional<Customer> findById(
@@ -33,5 +33,5 @@ interface CustomerRepository {
 
         void delete(@NotNull final UUID id) throws CustomerNotFoundException;
 
-        void update(@Valid final Customer customer) throws CustomerNotFoundException;
+        void update(@Valid @NotNull final Customer customer) throws CustomerNotFoundException;
 }

@@ -5,6 +5,7 @@ import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidateException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
@@ -24,13 +25,15 @@ public final class Invoice {
     private final UUID customerId;
 
     @NotNull
+    @Valid
     private final Address address;
 
     @NotNull
+    @Valid
     private final Address invoiceAddress;
 
     @NotNull
-    private final List<InvoiceItem> items;
+    private final List<@Valid InvoiceItem> items;
 
     @NotNull
     private final BigDecimal totalSetupFee;
@@ -48,9 +51,9 @@ public final class Invoice {
     public Invoice(
             @NotNull Brand brand,
             @NotNull UUID customerId,
-            @NotNull Address address,
-            @NotNull Address invoiceAddress,
-            @NotNull List<InvoiceItem> items,
+            @NotNull @Valid Address address,
+            @NotNull @Valid Address invoiceAddress,
+            @NotNull List<@Valid InvoiceItem> items,
             @NotNull BigDecimal discount) {
         validateNotNull(items, "Items list");
         validateDiscount(discount);

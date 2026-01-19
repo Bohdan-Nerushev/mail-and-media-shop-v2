@@ -2,6 +2,7 @@ package dev.mam.buizsol.mamshop.product.service;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Collection;
@@ -31,7 +32,7 @@ final class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public void save(
-            @NotNull final Product product) {
+            @NotNull @Valid final Product product) {
         validateNotNull(product, "Product");
         storage.put(product.getId(), product);
     }
