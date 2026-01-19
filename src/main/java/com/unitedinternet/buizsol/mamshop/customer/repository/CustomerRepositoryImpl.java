@@ -53,8 +53,8 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     public void delete(
             @NotNull final UUID id) throws CustomerNotFoundException {
         validateNotNull(id, "ID");
-        Customer deletObject = storage.remove(id);
-        if (deletObject == null) {
+        Customer deletedObject = storage.remove(id);
+        if (deletedObject == null) {
             throw new CustomerNotFoundException("Customer with ID " + id + " not found");
         }
     }

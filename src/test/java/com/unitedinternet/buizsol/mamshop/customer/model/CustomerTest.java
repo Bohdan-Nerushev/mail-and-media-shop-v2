@@ -160,7 +160,7 @@ class CustomerTest {
                                 communicationDetails, Brand.GMX);
                 Assertions.assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
 
-                customer.activate();
+                customer.setStatus(CustomerStatus.ACTIVE);
 
                 Assertions.assertEquals(CustomerStatus.ACTIVE, customer.getStatus());
         }
@@ -170,11 +170,10 @@ class CustomerTest {
         void shouldDeactivateCustomerAndChangeStatus() {
                 Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
                                 communicationDetails, Brand.GMX);
-                customer.activate();
+                customer.setStatus(CustomerStatus.ACTIVE);
                 Assertions.assertEquals(CustomerStatus.ACTIVE, customer.getStatus());
 
-                customer.deactivate();
-
+                customer.setStatus(CustomerStatus.INACTIVE);
                 Assertions.assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
         }
 

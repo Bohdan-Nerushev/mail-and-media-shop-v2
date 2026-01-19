@@ -5,6 +5,7 @@ import com.unitedinternet.buizsol.mamshop.customer.model.Address;
 import com.unitedinternet.buizsol.mamshop.customer.model.Brand;
 import com.unitedinternet.buizsol.mamshop.customer.model.CommunicationDetails;
 import com.unitedinternet.buizsol.mamshop.customer.model.Customer;
+import com.unitedinternet.buizsol.mamshop.customer.model.CustomerStatus;
 import com.unitedinternet.buizsol.mamshop.customer.repository.CustomerRepository;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -61,51 +62,51 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateAddress(@NotNull final UUID id, @NotNull final Address address) throws CustomerNotFoundException {
-        validateNotNull(id, "ID");
-        final Customer customer = customerRepository.getById(id);
+    public void updateAddress(@NotNull final UUID customerId, @NotNull final Address address) throws CustomerNotFoundException {
+        validateNotNull(customerId, "ID");
+        final var customer = customerRepository.getById(customerId);
         customer.setAddress(address);
         customerRepository.update(customer);
     }
 
     @Override
-    public void updateInvoiceAddress(@NotNull final UUID id, @NotNull final Address address)
+    public void updateInvoiceAddress(@NotNull final UUID customerId, @NotNull final Address address)
             throws CustomerNotFoundException {
-        validateNotNull(id, "ID");
-        final Customer customer = customerRepository.getById(id);
+        validateNotNull(customerId, "ID");
+        final Customer customer = customerRepository.getById(customerId);
         customer.setInvoiceAddress(address);
         customerRepository.update(customer);
     }
 
     @Override
-    public void updateCommunicationDetails(@NotNull final UUID id,
+    public void updateCommunicationDetails(@NotNull final UUID customerId,
             @NotNull final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
-        validateNotNull(id, "ID");
-        final Customer customer = customerRepository.getById(id);
+        validateNotNull(customerId, "ID");
+        final Customer customer = customerRepository.getById(customerId);
         customer.setCommunicationDetails(communicationDetails);
         customerRepository.update(customer);
     }
 
     @Override
-    public void activateCustomer(@NotNull final UUID id) throws CustomerNotFoundException {
-        validateNotNull(id, "ID");
-        final Customer customer = customerRepository.getById(id);
-        customer.activate();
+    public void activateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
+        validateNotNull(customerId, "ID");
+        final Customer customer = customerRepository.getById(customerId);
+        customer.setStatus(CustomerStatus.ACTIVE);
         customerRepository.update(customer);
     }
 
     @Override
-    public void deactivateCustomer(@NotNull final UUID id) throws CustomerNotFoundException {
-        validateNotNull(id, "ID");
-        final Customer customer = customerRepository.getById(id);
-        customer.deactivate();
+    public void deactivateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
+        validateNotNull(customerId, "ID");
+        final Customer customer = customerRepository.getById(customerId);
+        customer.setStatus(CustomerStatus.INACTIVE);
         customerRepository.update(customer);
     }
 
     @Override
-    public void deleteCustomer(@NotNull final UUID id) throws CustomerNotFoundException {
-       validateNotNull(id, "ID");
-        customerRepository.delete(id);
+    public void deleteCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
+       validateNotNull(customerId, "ID");
+        customerRepository.delete(customerId);
     }
 
     private void validateNotNull(final Object value, final String fieldName) {

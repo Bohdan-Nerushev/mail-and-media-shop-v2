@@ -92,7 +92,7 @@ local.properties
 
 # sbteclipse plugin
 .target
-
+ToDo.md
 # Tern plugin
 .tern-project
 

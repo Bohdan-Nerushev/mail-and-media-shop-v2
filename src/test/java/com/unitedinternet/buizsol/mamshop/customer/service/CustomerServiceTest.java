@@ -167,7 +167,7 @@ class CustomerServiceTest {
 
         customerService.activateCustomer(customerId);
 
-        verify(customerMock).activate();
+        verify(customerMock).setStatus(CustomerStatus.ACTIVE);
         verify(customerRepository).update(customerMock);
     }
 
@@ -181,7 +181,7 @@ class CustomerServiceTest {
 
         customerService.deactivateCustomer(customerId);
 
-        verify(customerMock).deactivate();
+        verify(customerMock).setStatus(CustomerStatus.INACTIVE);
         verify(customerRepository).update(customerMock);
     }
 

@@ -29,13 +29,13 @@ public class Customer {
     private CustomerStatus status;
 
     public Customer(
-            @NotBlank(message = "First name must not be blank") final String firstName,
-            @NotBlank(message = "Last name must not be blank") final String lastName,
-            @NotNull(message = "Birth date must not be null") final LocalDate birthDate,
-            @NotNull(message = "Address must not be null") final Address address,
+            @NotBlank final String firstName,
+            @NotBlank final String lastName,
+            @NotNull final LocalDate birthDate,
+            @NotNull final Address address,
             @Nullable final Address invoiceAddress,
-            @NotNull(message = "Communication details must not be null") final CommunicationDetails communicationDetails,
-            @NotNull(message = "Brand must not be null") final Brand brand) {
+            @NotNull final CommunicationDetails communicationDetails,
+            @NotNull final Brand brand) {
 
         validateNotBlank(firstName, "First name");
         validateNotBlank(lastName, "Last name");
@@ -81,7 +81,7 @@ public class Customer {
     }
 
     public void setAddress(
-            @NotNull(message = "Address must not be null") final Address address) {
+            @NotNull final Address address) {
         validateNotNull(address, "Address");
         this.address = address;
     }
@@ -92,7 +92,7 @@ public class Customer {
     }
 
     public void setInvoiceAddress(
-            @NotNull(message = "Invoice address must not be null") final Address invoiceAddress) {
+            @NotNull final Address invoiceAddress) {
         validateNotNull(invoiceAddress, "Invoice address");
         this.invoiceAddress = invoiceAddress;
     }
@@ -103,7 +103,7 @@ public class Customer {
     }
 
     public void setCommunicationDetails(
-            @NotNull(message = "Communication details must not be null") final CommunicationDetails communicationDetails) {
+            @NotNull final CommunicationDetails communicationDetails) {
         validateNotNull(communicationDetails, "Communication details");
         this.communicationDetails = communicationDetails;
     }
@@ -118,18 +118,10 @@ public class Customer {
         return status;
     }
 
-    void setStatus(
-            @NotNull(message = "Status must not be null") final CustomerStatus status) {
+    public void setStatus(
+            @NotNull final CustomerStatus status) {
         validateNotNull(status, "Status");
         this.status = status;
-    }
-
-    public void activate() {
-        this.status = CustomerStatus.ACTIVE;
-    }
-
-    public void deactivate() {
-        this.status = CustomerStatus.INACTIVE;
     }
 
     private void validateNotBlank(final String value, final String fieldName) {

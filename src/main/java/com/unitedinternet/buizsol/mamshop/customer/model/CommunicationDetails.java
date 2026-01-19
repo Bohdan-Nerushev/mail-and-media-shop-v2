@@ -1,10 +1,11 @@
 package com.unitedinternet.buizsol.mamshop.customer.model;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public record CommunicationDetails(
-        @NotBlank(message = "Email must not be blank") String email,
-        @NotBlank(message = "Telephone must not be blank") String telephone) {
+        @Email String email,
+        @NotBlank String telephone) {
 
     public CommunicationDetails {
         validate(email, "Email");
