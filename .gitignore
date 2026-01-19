@@ -123,7 +123,7 @@ local.properties
 .DS_Store
 .AppleDouble
 .LSOverride
-
+.vscode/settings.json
 # Icon must end with two \r
 Icon
 
