@@ -2,6 +2,7 @@ package dev.mam.buizsol.mamshop.customer.repository;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Collection;
@@ -30,7 +31,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     public void save(
-            @NotNull final Customer customer) {
+            @Valid final Customer customer) {
         validateNotNull(customer, "Customer");
         storage.put(customer.getId(), customer);
     }
@@ -61,7 +62,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     public void update(
-            @NotNull final Customer customer
+            @Valid final Customer customer
     ) throws CustomerNotFoundException {
         validateNotNull(customer, "Customer");
         if (!storage.containsKey(customer.getId())) {

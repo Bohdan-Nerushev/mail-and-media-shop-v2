@@ -2,6 +2,7 @@ package dev.mam.buizsol.mamshop.customer.repository;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Collection;
@@ -15,8 +16,7 @@ public interface CustomerRepository {
                 return CustomerRepositoryImpl.getInstance();
         }
 
-        void save(
-                        @NotNull final Customer customer);
+        void save(@Valid final Customer customer);
 
         @NotNull
         Optional<Customer> findById(
@@ -31,9 +31,7 @@ public interface CustomerRepository {
         @NotNull
         Collection<Customer> findAll();
 
-        void delete(
-                        @NotNull final UUID id) throws CustomerNotFoundException;
+        void delete(@NotNull final UUID id) throws CustomerNotFoundException;
 
-        void update(
-                        @NotNull final Customer customer) throws CustomerNotFoundException;
+        void update(@Valid final Customer customer) throws CustomerNotFoundException;
 }

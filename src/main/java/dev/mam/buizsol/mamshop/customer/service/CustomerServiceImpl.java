@@ -7,6 +7,7 @@ import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.customer.repository.CustomerRepository;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -62,7 +63,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateAddress(@NotNull final UUID customerId, @NotNull final Address address) throws CustomerNotFoundException {
+    public void updateAddress(@NotNull final UUID customerId, @Valid final Address address) throws CustomerNotFoundException {
         validateNotNull(customerId, "ID");
         final var customer = customerRepository.getById(customerId);
         customer.setAddress(address);
@@ -70,7 +71,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateInvoiceAddress(@NotNull final UUID customerId, @NotNull final Address address)
+    public void updateInvoiceAddress(@NotNull final UUID customerId, @Valid final Address address)
             throws CustomerNotFoundException {
         validateNotNull(customerId, "ID");
         final Customer customer = customerRepository.getById(customerId);
