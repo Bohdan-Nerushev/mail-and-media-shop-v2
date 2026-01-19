@@ -32,8 +32,8 @@ final class ContractServiceImpl implements ContractService {
     @Override
     @NotNull
     public Contract createContract(
-            @NotNull(message = "Customer must not be null") final Customer customer,
-            @NotNull(message = "Product must not be null") final Product product) {
+            @NotNull final Customer customer,
+            @NotNull final Product product) {
         validateNotNull(customer, "Customer");
         validateNotNull(product, "Product");
 
@@ -44,7 +44,7 @@ final class ContractServiceImpl implements ContractService {
     @Override
     @NotNull
     public Optional<Contract> findContractById(
-            @NotNull(message = "Contract ID must not be null") final UUID id) {
+            @NotNull final UUID id) {
         validateNotNull(id, "Contract ID");
         return repository.findById(id);
     }
@@ -52,7 +52,7 @@ final class ContractServiceImpl implements ContractService {
     @Override
     @NotNull
     public List<Contract> findContractsByCustomerId(
-            @NotNull(message = "Customer ID must not be null") final UUID customerId) {
+            @NotNull final UUID customerId) {
         validateNotNull(customerId, "Customer ID");
         return repository.findByCustomerId(customerId);
     }
@@ -60,7 +60,7 @@ final class ContractServiceImpl implements ContractService {
     @Override
     @NotNull
     public List<Contract> findContractsByProductId(
-            @NotNull(message = "Product ID must not be null") final UUID productId) {
+            @NotNull final UUID productId) {
         validateNotNull(productId, "Product ID");
         return repository.findByProductId(productId);
     }
@@ -68,8 +68,8 @@ final class ContractServiceImpl implements ContractService {
     @Override
     @NotNull
     public Contract updateContractStatus(
-            @NotNull(message = "Contract ID must not be null") final UUID contractId,
-            @NotNull(message = "Status must not be null") final ContractStatus status)
+            @NotNull final UUID contractId,
+            @NotNull final ContractStatus status)
             throws ContractNotFoundException {
         validateNotNull(contractId, "Contract ID");
         validateNotNull(status, "Status");

@@ -6,25 +6,24 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-
 public final class InvoiceItem {
 
-    @NotNull(message = "Product ID must not be null")
+    @NotNull
     private final UUID productId;
 
-    @NotBlank(message = "Product name must not be blank")
+    @NotBlank
     private final String productName;
 
-    @NotNull(message = "Contract ID must not be null")
+    @NotNull
     private final UUID contractId;
 
-    @NotNull(message = "Contract creation date must not be null")
+    @NotNull
     private final LocalDate contractCreationDate;
 
-    @NotNull(message = "Setup fee must not be null")
+    @NotNull
     private final BigDecimal setupFee;
 
-    @NotNull(message = "Monthly fee must not be null")
+    @NotNull
     private final BigDecimal monthlyFee;
 
     public InvoiceItem(

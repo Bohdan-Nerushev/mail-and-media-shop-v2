@@ -1,4 +1,4 @@
-package dev.mam.buizsol.mamshop.shop;
+package dev.mam.buizsol.mamshop;
 
 public final class MaMShopApplication {
 

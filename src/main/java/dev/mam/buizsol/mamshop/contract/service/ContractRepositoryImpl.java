@@ -32,7 +32,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @Override
     @NotNull
     public Contract save(
-            @NotNull(message = "Contract must not be null") final Contract contract) {
+            @NotNull final Contract contract) {
         validateNotNull(contract, "Contract");
         storage.put(contract.getId(), contract);
         return contract;
@@ -41,7 +41,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @Override
     @NotNull
     public Contract update(
-            @NotNull(message = "Contract must not be null") final Contract contract) {
+            @NotNull final Contract contract) {
         validateNotNull(contract, "Contract");
         storage.put(contract.getId(), contract);
         return contract;
@@ -50,7 +50,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @Override
     @NotNull
     public Optional<Contract> findById(
-            @NotNull(message = "ID must not be null") final UUID id) {
+            @NotNull final UUID id) {
         validateNotNull(id, "ID");
         return Optional.ofNullable(storage.get(id));
     }
@@ -58,7 +58,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @Override
     @NotNull
     public List<Contract> findByCustomerId(
-            @NotNull(message = "Customer ID must not be null") final UUID customerId) {
+            @NotNull final UUID customerId) {
         validateNotNull(customerId, "Customer ID");
         return storage.values().stream()
                 .filter(contract -> contract.getCustomerId().equals(customerId))
@@ -68,7 +68,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @Override
     @NotNull
     public List<Contract> findByProductId(
-            @NotNull(message = "Product ID must not be null") final UUID productId) {
+            @NotNull final UUID productId) {
         validateNotNull(productId, "Product ID");
         return storage.values().stream()
                 .filter(contract -> contract.getProductId().equals(productId))

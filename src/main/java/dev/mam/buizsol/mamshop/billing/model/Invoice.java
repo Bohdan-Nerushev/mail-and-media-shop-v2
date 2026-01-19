@@ -14,35 +14,35 @@ import java.util.UUID;
 
 public final class Invoice {
 
-    @NotNull(message = "Brand must not be null")
+    @NotNull
     private final Brand brand;
 
-    @NotNull(message = "Invoice date must not be null")
+    @NotNull
     private final LocalDate invoiceDate;
 
-    @NotNull(message = "Customer ID must not be null")
+    @NotNull
     private final UUID customerId;
 
-    @NotNull(message = "Address must not be null")
+    @NotNull
     private final Address address;
 
-    @NotNull(message = "Invoice address must not be null")
+    @NotNull
     private final Address invoiceAddress;
 
-    @NotNull(message = "Items list must not be null")
+    @NotNull
     private final List<InvoiceItem> items;
 
-    @NotNull(message = "Total setup fee must not be null")
+    @NotNull
     private final BigDecimal totalSetupFee;
 
-    @NotNull(message = "Total monthly fee must not be null")
+    @NotNull
     private final BigDecimal totalMonthlyFee;
 
-    @NotNull(message = "Discount must not be null")
-    @PositiveOrZero(message = "Discount must be positive or zero")
+    @NotNull
+    @PositiveOrZero
     private final BigDecimal discount;
 
-    @NotNull(message = "Total amount must not be null")
+    @NotNull
     private final BigDecimal totalAmount;
 
     public Invoice(

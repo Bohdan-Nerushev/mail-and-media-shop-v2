@@ -21,18 +21,18 @@ public abstract class Product {
     private final Brand brand;
 
     @NotNull
-    @DecimalMin(value = "0.00", message = "Setup fee must not be negative")
+    @DecimalMin(value = "0.00")
     private final BigDecimal setupFee;
 
     @NotNull
-    @DecimalMin(value = "0.11", message = "Monthly fee must be at least 0.11")
+    @DecimalMin(value = "0.11")
     private BigDecimal monthlyFee;
 
     protected Product(
-            @NotBlank(message = "Product name must not be blank") final String name,
-            @NotNull(message = "Brand must not be null") final Brand brand,
-            @NotNull(message = "Setup fee must not be null") final BigDecimal setupFee,
-            @NotNull(message = "Monthly fee must not be null") final BigDecimal monthlyFee) {
+            @NotBlank final String name,
+            @NotNull final Brand brand,
+            @NotNull final BigDecimal setupFee,
+            @NotNull final BigDecimal monthlyFee) {
 
         validateNotBlank(name, "Product name");
         validateNotNull(brand, "Brand");

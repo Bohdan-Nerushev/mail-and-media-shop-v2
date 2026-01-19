@@ -9,10 +9,10 @@ import java.math.BigDecimal;
 public class PartnerProduct extends Product {
 
     public PartnerProduct(
-            @NotBlank(message = "Product name must not be blank") final String name,
-            @NotNull(message = "Brand must not be null") final Brand brand,
-            @NotNull(message = "Setup fee must not be null") final BigDecimal setupFee,
-            @NotNull(message = "Monthly fee must not be null") final BigDecimal monthlyFee) {
+            @NotBlank final String name,
+            @NotNull final Brand brand,
+            @NotNull final BigDecimal setupFee,
+            @NotNull final BigDecimal monthlyFee) {
         super(
                 name,
                 brand,

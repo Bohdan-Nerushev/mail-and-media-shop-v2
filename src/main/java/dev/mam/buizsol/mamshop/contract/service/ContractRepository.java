@@ -16,23 +16,23 @@ interface ContractRepository {
 
         @NotNull
         Contract save(
-                        @NotNull(message = "Contract must not be null") final Contract contract);
+                        @NotNull final Contract contract);
 
         @NotNull
         Contract update(
-                        @NotNull(message = "Contract must not be null") final Contract contract);
+                        @NotNull final Contract contract);
 
         @NotNull
         Optional<Contract> findById(
-                        @NotNull(message = "ID must not be null") final UUID id);
+                        @NotNull final UUID id);
 
         @NotNull
         List<Contract> findByCustomerId(
-                        @NotNull(message = "Customer ID must not be null") final UUID customerId);
+                        @NotNull final UUID customerId);
 
         @NotNull
         List<Contract> findByProductId(
-                        @NotNull(message = "Product ID must not be null") final UUID productId);
+                        @NotNull final UUID productId);
 
         @NotNull
         List<Contract> findAll();

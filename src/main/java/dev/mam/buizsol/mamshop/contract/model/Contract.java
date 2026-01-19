@@ -29,8 +29,8 @@ public class Contract {
     private ContractStatus status;
 
     public Contract(
-            @NotNull(message = "Customer must not be null") final Customer customer,
-            @NotNull(message = "Product must not be null") final Product product) {
+            @NotNull final Customer customer,
+            @NotNull final Product product) {
 
         validateNotNull(customer, "Customer");
         validateNotNull(product, "Product");
@@ -78,15 +78,14 @@ public class Contract {
     }
 
     public void updateStatus(
-            @NotNull(message = "Status must not be null") final ContractStatus status) {
+            @NotNull final ContractStatus status) {
         validateNotNull(status, "Status");
         this.status = status;
     }
 
     private void validateBrandMatch(
             final Customer customer,
-            final Product product
-    ) {
+            final Product product) {
         if (!customer.getBrand().equals(product.getBrand())) {
             throw new BrandMismatchException(String.format(
                     "Customer brand %s does not match product brand %s",
@@ -96,8 +95,7 @@ public class Contract {
     }
 
     private void validateCustomerActive(
-            final Customer customer
-    ) {
+            final Customer customer) {
         if (customer.getStatus() != CustomerStatus.ACTIVE) {
             throw new CustomerNotActiveException(String.format(
                     "Customer %s is not active",

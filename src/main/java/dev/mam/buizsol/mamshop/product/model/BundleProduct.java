@@ -14,8 +14,8 @@ public class BundleProduct extends Product {
     private final PartnerProduct partnerProduct;
 
     public BundleProduct(
-            @NotNull(message = "Mail product must not be null") final MailProduct mailProduct,
-            @NotNull(message = "Partner product must not be null") final PartnerProduct partnerProduct) {
+            @NotNull final MailProduct mailProduct,
+            @NotNull final PartnerProduct partnerProduct) {
         super(
                 generateName(mailProduct, partnerProduct),
                 validateMatchingBrands(mailProduct, partnerProduct),

@@ -4,11 +4,11 @@ import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import jakarta.validation.constraints.NotBlank;
 
 public record Address(
-        @NotBlank(message = "Street must not be blank") String street,
-        @NotBlank(message = "Number must not be blank") String number,
-        @NotBlank(message = "Postcode must not be blank") String postcode,
-        @NotBlank(message = "City must not be blank") String city,
-        @NotBlank(message = "Country must not be blank") String country) {
+        @NotBlank String street,
+        @NotBlank String number,
+        @NotBlank String postcode,
+        @NotBlank String city,
+        @NotBlank String country) {
 
     public Address {
         validate(street, "Street");

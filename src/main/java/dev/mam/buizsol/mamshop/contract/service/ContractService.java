@@ -13,30 +13,30 @@ import java.util.UUID;
 
 public interface ContractService {
 
-    @NotNull
-    static ContractService getInstance() {
-        return ContractServiceImpl.getInstance();
-    }
+        @NotNull
+        static ContractService getInstance() {
+                return ContractServiceImpl.getInstance();
+        }
 
-    @NotNull
-    Contract createContract(
-            @NotNull(message = "Customer must not be null") final Customer customer,
-            @NotNull(message = "Product must not be null") final Product product);
+        @NotNull
+        Contract createContract(
+                        @NotNull final Customer customer,
+                        @NotNull final Product product);
 
-    @NotNull
-    Optional<Contract> findContractById(
-            @NotNull(message = "Contract ID must not be null") final UUID id);
+        @NotNull
+        Optional<Contract> findContractById(
+                        @NotNull final UUID id);
 
-    @NotNull
-    List<Contract> findContractsByCustomerId(
-            @NotNull(message = "Customer ID must not be null") final UUID customerId);
+        @NotNull
+        List<Contract> findContractsByCustomerId(
+                        @NotNull final UUID customerId);
 
-    @NotNull
-    List<Contract> findContractsByProductId(
-            @NotNull(message = "Product ID must not be null") final UUID productId);
+        @NotNull
+        List<Contract> findContractsByProductId(
+                        @NotNull final UUID productId);
 
-    @NotNull
-    Contract updateContractStatus(
-            @NotNull(message = "Contract ID must not be null") final UUID contractId,
-            @NotNull(message = "Status must not be null") final ContractStatus status) throws ContractNotFoundException;
+        @NotNull
+        Contract updateContractStatus(
+                        @NotNull final UUID contractId,
+                        @NotNull final ContractStatus status) throws ContractNotFoundException;
 }

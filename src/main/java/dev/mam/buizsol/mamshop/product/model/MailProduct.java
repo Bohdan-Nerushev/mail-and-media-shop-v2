@@ -9,15 +9,15 @@ import java.math.BigDecimal;
 
 public abstract class MailProduct extends Product {
 
-    @Min(value = 1, message = "Storage size must be at least 1GB")
+    @Min(1)
     private final Long storageSize;
 
     protected MailProduct(
-            @NotBlank(message = "Product name must not be blank") final String name,
-            @NotNull(message = "Brand must not be null") final Brand brand,
-            @NotNull(message = "Setup fee must not be null") final BigDecimal setupFee,
-            @NotNull(message = "Monthly fee must not be null") final BigDecimal monthlyFee,
-            @NotNull(message = "Storage size must not be null") final Long storageSize) {
+            @NotBlank final String name,
+            @NotNull final Brand brand,
+            @NotNull final BigDecimal setupFee,
+            @NotNull final BigDecimal monthlyFee,
+            @NotNull final Long storageSize) {
         super(name, brand, setupFee, monthlyFee);
         validateNotNull(storageSize, "Storage size");
         if (storageSize < 1L) {
