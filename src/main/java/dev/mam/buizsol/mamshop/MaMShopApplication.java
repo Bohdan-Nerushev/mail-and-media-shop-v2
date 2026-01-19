@@ -1,8 +1,12 @@
 package dev.mam.buizsol.mamshop;
 
-public class MaMShopApplication {
+public final class MaMShopApplication {
 
-    public static void main(String[] args) {
-        System.out.println("MaM Shop Application started...");
+    private MaMShopApplication() {
+
+    }
+
+    public static void main(final String[] args) {
+        System.out.println("Mail and Media Shop Application started successfully.");
     }
 }
