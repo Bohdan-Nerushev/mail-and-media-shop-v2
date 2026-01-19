@@ -53,9 +53,9 @@ class CustomerServiceTest {
     @Test
     @DisplayName("01: Create customer with valid data should succeed")
     void test01_createCustomer_withValidData_shouldSucceed() {
-        final Customer customer = customerService.createCustomer(
+        final Customer customer = customerService.createCustomer(new Customer(
                 "John", "Doe", LocalDate.of(1990, 1, 1),
-                address, null, communicationDetails, Brand.GMX);
+                address, null, communicationDetails, Brand.GMX));
 
         assertNotNull(customer.getId());
         assertEquals("John", customer.getFirstName());
@@ -67,9 +67,9 @@ class CustomerServiceTest {
     @EnumSource(Brand.class)
     @DisplayName("02: Create customer with different brands should succeed")
     void test02_createCustomer_withDifferentBrands_shouldSucceed(final Brand brand) {
-        final Customer customer = customerService.createCustomer(
+        final Customer customer = customerService.createCustomer(new Customer(
                 "John", "Doe", LocalDate.of(1990, 1, 1),
-                address, null, communicationDetails, brand);
+                address, null, communicationDetails, brand));
 
         assertEquals(brand, customer.getBrand());
         verify(customerRepository).save(any(Customer.class));
@@ -81,8 +81,8 @@ class CustomerServiceTest {
     @DisplayName("03: Create customer with invalid first name should throw exception")
     void test03_createCustomer_withInvalidFirstName_shouldThrowException(final String firstName) {
         assertThrows(IllegalArgumentException.class, () -> customerService.createCustomer(
-                firstName, "Doe", LocalDate.of(1990, 1, 1),
-                address, null, communicationDetails, Brand.WEB_DE));
+                new Customer(firstName, "Doe", LocalDate.of(1990, 1, 1),
+                        address, null, communicationDetails, Brand.WEB_DE)));
     }
 
     @ParameterizedTest
@@ -91,8 +91,8 @@ class CustomerServiceTest {
     @DisplayName("04: Create customer with invalid last name should throw exception")
     void test04_createCustomer_withInvalidLastName_shouldThrowException(final String lastName) {
         assertThrows(IllegalArgumentException.class, () -> customerService.createCustomer(
-                "John", lastName, LocalDate.of(1990, 1, 1),
-                address, null, communicationDetails, Brand.WEB_DE));
+                new Customer("John", lastName, LocalDate.of(1990, 1, 1),
+                        address, null, communicationDetails, Brand.WEB_DE)));
     }
 
     @ParameterizedTest
@@ -104,9 +104,9 @@ class CustomerServiceTest {
     void test05_createCustomer_withBoundaryBirthDates_shouldSucceed(final String dateStr) {
         final LocalDate birthDate = LocalDate.parse(dateStr);
 
-        final Customer customer = customerService.createCustomer(
+        final Customer customer = customerService.createCustomer(new Customer(
                 "John", "Doe", birthDate,
-                address, null, communicationDetails, Brand.GMX);
+                address, null, communicationDetails, Brand.GMX));
 
         assertEquals(birthDate, customer.getBirthDate());
         verify(customerRepository).save(any(Customer.class));
@@ -217,7 +217,7 @@ class CustomerServiceTest {
             final String fn, final String ln, final LocalDate bd,
             final Address addr, final CommunicationDetails cd, final Brand b) {
         assertThrows(IllegalArgumentException.class,
-                () -> customerService.createCustomer(fn, ln, bd, addr, null, cd, b));
+                () -> customerService.createCustomer(new Customer(fn, ln, bd, addr, addr, cd, b)));
     }
 
     private static Stream<Arguments> provideNullMandatoryFields() {

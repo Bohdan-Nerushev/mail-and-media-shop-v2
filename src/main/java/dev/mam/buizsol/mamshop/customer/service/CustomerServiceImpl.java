@@ -41,24 +41,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @NotNull
-    public Customer createCustomer(
-            @NotBlank final String firstName,
-            @NotBlank final String lastName,
-            @NotNull final LocalDate birthDate,
-            @NotNull final Address address,
-            final Address invoiceAddress,
-            @NotNull final CommunicationDetails communicationDetails,
-            @NotNull final Brand brand) {
-
-        final Customer customer = new Customer(
-                firstName,
-                lastName,
-                birthDate,
-                address,
-                invoiceAddress,
-                communicationDetails,
-                brand);
-
+    public Customer createCustomer(@NotNull final Customer customer) {
+        validateNotNull(customer, "Customer");
         customerRepository.save(customer);
         return customer;
     }

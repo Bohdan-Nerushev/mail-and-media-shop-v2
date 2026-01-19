@@ -22,14 +22,7 @@ public interface CustomerService {
     }
 
     @NotNull
-    Customer createCustomer(
-            @NotBlank String firstName,
-            @NotBlank String lastName,
-            @NotNull LocalDate birthDate,
-            @Valid Address address,
-            @Valid Address invoiceAddress,
-            @NotNull CommunicationDetails communicationDetails,
-            @NotNull Brand brand);
+    Customer createCustomer(@NotNull Customer customer);
 
     void updateAddress(@NotNull UUID id, @NotNull Address address) throws CustomerNotFoundException;
 
