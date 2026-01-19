@@ -1,4 +1,4 @@
-package dev.mam.buizsol.mamshop.customer.repository;
+package dev.mam.buizsol.mamshop.customer.service;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Brand;

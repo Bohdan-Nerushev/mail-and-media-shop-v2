@@ -6,7 +6,6 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
-import dev.mam.buizsol.mamshop.customer.repository.CustomerRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -249,4 +249,32 @@ class CustomerServiceTest {
                     () -> customerService.updateCommunicationDetails(null, communicationDetails));
         }
     }
+
+    @Test
+    @DisplayName("20: Find customer by ID should return customer from repository")
+    void test15_findCustomerById_shouldReturnCustomer() {
+        final UUID id = UUID.randomUUID();
+        final Customer customer = mock(Customer.class);
+        when(customerRepository.findById(id)).thenReturn(java.util.Optional.of(customer));
+
+        final java.util.Optional<Customer> result = customerService.findCustomerById(id);
+
+        assertTrue(result.isPresent());
+        assertEquals(customer, result.get());
+        verify(customerRepository).findById(id);
+    }
+
+    @Test
+    @DisplayName("21: Find all customers should return all customers from repository")
+    void test16_findAllCustomers_shouldReturnAllCustomers() {
+        final java.util.Collection<Customer> customers = java.util.List.of(mock(Customer.class));
+        when(customerRepository.findAll()).thenReturn(customers);
+
+        final java.util.Collection<Customer> result = customerService.findAllCustomers();
+
+        assertEquals(customers.size(), result.size());
+        assertEquals(customers, result);
+        verify(customerRepository).findAll();
+    }
+
 }

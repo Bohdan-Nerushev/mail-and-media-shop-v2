@@ -1,4 +1,4 @@
-package dev.mam.buizsol.mamshop.customer.repository;
+package dev.mam.buizsol.mamshop.customer.service;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface CustomerRepository {
+interface CustomerRepository {
 
         @NotNull
         static CustomerRepository getInstance() {

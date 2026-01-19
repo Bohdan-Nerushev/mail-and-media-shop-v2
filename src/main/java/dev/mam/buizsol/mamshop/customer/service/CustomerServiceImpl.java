@@ -6,12 +6,13 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
-import dev.mam.buizsol.mamshop.customer.repository.CustomerRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
 public class CustomerServiceImpl implements CustomerService {
@@ -109,6 +110,20 @@ public class CustomerServiceImpl implements CustomerService {
        validateNotNull(customerId, "ID");
         customerRepository.delete(customerId);
     }
+
+    @Override
+    @NotNull
+    public Optional<Customer> findCustomerById(@NotNull final UUID id) {
+        validateNotNull(id, "ID");
+        return customerRepository.findById(id);
+    }
+
+    @Override
+    @NotNull
+    public Collection<Customer> findAllCustomers() {
+        return customerRepository.findAll();
+    }
+
 
     private void validateNotNull(final Object value, final String fieldName) {
         if (value == null) {
