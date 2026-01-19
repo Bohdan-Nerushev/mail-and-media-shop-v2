@@ -56,8 +56,15 @@ public class ShopServiceImpl implements ShopService {
     @NotNull
     public Customer registerCustomer(
             @NotNull @Valid final Customer customer) {
-
         return customerService.createCustomer(customer);
+    }
+
+    @Override
+    @NotNull
+    public Product registerProduct(
+            @NotNull @Valid final Product product) {
+        productService.createProduct(product);
+        return product;
     }
 
     @Override
@@ -168,7 +175,7 @@ public class ShopServiceImpl implements ShopService {
         return contractService.createContract(customer, product);
     }
 
-    private void checkCustomerActive(@NotNull  final UUID customerId)
+    private void checkCustomerActive(@NotNull final UUID customerId)
             throws CustomerNotFoundException, CustomerNotActiveException {
         final Customer customer = loadCustomer(customerId);
         if (customer.getStatus() != CustomerStatus.ACTIVE) {
