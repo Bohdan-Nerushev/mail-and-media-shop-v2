@@ -14,9 +14,7 @@ import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.NotBlank;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 

@@ -5,8 +5,6 @@ import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
-import dev.mam.buizsol.mamshop.contract.service.ContractRepository;
-import dev.mam.buizsol.mamshop.contract.service.ContractRepositoryImpl;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import org.junit.jupiter.api.BeforeEach;

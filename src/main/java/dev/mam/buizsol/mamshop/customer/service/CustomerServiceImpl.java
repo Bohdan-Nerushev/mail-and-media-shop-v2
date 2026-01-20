@@ -2,15 +2,12 @@ package dev.mam.buizsol.mamshop.customer.service;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
-import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -80,7 +77,6 @@ final class CustomerServiceImpl implements CustomerService {
         validateNotNull(customerId, "Customer ID");
         final Customer customer = customerRepository.getById(customerId);
         customer.setStatus(CustomerStatus.ACTIVE);
-        ;
         customerRepository.update(customer);
     }
 

@@ -5,8 +5,6 @@ import dev.mam.buizsol.mamshop.product.model.BundleProduct;
 import dev.mam.buizsol.mamshop.product.model.MailProduct;
 import dev.mam.buizsol.mamshop.product.model.PartnerProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import dev.mam.buizsol.mamshop.product.service.ProductRepository;
-import dev.mam.buizsol.mamshop.product.service.ProductRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,21 +28,20 @@ class ProductRepositoryTest {
             Brand brand,
             String setupFee,
             String monthlyFee,
-            Long storageSize
-    ) {
+            Long storageSize) {
         return new MailProduct(
                 name,
                 brand, new BigDecimal(setupFee),
                 new BigDecimal(monthlyFee),
-                storageSize) {};
+                storageSize) {
+        };
     }
 
     private Product createPartnerProduct(
             String name,
             Brand brand,
             String setupFee,
-            String monthlyFee
-    ) {
+            String monthlyFee) {
         return new PartnerProduct(
                 name,
                 brand,
@@ -54,8 +51,7 @@ class ProductRepositoryTest {
 
     private Product createBundleProduct(
             MailProduct mail,
-            PartnerProduct partner
-    ) {
+            PartnerProduct partner) {
         return new BundleProduct(mail, partner);
     }
 
@@ -183,8 +179,8 @@ class ProductRepositoryTest {
     })
     @DisplayName("09: Should reject invalid monthly fees")
     void shouldRejectInvalidMonthlyFees(String monthlyFee) {
-        assertThrows(IllegalArgumentException.class, () ->
-                createMailProduct("MailInvalid", Brand.GMX, "1.00", monthlyFee, 2L));
+        assertThrows(IllegalArgumentException.class,
+                () -> createMailProduct("MailInvalid", Brand.GMX, "1.00", monthlyFee, 2L));
     }
 
     @Test
@@ -235,12 +231,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("15: Should reject MailProduct with invalid storage size")
     void shouldRejectMailProductWithInvalidStorageSize() {
-        assertThrows(IllegalArgumentException.class, () ->
-                createMailProduct("MailInvalid", Brand.GMX, "1.00", "0.50", 0L));
+        assertThrows(IllegalArgumentException.class,
+                () -> createMailProduct("MailInvalid", Brand.GMX, "1.00", "0.50", 0L));
     }
 }
-
-
-
-
-
