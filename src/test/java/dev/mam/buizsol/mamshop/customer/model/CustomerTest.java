@@ -83,6 +83,8 @@ class CustomerTest {
                 Assertions.assertEquals(mainAddress, customer.getAddress());
                 Assertions.assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
                 Assertions.assertEquals(Brand.GMX, customer.getBrand());
+                Assertions.assertEquals(customer.toString(),
+                                "Customer{id=" + customer.getId() + ", brand=GMX, status=INACTIVE}");
         }
 
         @Test

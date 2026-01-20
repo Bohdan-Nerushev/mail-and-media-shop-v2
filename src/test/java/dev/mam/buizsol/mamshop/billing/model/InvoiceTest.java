@@ -45,6 +45,7 @@ class InvoiceTest {
         assertEquals(new BigDecimal("20.00"), invoice.getTotalMonthlyFee());
         assertEquals(new BigDecimal("43.00"), invoice.getTotalAmount());
         assertEquals(LocalDate.now(), invoice.getInvoiceDate());
+        assertEquals(Brand.GMX, invoice.getBrand());
     }
 
     @Test

@@ -160,4 +160,40 @@ class CustomerRepositoryTest {
         }
         assertEquals(count, repository.findAll().size());
     }
+
+    @Test
+    @DisplayName("12: Should throw IllegalArgumentException when passing null to update method (Negative)")
+    void test12_throwExceptionOnUpdateNull() {
+        assertThrows(IllegalArgumentException.class, () -> repository.update(null));
+    }
+
+    @Test
+    @DisplayName("13: Should throw IllegalArgumentException when passing null to delete method (Negative)")
+    void test13_throwExceptionOnDeleteNull() {
+        assertThrows(IllegalArgumentException.class, () -> repository.delete(null));
+    }
+
+    @Test
+    @DisplayName("14: Should throw IllegalArgumentException when passing null to find method (Negative)")
+    void test14_throwExceptionOnFindNullId() {
+        assertThrows(IllegalArgumentException.class, () -> repository.findById(null));
+    }
+
+    @Test
+    @DisplayName("15: Should throw IllegalArgumentException when passing null to update method (Negative)")
+    void test15_throwExceptionOnUpdateNullId() {
+        assertThrows(IllegalArgumentException.class, () -> repository.update(null));
+    }
+
+    @Test
+    @DisplayName("16: Should throw IllegalArgumentException when passing null to delete method (Negative)")
+    void test16_throwExceptionOnDeleteNullId() {
+        assertThrows(IllegalArgumentException.class, () -> repository.delete(null));
+    }
+
+    @Test
+    @DisplayName("17: Negativ customer not found Exception")
+    void test17_throwExceptionOnCustomerNotFound() {
+        assertThrows(CustomerNotFoundException.class, () -> repository.getById(UUID.randomUUID()));
+    }
 }

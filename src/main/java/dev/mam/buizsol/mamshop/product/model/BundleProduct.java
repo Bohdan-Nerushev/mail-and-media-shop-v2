@@ -41,18 +41,14 @@ public class BundleProduct extends Product {
     private static String generateName(
             final MailProduct mail,
             final PartnerProduct partner) {
-        if (mail == null || partner == null) {
-            throw new IllegalArgumentException("Mail and Partner products must not be null");
-        }
+        validateComponents(mail, partner);
         return "Bundle: " + mail.getName() + " " + partner.getName();
     }
 
     private static Brand validateMatchingBrands(
             final MailProduct mail,
             final PartnerProduct partner) {
-        if (mail == null || partner == null) {
-            throw new IllegalArgumentException("Mail and Partner products must not be null");
-        }
+        validateComponents(mail, partner);
         if (mail.getBrand() != partner.getBrand()) {
             throw new IllegalArgumentException("Brands must match for bundle product");
         }
@@ -62,18 +58,22 @@ public class BundleProduct extends Product {
     private static BigDecimal calculateTotalSetupFee(
             final MailProduct mail,
             final PartnerProduct partner) {
-        if (mail == null || partner == null) {
-            throw new IllegalArgumentException("Mail and Partner products must not be null");
-        }
+        validateComponents(mail, partner);
         return mail.getSetupFee().add(partner.getSetupFee());
     }
 
     private static BigDecimal calculateTotalMonthlyFee(
             final MailProduct mail,
             final PartnerProduct partner) {
+        validateComponents(mail, partner);
+        return mail.getMonthlyFee().add(partner.getMonthlyFee());
+    }
+
+    private static void validateComponents(
+            final MailProduct mail,
+            final PartnerProduct partner) {
         if (mail == null || partner == null) {
             throw new IllegalArgumentException("Mail and Partner products must not be null");
         }
-        return mail.getMonthlyFee().add(partner.getMonthlyFee());
     }
 }
