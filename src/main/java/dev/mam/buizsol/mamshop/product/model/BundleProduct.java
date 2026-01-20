@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -50,7 +51,7 @@ public class BundleProduct extends Product {
             final PartnerProduct partner) {
         validateComponents(mail, partner);
         if (mail.getBrand() != partner.getBrand()) {
-            throw new IllegalArgumentException("Brands must match for bundle product");
+            throw new ProductValidationException("Brands must match for bundle product");
         }
         return mail.getBrand();
     }
@@ -73,7 +74,7 @@ public class BundleProduct extends Product {
             final MailProduct mail,
             final PartnerProduct partner) {
         if (mail == null || partner == null) {
-            throw new IllegalArgumentException("Mail and Partner products must not be null");
+            throw new ProductValidationException("Mail and Partner products must not be null");
         }
     }
 }

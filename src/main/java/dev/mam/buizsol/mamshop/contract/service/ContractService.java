@@ -1,6 +1,5 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
-import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
@@ -39,5 +38,5 @@ public interface ContractService {
         @NotNull
         Contract updateContractStatus(
                         @NotNull final UUID contractId,
-                        @NotNull final ContractStatus status) throws ContractNotFoundException;
+                        @NotNull final ContractStatus status);
 }

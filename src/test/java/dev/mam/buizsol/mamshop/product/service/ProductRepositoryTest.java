@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.service;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.BundleProduct;
 import dev.mam.buizsol.mamshop.product.model.MailProduct;
 import dev.mam.buizsol.mamshop.product.model.PartnerProduct;
@@ -84,9 +85,9 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("03: Should throw IllegalArgumentException when saving null product")
+    @DisplayName("03: Should throw ProductValidationException when saving null product")
     void shouldThrowExceptionWhenSavingNullProduct() {
-        assertThrows(IllegalArgumentException.class, () -> repository.save(null));
+        assertThrows(ProductValidationException.class, () -> repository.save(null));
     }
 
     @ParameterizedTest
@@ -179,20 +180,20 @@ class ProductRepositoryTest {
     })
     @DisplayName("09: Should reject invalid monthly fees")
     void shouldRejectInvalidMonthlyFees(String monthlyFee) {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ProductValidationException.class,
                 () -> createMailProduct("MailInvalid", Brand.GMX, "1.00", monthlyFee, 2L));
     }
 
     @Test
     @DisplayName("10: Should throw exception when finding by null ID")
     void shouldThrowExceptionWhenFindingByNullId() {
-        assertThrows(IllegalArgumentException.class, () -> repository.findById(null));
+        assertThrows(ProductValidationException.class, () -> repository.findById(null));
     }
 
     @Test
     @DisplayName("11: Should throw exception when finding by null brand")
     void shouldThrowExceptionWhenFindingByNullBrand() {
-        assertThrows(IllegalArgumentException.class, () -> repository.findByBrand(null));
+        assertThrows(ProductValidationException.class, () -> repository.findByBrand(null));
     }
 
     @Test
@@ -217,7 +218,7 @@ class ProductRepositoryTest {
         MailProduct mail = (MailProduct) createMailProduct("Mail", Brand.GMX, "2.00", "1.00", 3L);
         PartnerProduct partner = (PartnerProduct) createPartnerProduct("Partner", Brand.WEB_DE, "3.00", "2.00");
 
-        assertThrows(IllegalArgumentException.class, () -> createBundleProduct(mail, partner));
+        assertThrows(ProductValidationException.class, () -> createBundleProduct(mail, partner));
     }
 
     @Test
@@ -225,13 +226,13 @@ class ProductRepositoryTest {
     void shouldRejectNullInBundleConstructor() {
         MailProduct mail = null;
         PartnerProduct partner = (PartnerProduct) createPartnerProduct("Partner", Brand.MAIL_COM, "1.00", "0.50");
-        assertThrows(IllegalArgumentException.class, () -> createBundleProduct(mail, partner));
+        assertThrows(ProductValidationException.class, () -> createBundleProduct(mail, partner));
     }
 
     @Test
     @DisplayName("15: Should reject MailProduct with invalid storage size")
     void shouldRejectMailProductWithInvalidStorageSize() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ProductValidationException.class,
                 () -> createMailProduct("MailInvalid", Brand.GMX, "1.00", "0.50", 0L));
     }
 }

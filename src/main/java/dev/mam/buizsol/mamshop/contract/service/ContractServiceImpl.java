@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
 import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
+import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
@@ -70,8 +71,7 @@ final class ContractServiceImpl implements ContractService {
     @NotNull
     public Contract updateContractStatus(
             @NotNull final UUID contractId,
-            @NotNull final ContractStatus status)
-            throws ContractNotFoundException {
+            @NotNull final ContractStatus status) {
         validateNotNull(contractId, "Contract ID");
         validateNotNull(status, "Status");
 
@@ -86,7 +86,7 @@ final class ContractServiceImpl implements ContractService {
             final Object value,
             final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new ContractValidationException(fieldName + " must not be null");
         }
     }
 }

@@ -23,7 +23,7 @@ public final class MaMShopApplication {
         private MaMShopApplication() {
         }
 
-        public static void main(final String[] args) throws CustomerNotFoundException {
+        public static void main(final String[] args) {
                 System.out.println("================================");
                 System.out.println("MaM Shop Application Demo Start");
                 System.out.println("================================");

@@ -2,9 +2,9 @@ package dev.mam.buizsol.mamshop.contract.exception;
 
 import jakarta.validation.constraints.NotNull;
 
-public class CustomerNotActiveException extends RuntimeException {
+public final class ContractValidationException extends RuntimeException {
 
-    public CustomerNotActiveException(
+    public ContractValidationException(
             @NotNull final String message) {
         super(message);
     }

@@ -1,5 +1,6 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
+import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -86,7 +87,7 @@ final class ContractRepositoryImpl implements ContractRepository {
             final Object value,
             final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new ContractValidationException(fieldName + " must not be null");
         }
     }
 }

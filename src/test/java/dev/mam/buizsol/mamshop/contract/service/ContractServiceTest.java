@@ -1,6 +1,9 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
+import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
+import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
@@ -100,7 +103,7 @@ class ContractServiceTest {
 
     @Test
     @DisplayName("04. Success: updateContractStatus updates status correctly")
-    void test04_updateContractStatus_Success() throws ContractNotFoundException {
+    void test04_updateContractStatus_Success() {
         UUID contractId = UUID.randomUUID();
         Contract contract = new Contract(activeCustomer, matchingProduct);
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
@@ -132,7 +135,7 @@ class ContractServiceTest {
     void test06_createContract_NullParams(boolean customerIsNull, boolean productIsNull) {
         Customer customer = customerIsNull ? null : activeCustomer;
         Product product = productIsNull ? null : matchingProduct;
-        assertThrows(IllegalArgumentException.class, () -> contractService.createContract(customer, product));
+        assertThrows(ContractValidationException.class, () -> contractService.createContract(customer, product));
     }
 
     @Test
@@ -143,7 +146,8 @@ class ContractServiceTest {
                 Brand.GMX,
                 new BigDecimal("10.00"));
 
-        assertThrows(RuntimeException.class, () -> contractService.createContract(activeCustomer, mismatchProduct));
+        assertThrows(BrandMismatchException.class,
+                () -> contractService.createContract(activeCustomer, mismatchProduct));
     }
 
     @Test
@@ -153,7 +157,8 @@ class ContractServiceTest {
         when(inactiveCustomer.getStatus()).thenReturn(CustomerStatus.INACTIVE);
         lenient().when(inactiveCustomer.getBrand()).thenReturn(Brand.WEB_DE);
 
-        assertThrows(RuntimeException.class, () -> contractService.createContract(inactiveCustomer, matchingProduct));
+        assertThrows(CustomerNotActiveException.class,
+                () -> contractService.createContract(inactiveCustomer, matchingProduct));
     }
 
     @ParameterizedTest
@@ -164,7 +169,7 @@ class ContractServiceTest {
     }, nullValues = { "" })
     @DisplayName("09. Boundary/Negative: updateContractStatus throws exception on null parameters")
     void test09_updateContractStatus_NullParams(UUID id, ContractStatus status) {
-        assertThrows(IllegalArgumentException.class, () -> contractService.updateContractStatus(id, status));
+        assertThrows(ContractValidationException.class, () -> contractService.updateContractStatus(id, status));
     }
 
     @Test

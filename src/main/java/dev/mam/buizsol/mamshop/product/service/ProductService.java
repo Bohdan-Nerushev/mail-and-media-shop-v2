@@ -1,7 +1,6 @@
 package dev.mam.buizsol.mamshop.product.service;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
-import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -31,5 +30,5 @@ public interface ProductService {
 
         void updateMonthlyFee(
                         @NotNull final UUID id,
-                        @NotNull final BigDecimal monthlyFee) throws ProductNotFoundException;
+                        @NotNull final BigDecimal monthlyFee);
 }

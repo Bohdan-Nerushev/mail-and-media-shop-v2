@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 
@@ -133,13 +134,13 @@ class CustomerRepositoryTest {
     @Test
     @DisplayName("08: Should throw IllegalArgumentException when passing null to save method (Negative)")
     void test08_throwExceptionOnSaveNull() {
-        assertThrows(IllegalArgumentException.class, () -> repository.save(null));
+        assertThrows(CustomerValidationException.class, () -> repository.save(null));
     }
 
     @Test
     @DisplayName("09: Should throw IllegalArgumentException when searching by null identifier (Negative)")
     void test09_throwExceptionOnFindNullId() {
-        assertThrows(IllegalArgumentException.class, () -> repository.findById(null));
+        assertThrows(CustomerValidationException.class, () -> repository.findById(null));
     }
 
     @Test
@@ -164,31 +165,31 @@ class CustomerRepositoryTest {
     @Test
     @DisplayName("12: Should throw IllegalArgumentException when passing null to update method (Negative)")
     void test12_throwExceptionOnUpdateNull() {
-        assertThrows(IllegalArgumentException.class, () -> repository.update(null));
+        assertThrows(CustomerValidationException.class, () -> repository.update(null));
     }
 
     @Test
     @DisplayName("13: Should throw IllegalArgumentException when passing null to delete method (Negative)")
     void test13_throwExceptionOnDeleteNull() {
-        assertThrows(IllegalArgumentException.class, () -> repository.delete(null));
+        assertThrows(CustomerValidationException.class, () -> repository.delete(null));
     }
 
     @Test
     @DisplayName("14: Should throw IllegalArgumentException when passing null to find method (Negative)")
     void test14_throwExceptionOnFindNullId() {
-        assertThrows(IllegalArgumentException.class, () -> repository.findById(null));
+        assertThrows(CustomerValidationException.class, () -> repository.findById(null));
     }
 
     @Test
     @DisplayName("15: Should throw IllegalArgumentException when passing null to update method (Negative)")
     void test15_throwExceptionOnUpdateNullId() {
-        assertThrows(IllegalArgumentException.class, () -> repository.update(null));
+        assertThrows(CustomerValidationException.class, () -> repository.update(null));
     }
 
     @Test
     @DisplayName("16: Should throw IllegalArgumentException when passing null to delete method (Negative)")
     void test16_throwExceptionOnDeleteNullId() {
-        assertThrows(IllegalArgumentException.class, () -> repository.delete(null));
+        assertThrows(CustomerValidationException.class, () -> repository.delete(null));
     }
 
     @Test

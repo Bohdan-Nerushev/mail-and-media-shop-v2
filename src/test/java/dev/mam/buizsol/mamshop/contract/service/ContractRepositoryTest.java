@@ -1,5 +1,6 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
+import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
@@ -115,8 +116,8 @@ class ContractRepositoryTest {
     @NullSource
     @DisplayName("06. Negative: save and update throw exception on null")
     void test06_saveAndUpdate_NullParam(Contract contract) {
-        assertThrows(IllegalArgumentException.class, () -> contractRepository.save(contract));
-        assertThrows(IllegalArgumentException.class, () -> contractRepository.update(contract));
+        assertThrows(ContractValidationException.class, () -> contractRepository.save(contract));
+        assertThrows(ContractValidationException.class, () -> contractRepository.update(contract));
     }
 
     @Test
@@ -134,9 +135,9 @@ class ContractRepositoryTest {
     @Test
     @DisplayName("08. Negative: search by null IDs throws exception")
     void test08_searchMethods_NullParam() {
-        assertThrows(IllegalArgumentException.class, () -> contractRepository.findById(null));
-        assertThrows(IllegalArgumentException.class, () -> contractRepository.findByCustomerId(null));
-        assertThrows(IllegalArgumentException.class, () -> contractRepository.findByProductId(null));
+        assertThrows(ContractValidationException.class, () -> contractRepository.findById(null));
+        assertThrows(ContractValidationException.class, () -> contractRepository.findByCustomerId(null));
+        assertThrows(ContractValidationException.class, () -> contractRepository.findByProductId(null));
     }
 
     @Test

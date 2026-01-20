@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -80,8 +81,8 @@ class BundleProductTest {
                 PartnerProduct partner = createDefaultPartnerProduct("Cloud", Brand.WEB_DE, BigDecimal.ZERO,
                                 new BigDecimal("2.00"));
 
-                IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultBundleProduct(mail, partner));
 
                 assertEquals("Brands must match for bundle product", exception.getMessage());
@@ -90,8 +91,8 @@ class BundleProductTest {
         @Test
         @DisplayName("3. Negative: Failure when creating bundle with null components")
         void test3_CreateBundleProduct_NullComponents_ThrowsException() {
-                IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultBundleProduct(null, null));
 
                 assertEquals("Mail and Partner products must not be null", exception.getMessage());
@@ -120,8 +121,8 @@ class BundleProductTest {
                 final MailProduct finalMail = mail;
                 final PartnerProduct finalPartner = partner;
 
-                IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultBundleProduct(finalMail, finalPartner));
 
                 assertEquals("Mail and Partner products must not be null", exception.getMessage());

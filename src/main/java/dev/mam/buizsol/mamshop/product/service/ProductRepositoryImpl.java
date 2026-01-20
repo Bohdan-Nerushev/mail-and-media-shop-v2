@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.service;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -71,7 +72,7 @@ final class ProductRepositoryImpl implements ProductRepository {
             final Object value,
             final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new ProductValidationException(fieldName + " must not be null");
         }
     }
 }

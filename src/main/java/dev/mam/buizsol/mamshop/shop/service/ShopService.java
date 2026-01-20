@@ -1,17 +1,12 @@
 package dev.mam.buizsol.mamshop.shop.service;
 
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
-import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
-import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
-import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
-import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -34,39 +29,34 @@ public interface ShopService {
                         @NotNull @Valid final Product product);
 
         @NotNull
-        Customer loadCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
+        Customer loadCustomer(@NotNull final UUID customerId);
 
-        void removeCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
+        void removeCustomer(@NotNull final UUID customerId);
 
-        void activateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
+        void activateCustomer(@NotNull final UUID customerId);
 
         @NotNull
         Customer updateAddress(
                         @NotNull final UUID customerId,
-                        @NotNull @Valid final Address address)
-                        throws CustomerNotFoundException, CustomerNotActiveException;
+                        @NotNull @Valid final Address address);
 
         @NotNull
         Customer updateInvoiceAddress(
                         @NotNull final UUID customerId,
-                        @NotNull @Valid final Address invoiceAddress)
-                        throws CustomerNotFoundException, CustomerNotActiveException;
+                        @NotNull @Valid final Address invoiceAddress);
 
         @NotNull
         Customer updateCommunicationDetails(
                         @NotNull final UUID customerId,
-                        @NotNull @Valid final CommunicationDetails details)
-                        throws CustomerNotFoundException, CustomerNotActiveException;
+                        @NotNull @Valid final CommunicationDetails details);
 
         @NotNull
-        List<Contract> loadAllContracts(@NotNull final UUID customerId)
-                        throws CustomerNotFoundException, CustomerNotActiveException;
+        List<Contract> loadAllContracts(@NotNull final UUID customerId);
 
         @NotNull
-        Invoice generateInvoice(@NotNull final UUID customerId)
-                        throws CustomerNotFoundException, CustomerNotActiveException;
+        Invoice generateInvoice(@NotNull final UUID customerId);
 
-        void activateContract(@NotNull final UUID contractId) throws ContractNotFoundException;
+        void activateContract(@NotNull final UUID contractId);
 
         @NotNull
         List<Product> loadAllProductsForBrand(@NotNull @Valid final Brand brand);
@@ -74,8 +64,5 @@ public interface ShopService {
         @NotNull
         Contract purchaseProduct(
                         @NotNull final UUID customerId,
-                        @NotNull final UUID productId)
-                        throws CustomerNotFoundException, ProductNotFoundException,
-                        CustomerAndProductBrandMismatchException,
-                        CustomerNotActiveException;
+                        @NotNull final UUID productId);
 }

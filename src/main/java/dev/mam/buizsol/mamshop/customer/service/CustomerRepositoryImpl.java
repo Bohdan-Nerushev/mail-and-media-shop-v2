@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -74,7 +75,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
             final Object value,
             final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new CustomerValidationException(fieldName + " must not be null");
         }
     }
 

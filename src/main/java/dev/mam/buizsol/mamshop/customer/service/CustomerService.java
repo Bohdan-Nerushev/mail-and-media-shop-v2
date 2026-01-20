@@ -1,6 +1,5 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
-import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
@@ -21,19 +20,18 @@ public interface CustomerService {
     @NotNull
     Customer createCustomer(@Valid @NotNull final Customer customer);
 
-    void updateAddress(@NotNull UUID customerId, @Valid @NotNull Address address) throws CustomerNotFoundException;
+    void updateAddress(@NotNull UUID customerId, @Valid @NotNull Address address);
 
-    void updateInvoiceAddress(@NotNull UUID customerId, @Valid @NotNull Address address)
-            throws CustomerNotFoundException;
+    void updateInvoiceAddress(@NotNull UUID customerId, @Valid @NotNull Address address);
 
-    void updateCommunicationDetails(@NotNull UUID customerId, @Valid @NotNull CommunicationDetails communicationDetails)
-            throws CustomerNotFoundException;
+    void updateCommunicationDetails(@NotNull UUID customerId,
+            @Valid @NotNull CommunicationDetails communicationDetails);
 
-    void activateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
+    void activateCustomer(@NotNull UUID customerId);
 
-    void deactivateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
+    void deactivateCustomer(@NotNull UUID customerId);
 
-    void deleteCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
+    void deleteCustomer(@NotNull UUID customerId);
 
     @NotNull
     Optional<Customer> findCustomerById(@NotNull UUID customerId);

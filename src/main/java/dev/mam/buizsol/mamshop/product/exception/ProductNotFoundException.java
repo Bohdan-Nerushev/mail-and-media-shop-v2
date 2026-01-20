@@ -2,7 +2,7 @@ package dev.mam.buizsol.mamshop.product.exception;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class ProductNotFoundException extends Exception {
+public class ProductNotFoundException extends RuntimeException {
 
     public ProductNotFoundException(
             @NotBlank final String message) {

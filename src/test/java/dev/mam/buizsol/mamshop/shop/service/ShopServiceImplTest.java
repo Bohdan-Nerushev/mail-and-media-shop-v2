@@ -4,6 +4,7 @@ import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
@@ -118,7 +119,7 @@ class ShopServiceImplTest {
         @Test
         @DisplayName("2. Register Customer: Fails when input is null (Negative)")
         void test02_registerCustomer_Negative_NullInput() {
-                assertThrows(IllegalArgumentException.class, () -> shopService.registerCustomer(null));
+                assertThrows(CustomerValidationException.class, () -> shopService.registerCustomer(null));
         }
 
         @ParameterizedTest
@@ -468,7 +469,7 @@ class ShopServiceImplTest {
         @DisplayName("21. Negative - Update Address: Fails when ID is null")
         void test21_updateAddress_Negative_NullId() {
                 Address address = createDefaultAddress("Street_", "1", "12345", "City_", "Country_");
-                assertThrows(IllegalArgumentException.class, () -> shopService.updateAddress(null, address));
+                assertThrows(CustomerValidationException.class, () -> shopService.updateAddress(null, address));
         }
 
         @Test

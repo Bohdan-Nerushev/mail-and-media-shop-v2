@@ -1,6 +1,6 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
-import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
@@ -22,7 +22,7 @@ final class CustomerServiceImpl implements CustomerService {
 
     CustomerServiceImpl(@NotNull final CustomerRepository customerRepository) {
         if (customerRepository == null) {
-            throw new IllegalArgumentException("CustomerRepository must not be null");
+            throw new CustomerValidationException("CustomerRepository must not be null");
         }
         this.customerRepository = customerRepository;
     }
@@ -46,8 +46,7 @@ final class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateAddress(@NotNull final UUID customerId, @Valid @NotNull final Address address)
-            throws CustomerNotFoundException {
+    public void updateAddress(@NotNull final UUID customerId, @Valid @NotNull final Address address) {
         validateNotNull(customerId, "Customer ID");
         final var customer = customerRepository.getById(customerId);
         customer.setAddress(address);
@@ -55,8 +54,7 @@ final class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateInvoiceAddress(@NotNull final UUID customerId, @Valid @NotNull final Address address)
-            throws CustomerNotFoundException {
+    public void updateInvoiceAddress(@NotNull final UUID customerId, @Valid @NotNull final Address address) {
         validateNotNull(customerId, "Customer ID");
         final var customer = customerRepository.getById(customerId);
         customer.setInvoiceAddress(address);
@@ -65,7 +63,7 @@ final class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCommunicationDetails(@NotNull final UUID customerId,
-            @Valid @NotNull final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
+            @Valid @NotNull final CommunicationDetails communicationDetails) {
         validateNotNull(customerId, "Customer ID");
         final Customer customer = customerRepository.getById(customerId);
         customer.setCommunicationDetails(communicationDetails);
@@ -73,7 +71,7 @@ final class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void activateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
+    public void activateCustomer(@NotNull final UUID customerId) {
         validateNotNull(customerId, "Customer ID");
         final Customer customer = customerRepository.getById(customerId);
         customer.setStatus(CustomerStatus.ACTIVE);
@@ -81,7 +79,7 @@ final class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void deactivateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
+    public void deactivateCustomer(@NotNull final UUID customerId) {
         validateNotNull(customerId, "Customer ID");
         final Customer customer = customerRepository.getById(customerId);
         customer.setStatus(CustomerStatus.INACTIVE);
@@ -89,7 +87,7 @@ final class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void deleteCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
+    public void deleteCustomer(@NotNull final UUID customerId) {
         validateNotNull(customerId, "Customer ID");
         customerRepository.delete(customerId);
     }
@@ -109,7 +107,7 @@ final class CustomerServiceImpl implements CustomerService {
 
     private void validateNotNull(final Object value, final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new CustomerValidationException(fieldName + " must not be null");
         }
     }
 }

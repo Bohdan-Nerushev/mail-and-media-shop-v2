@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -99,8 +100,8 @@ class MailProductTest {
 
                 final BigDecimal invalidFee = new BigDecimal(feeString);
 
-                final IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultStandardMailProduct(
                                                 "Invalid Fee Mail",
                                                 Brand.WEB_DE,
@@ -116,8 +117,8 @@ class MailProductTest {
         void test5_CreateMailProduct_ThrowsException_InvalidName(
                         final String invalidName) {
 
-                final IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultStandardMailProduct(
                                                 invalidName,
                                                 Brand.GMX,
@@ -130,8 +131,8 @@ class MailProductTest {
         @DisplayName("6. Verify MailProduct failure with null brand")
         void test6_CreateMailProduct_ThrowsException_NullBrand() {
 
-                final IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultStandardMailProduct(
                                                 "No Brand Mail",
                                                 null,
@@ -144,8 +145,8 @@ class MailProductTest {
         @DisplayName("7. Verify MailProduct failure with null monthly fee")
         void test7_CreateMailProduct_ThrowsException_NullMonthlyFee() {
 
-                final IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultStandardMailProduct(
                                                 "No Fee Mail",
                                                 Brand.GMX,
@@ -182,8 +183,8 @@ class MailProductTest {
 
                 final BigDecimal invalidFee = new BigDecimal(feeString);
 
-                final IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultPremiumMailProduct(
                                                 "Premium Invalid Fee",
                                                 Brand.WEB_DE,
@@ -199,8 +200,8 @@ class MailProductTest {
         void test10_CreatePremiumMailProduct_ThrowsException_InvalidName(
                         final String invalidName) {
 
-                final IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultPremiumMailProduct(
                                                 invalidName,
                                                 Brand.WEB_DE,
@@ -247,8 +248,8 @@ class MailProductTest {
         @DisplayName("11. Verify PremiumMailProduct failure with null brand")
         void test11_CreatePremiumMailProduct_ThrowsException_NullBrand() {
 
-                final IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultPremiumMailProduct(
                                                 "Premium Null Brand",
                                                 null,
@@ -274,8 +275,8 @@ class MailProductTest {
         @Test
         @DisplayName("15. Negative: Failure with invalid storage size (< 1GB)")
         void test15_CreateMailProduct_InvalidStorageSize() {
-                final IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> createDefaultMailProduct("Small Storage", Brand.GMX, BigDecimal.ZERO,
                                                 BigDecimal.ONE, 0L));
 

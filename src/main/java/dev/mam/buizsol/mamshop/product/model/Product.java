@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -83,14 +84,14 @@ public abstract class Product {
     private void validateMonthlyFee(
             @NotNull final BigDecimal monthlyFee) {
         if (monthlyFee.compareTo(new BigDecimal("0.10")) <= 0) {
-            throw new IllegalArgumentException("Monthly fee must be greater than 0.10 €");
+            throw new ProductValidationException("Monthly fee must be greater than 0.10 €");
         }
     }
 
     private void validateSetupFee(
             final BigDecimal setupFee) {
         if (setupFee.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Setup fee must not be negative");
+            throw new ProductValidationException("Setup fee must not be negative");
         }
     }
 
@@ -98,7 +99,7 @@ public abstract class Product {
             @Nullable final String value,
             @NotNull final String fieldName) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must not be null or empty");
+            throw new ProductValidationException(fieldName + " must not be null or empty");
         }
     }
 
@@ -106,7 +107,7 @@ public abstract class Product {
             @Nullable final Object value,
             @NotNull final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new ProductValidationException(fieldName + " must not be null");
         }
     }
 }

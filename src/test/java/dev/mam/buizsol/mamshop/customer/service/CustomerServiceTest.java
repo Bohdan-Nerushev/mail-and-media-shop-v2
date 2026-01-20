@@ -77,7 +77,7 @@ class CustomerServiceTest {
     @Test
     @DisplayName("02: Create customer with repository = null should throw exception")
     void test02_createCustomer_withRepositoryNull_shouldThrowException() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(CustomerValidationException.class,
                 () -> new CustomerServiceImpl(null));
     }
 
@@ -324,13 +324,18 @@ class CustomerServiceTest {
     @DisplayName("20: All ID-based methods should throw exception if ID is null")
     void test20_idBasedMethods_withNullId_shouldThrowException(final String methodName) {
         switch (methodName) {
-            case "activate" -> assertThrows(Exception.class, () -> customerService.activateCustomer(null));
-            case "deactivate" -> assertThrows(Exception.class, () -> customerService.deactivateCustomer(null));
-            case "delete" -> assertThrows(Exception.class, () -> customerService.deleteCustomer(null));
-            case "updateAddress" -> assertThrows(Exception.class, () -> customerService.updateAddress(null, address));
+            case "activate" ->
+                assertThrows(CustomerValidationException.class, () -> customerService.activateCustomer(null));
+            case "deactivate" ->
+                assertThrows(CustomerValidationException.class, () -> customerService.deactivateCustomer(null));
+            case "delete" ->
+                assertThrows(CustomerValidationException.class, () -> customerService.deleteCustomer(null));
+            case "updateAddress" ->
+                assertThrows(CustomerValidationException.class, () -> customerService.updateAddress(null, address));
             case "updateInvoiceAddress" ->
-                assertThrows(Exception.class, () -> customerService.updateInvoiceAddress(null, address));
-            case "updateCommunicationDetails" -> assertThrows(Exception.class,
+                assertThrows(CustomerValidationException.class,
+                        () -> customerService.updateInvoiceAddress(null, address));
+            case "updateCommunicationDetails" -> assertThrows(CustomerValidationException.class,
                     () -> customerService.updateCommunicationDetails(null, communicationDetails));
         }
     }

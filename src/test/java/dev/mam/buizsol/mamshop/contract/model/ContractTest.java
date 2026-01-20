@@ -1,7 +1,8 @@
 package dev.mam.buizsol.mamshop.contract.model;
 
 import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
-import dev.mam.buizsol.mamshop.contract.exception.CustomerNotActiveException;
+import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
@@ -112,14 +113,14 @@ class ContractTest {
     @DisplayName("06. Attempting to create a client with a null parameter → IllegalArgumentException")
     void shouldThrowExceptionWhenCustomerIsNull() {
         Product product = mock(Product.class);
-        assertThrows(IllegalArgumentException.class, () -> new Contract(null, product));
+        assertThrows(ContractValidationException.class, () -> new Contract(null, product));
     }
 
     @Test
     @DisplayName("07. Attempting to create a product with a null parameter → IllegalArgumentException")
     void shouldThrowExceptionWhenProductIsNull() {
         Customer customer = mock(Customer.class);
-        assertThrows(IllegalArgumentException.class, () -> new Contract(customer, null));
+        assertThrows(ContractValidationException.class, () -> new Contract(customer, null));
     }
 
     @ParameterizedTest
@@ -179,6 +180,6 @@ class ContractTest {
 
         Contract contract = new Contract(customer, product);
 
-        assertThrows(IllegalArgumentException.class, () -> contract.updateStatus(null));
+        assertThrows(ContractValidationException.class, () -> contract.updateStatus(null));
     }
 }

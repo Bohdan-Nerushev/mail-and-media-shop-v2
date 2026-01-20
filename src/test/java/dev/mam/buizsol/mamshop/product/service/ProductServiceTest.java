@@ -2,6 +2,7 @@ package dev.mam.buizsol.mamshop.product.service;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.MailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,7 +76,7 @@ class ProductServiceTest {
         @DisplayName("03: Should throw IllegalArgumentException when creating product with null value")
         void shouldThrowIllegalArgumentExceptionWhenCreatingProductWithNullValue() {
                 assertThrows(
-                                IllegalArgumentException.class,
+                                ProductValidationException.class,
                                 () -> productService.createProduct(null));
         }
 
@@ -83,7 +84,7 @@ class ProductServiceTest {
         @DisplayName("04: Should throw IllegalArgumentException when finding product by null ID")
         void shouldThrowIllegalArgumentExceptionWhenFindingProductByNullId() {
                 assertThrows(
-                                IllegalArgumentException.class,
+                                ProductValidationException.class,
                                 () -> productService.findById(null));
         }
 
@@ -157,7 +158,7 @@ class ProductServiceTest {
         @DisplayName("08: Should throw IllegalArgumentException when searching by null brand")
         void shouldThrowIllegalArgumentExceptionWhenSearchingByNullBrand() {
                 assertThrows(
-                                IllegalArgumentException.class,
+                                ProductValidationException.class,
                                 () -> productService.findByBrand(null));
         }
 
@@ -270,8 +271,8 @@ class ProductServiceTest {
 
                 final BigDecimal invalidFee = new BigDecimal(feeValue);
 
-                final IllegalArgumentException exception = assertThrows(
-                                IllegalArgumentException.class,
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
                                 () -> productService.updateMonthlyFee(product.getId(), invalidFee));
 
                 assertNotNull(exception.getMessage());
@@ -298,7 +299,7 @@ class ProductServiceTest {
                 final BigDecimal negativeFee = new BigDecimal(feeValue);
 
                 assertThrows(
-                                IllegalArgumentException.class,
+                                ProductValidationException.class,
                                 () -> productService.updateMonthlyFee(product.getId(), negativeFee));
         }
 
@@ -322,7 +323,7 @@ class ProductServiceTest {
                 final BigDecimal validFee = new BigDecimal("1.00");
 
                 assertThrows(
-                                IllegalArgumentException.class,
+                                ProductValidationException.class,
                                 () -> productService.updateMonthlyFee(null, validFee));
         }
 
@@ -337,7 +338,7 @@ class ProductServiceTest {
                 productService.createProduct(product);
 
                 assertThrows(
-                                IllegalArgumentException.class,
+                                ProductValidationException.class,
                                 () -> productService.updateMonthlyFee(product.getId(), null));
         }
 
@@ -345,7 +346,7 @@ class ProductServiceTest {
         @DisplayName("18: Should throw IllegalArgumentException when both ID and fee are null")
         void shouldThrowIllegalArgumentExceptionWhenBothIdAndFeeAreNull() throws Exception {
                 assertThrows(
-                                IllegalArgumentException.class,
+                                ProductValidationException.class,
                                 () -> productService.updateMonthlyFee(null, null));
         }
 
@@ -378,7 +379,7 @@ class ProductServiceTest {
                 final BigDecimal boundaryInvalidFee = new BigDecimal("0.10");
 
                 assertThrows(
-                                IllegalArgumentException.class,
+                                ProductValidationException.class,
                                 () -> productService.updateMonthlyFee(product.getId(), boundaryInvalidFee));
         }
 

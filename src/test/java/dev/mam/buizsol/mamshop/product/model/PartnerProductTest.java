@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -64,8 +65,8 @@ class PartnerProductTest {
     void test3_CreatePartnerProduct_InvalidMonthlyFee_ThrowsException(String fee) {
         BigDecimal invalidFee = new BigDecimal(fee);
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ProductValidationException exception = assertThrows(
+                ProductValidationException.class,
                 () -> createPartnerProduct("Invalid Fee Product", Brand.WEB_DE, BigDecimal.ONE, invalidFee));
 
         assertEquals("Monthly fee must be greater than 0.10 €", exception.getMessage());
@@ -76,8 +77,8 @@ class PartnerProductTest {
     @ValueSource(strings = { " ", "   ", "\t", "\n" })
     @DisplayName("4. Negative: Failure with null, empty or blank name")
     void test4_CreatePartnerProduct_InvalidName_ThrowsException(String name) {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ProductValidationException exception = assertThrows(
+                ProductValidationException.class,
                 () -> createPartnerProduct(name, Brand.GMX, BigDecimal.ZERO, new BigDecimal("1.00")));
 
         assertEquals("Product name must not be null or empty", exception.getMessage());
@@ -86,8 +87,8 @@ class PartnerProductTest {
     @Test
     @DisplayName("5. Negative: Failure with null brand")
     void test5_CreatePartnerProduct_NullBrand_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ProductValidationException exception = assertThrows(
+                ProductValidationException.class,
                 () -> createPartnerProduct("No Brand", null, BigDecimal.ZERO, new BigDecimal("1.00")));
 
         assertEquals("Brand must not be null", exception.getMessage());
@@ -96,8 +97,8 @@ class PartnerProductTest {
     @Test
     @DisplayName("6. Negative: Failure with null setup fee")
     void test6_CreatePartnerProduct_NullSetupFee_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ProductValidationException exception = assertThrows(
+                ProductValidationException.class,
                 () -> createPartnerProduct("No Setup Fee", Brand.WEB_DE, null, new BigDecimal("1.00")));
 
         assertEquals("Setup fee must not be null", exception.getMessage());
@@ -106,8 +107,8 @@ class PartnerProductTest {
     @Test
     @DisplayName("7. Negative: Failure with null monthly fee")
     void test7_CreatePartnerProduct_NullMonthlyFee_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ProductValidationException exception = assertThrows(
+                ProductValidationException.class,
                 () -> createPartnerProduct("No Monthly Fee", Brand.GMX, BigDecimal.ZERO, null));
 
         assertEquals("Monthly fee must not be null", exception.getMessage());
@@ -118,8 +119,8 @@ class PartnerProductTest {
     void test8_CreatePartnerProduct_NegativeSetupFee_ThrowsException() {
         BigDecimal negativeFee = new BigDecimal("-1.00");
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ProductValidationException exception = assertThrows(
+                ProductValidationException.class,
                 () -> createPartnerProduct("Bad Setup Fee", Brand.GMX, negativeFee, new BigDecimal("1.00")));
 
         assertEquals("Setup fee must not be negative", exception.getMessage());

@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,7 +22,7 @@ public abstract class MailProduct extends Product {
         super(name, brand, setupFee, monthlyFee);
         validateNotNull(storageSize, "Storage size");
         if (storageSize < 1L) {
-            throw new IllegalArgumentException("Storage size must be at least 1GB");
+            throw new ProductValidationException("Storage size must be at least 1GB");
         }
         this.storageSize = storageSize;
     }

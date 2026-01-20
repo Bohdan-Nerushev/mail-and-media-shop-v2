@@ -1,7 +1,8 @@
 package dev.mam.buizsol.mamshop.contract.model;
 
 import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
-import dev.mam.buizsol.mamshop.contract.exception.CustomerNotActiveException;
+import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
@@ -108,7 +109,7 @@ public class Contract {
             @Nullable final Object value,
             @NotNull final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new ContractValidationException(fieldName + " must not be null");
         }
     }
 }
