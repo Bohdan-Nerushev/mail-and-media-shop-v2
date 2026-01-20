@@ -156,10 +156,10 @@ class ContractTest {
         Contract contract = new Contract(customer, product);
         assertEquals(ContractStatus.ACTIVE, contract.getStatus());
 
-        contract.deactivate();
+        contract.updateStatus(ContractStatus.INACTIVE);
         assertEquals(ContractStatus.INACTIVE, contract.getStatus());
 
-        contract.activate();
+        contract.updateStatus(ContractStatus.ACTIVE);
         assertEquals(ContractStatus.ACTIVE, contract.getStatus());
 
         contract.updateStatus(ContractStatus.INACTIVE);

@@ -129,13 +129,17 @@ public class Customer {
         this.status = status;
     }
 
-    private void validateNotBlank(final String value, final String fieldName) {
+    private void validateNotBlank(
+            @NotNull final String value,
+            @NotNull final String fieldName) {
         if (value == null || value.isBlank()) {
             throw new CustomerValidationException(fieldName + " must not be null or empty");
         }
     }
 
-    private void validateNotNull(final Object value, final String fieldName) {
+    private void validateNotNull(
+            @Nullable final Object value,
+            @NotNull final String fieldName) {
         if (value == null) {
             throw new CustomerValidationException(fieldName + " must not be null");
         }

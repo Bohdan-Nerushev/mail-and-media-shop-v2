@@ -1,14 +1,16 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
+import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,14 +41,15 @@ final class CustomerServiceImpl implements CustomerService {
     @Override
     @NotNull
     public Customer createCustomer(@Valid @NotNull final Customer customer) {
-
         validateNotNull(customer, "Customer");
         customerRepository.save(customer);
         return customer;
     }
 
     @Override
-    public void updateAddress(@NotNull final UUID customerId, @Valid @NotNull final Address address) {
+    public void updateAddress(
+            @NotNull final UUID customerId,
+            @Valid @NotNull final Address address) {
         validateNotNull(customerId, "Customer ID");
         final var customer = customerRepository.getById(customerId);
         customer.setAddress(address);
@@ -54,7 +57,9 @@ final class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateInvoiceAddress(@NotNull final UUID customerId, @Valid @NotNull final Address address) {
+    public void updateInvoiceAddress(
+            @NotNull final UUID customerId,
+            @Valid @NotNull final Address address) {
         validateNotNull(customerId, "Customer ID");
         final var customer = customerRepository.getById(customerId);
         customer.setInvoiceAddress(address);
@@ -81,7 +86,10 @@ final class CustomerServiceImpl implements CustomerService {
     @Override
     public void deactivateCustomer(@NotNull final UUID customerId) {
         validateNotNull(customerId, "Customer ID");
-        final Customer customer = customerRepository.getById(customerId);
+        Customer customer = customerRepository.getById(customerId);
+        if (customer.getStatus() == CustomerStatus.INACTIVE) {
+            throw new CustomerNotActiveException("Customer is already inactive");
+        }
         customer.setStatus(CustomerStatus.INACTIVE);
         customerRepository.update(customer);
     }
@@ -101,11 +109,13 @@ final class CustomerServiceImpl implements CustomerService {
 
     @Override
     @NotNull
-    public Collection<Customer> findAllCustomers() {
-        return customerRepository.findAll();
+    public List<Customer> findAllCustomers() {
+        return List.copyOf(customerRepository.findAll());
     }
 
-    private void validateNotNull(final Object value, final String fieldName) {
+    private void validateNotNull(
+            @Nullable final Object value,
+            @NotNull final String fieldName) {
         if (value == null) {
             throw new CustomerValidationException(fieldName + " must not be null");
         }

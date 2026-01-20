@@ -20,7 +20,6 @@ import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchExc
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -80,6 +79,12 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    public void deactivateCustomer(
+            @NotNull final UUID customerId) {
+        customerService.deactivateCustomer(customerId);
+    }
+
+    @Override
     @NotNull
     public Customer updateAddress(
             @NotNull final UUID customerId,
@@ -114,7 +119,7 @@ public class ShopServiceImpl implements ShopService {
     public List<Contract> loadAllContracts(
             @NotNull final UUID customerId) {
         checkCustomerActive(customerId);
-        return contractService.findContractsByCustomerId(customerId);
+        return List.copyOf(contractService.findContractsByCustomerId(customerId));
     }
 
     @Override
@@ -135,7 +140,7 @@ public class ShopServiceImpl implements ShopService {
     @NotNull
     public List<Product> loadAllProductsForBrand(
             final @NotNull @Valid Brand brand) {
-        return new ArrayList<>(productService.findByBrand(brand));
+        return List.copyOf(productService.findByBrand(brand));
     }
 
     @Override

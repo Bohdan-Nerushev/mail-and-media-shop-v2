@@ -235,6 +235,7 @@ public final class MaMShopApplication {
                         demonstrateUtilityMethods(
                                         shop,
                                         customerMailActive.getId());
+                        shop.deactivateCustomer(customerGMXActive.getId());
                         shop.removeCustomer(customerWebDeActive.getId());
                         System.out.println("Utility: Also removed webInactive for cleanup.");
 

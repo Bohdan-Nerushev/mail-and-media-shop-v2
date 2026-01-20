@@ -3,6 +3,7 @@ package dev.mam.buizsol.mamshop.product.service;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -69,8 +70,8 @@ final class ProductRepositoryImpl implements ProductRepository {
     }
 
     private void validateNotNull(
-            final Object value,
-            final String fieldName) {
+            @Nullable final Object value,
+            @NotNull final String fieldName) {
         if (value == null) {
             throw new ProductValidationException(fieldName + " must not be null");
         }

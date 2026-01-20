@@ -6,7 +6,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,7 +25,7 @@ public interface ProductService {
                         @NotNull final UUID id);
 
         @NotNull
-        Collection<Product> findByBrand(
+        List<Product> findByBrand(
                         @NotNull final Brand brand);
 
         void updateMonthlyFee(

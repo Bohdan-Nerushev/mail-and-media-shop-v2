@@ -35,6 +35,8 @@ public interface ShopService {
 
         void activateCustomer(@NotNull final UUID customerId);
 
+        void deactivateCustomer(@NotNull final UUID customerId);
+
         @NotNull
         Customer updateAddress(
                         @NotNull final UUID customerId,

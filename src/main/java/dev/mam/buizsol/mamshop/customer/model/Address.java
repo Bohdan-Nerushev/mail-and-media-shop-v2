@@ -1,7 +1,9 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record Address(
         @NotBlank String street,
@@ -18,7 +20,9 @@ public record Address(
         validate(country, "Country");
     }
 
-    private void validate(String value, String fieldName) {
+    private void validate(
+            @Nullable final String value,
+            @NotNull final String fieldName) {
         if (value == null || value.isBlank()) {
             throw new CustomerValidationException(fieldName + " must not be null or empty");
         }

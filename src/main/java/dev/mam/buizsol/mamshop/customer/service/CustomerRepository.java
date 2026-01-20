@@ -5,7 +5,7 @@ import dev.mam.buizsol.mamshop.customer.model.Customer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,7 +29,7 @@ interface CustomerRepository {
         }
 
         @NotNull
-        Collection<Customer> findAll();
+        List<Customer> findAll();
 
         void delete(@NotNull final UUID id) throws CustomerNotFoundException;
 

@@ -22,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -116,7 +118,11 @@ class CustomerServiceTest {
     @ParameterizedTest
     @CsvSource({
             "1900-01-01, Boundary: very old birth date",
-            "2026-01-13, Boundary: today birth date"
+            "2026-01-14, Boundary: today birth date",
+            "2024-05-14, Boundary: future birth date",
+            "2010-04-14, Boundary: future birth1 date",
+            "1000-01-01, Boundary: future birth2 date",
+            "1500-01-01, Boundary: future birth3 date"
     })
     @DisplayName("06: Create customer with boundary birth dates should succeed")
     void test06_createCustomer_withBoundaryBirthDates_shouldSucceed(final String dateStr) {
@@ -345,9 +351,9 @@ class CustomerServiceTest {
     void test21_findCustomerById_shouldReturnCustomer() {
         final UUID id = UUID.randomUUID();
         final Customer customer = mock(Customer.class);
-        when(customerRepository.findById(id)).thenReturn(java.util.Optional.of(customer));
+        when(customerRepository.findById(id)).thenReturn(Optional.of(customer));
 
-        final java.util.Optional<Customer> result = customerService.findCustomerById(id);
+        final Optional<Customer> result = customerService.findCustomerById(id);
 
         assertTrue(result.isPresent());
         assertEquals(customer, result.get());
@@ -357,10 +363,10 @@ class CustomerServiceTest {
     @Test
     @DisplayName("22: Find all customers should return all customers from repository")
     void test22_findAllCustomers_shouldReturnAllCustomers() {
-        final java.util.Collection<Customer> customers = java.util.List.of(mock(Customer.class));
+        final List<Customer> customers = List.of(mock(Customer.class));
         when(customerRepository.findAll()).thenReturn(customers);
 
-        final java.util.Collection<Customer> result = customerService.findAllCustomers();
+        final List<Customer> result = customerService.findAllCustomers();
 
         assertEquals(customers.size(), result.size());
         assertEquals(customers, result);

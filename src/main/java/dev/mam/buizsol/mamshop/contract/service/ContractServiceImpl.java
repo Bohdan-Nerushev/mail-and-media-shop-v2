@@ -6,6 +6,7 @@ import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -46,9 +47,9 @@ final class ContractServiceImpl implements ContractService {
     @Override
     @NotNull
     public Optional<Contract> findContractById(
-            @NotNull final UUID id) {
-        validateNotNull(id, "Contract ID");
-        return repository.findById(id);
+            @NotNull final UUID contractId) {
+        validateNotNull(contractId, "Contract ID");
+        return repository.findById(contractId);
     }
 
     @Override
@@ -56,7 +57,7 @@ final class ContractServiceImpl implements ContractService {
     public List<Contract> findContractsByCustomerId(
             @NotNull final UUID customerId) {
         validateNotNull(customerId, "Customer ID");
-        return repository.findByCustomerId(customerId);
+        return List.copyOf(repository.findByCustomerId(customerId));
     }
 
     @Override
@@ -64,27 +65,27 @@ final class ContractServiceImpl implements ContractService {
     public List<Contract> findContractsByProductId(
             @NotNull final UUID productId) {
         validateNotNull(productId, "Product ID");
-        return repository.findByProductId(productId);
+        return List.copyOf(repository.findByProductId(productId));
     }
 
     @Override
     @NotNull
     public Contract updateContractStatus(
             @NotNull final UUID contractId,
-            @NotNull final ContractStatus status) {
+            @NotNull final ContractStatus changeStatus) {
         validateNotNull(contractId, "Contract ID");
-        validateNotNull(status, "Status");
+        validateNotNull(changeStatus, "Status");
 
         Contract contract = repository.findById(contractId)
                 .orElseThrow(() -> new ContractNotFoundException("Contract with ID " + contractId + " not found"));
 
-        contract.updateStatus(status);
+        contract.updateStatus(changeStatus);
         return repository.update(contract);
     }
 
     private void validateNotNull(
-            final Object value,
-            final String fieldName) {
+            @Nullable final Object value,
+            @NotNull final String fieldName) {
         if (value == null) {
             throw new ContractValidationException(fieldName + " must not be null");
         }

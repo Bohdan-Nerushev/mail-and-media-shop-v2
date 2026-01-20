@@ -71,14 +71,6 @@ public class Contract {
         return status;
     }
 
-    public void activate() {
-        this.status = ContractStatus.ACTIVE;
-    }
-
-    public void deactivate() {
-        this.status = ContractStatus.INACTIVE;
-    }
-
     public void updateStatus(
             @NotNull final ContractStatus status) {
         validateNotNull(status, "Status");
@@ -86,8 +78,8 @@ public class Contract {
     }
 
     private void validateBrandMatch(
-            final Customer customer,
-            final Product product) {
+            @NotNull final Customer customer,
+            @NotNull final Product product) {
         if (!customer.getBrand().equals(product.getBrand())) {
             throw new BrandMismatchException(String.format(
                     "Customer brand %s does not match product brand %s",
@@ -97,7 +89,7 @@ public class Contract {
     }
 
     private void validateCustomerActive(
-            final Customer customer) {
+            @NotNull final Customer customer) {
         if (customer.getStatus() != CustomerStatus.ACTIVE) {
             throw new CustomerNotActiveException(String.format(
                     "Customer %s is not active",
