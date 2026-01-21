@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.math.BigDecimal;
@@ -313,21 +314,24 @@ class ShopServiceImplTest {
         }
 
         @ParameterizedTest
-        @EnumSource(Brand.class)
+        @CsvSource({
+                        "GMX, WEB_DE",
+                        "WEB_DE, MAIL_COM",
+                        "MAIL_COM, GMX"
+        })
         @DisplayName("14. Purchase Product: Throws exception when brands do not match (Negative)")
-        void test14_purchaseProduct_Negative_BrandMismatch(Brand brand) throws Exception {
+        void test14_purchaseProduct_Negative_BrandMismatch(Brand customerBrand, Brand productBrand) throws Exception {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
                                 LocalDate.of(1990, 1, 1),
-                                brand,
+                                customerBrand,
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
                 shopService.activateCustomer(customer.getId());
 
-                Brand otherBrand = Brand.values()[(brand.ordinal() + 1) % Brand.values().length];
-                Product product = createDefaultStandardMailProduct("Mismatched Mail", otherBrand,
+                Product product = createDefaultStandardMailProduct("Mismatched Mail", productBrand,
                                 new BigDecimal("2.50"));
                 shopService.registerProduct(product);
 

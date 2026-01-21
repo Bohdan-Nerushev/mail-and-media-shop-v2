@@ -324,31 +324,46 @@ class CustomerServiceTest {
                         null)));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = { "activate", "deactivate", "delete", "updateAddress", "updateInvoiceAddress",
-            "updateCommunicationDetails" })
-    @DisplayName("20: All ID-based methods should throw exception if ID is null")
-    void test20_idBasedMethods_withNullId_shouldThrowException(final String methodName) {
-        switch (methodName) {
-            case "activate" ->
-                assertThrows(CustomerValidationException.class, () -> customerService.activateCustomer(null));
-            case "deactivate" ->
-                assertThrows(CustomerValidationException.class, () -> customerService.deactivateCustomer(null));
-            case "delete" ->
-                assertThrows(CustomerValidationException.class, () -> customerService.deleteCustomer(null));
-            case "updateAddress" ->
-                assertThrows(CustomerValidationException.class, () -> customerService.updateAddress(null, address));
-            case "updateInvoiceAddress" ->
-                assertThrows(CustomerValidationException.class,
-                        () -> customerService.updateInvoiceAddress(null, address));
-            case "updateCommunicationDetails" -> assertThrows(CustomerValidationException.class,
-                    () -> customerService.updateCommunicationDetails(null, communicationDetails));
-        }
+    @Test
+    @DisplayName("20: Activate customer with null ID should throw exception")
+    void test20_activateCustomer_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class, () -> customerService.activateCustomer(null));
     }
 
     @Test
-    @DisplayName("21: Find customer by ID should return customer from repository")
-    void test21_findCustomerById_shouldReturnCustomer() {
+    @DisplayName("21: Deactivate customer with null ID should throw exception")
+    void test21_deactivateCustomer_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class, () -> customerService.deactivateCustomer(null));
+    }
+
+    @Test
+    @DisplayName("22: Delete customer with null ID should throw exception")
+    void test22_deleteCustomer_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class, () -> customerService.deleteCustomer(null));
+    }
+
+    @Test
+    @DisplayName("23: Update address with null ID should throw exception")
+    void test23_updateAddress_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class, () -> customerService.updateAddress(null, address));
+    }
+
+    @Test
+    @DisplayName("24: Update invoice address with null ID should throw exception")
+    void test24_updateInvoiceAddress_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class, () -> customerService.updateInvoiceAddress(null, address));
+    }
+
+    @Test
+    @DisplayName("25: Update communication details with null ID should throw exception")
+    void test25_updateCommunicationDetails_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class,
+                () -> customerService.updateCommunicationDetails(null, communicationDetails));
+    }
+
+    @Test
+    @DisplayName("26: Find customer by ID should return customer from repository")
+    void test26_findCustomerById_shouldReturnCustomer() {
         final UUID id = UUID.randomUUID();
         final Customer customer = mock(Customer.class);
         when(customerRepository.findById(id)).thenReturn(Optional.of(customer));
@@ -361,8 +376,8 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("22: Find all customers should return all customers from repository")
-    void test22_findAllCustomers_shouldReturnAllCustomers() {
+    @DisplayName("27: Find all customers should return all customers from repository")
+    void test27_findAllCustomers_shouldReturnAllCustomers() {
         final List<Customer> customers = List.of(mock(Customer.class));
         when(customerRepository.findAll()).thenReturn(customers);
 

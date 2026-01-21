@@ -9,6 +9,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 class CommunicationDetailsTest {
 
     private CommunicationDetails createDefaultCommunicationDetails(
@@ -23,8 +26,8 @@ class CommunicationDetailsTest {
     @DisplayName("1. Positive: Successful creation with valid data")
     void shouldCreateCommunicationDetailsWhenDataIsValid() {
         CommunicationDetails details = createDefaultCommunicationDetails("test@example.com", "+123456789");
-        Assertions.assertEquals("test@example.com", details.email());
-        Assertions.assertEquals("+123456789", details.telephone());
+        assertEquals("test@example.com", details.email());
+        assertEquals("+123456789", details.telephone());
     }
 
     @ParameterizedTest
@@ -32,7 +35,7 @@ class CommunicationDetailsTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("2. Negative: Validation of 'email' field")
     void shouldThrowExceptionWhenEmailIsInvalid(String invalidEmail) {
-        Assertions.assertThrows(CustomerValidationException.class,
+        assertThrows(CustomerValidationException.class,
                 () -> createDefaultCommunicationDetails(invalidEmail, "+123456789"));
     }
 
@@ -41,7 +44,7 @@ class CommunicationDetailsTest {
     @ValueSource(strings = { " ", "\t", "\n" })
     @DisplayName("3. Negative: Validation of 'telephone' field")
     void shouldThrowExceptionWhenTelephoneIsInvalid(String invalidPhone) {
-        Assertions.assertThrows(CustomerValidationException.class,
+        assertThrows(CustomerValidationException.class,
                 () -> createDefaultCommunicationDetails("test@example.com", invalidPhone));
     }
 
@@ -50,14 +53,14 @@ class CommunicationDetailsTest {
     void shouldHandleExtremelyLongEmail() {
         String longEmail = "a".repeat(250) + "@example.com";
         CommunicationDetails details = createDefaultCommunicationDetails(longEmail, "123");
-        Assertions.assertEquals(longEmail, details.email());
+        assertEquals(longEmail, details.email());
     }
 
     @Test
     @DisplayName("5. Boundary: Shortest valid phone number")
     void shouldHandleShortTelephone() {
         CommunicationDetails details = createDefaultCommunicationDetails("a@b.c", "0");
-        Assertions.assertEquals("0", details.telephone());
+        assertEquals("0", details.telephone());
     }
 
     @ParameterizedTest
@@ -65,7 +68,7 @@ class CommunicationDetailsTest {
     @DisplayName("6. Positive: Support for various email formats")
     void shouldHandleVariousEmailFormats(String email) {
         CommunicationDetails details = createDefaultCommunicationDetails(email, "12345");
-        Assertions.assertEquals(email, details.email());
+        assertEquals(email, details.email());
     }
 
     @ParameterizedTest
@@ -73,6 +76,6 @@ class CommunicationDetailsTest {
     @DisplayName("7. Positive: Support for various telephone formats")
     void shouldHandleVariousTelephoneFormats(String phone) {
         CommunicationDetails details = createDefaultCommunicationDetails("test@test.com", phone);
-        Assertions.assertEquals(phone, details.telephone());
+        assertEquals(phone, details.telephone());
     }
 }

@@ -49,14 +49,14 @@ class ProductTest {
     @DisplayName("2. Success: Verify mass ID uniqueness (1000 instances)")
     void test2_MassProductID_Uniqueness() {
         int count = 1000;
-        Set<UUID> ids = new HashSet<>();
+        Set<UUID> verifyIdsSuccess = new HashSet<>();
 
         for (int i = 0; i < count; i++) {
             Product p = createDefaultProduct("P" + i, Brand.GMX, BigDecimal.ZERO, BigDecimal.ONE);
-            ids.add(p.getId());
+            verifyIdsSuccess.add(p.getId());
         }
 
-        assertEquals(count, ids.size(), "All generated IDs must be unique");
+        assertEquals(count, verifyIdsSuccess.size(), "All generated IDs must be unique");
     }
 
     @ParameterizedTest(name = "[{index}] Name: ''{0}''")

@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -295,7 +296,7 @@ class BillingServiceTest {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         int count = 100;
-        java.util.List<Contract> contracts = new java.util.ArrayList<>(count);
+        List<Contract> contracts = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             Contract c = mock(Contract.class);
             when(c.getStatus()).thenReturn(ContractStatus.ACTIVE);

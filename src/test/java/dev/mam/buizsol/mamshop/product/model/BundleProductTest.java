@@ -89,48 +89,43 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("3. Negative: Failure when creating bundle with null components")
-        void test3_CreateBundleProduct_NullComponents_ThrowsException() {
-                ProductValidationException exception = assertThrows(
+        @DisplayName("3. Negative: Failure with null MailProduct")
+        void test3_CreateBundleProduct_NullMail_ThrowsException() {
+                final PartnerProduct partner = createDefaultPartnerProduct("P", Brand.GMX, BigDecimal.ZERO,
+                                BigDecimal.ONE);
+
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
+                                () -> createDefaultBundleProduct(null, partner));
+
+                assertEquals("Mail and Partner products must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("4. Negative: Failure with null PartnerProduct")
+        void test4_CreateBundleProduct_NullPartner_ThrowsException() {
+                final MailProduct mail = createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
+
+                final ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
+                                () -> createDefaultBundleProduct(mail, null));
+
+                assertEquals("Mail and Partner products must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("5. Negative: Failure with both components null")
+        void test5_CreateBundleProduct_BothNull_ThrowsException() {
+                final ProductValidationException exception = assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultBundleProduct(null, null));
 
                 assertEquals("Mail and Partner products must not be null", exception.getMessage());
         }
 
-        @ParameterizedTest(name = "[{index}] Null Case: {0}")
-        @CsvSource({
-                        "MAIL_NULL",
-                        "PARTNER_NULL",
-                        "BOTH_NULL"
-        })
-        @DisplayName("4. Negative: Failure with null components")
-        void test4_CreateBundleProduct_NullComponents_ThrowsException(String nullCase) {
-                MailProduct mail = nullCase.equals("PARTNER_NULL")
-                                ? createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE)
-                                : null;
-                PartnerProduct partner = nullCase.equals("MAIL_NULL")
-                                ? createDefaultPartnerProduct("P", Brand.GMX, BigDecimal.ZERO, BigDecimal.ONE)
-                                : null;
-
-                if (nullCase.equals("BOTH_NULL")) {
-                        mail = null;
-                        partner = null;
-                }
-
-                final MailProduct finalMail = mail;
-                final PartnerProduct finalPartner = partner;
-
-                ProductValidationException exception = assertThrows(
-                                ProductValidationException.class,
-                                () -> createDefaultBundleProduct(finalMail, finalPartner));
-
-                assertEquals("Mail and Partner products must not be null", exception.getMessage());
-        }
-
         @Test
-        @DisplayName("5. Boundary: Success with large fees summation")
-        void test5_CreateBundleProduct_LargeFees_Success() {
+        @DisplayName("6. Boundary: Success with large fees summation")
+        void test6_CreateBundleProduct_LargeFees_Success() {
                 BigDecimal largeFee = new BigDecimal("1000000.00");
                 PremiumMailProduct mail = createDefaultPremiumMailProduct("Rich Mail", Brand.GMX, largeFee);
                 PartnerProduct partner = createDefaultPartnerProduct("Rich Cloud", Brand.GMX, largeFee, largeFee);
@@ -142,8 +137,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("6. Polymorphism: Verify calls via Product base class")
-        void test6_BundleProduct_PolymorphicCalls() {
+        @DisplayName("7. Polymorphism: Verify calls via Product base class")
+        void test7_BundleProduct_PolymorphicCalls() {
                 MailProduct mail = createDefaultStandardMailProduct("Base Mail", Brand.WEB_DE, new BigDecimal("1.50"));
                 PartnerProduct partner = createDefaultPartnerProduct("Base Cloud", Brand.WEB_DE,
                                 new BigDecimal("10.00"),
@@ -156,8 +151,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("7. Success: Verify getters for components")
-        void test7_BundleProduct_VerifyGetters() {
+        @DisplayName("8. Success: Verify getters for components")
+        void test8_BundleProduct_VerifyGetters() {
                 StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, new BigDecimal("1.00"));
                 PartnerProduct partner = createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO,
                                 new BigDecimal("1.00"));

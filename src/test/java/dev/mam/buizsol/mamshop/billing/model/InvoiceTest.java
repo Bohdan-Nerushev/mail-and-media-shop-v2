@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -153,16 +154,13 @@ class InvoiceTest {
     @Test
     @DisplayName("11: Stress test with a large number of items (performance check)")
     void test11_invoiceLargeItemsList_calculatesCorrectly() {
-        int count = 1000;
-        java.util.List<InvoiceItem> items = new java.util.ArrayList<>(count);
-        BigDecimal setup = new BigDecimal("1.00");
-        BigDecimal monthly = new BigDecimal("2.00");
+        final InvoiceItem prototype = new InvoiceItem(
+                UUID.randomUUID(), "Product", UUID.randomUUID(), LocalDate.now(),
+                new BigDecimal("1.00"), new BigDecimal("2.00"));
 
-        for (int i = 0; i < count; i++) {
-            items.add(new InvoiceItem(UUID.randomUUID(), "P" + i, UUID.randomUUID(), LocalDate.now(), setup, monthly));
-        }
+        final List<InvoiceItem> items = Collections.nCopies(1000, prototype);
 
-        Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, testAddress, items, BigDecimal.ZERO);
+        final Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, testAddress, items, BigDecimal.ZERO);
 
         assertEquals(new BigDecimal("1000.00"), invoice.getTotalSetupFee());
         assertEquals(new BigDecimal("2000.00"), invoice.getTotalMonthlyFee());
