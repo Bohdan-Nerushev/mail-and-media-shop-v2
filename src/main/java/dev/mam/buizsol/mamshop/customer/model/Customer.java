@@ -1,6 +1,8 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -18,10 +20,13 @@ public class Customer {
     @NotNull
     private final LocalDate birthDate;
     @NotNull
+    @Valid
     private Address address;
     @NotNull
+    @Valid
     private Address invoiceAddress;
     @NotNull
+    @Valid
     private CommunicationDetails communicationDetails;
     @NotNull
     private final Brand brand;
@@ -32,9 +37,9 @@ public class Customer {
             @NotBlank final String firstName,
             @NotBlank final String lastName,
             @NotNull final LocalDate birthDate,
-            @NotNull final Address address,
-            @Nullable final Address invoiceAddress,
-            @NotNull final CommunicationDetails communicationDetails,
+            @NotNull @Valid final Address address,
+            @Nullable @Valid final Address invoiceAddress,
+            @NotNull @Valid final CommunicationDetails communicationDetails,
             @NotNull final Brand brand) {
 
         validateNotBlank(firstName, "First name");
@@ -81,7 +86,7 @@ public class Customer {
     }
 
     public void setAddress(
-            @NotNull final Address address) {
+            @NotNull @Valid final Address address) {
         validateNotNull(address, "Address");
         this.address = address;
     }
@@ -92,7 +97,7 @@ public class Customer {
     }
 
     public void setInvoiceAddress(
-            @NotNull final Address invoiceAddress) {
+            @NotNull @Valid final Address invoiceAddress) {
         validateNotNull(invoiceAddress, "Invoice address");
         this.invoiceAddress = invoiceAddress;
     }
@@ -103,7 +108,7 @@ public class Customer {
     }
 
     public void setCommunicationDetails(
-            @NotNull final CommunicationDetails communicationDetails) {
+            @NotNull @Valid final CommunicationDetails communicationDetails) {
         validateNotNull(communicationDetails, "Communication details");
         this.communicationDetails = communicationDetails;
     }
@@ -124,15 +129,19 @@ public class Customer {
         this.status = status;
     }
 
-    private void validateNotBlank(final String value, final String fieldName) {
+    private void validateNotBlank(
+            @NotNull final String value,
+            @NotNull final String fieldName) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must not be null or empty");
+            throw new CustomerValidationException(fieldName + " must not be null or empty");
         }
     }
 
-    private void validateNotNull(final Object value, final String fieldName) {
+    private void validateNotNull(
+            @Nullable final Object value,
+            @NotNull final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new CustomerValidationException(fieldName + " must not be null");
         }
     }
 

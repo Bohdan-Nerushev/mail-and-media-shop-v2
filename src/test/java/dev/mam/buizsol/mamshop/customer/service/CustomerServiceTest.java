@@ -1,11 +1,13 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,10 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.UUID;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,6 +37,19 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
+
+    public Customer createDefaultCustomer(
+            final String firstName,
+            final String lastName,
+            final LocalDate birthDate,
+            final Address address,
+            final Address invoiceAddress,
+            final CommunicationDetails communicationDetails,
+            final Brand brand) {
+        return new Customer(
+                firstName, lastName, birthDate,
+                address, invoiceAddress, communicationDetails, brand);
+    }
 
     @Mock
     private Address address;
@@ -53,7 +66,7 @@ class CustomerServiceTest {
     @Test
     @DisplayName("01: Create customer with valid data should succeed")
     void test01_createCustomer_withValidData_shouldSucceed() {
-        final Customer customer = customerService.createCustomer(new Customer(
+        final Customer customer = customerService.createCustomer(createDefaultCustomer(
                 "John", "Doe", LocalDate.of(1990, 1, 1),
                 address, null, communicationDetails, Brand.GMX));
 
@@ -63,11 +76,18 @@ class CustomerServiceTest {
         verify(customerRepository).save(any(Customer.class));
     }
 
+    @Test
+    @DisplayName("02: Create customer with repository = null should throw exception")
+    void test02_createCustomer_withRepositoryNull_shouldThrowException() {
+        assertThrows(CustomerValidationException.class,
+                () -> new CustomerServiceImpl(null));
+    }
+
     @ParameterizedTest
     @EnumSource(Brand.class)
-    @DisplayName("02: Create customer with different brands should succeed")
-    void test02_createCustomer_withDifferentBrands_shouldSucceed(final Brand brand) {
-        final Customer customer = customerService.createCustomer(new Customer(
+    @DisplayName("03: Create customer with different brands should succeed")
+    void test03_createCustomer_withDifferentBrands_shouldSucceed(final Brand brand) {
+        final Customer customer = customerService.createCustomer(createDefaultCustomer(
                 "John", "Doe", LocalDate.of(1990, 1, 1),
                 address, null, communicationDetails, brand));
 
@@ -78,33 +98,37 @@ class CustomerServiceTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = { " ", "\t", "\n" })
-    @DisplayName("03: Create customer with invalid first name should throw exception")
-    void test03_createCustomer_withInvalidFirstName_shouldThrowException(final String firstName) {
-        assertThrows(IllegalArgumentException.class, () -> customerService.createCustomer(
-                new Customer(firstName, "Doe", LocalDate.of(1990, 1, 1),
-                        address, null, communicationDetails, Brand.WEB_DE)));
+    @DisplayName("04: Create customer with invalid first name should throw exception")
+    void test04_createCustomer_withInvalidFirstName_shouldThrowException(final String firstName) {
+        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(createDefaultCustomer(
+                firstName, "Doe", LocalDate.of(1990, 1, 1),
+                address, null, communicationDetails, Brand.WEB_DE)));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = { " ", "\t", "\n" })
-    @DisplayName("04: Create customer with invalid last name should throw exception")
-    void test04_createCustomer_withInvalidLastName_shouldThrowException(final String lastName) {
-        assertThrows(IllegalArgumentException.class, () -> customerService.createCustomer(
-                new Customer("John", lastName, LocalDate.of(1990, 1, 1),
-                        address, null, communicationDetails, Brand.WEB_DE)));
+    @DisplayName("05: Create customer with invalid last name should throw exception")
+    void test05_createCustomer_withInvalidLastName_shouldThrowException(final String lastName) {
+        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(createDefaultCustomer(
+                "John", lastName, LocalDate.of(1990, 1, 1),
+                address, null, communicationDetails, Brand.WEB_DE)));
     }
 
     @ParameterizedTest
     @CsvSource({
             "1900-01-01, Boundary: very old birth date",
-            "2026-01-13, Boundary: today birth date"
+            "2026-01-14, Boundary: today birth date",
+            "2024-05-14, Boundary: future birth date",
+            "2010-04-14, Boundary: future birth1 date",
+            "1000-01-01, Boundary: future birth2 date",
+            "1500-01-01, Boundary: future birth3 date"
     })
-    @DisplayName("05: Create customer with boundary birth dates should succeed")
-    void test05_createCustomer_withBoundaryBirthDates_shouldSucceed(final String dateStr) {
+    @DisplayName("06: Create customer with boundary birth dates should succeed")
+    void test06_createCustomer_withBoundaryBirthDates_shouldSucceed(final String dateStr) {
         final LocalDate birthDate = LocalDate.parse(dateStr);
 
-        final Customer customer = customerService.createCustomer(new Customer(
+        final Customer customer = customerService.createCustomer(createDefaultCustomer(
                 "John", "Doe", birthDate,
                 address, null, communicationDetails, Brand.GMX));
 
@@ -113,8 +137,8 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("06: Update address should update customer address but keep unique invoice address")
-    void test06_updateAddress_shouldUpdateAddressSuccessfully() throws CustomerNotFoundException {
+    @DisplayName("07: Update address should update customer address but keep unique invoice address")
+    void test07_updateAddress_shouldUpdateAddressSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
         final Address newAddressMock = mock(Address.class);
@@ -128,8 +152,8 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("07: Update invoice address should update only invoice address")
-    void test07_updateInvoiceAddress_shouldUpdateInvoiceAddressSuccessfully() throws CustomerNotFoundException {
+    @DisplayName("08: Update invoice address should update only invoice address")
+    void test08_updateInvoiceAddress_shouldUpdateInvoiceAddressSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
         final Address newInvoiceAddressMock = mock(Address.class);
@@ -143,8 +167,8 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("08: Update communication details should update successfully")
-    void test08_updateCommunicationDetails_shouldUpdateSuccessfully() throws CustomerNotFoundException {
+    @DisplayName("09: Update communication details should update successfully")
+    void test09_updateCommunicationDetails_shouldUpdateSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
         final CommunicationDetails newDetailsMock = mock(CommunicationDetails.class);
@@ -158,8 +182,8 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("09: Activate customer should change status to ACTIVE")
-    void test09_activateCustomer_shouldChangeStatusToActive() throws CustomerNotFoundException {
+    @DisplayName("10: Activate customer should change status to ACTIVE")
+    void test10_activateCustomer_shouldChangeStatusToActive() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
 
@@ -172,8 +196,8 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("10: Deactivate customer should change status to INACTIVE")
-    void test10_deactivateCustomer_shouldChangeStatusToInactive() throws CustomerNotFoundException {
+    @DisplayName("11: Deactivate customer should change status to INACTIVE")
+    void test11_deactivateCustomer_shouldChangeStatusToInactive() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
 
@@ -186,8 +210,8 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("11: Delete customer should remove customer from repository")
-    void test11_deleteCustomer_shouldRemoveFromRepository() throws CustomerNotFoundException {
+    @DisplayName("12: Delete customer should remove customer from repository")
+    void test12_deleteCustomer_shouldRemoveFromRepository() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
 
         customerService.deleteCustomer(customerId);
@@ -196,8 +220,8 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("12: Operations on non-existent customer should throw CustomerNotFoundException")
-    void test12_opsOnNonExistentCustomer_shouldThrowException() throws CustomerNotFoundException {
+    @DisplayName("13: Operations on non-existent customer should throw CustomerNotFoundException")
+    void test13_opsOnNonExistentCustomer_shouldThrowException() throws CustomerNotFoundException {
         final UUID randomId = UUID.randomUUID();
 
         when(customerRepository.getById(randomId)).thenThrow(new CustomerNotFoundException("Not found"));
@@ -210,54 +234,141 @@ class CustomerServiceTest {
                 () -> customerService.updateAddress(randomId, address));
     }
 
-    @ParameterizedTest
-    @MethodSource("provideNullMandatoryFields")
-    @DisplayName("13: Create customer with any null mandatory field should throw exception")
-    void test13_createCustomer_withNullFields_shouldThrowException(
-            final String fn, final String ln, final LocalDate bd,
-            final Address addr, final CommunicationDetails cd, final Brand b) {
-        assertThrows(IllegalArgumentException.class,
-                () -> customerService.createCustomer(new Customer(fn, ln, bd, addr, addr, cd, b)));
-    }
-
-    private static Stream<Arguments> provideNullMandatoryFields() {
-        final Address a = mock(Address.class);
-        final CommunicationDetails c = mock(CommunicationDetails.class);
-        final LocalDate d = LocalDate.now();
-        return Stream.of(
-                Arguments.of(null, "Doe", d, a, c, Brand.GMX),
-                Arguments.of("John", null, d, a, c, Brand.GMX),
-                Arguments.of("John", "Doe", null, a, c, Brand.GMX),
-                Arguments.of("John", "Doe", d, null, c, Brand.GMX),
-                Arguments.of("John", "Doe", d, a, null, Brand.GMX),
-                Arguments.of("John", "Doe", d, a, c, null));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "activate", "deactivate", "delete", "updateAddress", "updateInvoiceAddress",
-            "updateCommunicationDetails" })
-    @DisplayName("14: All ID-based methods should throw exception if ID is null")
-    void test14_idBasedMethods_withNullId_shouldThrowException(final String methodName) {
-        switch (methodName) {
-            case "activate" -> assertThrows(Exception.class, () -> customerService.activateCustomer(null));
-            case "deactivate" -> assertThrows(Exception.class, () -> customerService.deactivateCustomer(null));
-            case "delete" -> assertThrows(Exception.class, () -> customerService.deleteCustomer(null));
-            case "updateAddress" -> assertThrows(Exception.class, () -> customerService.updateAddress(null, address));
-            case "updateInvoiceAddress" ->
-                assertThrows(Exception.class, () -> customerService.updateInvoiceAddress(null, address));
-            case "updateCommunicationDetails" -> assertThrows(Exception.class,
-                    () -> customerService.updateCommunicationDetails(null, communicationDetails));
-        }
+    @Test
+    @DisplayName("14: Create customer with null first name should throw exception")
+    void test14_createCustomer_withNullFirstName_shouldThrowException() {
+        assertThrows(
+                CustomerValidationException.class,
+                () -> customerService.createCustomer(createDefaultCustomer(
+                        null,
+                        "Doe",
+                        LocalDate.now(),
+                        address,
+                        null,
+                        communicationDetails,
+                        Brand.GMX)));
     }
 
     @Test
-    @DisplayName("20: Find customer by ID should return customer from repository")
-    void test15_findCustomerById_shouldReturnCustomer() {
+    @DisplayName("15: Create customer with null last name should throw exception")
+    void test15_createCustomer_withNullLastName_shouldThrowException() {
+        assertThrows(
+                CustomerValidationException.class,
+                () -> customerService.createCustomer(createDefaultCustomer(
+                        "John",
+                        null,
+                        LocalDate.now(),
+                        address,
+                        null,
+                        communicationDetails,
+                        Brand.GMX)));
+    }
+
+    @Test
+    @DisplayName("16: Create customer with null birth date should throw exception")
+    void test16_createCustomer_withNullBirthDate_shouldThrowException() {
+        assertThrows(
+                CustomerValidationException.class,
+                () -> customerService.createCustomer(createDefaultCustomer(
+                        "John",
+                        "Doe",
+                        null,
+                        address,
+                        null,
+                        communicationDetails,
+                        Brand.GMX)));
+    }
+
+    @Test
+    @DisplayName("17: Create customer with null address should throw exception")
+    void test17_createCustomer_withNullAddress_shouldThrowException() {
+        assertThrows(
+                CustomerValidationException.class,
+                () -> customerService.createCustomer(createDefaultCustomer(
+                        "John",
+                        "Doe",
+                        LocalDate.now(),
+                        null,
+                        null,
+                        communicationDetails,
+                        Brand.GMX)));
+    }
+
+    @Test
+    @DisplayName("18: Create customer with null communication details should throw exception")
+    void test18_createCustomer_withNullCommunicationDetails_shouldThrowException() {
+        assertThrows(
+                CustomerValidationException.class,
+                () -> customerService.createCustomer(createDefaultCustomer(
+                        "John",
+                        "Doe",
+                        LocalDate.now(),
+                        address,
+                        null,
+                        null,
+                        Brand.GMX)));
+    }
+
+    @Test
+    @DisplayName("19: Create customer with null brand should throw exception")
+    void test19_createCustomer_withNullBrand_shouldThrowException() {
+        assertThrows(
+                CustomerValidationException.class,
+                () -> customerService.createCustomer(createDefaultCustomer(
+                        "John",
+                        "Doe",
+                        LocalDate.now(),
+                        address,
+                        null,
+                        communicationDetails,
+                        null)));
+    }
+
+    @Test
+    @DisplayName("20: Activate customer with null ID should throw exception")
+    void test20_activateCustomer_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class, () -> customerService.activateCustomer(null));
+    }
+
+    @Test
+    @DisplayName("21: Deactivate customer with null ID should throw exception")
+    void test21_deactivateCustomer_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class, () -> customerService.deactivateCustomer(null));
+    }
+
+    @Test
+    @DisplayName("22: Delete customer with null ID should throw exception")
+    void test22_deleteCustomer_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class, () -> customerService.deleteCustomer(null));
+    }
+
+    @Test
+    @DisplayName("23: Update address with null ID should throw exception")
+    void test23_updateAddress_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class, () -> customerService.updateAddress(null, address));
+    }
+
+    @Test
+    @DisplayName("24: Update invoice address with null ID should throw exception")
+    void test24_updateInvoiceAddress_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class, () -> customerService.updateInvoiceAddress(null, address));
+    }
+
+    @Test
+    @DisplayName("25: Update communication details with null ID should throw exception")
+    void test25_updateCommunicationDetails_withNullId_shouldThrowException() {
+        assertThrows(CustomerValidationException.class,
+                () -> customerService.updateCommunicationDetails(null, communicationDetails));
+    }
+
+    @Test
+    @DisplayName("26: Find customer by ID should return customer from repository")
+    void test26_findCustomerById_shouldReturnCustomer() {
         final UUID id = UUID.randomUUID();
         final Customer customer = mock(Customer.class);
-        when(customerRepository.findById(id)).thenReturn(java.util.Optional.of(customer));
+        when(customerRepository.findById(id)).thenReturn(Optional.of(customer));
 
-        final java.util.Optional<Customer> result = customerService.findCustomerById(id);
+        final Optional<Customer> result = customerService.findCustomerById(id);
 
         assertTrue(result.isPresent());
         assertEquals(customer, result.get());
@@ -265,16 +376,15 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("21: Find all customers should return all customers from repository")
-    void test16_findAllCustomers_shouldReturnAllCustomers() {
-        final java.util.Collection<Customer> customers = java.util.List.of(mock(Customer.class));
+    @DisplayName("27: Find all customers should return all customers from repository")
+    void test27_findAllCustomers_shouldReturnAllCustomers() {
+        final List<Customer> customers = List.of(mock(Customer.class));
         when(customerRepository.findAll()).thenReturn(customers);
 
-        final java.util.Collection<Customer> result = customerService.findAllCustomers();
+        final List<Customer> result = customerService.findAllCustomers();
 
         assertEquals(customers.size(), result.size());
         assertEquals(customers, result);
         verify(customerRepository).findAll();
     }
-
 }

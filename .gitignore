@@ -123,7 +123,7 @@ ToDo.md
 .DS_Store
 .AppleDouble
 .LSOverride
-
+.vscode/settings.json
 # Icon must end with two \r
 Icon
 
@@ -157,7 +157,7 @@ Temporary Items
 
 # Linux trash folder which might appear on any partition or disk
 .Trash-*
-
+ToDo.md
 # .nfs files are created when an open file is removed but is still being accessed
 .nfs*
 
