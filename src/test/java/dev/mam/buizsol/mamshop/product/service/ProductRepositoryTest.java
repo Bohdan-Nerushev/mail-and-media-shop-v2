@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProductRepositoryTest {
@@ -234,5 +236,58 @@ class ProductRepositoryTest {
     void shouldRejectMailProductWithInvalidStorageSize() {
         assertThrows(ProductValidationException.class,
                 () -> createMailProduct("MailInvalid", Brand.GMX, "1.00", "0.50", 0L));
+    }
+
+    @Test
+    @DisplayName("16: Should update existing product in storage")
+    void shouldUpdateExistingProduct() {
+        final MailProduct product = (MailProduct) createMailProduct("Initial Mail",
+                Brand.GMX,
+                "1.00",
+                "0.50",
+                2L);
+        repository.save(product);
+
+        final BigDecimal newMonthlyFee = new BigDecimal("0.75");
+        product.setMonthlyFee(newMonthlyFee);
+
+        repository.update(product);
+
+        final Optional<Product> retrieved = repository.findById(product.getId());
+        assertThat(retrieved)
+                .isPresent()
+                .hasValueSatisfying(updated -> {
+                    assertThat(updated.getMonthlyFee())
+                            .isEqualByComparingTo(newMonthlyFee);
+                    assertThat(updated.getName())
+                            .isEqualTo("Initial Mail");
+                    assertThat(updated.getId())
+                            .isEqualTo(product.getId());
+                });
+    }
+
+    @Test
+    @DisplayName("17: Should save product when updating non-existent product")
+    void shouldSaveProductWhenUpdatingNonExistentProduct() {
+        final Product product = createMailProduct("New Product",
+                Brand.WEB_DE,
+                "1.00",
+                "0.60",
+                3L);
+
+        repository.update(product);
+
+        final Optional<Product> retrieved = repository.findById(product.getId());
+        assertThat(retrieved)
+                .isPresent()
+                .contains(product);
+    }
+
+    @Test
+    @DisplayName("18: Should throw ProductValidationException when updating null product")
+    void shouldThrowExceptionWhenUpdatingNullProduct() {
+        assertThatThrownBy(() -> repository.update(null))
+                .isInstanceOf(ProductValidationException.class)
+                .hasMessage("Product must not be null");
     }
 }

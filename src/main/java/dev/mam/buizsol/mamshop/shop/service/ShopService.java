@@ -28,9 +28,6 @@ public interface ShopService {
         Customer registerCustomer(@NotNull @Valid final Customer customer);
 
         @NotNull
-        Product registerProduct(@NotNull @Valid final Product product);
-
-        @NotNull
         Customer loadCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
 
         void removeCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;

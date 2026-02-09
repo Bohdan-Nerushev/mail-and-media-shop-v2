@@ -7,13 +7,9 @@ import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
-import dev.mam.buizsol.mamshop.product.model.PartnerProduct;
-import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import dev.mam.buizsol.mamshop.shop.service.ShopService;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -30,31 +26,7 @@ public final class MaMShopApplication {
 
                 final ShopService shop = ShopService.getInstance();
 
-                for (final Brand brand : Brand.values()) {
-                        shop.registerProduct(new StandardMailProduct(
-                                        brand.name() + " Basic Mail",
-                                        brand,
-                                        new BigDecimal("0.50")));
-                        shop.registerProduct(new PremiumMailProduct(
-                                        brand.name() + " Premium Mail",
-                                        brand,
-                                        new BigDecimal("4.99")));
-                        shop.registerProduct(new PartnerProduct(
-                                        brand.name() + " Storage Pro",
-                                        brand,
-                                        new BigDecimal("9.99"),
-                                        new BigDecimal("1.99")));
-                        shop.registerProduct(new PartnerProduct(
-                                        brand.name() + " Music Streaming",
-                                        brand,
-                                        BigDecimal.ZERO,
-                                        new BigDecimal("9.99")));
-                        shop.registerProduct(new PartnerProduct(
-                                        brand.name() + " Security Pack",
-                                        brand,
-                                        new BigDecimal("4.99"),
-                                        new BigDecimal("2.49")));
-                }
+                System.out.println("Product catalog initialized automatically.");
 
                 final Customer customerGMXInactive = createCustomer(
                                 "Maxim",

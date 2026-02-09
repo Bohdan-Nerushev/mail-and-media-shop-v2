@@ -22,6 +22,8 @@ import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchExc
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
+import dev.mam.buizsol.mamshop.product.service.ProductCatalogLoader;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -34,11 +36,14 @@ public class ShopServiceImpl implements ShopService {
     private final ContractService contractService;
     private final BillingService billingService;
 
+    private static final String CSV_PATH = "/products.csv";
+
     private ShopServiceImpl() {
         this.customerService = CustomerService.getInstance();
         this.productService = ProductService.getInstance();
         this.contractService = ContractService.getInstance();
         this.billingService = BillingService.getInstance();
+        ProductCatalogLoader.load(this.productService, CSV_PATH);
     }
 
     public static ShopServiceImpl getInstance() {
@@ -52,9 +57,8 @@ public class ShopServiceImpl implements ShopService {
         return customerService.createCustomer(customer);
     }
 
-    @Override
     @NotNull
-    public Product registerProduct(
+    protected Product registerProduct(
             @NotNull @Valid final Product product) {
         productService.createProduct(product);
         return product;
@@ -149,7 +153,8 @@ public class ShopServiceImpl implements ShopService {
     @NotNull
     public Contract purchaseProduct(
             @NotNull final UUID customerId,
-            @NotNull final UUID productId) throws CustomerNotFoundException, ProductNotFoundException, BrandMismatchException {
+            @NotNull final UUID productId)
+            throws CustomerNotFoundException, ProductNotFoundException, BrandMismatchException {
 
         final Customer customer = loadCustomer(customerId);
         if (customer.getStatus() != CustomerStatus.ACTIVE) {

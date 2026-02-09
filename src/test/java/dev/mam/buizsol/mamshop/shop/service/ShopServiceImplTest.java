@@ -13,6 +13,7 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
@@ -28,15 +29,19 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import dev.mam.buizsol.mamshop.product.service.ProductService;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ShopServiceImplTest {
 
-        private ShopService shopService;
+        private ShopServiceImpl shopService;
+        private ProductService productService;
 
         @BeforeEach
         void setUp() {
-                shopService = ShopService.getInstance();
+                shopService = (ShopServiceImpl) ShopService.getInstance();
+                productService = ProductService.getInstance();
         }
 
         private Product createDefaultStandardMailProduct(
@@ -283,7 +288,7 @@ class ShopServiceImplTest {
                 shopService.activateCustomer(customer.getId());
 
                 Product product = createDefaultStandardMailProduct("Standard Mail", brand, new BigDecimal("2.50"));
-                shopService.registerProduct(product);
+                productService.createProduct(product);
 
                 Contract contract = shopService.purchaseProduct(customer.getId(), product.getId());
                 assertNotNull(contract);
@@ -306,7 +311,7 @@ class ShopServiceImplTest {
                 shopService.activateCustomer(customer.getId());
 
                 Product product = createDefaultPremiumMailProduct("Premium Mail", brand, new BigDecimal("2.50"));
-                shopService.registerProduct(product);
+                productService.createProduct(product);
 
                 Contract contract = shopService.purchaseProduct(customer.getId(), product.getId());
                 assertNotNull(contract);
@@ -334,7 +339,7 @@ class ShopServiceImplTest {
 
                 Product product = createDefaultStandardMailProduct("Mismatched Mail", productBrand,
                                 new BigDecimal("2.50"));
-                shopService.registerProduct(product);
+                productService.createProduct(product);
 
                 assertThrows(CustomerAndProductBrandMismatchException.class,
                                 () -> shopService.purchaseProduct(customer.getId(), product.getId()));
@@ -409,7 +414,7 @@ class ShopServiceImplTest {
                 shopService.activateCustomer(customer.getId());
 
                 Product product = createDefaultStandardMailProduct("Mail", brand, new BigDecimal("2.50"));
-                shopService.registerProduct(product);
+                productService.createProduct(product);
                 Contract contract = shopService.purchaseProduct(customer.getId(), product.getId());
                 shopService.activateContract(contract.getId());
 
@@ -434,7 +439,7 @@ class ShopServiceImplTest {
                 shopService.activateCustomer(customer.getId());
 
                 Product product = createDefaultStandardMailProduct("Mail", brand, new BigDecimal("2.50"));
-                shopService.registerProduct(product);
+                productService.createProduct(product);
                 shopService.purchaseProduct(customer.getId(), product.getId());
                 List<Contract> contracts = shopService.loadAllContracts(customer.getId());
                 assertFalse(contracts.isEmpty());
@@ -455,7 +460,7 @@ class ShopServiceImplTest {
                 shopService.activateCustomer(customer.getId());
 
                 Product product = createDefaultPremiumMailProduct("Premium Mail", Brand.GMX, new BigDecimal("2.50"));
-                shopService.registerProduct(product);
+                productService.createProduct(product);
                 Contract contract = shopService.purchaseProduct(customer.getId(), product.getId());
 
                 shopService.activateContract(contract.getId());
@@ -586,5 +591,39 @@ class ShopServiceImplTest {
         @DisplayName("29. Negative - Remove Customer: Fails for non-existent ID")
         void test29_removeCustomer_Negative_NotFound() {
                 assertThrows(CustomerNotFoundException.class, () -> shopService.removeCustomer(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("30. Register Product: Successfully registers and returns the product")
+        void test30_registerProduct_Success() {
+                Product product = createDefaultStandardMailProduct("Shop Product", Brand.GMX, new BigDecimal("4.99"));
+
+                Product registered = shopService.registerProduct(product);
+
+                assertNotNull(registered);
+                assertEquals(product.getId(), registered.getId());
+
+                java.util.Optional<Product> found = productService.findById(product.getId());
+                assertTrue(found.isPresent());
+                assertEquals(product.getName(), found.get().getName());
+        }
+
+        @Test
+        @DisplayName("31. Register Product: Throws exception when product is null (Negative)")
+        void test31_registerProduct_Negative_NullInput() {
+                assertThrows(ProductValidationException.class, () -> shopService.registerProduct(null));
+        }
+
+        @Test
+        @DisplayName("32. Register Product: Successfully registers different product types")
+        void test32_registerProduct_VariousTypes() {
+                Product standard = createDefaultStandardMailProduct("Std", Brand.WEB_DE, new BigDecimal("5.00"));
+                Product premium = createDefaultPremiumMailProduct("Prem", Brand.WEB_DE, new BigDecimal("10.00"));
+
+                shopService.registerProduct(standard);
+                shopService.registerProduct(premium);
+
+                assertTrue(productService.findById(standard.getId()).isPresent());
+                assertTrue(productService.findById(premium.getId()).isPresent());
         }
 }
