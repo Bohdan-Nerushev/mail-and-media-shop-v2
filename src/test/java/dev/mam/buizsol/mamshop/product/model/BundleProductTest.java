@@ -162,4 +162,34 @@ class BundleProductTest {
                 assertEquals(mail, bundle.getMailProduct());
                 assertEquals(partner, bundle.getPartnerProduct());
         }
+
+        @Test
+        @DisplayName("9. Negative: setMonthlyFee throws UnsupportedOperationException")
+        void test9_SetMonthlyFee_ThrowsException() {
+                StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, new BigDecimal("1.00"));
+                PartnerProduct partner = createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO,
+                                new BigDecimal("1.00"));
+                BundleProduct bundle = createDefaultBundleProduct(mail, partner);
+
+                assertThrows(UnsupportedOperationException.class,
+                                () -> bundle.setMonthlyFee(new BigDecimal("5.00")));
+        }
+
+        @Test
+        @DisplayName("10. Dynamic: Bundle fee updates when components change")
+        void test10_DynamicFeeCalculation() {
+                BigDecimal initialFee = new BigDecimal("1.00");
+                StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, initialFee);
+                PartnerProduct partner = createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO,
+                                new BigDecimal("1.00"));
+                BundleProduct bundle = createDefaultBundleProduct(mail, partner);
+
+                assertEquals(new BigDecimal("2.00"), bundle.getMonthlyFee());
+
+                BigDecimal newFee = new BigDecimal("5.00");
+                mail.setMonthlyFee(newFee);
+
+                assertEquals(newFee.add(partner.getMonthlyFee()), bundle.getMonthlyFee(),
+                                "Bundle fee should reflect component change");
+        }
 }

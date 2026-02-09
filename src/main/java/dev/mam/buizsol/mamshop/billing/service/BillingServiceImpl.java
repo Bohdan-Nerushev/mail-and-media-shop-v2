@@ -3,7 +3,7 @@ package dev.mam.buizsol.mamshop.billing.service;
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
 import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
-import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidateException;
+import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
@@ -99,7 +99,7 @@ final class BillingServiceImpl implements BillingService {
 
     private void validateNotNull(final Object value, final String fieldName) {
         if (value == null) {
-            throw new InvoiceValidateException(fieldName + " must not be null");
+            throw new InvoiceValidationException(fieldName + " must not be null");
         }
     }
 }

@@ -1,7 +1,7 @@
 package dev.mam.buizsol.mamshop.billing.service;
 
 import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
-import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidateException;
+import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
@@ -156,12 +156,12 @@ class BillingServiceTest {
         Invoice invoice = billingService.generateInvoice(customerId);
         InvoiceItem item = invoice.getItems().get(0);
 
-        assertEquals(testProduct.getId(), item.getProductId());
-        assertEquals(testProduct.getName(), item.getProductName());
-        assertEquals(contract.getId(), item.getContractId());
-        assertEquals(creationDate, item.getContractCreationDate());
-        assertEquals(testProduct.getSetupFee(), item.getSetupFee());
-        assertEquals(testProduct.getMonthlyFee(), item.getMonthlyFee());
+        assertEquals(testProduct.getId(), item.productId());
+        assertEquals(testProduct.getName(), item.productName());
+        assertEquals(contract.getId(), item.contractId());
+        assertEquals(creationDate, item.contractCreationDate());
+        assertEquals(testProduct.getSetupFee(), item.setupFee());
+        assertEquals(testProduct.getMonthlyFee(), item.monthlyFee());
     }
 
     @ParameterizedTest(name = "Test 5: Invalid discount validation - value: {0}")
@@ -207,7 +207,7 @@ class BillingServiceTest {
             "null, null"
     }, nullValues = { "null" })
     void test8_generateInvoice_nullArguments_throwsException(UUID cid, BigDecimal disc) {
-        assertThrows(InvoiceValidateException.class, () -> billingService.generateInvoice(cid, disc));
+        assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(cid, disc));
     }
 
     @Test
@@ -257,7 +257,7 @@ class BillingServiceTest {
         Invoice invoice = billingService.generateInvoice(customerId);
 
         assertEquals(1, invoice.getItems().size());
-        assertEquals(testProduct.getId(), invoice.getItems().get(0).getProductId());
+        assertEquals(testProduct.getId(), invoice.getItems().get(0).productId());
     }
 
     @Test
@@ -286,8 +286,8 @@ class BillingServiceTest {
         Invoice invoice = billingService.generateInvoice(customerId);
 
         assertEquals(2, invoice.getItems().size());
-        assertEquals(c1Id, invoice.getItems().get(0).getContractId());
-        assertEquals(c2Id, invoice.getItems().get(1).getContractId());
+        assertEquals(c1Id, invoice.getItems().get(0).contractId());
+        assertEquals(c2Id, invoice.getItems().get(1).contractId());
     }
 
     @Test

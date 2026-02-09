@@ -1,7 +1,7 @@
 package dev.mam.buizsol.mamshop.billing.model;
 
 import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
-import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidateException;
+import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import jakarta.annotation.Nullable;
@@ -73,13 +73,13 @@ public final class Invoice {
 
     private BigDecimal calculateTotalSetupFee() {
         return items.stream()
-                .map(InvoiceItem::getSetupFee)
+                .map(InvoiceItem::setupFee)
                 .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
     }
 
     private BigDecimal calculateTotalMonthlyFee() {
         return items.stream()
-                .map(InvoiceItem::getMonthlyFee)
+                .map(InvoiceItem::monthlyFee)
                 .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
     }
 
@@ -137,7 +137,7 @@ public final class Invoice {
             @Nullable final Object value,
             @NotNull final String fieldName) {
         if (value == null) {
-            throw new InvoiceValidateException(fieldName + " must not be null");
+            throw new InvoiceValidationException(fieldName + " must not be null");
         }
     }
 

@@ -25,12 +25,12 @@ class InvoiceItemTest {
 
         InvoiceItem item = new InvoiceItem(productId, productName, contractId, creationDate, setupFee, monthlyFee);
 
-        assertEquals(productId, item.getProductId());
-        assertEquals(productName, item.getProductName());
-        assertEquals(contractId, item.getContractId());
-        assertEquals(creationDate, item.getContractCreationDate());
-        assertEquals(setupFee, item.getSetupFee());
-        assertEquals(monthlyFee, item.getMonthlyFee());
+        assertEquals(productId, item.productId());
+        assertEquals(productName, item.productName());
+        assertEquals(contractId, item.contractId());
+        assertEquals(creationDate, item.contractCreationDate());
+        assertEquals(setupFee, item.setupFee());
+        assertEquals(monthlyFee, item.monthlyFee());
     }
 
     @ParameterizedTest(name = "02: Parameterized check of fees - setup: {0}, monthly: {1}")
@@ -50,8 +50,8 @@ class InvoiceItemTest {
                 setupFee,
                 monthlyFee);
 
-        assertEquals(setupFee, item.getSetupFee());
-        assertEquals(monthlyFee, item.getMonthlyFee());
+        assertEquals(setupFee, item.setupFee());
+        assertEquals(monthlyFee, item.monthlyFee());
     }
 
     @Test
@@ -67,6 +67,6 @@ class InvoiceItemTest {
                 BigDecimal.ZERO,
                 new BigDecimal("10.00"));
 
-        assertEquals(pastDate, item.getContractCreationDate());
+        assertEquals(pastDate, item.contractCreationDate());
     }
 }

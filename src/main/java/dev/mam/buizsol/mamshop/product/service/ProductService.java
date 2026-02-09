@@ -18,18 +18,14 @@ public interface ProductService {
                 return ProductServiceImpl.getInstance();
         }
 
-        void createProduct(
-                        @NotNull @Valid final Product product);
+        void createProduct(@NotNull @Valid final Product product);
 
         @NotNull
-        Optional<Product> findById(
-                        @NotNull final UUID id);
+        Optional<Product> findById(@NotNull final UUID id);
 
         @NotNull
-        List<Product> findByBrand(
-                        @NotNull final Brand brand);
+        List<Product> findByBrand(@NotNull final Brand brand);
 
-        void updateMonthlyFee(
-                        @NotNull final UUID id,
-                        @NotNull final BigDecimal monthlyFee) throws ProductNotFoundException;
+        void updateMonthlyFee(@NotNull final UUID id, @NotNull final BigDecimal monthlyFee)
+                        throws ProductNotFoundException;
 }

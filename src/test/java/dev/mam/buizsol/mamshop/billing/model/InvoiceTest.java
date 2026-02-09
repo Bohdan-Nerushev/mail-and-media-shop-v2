@@ -1,7 +1,7 @@
 package dev.mam.buizsol.mamshop.billing.model;
 
 import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
-import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidateException;
+import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -118,7 +117,7 @@ class InvoiceTest {
     @Test
     @DisplayName("08: Null items list validation (negative scenario)")
     void test8_invoiceNullItems_throwsException() {
-        assertThrows(InvoiceValidateException.class,
+        assertThrows(InvoiceValidationException.class,
                 () -> new Invoice(Brand.GMX, customerId, testAddress, testAddress, null, BigDecimal.ZERO));
     }
 

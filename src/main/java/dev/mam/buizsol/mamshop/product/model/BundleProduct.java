@@ -39,6 +39,18 @@ public class BundleProduct extends Product {
         return partnerProduct;
     }
 
+    @Override
+    public void setMonthlyFee(
+            @NotNull final BigDecimal monthlyFee) {
+        throw new UnsupportedOperationException("Monthly fee is calculated from components and cannot be set manually");
+    }
+
+    @Override
+    @NotNull
+    public BigDecimal getMonthlyFee() {
+        return calculateTotalMonthlyFee(mailProduct, partnerProduct);
+    }
+
     private static String generateName(
             final MailProduct mail,
             final PartnerProduct partner) {

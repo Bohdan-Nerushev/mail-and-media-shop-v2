@@ -23,9 +23,11 @@ public interface CustomerService {
 
     void updateAddress(@NotNull UUID customerId, @Valid @NotNull Address address) throws CustomerNotFoundException;
 
-    void updateInvoiceAddress(@NotNull UUID customerId, @Valid @NotNull Address address) throws CustomerNotFoundException;
+    void updateInvoiceAddress(@NotNull UUID customerId, @Valid @NotNull Address address)
+            throws CustomerNotFoundException;
 
-    void updateCommunicationDetails(@NotNull UUID customerId,
+    void updateCommunicationDetails(
+            @NotNull UUID customerId,
             @Valid @NotNull CommunicationDetails communicationDetails) throws CustomerNotFoundException;
 
     void activateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;

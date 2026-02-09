@@ -25,12 +25,10 @@ public interface ShopService {
         }
 
         @NotNull
-        Customer registerCustomer(
-                        @NotNull @Valid final Customer customer);
+        Customer registerCustomer(@NotNull @Valid final Customer customer);
 
         @NotNull
-        Product registerProduct(
-                        @NotNull @Valid final Product product);
+        Product registerProduct(@NotNull @Valid final Product product);
 
         @NotNull
         Customer loadCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
@@ -60,7 +58,8 @@ public interface ShopService {
         List<Contract> loadAllContracts(@NotNull final UUID customerId) throws CustomerNotFoundException;
 
         @NotNull
-        Invoice generateInvoice(@NotNull final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException;
+        Invoice generateInvoice(@NotNull final UUID customerId)
+                        throws CustomerNotFoundException, ProductNotFoundException;
 
         void activateContract(@NotNull final UUID contractId) throws ContractNotFoundException;
 
@@ -70,5 +69,6 @@ public interface ShopService {
         @NotNull
         Contract purchaseProduct(
                         @NotNull final UUID customerId,
-                        @NotNull final UUID productId) throws CustomerNotFoundException, ProductNotFoundException, BrandMismatchException;
+                        @NotNull final UUID productId)
+                        throws CustomerNotFoundException, ProductNotFoundException, BrandMismatchException;
 }

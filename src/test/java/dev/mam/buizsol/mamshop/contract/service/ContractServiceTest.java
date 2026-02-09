@@ -71,7 +71,7 @@ class ContractServiceTest {
         assertNotNull(created);
         assertEquals(activeCustomer.getId(), created.getCustomerId());
         assertEquals(matchingProduct.getId(), created.getProductId());
-        assertEquals(ContractStatus.ACTIVE, created.getStatus());
+        assertEquals(ContractStatus.INACTIVE, created.getStatus());
         verify(contractRepository).save(any(Contract.class));
     }
 

@@ -19,8 +19,7 @@ interface CustomerRepository {
         void save(@Valid @NotNull final Customer customer);
 
         @NotNull
-        Optional<Customer> findById(
-                        @NotNull final UUID id);
+        Optional<Customer> findById(@NotNull final UUID id);
 
         @NotNull
         default Customer getById(@NotNull final UUID id) throws CustomerNotFoundException {

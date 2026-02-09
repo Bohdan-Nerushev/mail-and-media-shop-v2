@@ -32,24 +32,21 @@ final class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void createProduct(
-            @NotNull @Valid final Product product) {
+    public void createProduct(@NotNull @Valid final Product product) {
         validateNotNull(product, "Product");
         repository.save(product);
     }
 
     @Override
     @NotNull
-    public Optional<Product> findById(
-            @NotNull final UUID productId) {
+    public Optional<Product> findById(@NotNull final UUID productId) {
         validateNotNull(productId, "ID");
         return repository.findById(productId);
     }
 
     @Override
     @NotNull
-    public List<Product> findByBrand(
-            @NotNull final Brand brand) {
+    public List<Product> findByBrand(@NotNull final Brand brand) {
         validateNotNull(brand, "Brand");
         return List.copyOf(repository.findByBrand(brand));
     }

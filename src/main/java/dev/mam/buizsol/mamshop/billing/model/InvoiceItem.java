@@ -6,68 +6,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public final class InvoiceItem {
+public record InvoiceItem(
+        @NotNull UUID productId,
 
-    @NotNull
-    private final UUID productId;
+        @NotBlank String productName,
 
-    @NotBlank
-    private final String productName;
+        @NotNull UUID contractId,
 
-    @NotNull
-    private final UUID contractId;
+        @NotNull LocalDate contractCreationDate,
 
-    @NotNull
-    private final LocalDate contractCreationDate;
+        @NotNull BigDecimal setupFee,
 
-    @NotNull
-    private final BigDecimal setupFee;
-
-    @NotNull
-    private final BigDecimal monthlyFee;
-
-    public InvoiceItem(
-            @NotNull UUID productId,
-            @NotBlank String productName,
-            @NotNull UUID contractId,
-            @NotNull LocalDate contractCreationDate,
-            @NotNull BigDecimal setupFee,
-            @NotNull BigDecimal monthlyFee) {
-        this.productId = productId;
-        this.productName = productName;
-        this.contractId = contractId;
-        this.contractCreationDate = contractCreationDate;
-        this.setupFee = setupFee;
-        this.monthlyFee = monthlyFee;
-    }
-
-    @NotNull
-    public UUID getProductId() {
-        return productId;
-    }
-
-    @NotBlank
-    public String getProductName() {
-        return productName;
-    }
-
-    @NotNull
-    public UUID getContractId() {
-        return contractId;
-    }
-
-    @NotNull
-    public LocalDate getContractCreationDate() {
-        return contractCreationDate;
-    }
-
-    @NotNull
-    public BigDecimal getSetupFee() {
-        return setupFee;
-    }
-
-    @NotNull
-    public BigDecimal getMonthlyFee() {
-        return monthlyFee;
-    }
+        @NotNull BigDecimal monthlyFee) {
 }

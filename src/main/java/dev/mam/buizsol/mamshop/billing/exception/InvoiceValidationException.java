@@ -2,9 +2,9 @@ package dev.mam.buizsol.mamshop.billing.exception;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class InvoiceValidateException extends BillingException {
+public class InvoiceValidationException extends BillingException {
 
-    public InvoiceValidateException(
+    public InvoiceValidationException(
             @NotBlank final String message) {
         super(message);
     }

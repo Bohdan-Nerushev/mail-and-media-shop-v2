@@ -410,7 +410,8 @@ class ShopServiceImplTest {
 
                 Product product = createDefaultStandardMailProduct("Mail", brand, new BigDecimal("2.50"));
                 shopService.registerProduct(product);
-                shopService.purchaseProduct(customer.getId(), product.getId());
+                Contract contract = shopService.purchaseProduct(customer.getId(), product.getId());
+                shopService.activateContract(contract.getId());
 
                 Invoice invoice = shopService.generateInvoice(customer.getId());
                 assertNotNull(invoice);

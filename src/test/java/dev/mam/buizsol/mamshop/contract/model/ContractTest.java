@@ -42,7 +42,7 @@ class ContractTest {
         assertNotNull(contract.getId());
         assertEquals(customerId, contract.getCustomerId());
         assertEquals(productId, contract.getProductId());
-        assertEquals(ContractStatus.ACTIVE, contract.getStatus());
+        assertEquals(ContractStatus.INACTIVE, contract.getStatus());
     }
 
     @Test
@@ -154,7 +154,7 @@ class ContractTest {
         when(product.getBrand()).thenReturn(Brand.GMX);
 
         Contract contract = new Contract(customer, product);
-        assertEquals(ContractStatus.ACTIVE, contract.getStatus());
+        assertEquals(ContractStatus.INACTIVE, contract.getStatus());
 
         contract.updateStatus(ContractStatus.INACTIVE);
         assertEquals(ContractStatus.INACTIVE, contract.getStatus());

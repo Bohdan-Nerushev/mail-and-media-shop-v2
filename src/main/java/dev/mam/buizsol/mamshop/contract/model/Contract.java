@@ -43,7 +43,7 @@ public class Contract {
         this.customerId = customer.getId();
         this.productId = product.getId();
         this.creationDate = LocalDate.now();
-        this.status = ContractStatus.ACTIVE;
+        this.status = ContractStatus.INACTIVE;
     }
 
     @NotNull

@@ -16,24 +16,19 @@ interface ContractRepository {
         }
 
         @NotNull
-        Contract save(
-                        @NotNull @Valid final Contract contract);
+        Contract save(@NotNull @Valid final Contract contract);
 
         @NotNull
-        Contract update(
-                        @NotNull @Valid final Contract contract);
+        Contract update(@NotNull @Valid final Contract contract);
 
         @NotNull
-        Optional<Contract> findById(
-                        @NotNull final UUID id);
+        Optional<Contract> findById(@NotNull final UUID id);
 
         @NotNull
-        List<Contract> findByCustomerId(
-                        @NotNull final UUID customerId);
+        List<Contract> findByCustomerId(@NotNull final UUID customerId);
 
         @NotNull
-        List<Contract> findByProductId(
-                        @NotNull final UUID productId);
+        List<Contract> findByProductId(@NotNull final UUID productId);
 
         @NotNull
         List<Contract> findAll();
