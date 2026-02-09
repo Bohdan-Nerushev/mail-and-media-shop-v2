@@ -63,7 +63,7 @@ class ContractServiceTest {
 
     @Test
     @DisplayName("01. Success: createContract generates and saves a contract")
-    void test01_createContract_Success() {
+    void test01_createContract_Success() throws BrandMismatchException {
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract created = contractService.createContract(activeCustomer, matchingProduct);
@@ -103,7 +103,7 @@ class ContractServiceTest {
 
     @Test
     @DisplayName("04. Success: updateContractStatus updates status correctly")
-    void test04_updateContractStatus_Success() {
+    void test04_updateContractStatus_Success() throws ContractNotFoundException, BrandMismatchException {
         UUID contractId = UUID.randomUUID();
         Contract contract = new Contract(activeCustomer, matchingProduct);
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));

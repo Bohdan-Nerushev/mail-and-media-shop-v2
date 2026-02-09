@@ -188,8 +188,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("7: Deactivate Customer: Fails for INACTIVE customer (Parameterized)")
-        void test06_deactivateCustomer_Negative_Inactive(Brand brand) throws CustomerNotFoundException {
+        @DisplayName("7: Deactivate Customer: Succeeds for INACTIVE customer (Idempotency)")
+        void test07_deactivateCustomer_Idempotent(Brand brand) throws CustomerNotFoundException {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -198,8 +198,9 @@ class ShopServiceImplTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                assertThrows(CustomerNotActiveException.class,
-                                () -> shopService.deactivateCustomer(customer.getId()));
+
+                assertDoesNotThrow(() -> shopService.deactivateCustomer(customer.getId()));
+                assertEquals(CustomerStatus.INACTIVE, shopService.loadCustomer(customer.getId()).getStatus());
         }
 
         @ParameterizedTest

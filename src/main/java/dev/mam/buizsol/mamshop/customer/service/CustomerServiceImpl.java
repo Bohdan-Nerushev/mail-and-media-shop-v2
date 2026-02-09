@@ -1,6 +1,6 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
-import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
@@ -49,7 +49,7 @@ final class CustomerServiceImpl implements CustomerService {
     @Override
     public void updateAddress(
             @NotNull final UUID customerId,
-            @Valid @NotNull final Address address) {
+            @Valid @NotNull final Address address) throws CustomerNotFoundException {
         validateNotNull(customerId, "Customer ID");
         final var customer = customerRepository.getById(customerId);
         customer.setAddress(address);
@@ -59,7 +59,7 @@ final class CustomerServiceImpl implements CustomerService {
     @Override
     public void updateInvoiceAddress(
             @NotNull final UUID customerId,
-            @Valid @NotNull final Address address) {
+            @Valid @NotNull final Address address) throws CustomerNotFoundException {
         validateNotNull(customerId, "Customer ID");
         final var customer = customerRepository.getById(customerId);
         customer.setInvoiceAddress(address);
@@ -68,7 +68,7 @@ final class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCommunicationDetails(@NotNull final UUID customerId,
-            @Valid @NotNull final CommunicationDetails communicationDetails) {
+            @Valid @NotNull final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
         validateNotNull(customerId, "Customer ID");
         final Customer customer = customerRepository.getById(customerId);
         customer.setCommunicationDetails(communicationDetails);
@@ -76,7 +76,7 @@ final class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void activateCustomer(@NotNull final UUID customerId) {
+    public void activateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
         validateNotNull(customerId, "Customer ID");
         final Customer customer = customerRepository.getById(customerId);
         customer.setStatus(CustomerStatus.ACTIVE);
@@ -84,18 +84,15 @@ final class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void deactivateCustomer(@NotNull final UUID customerId) {
+    public void deactivateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
         validateNotNull(customerId, "Customer ID");
-        Customer customer = customerRepository.getById(customerId);
-        if (customer.getStatus() == CustomerStatus.INACTIVE) {
-            throw new CustomerNotActiveException("Customer is already inactive");
-        }
+        final Customer customer = customerRepository.getById(customerId);
         customer.setStatus(CustomerStatus.INACTIVE);
         customerRepository.update(customer);
     }
 
     @Override
-    public void deleteCustomer(@NotNull final UUID customerId) {
+    public void deleteCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
         validateNotNull(customerId, "Customer ID");
         customerRepository.delete(customerId);
     }

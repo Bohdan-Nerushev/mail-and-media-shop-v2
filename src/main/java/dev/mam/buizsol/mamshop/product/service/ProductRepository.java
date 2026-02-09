@@ -14,6 +14,9 @@ interface ProductRepository {
         void save(
                         @NotNull @Valid final Product product);
 
+        void update(
+                        @NotNull @Valid final Product product);
+
         @NotNull
         Optional<Product> findById(
                         @NotNull final UUID id);

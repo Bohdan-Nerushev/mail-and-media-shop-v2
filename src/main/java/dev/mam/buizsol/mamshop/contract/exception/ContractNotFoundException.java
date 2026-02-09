@@ -3,7 +3,7 @@ package dev.mam.buizsol.mamshop.contract.exception;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
-public class ContractNotFoundException extends RuntimeException {
+public class ContractNotFoundException extends Exception {
 
     public ContractNotFoundException(
             @NotNull final String message) {

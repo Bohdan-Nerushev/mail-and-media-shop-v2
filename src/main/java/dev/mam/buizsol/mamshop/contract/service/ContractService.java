@@ -1,5 +1,7 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
+import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
+import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
@@ -21,7 +23,7 @@ public interface ContractService {
         @NotNull
         Contract createContract(
                         @NotNull @Valid final Customer customer,
-                        @NotNull @Valid final Product product);
+                        @NotNull @Valid final Product product) throws BrandMismatchException;
 
         @NotNull
         Optional<Contract> findContractById(
@@ -38,5 +40,5 @@ public interface ContractService {
         @NotNull
         Contract updateContractStatus(
                         @NotNull final UUID contractId,
-                        @NotNull final ContractStatus status);
+                        @NotNull final ContractStatus status) throws ContractNotFoundException;
 }

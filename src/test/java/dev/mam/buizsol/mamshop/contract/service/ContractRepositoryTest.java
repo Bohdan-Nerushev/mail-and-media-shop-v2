@@ -1,5 +1,6 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
+import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
@@ -51,7 +52,7 @@ class ContractRepositoryTest {
 
     @Test
     @DisplayName("01. Success: save stores a contract and returns it")
-    void test01_save_Success() {
+    void test01_save_Success() throws BrandMismatchException {
         Contract contract = new Contract(testCustomer, testProduct);
 
         Contract saved = contractRepository.save(contract);
@@ -66,7 +67,7 @@ class ContractRepositoryTest {
 
     @Test
     @DisplayName("02. Success: update modifies existing contract")
-    void test02_update_Success() {
+    void test02_update_Success() throws BrandMismatchException {
         Contract contract = new Contract(testCustomer, testProduct);
         contractRepository.save(contract);
         contract.updateStatus(ContractStatus.INACTIVE);
@@ -79,7 +80,7 @@ class ContractRepositoryTest {
 
     @Test
     @DisplayName("03. Success: findByCustomerId returns all contracts for customer")
-    void test03_findByCustomerId_Success() {
+    void test03_findByCustomerId_Success() throws BrandMismatchException {
         UUID customerId = testCustomer.getId();
         Contract contract1 = new Contract(testCustomer, testProduct);
         Contract contract2 = new Contract(testCustomer, testProduct);
@@ -94,7 +95,7 @@ class ContractRepositoryTest {
 
     @Test
     @DisplayName("04. Success: findByProductId returns all contracts for product")
-    void test04_findByProductId_Success() {
+    void test04_findByProductId_Success() throws BrandMismatchException {
         UUID productId = testProduct.getId();
         Contract contract = new Contract(testCustomer, testProduct);
         contractRepository.save(contract);
@@ -122,7 +123,7 @@ class ContractRepositoryTest {
 
     @Test
     @DisplayName("07. Boundary: findAll returns list containing saved contracts")
-    void test07_findAll_Success() {
+    void test07_findAll_Success() throws BrandMismatchException {
         Contract contract = new Contract(testCustomer, testProduct);
         contractRepository.save(contract);
 
@@ -156,7 +157,7 @@ class ContractRepositoryTest {
 
     @Test
     @DisplayName("11. Success: findByCustomerId filters correct contracts among many")
-    void test11_findByCustomerId_ComplexFiltering() {
+    void test11_findByCustomerId_ComplexFiltering() throws BrandMismatchException {
         Customer anotherCustomer = mock(Customer.class);
         when(anotherCustomer.getId()).thenReturn(UUID.randomUUID());
         when(anotherCustomer.getStatus()).thenReturn(CustomerStatus.ACTIVE);

@@ -32,7 +32,7 @@ public class Contract {
 
     public Contract(
             @NotNull @Valid final Customer customer,
-            @NotNull @Valid final Product product) {
+            @NotNull @Valid final Product product) throws BrandMismatchException {
 
         validateNotNull(customer, "Customer");
         validateNotNull(product, "Product");
@@ -79,7 +79,7 @@ public class Contract {
 
     private void validateBrandMatch(
             @NotNull final Customer customer,
-            @NotNull final Product product) {
+            @NotNull final Product product) throws BrandMismatchException {
         if (!customer.getBrand().equals(product.getBrand())) {
             throw new BrandMismatchException(String.format(
                     "Customer brand %s does not match product brand %s",

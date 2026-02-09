@@ -25,7 +25,7 @@ class ContractTest {
 
     @Test
     @DisplayName("01. Creating a contract for an active customer with the corresponding product")
-    void shouldCreateContractWhenCustomerIsActiveAndBrandsMatch() {
+    void shouldCreateContractWhenCustomerIsActiveAndBrandsMatch() throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
         UUID customerId = UUID.randomUUID();
@@ -47,7 +47,7 @@ class ContractTest {
 
     @Test
     @DisplayName("02. Verify that only IDs are saved, not objects")
-    void shouldStoreOnlyIdsAndNotFullObjects() {
+    void shouldStoreOnlyIdsAndNotFullObjects() throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
         UUID customerId = UUID.randomUUID();
@@ -69,7 +69,7 @@ class ContractTest {
 
     @Test
     @DisplayName("03. Checking the creation date")
-    void shouldSetCreationDateToCurrentDate() {
+    void shouldSetCreationDateToCurrentDate() throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
 
@@ -126,7 +126,7 @@ class ContractTest {
     @ParameterizedTest
     @EnumSource(Brand.class)
     @DisplayName("08. Parameterized test: creating a contract for all brands")
-    void shouldCreateContractForAllBrands(Brand brand) {
+    void shouldCreateContractForAllBrands(Brand brand) throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
 
@@ -143,7 +143,7 @@ class ContractTest {
 
     @Test
     @DisplayName("09. Contract status update")
-    void shouldUpdateContractStatus() {
+    void shouldUpdateContractStatus() throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
 
@@ -168,7 +168,7 @@ class ContractTest {
 
     @Test
     @DisplayName("10. Attempting to update status to null → IllegalArgumentException")
-    void shouldThrowExceptionWhenUpdatingStatusWithNull() {
+    void shouldThrowExceptionWhenUpdatingStatusWithNull() throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
 

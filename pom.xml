@@ -6,7 +6,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dev.mam.buizsol.buizsol</groupId>
+    <groupId>dev.mam.buizsol</groupId>
     <artifactId>mail-and-media-shop</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>

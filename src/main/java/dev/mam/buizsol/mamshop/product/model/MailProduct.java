@@ -18,13 +18,13 @@ public abstract class MailProduct extends Product {
             @NotNull final Brand brand,
             @NotNull final BigDecimal setupFee,
             @NotNull final BigDecimal monthlyFee,
-            @NotNull final Long storageSize) {
+            @NotNull final Long storageSizeGB) {
         super(name, brand, setupFee, monthlyFee);
-        validateNotNull(storageSize, "Storage size");
-        if (storageSize < 1L) {
+        validateNotNull(storageSizeGB, "Storage size");
+        if (storageSizeGB < 1L) {
             throw new ProductValidationException("Storage size must be at least 1GB");
         }
-        this.storageSize = storageSize;
+        this.storageSize = storageSizeGB;
     }
 
     @NotNull

@@ -40,6 +40,13 @@ final class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
+    public void update(
+            @NotNull @Valid final Product product) {
+        validateNotNull(product, "Product");
+        storage.put(product.getId(), product);
+    }
+
+    @Override
     @NotNull
     public Optional<Product> findById(
             @NotNull final UUID id) {
@@ -64,7 +71,6 @@ final class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    @NotNull
     public void clearStorage() {
         storage.clear();
     }

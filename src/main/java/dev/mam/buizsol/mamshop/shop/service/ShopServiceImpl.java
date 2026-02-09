@@ -2,6 +2,8 @@ package dev.mam.buizsol.mamshop.shop.service;
 
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.service.BillingService;
+import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
+import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
@@ -61,26 +63,26 @@ public class ShopServiceImpl implements ShopService {
     @Override
     @NotNull
     public Customer loadCustomer(
-            @NotNull final UUID customerId) {
+            @NotNull final UUID customerId) throws CustomerNotFoundException {
         return customerService.findCustomerById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + customerId));
     }
 
     @Override
     public void removeCustomer(
-            @NotNull final UUID customerId) {
+            @NotNull final UUID customerId) throws CustomerNotFoundException {
         customerService.deleteCustomer(customerId);
     }
 
     @Override
     public void activateCustomer(
-            @NotNull final UUID customerId) {
+            @NotNull final UUID customerId) throws CustomerNotFoundException {
         customerService.activateCustomer(customerId);
     }
 
     @Override
     public void deactivateCustomer(
-            @NotNull final UUID customerId) {
+            @NotNull final UUID customerId) throws CustomerNotFoundException {
         customerService.deactivateCustomer(customerId);
     }
 
@@ -88,7 +90,7 @@ public class ShopServiceImpl implements ShopService {
     @NotNull
     public Customer updateAddress(
             @NotNull final UUID customerId,
-            @NotNull @Valid final Address address) {
+            @NotNull @Valid final Address address) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateAddress(customerId, address);
         return loadCustomer(customerId);
@@ -98,7 +100,7 @@ public class ShopServiceImpl implements ShopService {
     @NotNull
     public Customer updateInvoiceAddress(
             @NotNull final UUID customerId,
-            @NotNull @Valid final Address invoiceAddress) {
+            @NotNull @Valid final Address invoiceAddress) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateInvoiceAddress(customerId, invoiceAddress);
         return loadCustomer(customerId);
@@ -108,7 +110,7 @@ public class ShopServiceImpl implements ShopService {
     @NotNull
     public Customer updateCommunicationDetails(
             @NotNull final UUID customerId,
-            @NotNull @Valid final CommunicationDetails details) {
+            @NotNull @Valid final CommunicationDetails details) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateCommunicationDetails(customerId, details);
         return loadCustomer(customerId);
@@ -117,7 +119,7 @@ public class ShopServiceImpl implements ShopService {
     @Override
     @NotNull
     public List<Contract> loadAllContracts(
-            @NotNull final UUID customerId) {
+            @NotNull final UUID customerId) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         return List.copyOf(contractService.findContractsByCustomerId(customerId));
     }
@@ -125,14 +127,14 @@ public class ShopServiceImpl implements ShopService {
     @Override
     @NotNull
     public Invoice generateInvoice(
-            @NotNull final UUID customerId) {
+            @NotNull final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
         checkCustomerActive(customerId);
         return billingService.generateInvoice(customerId);
     }
 
     @Override
     public void activateContract(
-            @NotNull final UUID contractId) {
+            @NotNull final UUID contractId) throws ContractNotFoundException {
         contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
     }
 
@@ -147,7 +149,7 @@ public class ShopServiceImpl implements ShopService {
     @NotNull
     public Contract purchaseProduct(
             @NotNull final UUID customerId,
-            @NotNull final UUID productId) {
+            @NotNull final UUID productId) throws CustomerNotFoundException, ProductNotFoundException, BrandMismatchException {
 
         final Customer customer = loadCustomer(customerId);
         if (customer.getStatus() != CustomerStatus.ACTIVE) {
@@ -165,7 +167,7 @@ public class ShopServiceImpl implements ShopService {
         return contractService.createContract(customer, product);
     }
 
-    private void checkCustomerActive(@NotNull final UUID customerId) {
+    private void checkCustomerActive(@NotNull final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
         if (customer.getStatus() != CustomerStatus.ACTIVE) {
             throw new CustomerNotActiveException("Customer is not active");

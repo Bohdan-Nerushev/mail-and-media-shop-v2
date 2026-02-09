@@ -57,7 +57,7 @@ final class ProductServiceImpl implements ProductService {
     @Override
     public void updateMonthlyFee(
             @NotNull final UUID id,
-            @NotNull final BigDecimal monthlyFee) {
+            @NotNull final BigDecimal monthlyFee) throws ProductNotFoundException {
         validateNotNull(id, "ID");
         notZeroOrNegative(monthlyFee, "Monthly fee");
 
