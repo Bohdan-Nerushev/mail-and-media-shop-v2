@@ -25,8 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -40,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class BillingServiceTest {
 
     @Mock
@@ -168,7 +165,7 @@ class BillingServiceTest {
     @ParameterizedTest(name = "Invalid discount validation - value: {0}")
     @ValueSource(strings = { "0.01", "0.05", "0.10", "-0.01", "-1.00" })
     void shouldThrowExceptionWhenDiscountIsInvalid(BigDecimal invalidDiscount) {
-        when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
+        lenient().when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         assertThrows(InvalidInvoiceDiscountException.class,
                 () -> billingService.generateInvoice(customerId, invalidDiscount));
