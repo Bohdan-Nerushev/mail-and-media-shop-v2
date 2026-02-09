@@ -11,8 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 class ContractNotFoundExceptionTest {
 
     @Test
-    @DisplayName("test01: Constructor with message should set message correctly")
-    void constructorWithMessage_shouldSetMessage() {
+    @DisplayName("Constructor with message should set message correctly")
+    void shouldSetMessageWhenConstructorWithMessageIsCalled() {
         final String message = "Contract not found";
 
         final ContractNotFoundException exception = new ContractNotFoundException(message);
@@ -22,8 +22,8 @@ class ContractNotFoundExceptionTest {
     }
 
     @Test
-    @DisplayName("test02: Constructor with message and cause should set both correctly")
-    void constructorWithMessageAndCause_shouldSetBoth() {
+    @DisplayName("Constructor with message and cause should set both correctly")
+    void shouldSetMessageAndCauseWhenConstructorIsCalled() {
         final String message = "Contract not found";
         final Throwable cause = new RuntimeException("Root cause");
 
@@ -34,8 +34,8 @@ class ContractNotFoundExceptionTest {
     }
 
     @Test
-    @DisplayName("test03: Constructor with message and null cause should set message and null cause")
-    void constructorWithMessageAndNullCause_shouldSetMessageAndNullCause() {
+    @DisplayName("Constructor with message and null cause should set message and null cause")
+    void shouldSetMessageAndNullCauseWhenConstructorIsCalled() {
         final String message = "Contract not found";
 
         final ContractNotFoundException exception = new ContractNotFoundException(message, null);

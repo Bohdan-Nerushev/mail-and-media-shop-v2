@@ -31,8 +31,8 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("1. Success: Create Product and verify fields and ID uniqueness")
-    void test1_CreateProduct_Success() {
+    @DisplayName("Success: Create Product and verify fields and ID uniqueness")
+    void shouldCreateProductAndVerifyFieldsWhenDataIsValid() {
         Product p1 = createDefaultProduct("P1", Brand.GMX, BigDecimal.ZERO, BigDecimal.ONE);
         Product p2 = createDefaultProduct("P2", Brand.WEB_DE, BigDecimal.TEN, new BigDecimal("5.50"));
 
@@ -46,8 +46,8 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("2. Success: Verify mass ID uniqueness (1000 instances)")
-    void test2_MassProductID_Uniqueness() {
+    @DisplayName("Success: Verify mass ID uniqueness (1000 instances)")
+    void shouldGenerateUniqueIdsWhenMassCreatingProducts() {
         int count = 1000;
         Set<UUID> verifyIdsSuccess = new HashSet<>();
 
@@ -59,11 +59,11 @@ class ProductTest {
         assertEquals(count, verifyIdsSuccess.size(), "All generated IDs must be unique");
     }
 
+    @DisplayName("Negative: Failure with invalid names (null, empty, blank)")
     @ParameterizedTest(name = "[{index}] Name: ''{0}''")
     @NullAndEmptySource
     @ValueSource(strings = { " ", "   ", "\t", "\n" })
-    @DisplayName("3. Negative: Failure with invalid names (null, empty, blank)")
-    void test3_CreateProduct_InvalidName_ThrowsException(String invalidName) {
+    void shouldThrowExceptionWhenProductNameIsInvalid(String invalidName) {
         ProductValidationException exception = assertThrows(
                 ProductValidationException.class,
                 () -> createDefaultProduct(invalidName, Brand.GMX, BigDecimal.ZERO, BigDecimal.ONE));
@@ -72,8 +72,8 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("4. Negative: Failure with null brand")
-    void test4_CreateProduct_NullBrand_ThrowsException() {
+    @DisplayName("Negative: Failure with null brand")
+    void shouldThrowExceptionWhenBrandIsNull() {
         ProductValidationException exception = assertThrows(
                 ProductValidationException.class,
                 () -> createDefaultProduct("P", null, BigDecimal.ZERO, BigDecimal.ONE));
@@ -81,13 +81,13 @@ class ProductTest {
         assertEquals("Brand must not be null", exception.getMessage());
     }
 
+    @DisplayName("Negative: Failure with null fees")
     @ParameterizedTest(name = "[{index}] Setup: {0}, Monthly: {1}")
     @CsvSource({
             ", 1.00",
             "0.00, "
     })
-    @DisplayName("5. Negative: Failure with null fees")
-    void test5_CreateProduct_NullFees_ThrowsException(BigDecimal setupFee, BigDecimal monthlyFee) {
+    void shouldThrowExceptionWhenFeesAreNull(BigDecimal setupFee, BigDecimal monthlyFee) {
         String expectedField = setupFee == null ? "Setup fee" : "Monthly fee";
 
         ProductValidationException exception = assertThrows(
@@ -98,8 +98,8 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("6. Negative: Failure with negative setup fee")
-    void test6_CreateProduct_NegativeSetupFee_ThrowsException() {
+    @DisplayName("Negative: Failure with negative setup fee")
+    void shouldThrowExceptionWhenSetupFeeIsNegative() {
         BigDecimal negativeFee = new BigDecimal("-0.01");
 
         ProductValidationException exception = assertThrows(
@@ -109,10 +109,10 @@ class ProductTest {
         assertEquals("Setup fee must not be negative", exception.getMessage());
     }
 
+    @DisplayName("Negative: Failure with monthly fee <= 0.10")
     @ParameterizedTest(name = "[{index}] Monthly fee: {0}")
     @ValueSource(strings = { "0.10", "0.09", "0.00", "-1.00" })
-    @DisplayName("7. Negative: Failure with monthly fee <= 0.10")
-    void test7_CreateProduct_InvalidMonthlyFee_ThrowsException(String fee) {
+    void shouldThrowExceptionWhenMonthlyFeeIsInvalid(String fee) {
         BigDecimal invalidMonthlyFee = new BigDecimal(fee);
 
         ProductValidationException exception = assertThrows(
@@ -123,8 +123,8 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("8. Boundary: Success with minimum allowed monthly fee (0.11)")
-    void test8_CreateProduct_MinMonthlyFee_Success() {
+    @DisplayName("Boundary: Success with minimum allowed monthly fee (0.11)")
+    void shouldSucceedWhenMonthlyFeeIsAtMinimumAllowed() {
         BigDecimal minFee = new BigDecimal("0.11");
         Product p = createDefaultProduct("P", Brand.GMX, BigDecimal.ZERO, minFee);
 

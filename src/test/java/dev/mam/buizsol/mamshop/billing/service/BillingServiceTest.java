@@ -72,8 +72,8 @@ class BillingServiceTest {
     }
 
     @Test
-    @DisplayName("01: Successful generation of invoice without discount")
-    void test1_generateInvoiceWithoutDiscount_success() throws Exception {
+    @DisplayName("Successful generation of invoice without discount")
+    void shouldGenerateInvoiceWithoutDiscountWhenAllRequirementsAreMet() throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         Contract contract = mock(Contract.class);
@@ -94,8 +94,8 @@ class BillingServiceTest {
     }
 
     @Test
-    @DisplayName("02: Successful generation of invoice with discount")
-    void test2_generateInvoiceWithDiscount_success() throws Exception {
+    @DisplayName("Successful generation of invoice with discount")
+    void shouldGenerateInvoiceWithDiscountWhenValidDiscountProvided() throws Exception {
         BigDecimal discount = new BigDecimal("1.00");
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
         when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of());
@@ -107,12 +107,12 @@ class BillingServiceTest {
     }
 
     @Test
-    @DisplayName("03: Verification of correct totals calculation in invoice")
-    void test3_generateInvoice_correctCalculations() throws Exception {
+    @DisplayName("Verification of correct totals calculation in invoice")
+    void shouldCalculateTotalsCorrectlyWhenMultipleContractsExist() throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
-        Product p1 = new StandardMailProduct("P1", Brand.GMX, new BigDecimal("5.00")); // Setup 4.99
-        Product p2 = new StandardMailProduct("P2", Brand.GMX, new BigDecimal("15.00")); // Setup 4.99
+        Product p1 = new StandardMailProduct("P1", Brand.GMX, new BigDecimal("5.00"));
+        Product p2 = new StandardMailProduct("P2", Brand.GMX, new BigDecimal("15.00"));
 
         Contract c1 = mock(Contract.class);
         when(c1.getStatus()).thenReturn(ContractStatus.ACTIVE);
@@ -140,8 +140,8 @@ class BillingServiceTest {
     }
 
     @Test
-    @DisplayName("04: Verification of invoice item field structure")
-    void test4_generateInvoice_invoiceItemStructure() throws Exception {
+    @DisplayName("Verification of invoice item field structure")
+    void shouldPopulateInvoiceItemCorrectlyWhenGeneratingInvoice() throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
         LocalDate creationDate = LocalDate.now().minusDays(10);
         Contract contract = mock(Contract.class);
@@ -164,10 +164,10 @@ class BillingServiceTest {
         assertEquals(testProduct.getMonthlyFee(), item.monthlyFee());
     }
 
-    @ParameterizedTest(name = "Test 5: Invalid discount validation - value: {0}")
-    @DisplayName("05: Invalid discount validation checks")
+    @DisplayName("Invalid discount validation checks")
+    @ParameterizedTest(name = "Invalid discount validation - value: {0}")
     @ValueSource(strings = { "0.01", "0.05", "0.10", "-0.01", "-1.00" })
-    void test5_generateInvoice_invalidDiscount_throwsException(BigDecimal invalidDiscount) {
+    void shouldThrowExceptionWhenDiscountIsInvalid(BigDecimal invalidDiscount) {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         assertThrows(InvalidInvoiceDiscountException.class,
@@ -175,16 +175,16 @@ class BillingServiceTest {
     }
 
     @Test
-    @DisplayName("06: Handling scenario when customer is not found")
-    void test6_generateInvoice_customerNotFound_throwsException() {
+    @DisplayName("Handling scenario when customer is not found")
+    void shouldThrowExceptionWhenCustomerDoesNotExist() {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.empty());
 
         assertThrows(CustomerNotFoundException.class, () -> billingService.generateInvoice(customerId));
     }
 
     @Test
-    @DisplayName("07: Successful generation for customer without active contracts")
-    void test7_generateInvoice_noActiveContracts_emptyInvoice() throws Exception {
+    @DisplayName("Successful generation for customer without active contracts")
+    void shouldGenerateEmptyInvoiceWhenCustomerHasNoActiveContracts() throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         Contract contract = mock(Contract.class);
@@ -199,20 +199,20 @@ class BillingServiceTest {
         assertEquals(BigDecimal.ZERO, invoice.getTotalAmount());
     }
 
-    @ParameterizedTest(name = "Test 8: Null arguments validation - customerId={0}, discount={1}")
-    @DisplayName("08: Null arguments validation for generateInvoice")
+    @DisplayName("Null arguments validation for generateInvoice")
+    @ParameterizedTest(name = "Null arguments validation - customerId={0}, discount={1}")
     @CsvSource(value = {
             "null, 10.00",
             "550e8400-e29b-41d4-a716-446655440000, null",
             "null, null"
     }, nullValues = { "null" })
-    void test8_generateInvoice_nullArguments_throwsException(UUID cid, BigDecimal disc) {
+    void shouldThrowExceptionWhenArgumentsAreNull(UUID cid, BigDecimal disc) {
         assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(cid, disc));
     }
 
     @Test
-    @DisplayName("09: Handling scenario when product is not found for a contract")
-    void test9_generateInvoice_productNotFound_throwsException() throws Exception {
+    @DisplayName("Handling scenario when product is not found for a contract")
+    void shouldThrowExceptionWhenProductInContractDoesNotExist() throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
         Contract contract = mock(Contract.class);
         when(contract.getStatus()).thenReturn(ContractStatus.ACTIVE);
@@ -223,10 +223,10 @@ class BillingServiceTest {
         assertThrows(ProductNotFoundException.class, () -> billingService.generateInvoice(customerId));
     }
 
-    @ParameterizedTest(name = "Test 10: Boundary discount values - value: {0}")
-    @DisplayName("10: Verification of valid boundary discount values")
+    @DisplayName("Verification of valid boundary discount values")
+    @ParameterizedTest(name = "Boundary discount values - value: {0}")
     @ValueSource(strings = { "0.00", "0.11", "0.10001", "1.00", "5.00", "100.00" })
-    void test10_generateInvoice_validDiscounts_success(BigDecimal validDiscount) throws Exception {
+    void shouldGenerateInvoiceWhenValidBoundaryDiscountsProvided(BigDecimal validDiscount) throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
         when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of());
 
@@ -237,8 +237,8 @@ class BillingServiceTest {
     }
 
     @Test
-    @DisplayName("11: Generation with mixed contract states (active and inactive)")
-    void test11_generateInvoice_mixedContractStates() throws Exception {
+    @DisplayName("Generation with mixed contract states (active and inactive)")
+    void shouldOnlyIncludeActiveContractsInInvoice() throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         Contract activeContract = mock(Contract.class);
@@ -261,8 +261,8 @@ class BillingServiceTest {
     }
 
     @Test
-    @DisplayName("12: Generation with multiple contracts for the same product")
-    void test12_generateInvoice_duplicateProducts() throws Exception {
+    @DisplayName("Generation with multiple contracts for the same product")
+    void shouldIncludeMultipleInvoiceItemsWhenContractsAreForSameProduct() throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         UUID c1Id = UUID.randomUUID();
@@ -291,8 +291,8 @@ class BillingServiceTest {
     }
 
     @Test
-    @DisplayName("13: Stress test for generation with 100 active contracts")
-    void test13_generateInvoice_stressLogic() throws Exception {
+    @DisplayName("Stress test for generation with 100 active contracts")
+    void shouldHandleLargeNumberOfContractsWhenGeneratingInvoice() throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         int count = 100;

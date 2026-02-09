@@ -70,7 +70,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("1. Positive: Successful creation with all required data and generated ID")
+        @DisplayName("Positive: Successful creation with all required data and generated ID")
         void shouldCreateCustomerWhenDataIsValid() {
                 Customer customer = createDefaultCustomer(
                                 "John",
@@ -94,7 +94,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("2. Positive: Invoice address fallback to main address")
+        @DisplayName("Positive: Invoice address fallback to main address")
         void shouldUseMainAddressAsInvoiceAddressWhenNotProvided() {
                 Customer customer = createDefaultCustomer(
                                 "John",
@@ -110,7 +110,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("3. Positive: Address duplication handling by value")
+        @DisplayName("Positive: Address duplication handling by value")
         void shouldHandleAddressesWithSameContentAsDuplicateButDifferentObjects() {
                 Address duplicateAddress = createDefaultAddress("Main St", "10", "12345", "Berlin", "Germany");
 
@@ -130,7 +130,7 @@ class CustomerTest {
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = { " ", "\t", "\n" })
-        @DisplayName("4. Negative: Validation of first name field in constructor")
+        @DisplayName("Negative: Validation of first name field in constructor")
         void shouldThrowExceptionWhenFirstNameIsInvalid(String invalidName) {
                 assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer(invalidName, "Doe", LocalDate.now(),
@@ -140,7 +140,7 @@ class CustomerTest {
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = { " ", "\t", "\n" })
-        @DisplayName("5. Negative: Validation of last name field in constructor")
+        @DisplayName("Negative: Validation of last name field in constructor")
         void shouldThrowExceptionWhenLastNameIsInvalid(String invalidName) {
                 assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer("John", invalidName, LocalDate.now(),
@@ -148,7 +148,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("6. Negative: Validation of birth date (null check)")
+        @DisplayName("Negative: Validation of birth date (null check)")
         void shouldThrowExceptionWhenBirthDateIsNull() {
                 assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer("John", "Doe", null, mainAddress, null,
@@ -156,7 +156,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("7. Negative: Validation of address (null check)")
+        @DisplayName("Negative: Validation of address (null check)")
         void shouldThrowExceptionWhenAddressIsNull() {
                 assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer("John", "Doe", LocalDate.now(), null, null,
@@ -164,7 +164,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("8. Positive: Activate customer changes status to ACTIVE")
+        @DisplayName("Positive: Activate customer changes status to ACTIVE")
         void shouldActivateCustomerAndChangeStatus() {
                 Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
                                 communicationDetails, Brand.GMX);
@@ -176,7 +176,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("9. Positive: Deactivate customer changes status to INACTIVE")
+        @DisplayName("Positive: Deactivate customer changes status to INACTIVE")
         void shouldDeactivateCustomerAndChangeStatus() {
                 Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
                                 communicationDetails, Brand.GMX);
@@ -189,7 +189,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("10. Boundary: Extremely long name handling")
+        @DisplayName("Boundary: Extremely long name handling")
         void shouldHandleExtremelyLongNames() {
                 String longName = "A".repeat(2000);
                 Customer customer = createDefaultCustomer(
@@ -205,7 +205,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("11. Boundary: Birth date as today")
+        @DisplayName("Boundary: Birth date as today")
         void shouldAllowBirthDateToBeToday() {
                 LocalDate today = LocalDate.now();
                 Customer customer = createDefaultCustomer(
@@ -220,7 +220,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("12. Boundary: Birth date in far past")
+        @DisplayName("Boundary: Birth date in far past")
         void shouldAllowBirthDateInFarPast() {
                 LocalDate farPast = LocalDate.of(1900, 1, 1);
                 Customer customer = createDefaultCustomer(
@@ -235,7 +235,7 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("13. Boundary: ID generation uniqueness")
+        @DisplayName("Boundary: ID generation uniqueness")
         void shouldGenerateUniqueIdsForDifferentCustomers() {
                 Customer customer1 = createDefaultCustomer("John1", "Doe1", LocalDate.of(1991, 1, 1), mainAddress, null,
                                 communicationDetails, Brand.GMX);

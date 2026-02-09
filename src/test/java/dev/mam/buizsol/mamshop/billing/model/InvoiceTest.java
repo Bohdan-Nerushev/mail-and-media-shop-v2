@@ -30,8 +30,8 @@ class InvoiceTest {
     }
 
     @Test
-    @DisplayName("01: Successful calculation of totals for multiple items")
-    void test1_invoiceTotalsCalculation_success() {
+    @DisplayName("Successful calculation of totals for multiple items")
+    void shouldCalculateTotalsCorrectlyWhenMultipleItemsExist() {
         InvoiceItem item1 = new InvoiceItem(UUID.randomUUID(), "P1", UUID.randomUUID(), LocalDate.now(),
                 new BigDecimal("10.00"), new BigDecimal("5.00"));
         InvoiceItem item2 = new InvoiceItem(UUID.randomUUID(), "P2", UUID.randomUUID(), LocalDate.now(),
@@ -49,8 +49,8 @@ class InvoiceTest {
     }
 
     @Test
-    @DisplayName("02: Successful creation with zero discount (boundary value)")
-    void test2_invoiceWithZeroDiscount_success() {
+    @DisplayName("Successful creation with zero discount (boundary value)")
+    void shouldAllowCreationWhenDiscountIsZero() {
         Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, testAddress, Collections.emptyList(),
                 BigDecimal.ZERO);
 
@@ -58,29 +58,29 @@ class InvoiceTest {
         assertEquals(BigDecimal.ZERO, invoice.getTotalAmount());
     }
 
-    @ParameterizedTest(name = "Test 3: Invalid discount validation - value: {0}")
-    @DisplayName("03: Verification that invalid discounts (negative/null) throw exception")
+    @DisplayName("Verification that invalid discounts (negative/null) throw exception")
+    @ParameterizedTest(name = "Invalid discount validation - value: {0}")
     @ValueSource(strings = { "-0.01", "-10.00" })
-    void test3_invoiceNegativeDiscount_throwsException(BigDecimal negativeDiscount) {
+    void shouldThrowExceptionWhenDiscountIsNegative(BigDecimal negativeDiscount) {
         assertThrows(InvalidInvoiceDiscountException.class, () -> new Invoice(Brand.GMX, customerId, testAddress,
                 testAddress, Collections.emptyList(), negativeDiscount));
     }
 
     @Test
-    @DisplayName("04: Null discount validation (negative scenario)")
-    void test4_invoiceNullDiscount_throwsException() {
+    @DisplayName("Null discount validation (negative scenario)")
+    void shouldThrowExceptionWhenDiscountIsNull() {
         assertThrows(InvalidInvoiceDiscountException.class,
                 () -> new Invoice(Brand.GMX, customerId, testAddress, testAddress, Collections.emptyList(), null));
     }
 
-    @ParameterizedTest(name = "Test 5: Calculation logic with various item counts and discount: {0}")
-    @DisplayName("05: Verification of totals calculation using parameterized discounts")
+    @DisplayName("Verification of totals calculation using parameterized discounts")
+    @ParameterizedTest(name = "Calculation logic with various item counts and discount: {0}")
     @CsvSource({
             "0.00, 0.00",
             "10.50, -10.50",
             "100.00, -100.00"
     })
-    void test5_invoiceCalculations_parameterized(BigDecimal discount, BigDecimal expectedTotal) {
+    void shouldCalculateAmountCorrectlyWhenDiscountsAreProvided(BigDecimal discount, BigDecimal expectedTotal) {
 
         Invoice invoice = new Invoice(Brand.MAIL_COM, customerId, testAddress, testAddress, Collections.emptyList(),
                 discount);
@@ -89,8 +89,8 @@ class InvoiceTest {
     }
 
     @Test
-    @DisplayName("06: Verification of items list immutability")
-    void test6_invoiceItemsList_isImmutable() {
+    @DisplayName("Verification of items list immutability")
+    void shouldReturnImmutableItemsList() {
 
         InvoiceItem item = new InvoiceItem(UUID.randomUUID(), "P1", UUID.randomUUID(), LocalDate.now(),
                 BigDecimal.ZERO, BigDecimal.TEN);
@@ -103,8 +103,8 @@ class InvoiceTest {
     }
 
     @Test
-    @DisplayName("07: Verification of different mailing and invoice addresses")
-    void test7_invoiceDifferentAddresses_success() {
+    @DisplayName("Verification of different mailing and invoice addresses")
+    void shouldStoreDifferentMailingAndInvoiceAddresses() {
         Address invoiceAddress = new Address("Invoice St", "2", "54321", "City2", "Country");
 
         Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, invoiceAddress, Collections.emptyList(),
@@ -115,15 +115,15 @@ class InvoiceTest {
     }
 
     @Test
-    @DisplayName("08: Null items list validation (negative scenario)")
-    void test8_invoiceNullItems_throwsException() {
+    @DisplayName("Null items list validation (negative scenario)")
+    void shouldThrowExceptionWhenItemsListIsNull() {
         assertThrows(InvoiceValidationException.class,
                 () -> new Invoice(Brand.GMX, customerId, testAddress, testAddress, null, BigDecimal.ZERO));
     }
 
     @Test
-    @DisplayName("09: Precision verification with many fractional fee items")
-    void test9_invoicePrecision_correctSum() {
+    @DisplayName("Precision verification with many fractional fee items")
+    void shouldMaintainPrecisionWhenCalculatingTotals() {
         BigDecimal fee = new BigDecimal("1.3333333333"); // Extreme precision
         InvoiceItem item1 = new InvoiceItem(UUID.randomUUID(), "P1", UUID.randomUUID(), LocalDate.now(), fee, fee);
         InvoiceItem item2 = new InvoiceItem(UUID.randomUUID(), "P2", UUID.randomUUID(), LocalDate.now(), fee, fee);
@@ -139,8 +139,8 @@ class InvoiceTest {
     }
 
     @Test
-    @DisplayName("10: Discount exceeding total fees (Negative total amount scenario)")
-    void test10_invoiceDiscountExceedingTotals_resultsInNegativeAmount() {
+    @DisplayName("Discount exceeding total fees (Negative total amount scenario)")
+    void shouldAllowNegativeTotalAmountWhenDiscountExceedsFees() {
         InvoiceItem item = new InvoiceItem(UUID.randomUUID(), "P1", UUID.randomUUID(), LocalDate.now(),
                 new BigDecimal("10.00"), new BigDecimal("10.00"));
         BigDecimal highDiscount = new BigDecimal("25.00");
@@ -151,8 +151,8 @@ class InvoiceTest {
     }
 
     @Test
-    @DisplayName("11: Stress test with a large number of items (performance check)")
-    void test11_invoiceLargeItemsList_calculatesCorrectly() {
+    @DisplayName("Stress test with a large number of items (performance check)")
+    void shouldCalculateTotalsCorrectlyWhenLargeNumberOfItemsProvided() {
         final InvoiceItem prototype = new InvoiceItem(
                 UUID.randomUUID(), "Product", UUID.randomUUID(), LocalDate.now(),
                 new BigDecimal("1.00"), new BigDecimal("2.00"));

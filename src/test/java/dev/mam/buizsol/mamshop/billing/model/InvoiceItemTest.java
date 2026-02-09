@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class InvoiceItemTest {
 
+    @DisplayName("Successful creation of InvoiceItem with valid data")
     @Test
-    @DisplayName("01: Successful creation of InvoiceItem with valid data")
-    void test1_invoiceItemCreation_success() {
+    void shouldCreateInvoiceItemWhenValidDataProvided() {
         UUID productId = UUID.randomUUID();
         String productName = "Test Product";
         UUID contractId = UUID.randomUUID();
@@ -33,15 +33,15 @@ class InvoiceItemTest {
         assertEquals(monthlyFee, item.monthlyFee());
     }
 
-    @ParameterizedTest(name = "02: Parameterized check of fees - setup: {0}, monthly: {1}")
-    @DisplayName("02: Verification of setup and monthly fees using various values")
+    @ParameterizedTest(name = "Check of fees - setup: {0}, monthly: {1}")
+    @DisplayName("Verification of setup and monthly fees using various values")
     @CsvSource({
             "0.00, 0.11",
             "4.99, 9.99",
             "99.99, 149.50",
             "0.01, 0.11"
     })
-    void test2_invoiceItemFees_parameterized(BigDecimal setupFee, BigDecimal monthlyFee) {
+    void shouldSetCorrectFeesWhenValuesAreProvided(BigDecimal setupFee, BigDecimal monthlyFee) {
         InvoiceItem item = new InvoiceItem(
                 UUID.randomUUID(),
                 "Product",
@@ -55,8 +55,8 @@ class InvoiceItemTest {
     }
 
     @Test
-    @DisplayName("03: Verification of InvoiceItem with boundary date (yesterday)")
-    void test3_invoiceItemWithPastDate_success() {
+    @DisplayName("Verification of InvoiceItem with boundary date (yesterday)")
+    void shouldHandlePastDateWhenCreatingInvoiceItem() {
         LocalDate pastDate = LocalDate.now().minusYears(1);
 
         InvoiceItem item = new InvoiceItem(

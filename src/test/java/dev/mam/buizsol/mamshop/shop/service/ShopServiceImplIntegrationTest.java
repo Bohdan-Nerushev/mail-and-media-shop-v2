@@ -33,7 +33,7 @@ import dev.mam.buizsol.mamshop.product.service.ProductService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ShopServiceImplTest {
+class ShopServiceImplIntegrationTest {
 
         private ShopServiceImpl shopService;
         private ProductService productService;
@@ -106,8 +106,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("1. Register Customer: Successfully creates and stores a customer (Parameterized)")
-        void test01_registerCustomer_Parameterized(Brand brand) {
+        @DisplayName("Register Customer: Successfully creates and stores a customer (Parameterized)")
+        void shouldRegisterCustomerWhenValidDetailsProvided(Brand brand) {
 
                 Customer customer = createDefaultTestCustomer(
                                 "John",
@@ -125,15 +125,15 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("2. Register Customer: Fails when input is null (Negative)")
-        void test02_registerCustomer_Negative_NullInput() {
+        @DisplayName("Register Customer: Fails when input is null (Negative)")
+        void shouldThrowExceptionWhenRegisteringNullCustomer() {
                 assertThrows(CustomerValidationException.class, () -> shopService.registerCustomer(null));
         }
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("3. Load Customer: Successfully retrieves existing customer by ID (Parameterized)")
-        void test03_loadCustomer_Parameterized(Brand brand) throws CustomerNotFoundException {
+        @DisplayName("Load Customer: Successfully retrieves existing customer by ID (Parameterized)")
+        void shouldLoadCustomerWhenIdExists(Brand brand) throws CustomerNotFoundException {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -149,15 +149,15 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("4. Load Customer: Throws exception for non-existent ID (Negative)")
-        void test04_loadCustomer_Negative_NotFound() {
+        @DisplayName("Load Customer: Throws exception for non-existent ID (Negative)")
+        void shouldThrowExceptionWhenLoadingNonExistentCustomer() {
                 assertThrows(CustomerNotFoundException.class, () -> shopService.loadCustomer(UUID.randomUUID()));
         }
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("5. Activate Customer: Changes status to ACTIVE (Parameterized)")
-        void test05_activateCustomer_Parameterized(Brand brand) throws CustomerNotFoundException {
+        @DisplayName("Activate Customer: Changes status to ACTIVE (Parameterized)")
+        void shouldActivateCustomerWhenIdExists(Brand brand) throws CustomerNotFoundException {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -174,8 +174,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("6 Deactivate Customer: Changes status to INACTIVE (Parameterized)")
-        void test06_deactivateCustomer_Parameterized(Brand brand) throws CustomerNotFoundException {
+        @DisplayName("Deactivate Customer: Changes status to INACTIVE (Parameterized)")
+        void shouldDeactivateCustomerWhenIdExists(Brand brand) throws CustomerNotFoundException {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -193,8 +193,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("7: Deactivate Customer: Succeeds for INACTIVE customer (Idempotency)")
-        void test07_deactivateCustomer_Idempotent(Brand brand) throws CustomerNotFoundException {
+        @DisplayName("Deactivate Customer: Succeeds for INACTIVE customer (Idempotency)")
+        void shouldBeIdempotentWhenDeactivatingCustomer(Brand brand) throws CustomerNotFoundException {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -210,8 +210,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("8. Remove Customer: Successfully deletes customer from system (Parameterized)")
-        void test08_removeCustomer_Parameterized(Brand brand) throws CustomerNotFoundException {
+        @DisplayName("Remove Customer: Successfully deletes customer from system (Parameterized)")
+        void shouldRemoveCustomerWhenIdExists(Brand brand) throws CustomerNotFoundException {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -227,8 +227,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("9. Update Address: Successfully updates address for ACTIVE customer (Parameterized)")
-        void test09_updateAddress_Parameterized(Brand brand)
+        @DisplayName("Update Address: Successfully updates address for ACTIVE customer (Parameterized)")
+        void shouldUpdateAddressWhenCustomerIsActive(Brand brand)
                         throws CustomerNotFoundException, CustomerNotActiveException {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
@@ -248,8 +248,8 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("10. Update Address: Fails for INACTIVE customer (Boundary/State)")
-        void test10_updateAddress_Negative_InactiveCustomer() {
+        @DisplayName("Update Address: Fails for INACTIVE customer (Boundary/State)")
+        void shouldThrowExceptionWhenUpdatingAddressOfInactiveCustomer() {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -266,8 +266,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("11. Load All Products: Returns products for specified brand (Parameterized)")
-        void test11_loadAllProductsForBrand_Parameterized(Brand brand) {
+        @DisplayName("Load All Products: Returns products for specified brand (Parameterized)")
+        void shouldLoadAllProductsWhenBrandIsSpecified(Brand brand) {
                 List<Product> products = shopService.loadAllProductsForBrand(brand);
                 assertNotNull(products);
                 assertTrue(products.stream().allMatch(p -> p.getBrand() == brand));
@@ -275,8 +275,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("12. Purchase Product: Successfully creates contract for matching brand and active customer (Parameterized)")
-        void test12_purchaseProduct_Parameterized(Brand brand) throws Exception {
+        @DisplayName("Purchase Product: Successfully creates contract for matching brand and active customer (Parameterized)")
+        void shouldPurchaseProductWhenCustomerAndProductMatchBrand(Brand brand) throws Exception {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -298,8 +298,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("13. Purchase Product Premium: Successfully creates contract (Parameterized)")
-        void test13_purchaseProduct_PremiumMail_Parameterized(Brand brand) throws Exception {
+        @DisplayName("Purchase Product Premium: Successfully creates contract (Parameterized)")
+        void shouldPurchasePremiumProductWhenCustomerAndProductMatchBrand(Brand brand) throws Exception {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -325,8 +325,9 @@ class ShopServiceImplTest {
                         "WEB_DE, MAIL_COM",
                         "MAIL_COM, GMX"
         })
-        @DisplayName("14. Purchase Product: Throws exception when brands do not match (Negative)")
-        void test14_purchaseProduct_Negative_BrandMismatch(Brand customerBrand, Brand productBrand) throws Exception {
+        @DisplayName("Purchase Product: Throws exception when brands do not match (Negative)")
+        void shouldThrowExceptionWhenPurchaseBrandsDoNotMatch(Brand customerBrand, Brand productBrand)
+                        throws Exception {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -347,8 +348,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("15. Purchase Product: Fails for non-existent product ID (Negative)")
-        void test15_purchaseProduct_Negative_ProductNotFound(Brand brand) throws Exception {
+        @DisplayName("Purchase Product: Fails for non-existent product ID (Negative)")
+        void shouldThrowExceptionWhenPurchasingNonExistentProduct(Brand brand) throws Exception {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -365,8 +366,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("16. Purchase Standard Mail: Fails when customer is not active (Boundary)")
-        void test16_purchaseProduct_Negative_InactiveCustomer(Brand brand) {
+        @DisplayName("Purchase Standard Mail: Fails when customer is not active (Boundary)")
+        void shouldThrowExceptionWhenPurchasingProductForInactiveCustomer(Brand brand) {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -383,8 +384,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("17. Purchase Premium Mail: Fails when customer is not active (Boundary)")
-        void test17_purchaseProduct_Negative_InactiveCustomer(Brand brand) {
+        @DisplayName("Purchase Premium Mail: Fails when customer is not active (Boundary)")
+        void shouldThrowExceptionWhenPurchasingPremiumProductForInactiveCustomer(Brand brand) {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -401,8 +402,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("18. Generate Invoice: Returns valid invoice for active customer (Parameterized)")
-        void test18_generateInvoice_Success(Brand brand) throws Exception {
+        @DisplayName("Generate Invoice: Returns valid invoice for active customer (Parameterized)")
+        void shouldGenerateInvoiceWhenCustomerIsActiveAndHasContracts(Brand brand) throws Exception {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -426,8 +427,8 @@ class ShopServiceImplTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("19. Load All Contracts: Retrieves list for active customer (Parameterized)")
-        void test19_loadAllContracts_Success(Brand brand) throws Exception {
+        @DisplayName("Load All Contracts: Retrieves list for active customer (Parameterized)")
+        void shouldLoadAllContractsWhenCustomerIsActive(Brand brand) throws Exception {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -447,8 +448,8 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("20. Activate Contract: Updates contract status successfully")
-        void test20_activateContract_Success() throws Exception {
+        @DisplayName("Activate Contract: Updates contract status successfully")
+        void shouldActivateContractWhenIdExists() throws Exception {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -475,8 +476,8 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("21. Multi-Update: Customer can update multiple fields sequentially if active")
-        void test21_sequentialUpdates_Success() throws Exception {
+        @DisplayName("Multi-Update: Customer can update multiple fields sequentially if active")
+        void shouldAllowSequentialUpdatesWhenCustomerIsActive() throws Exception {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -494,8 +495,8 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("22. Update Communication Details: Successfully updates for ACTIVE customer")
-        void test22_updateCommunicationDetails_Success() throws Exception {
+        @DisplayName("Update Communication Details: Successfully updates for ACTIVE customer")
+        void shouldUpdateCommunicationDetailsWhenCustomerIsActive() throws Exception {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -514,15 +515,15 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("23. Negative - Update Address: Fails when ID is null")
-        void test23_updateAddress_Negative_NullId() {
+        @DisplayName("Negative - Update Address: Fails when ID is null")
+        void shouldThrowExceptionWhenUpdatingAddressWithNullId() {
                 Address address = createDefaultAddress("Street_", "1", "12345", "City_", "Country_");
                 assertThrows(CustomerValidationException.class, () -> shopService.updateAddress(null, address));
         }
 
         @Test
-        @DisplayName("24. Negative - Load All Contracts: Fails for inactive customer")
-        void test24_loadAllContracts_Negative_Inactive() {
+        @DisplayName("Negative - Load All Contracts: Fails for inactive customer")
+        void shouldThrowExceptionWhenLoadingContractsForInactiveCustomer() {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -535,8 +536,8 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("25. Negative - Update Invoice Address: Fails for inactive customer")
-        void test25_updateInvoiceAddress_Negative_Inactive() {
+        @DisplayName("Negative - Update Invoice Address: Fails for inactive customer")
+        void shouldThrowExceptionWhenUpdatingInvoiceAddressOfInactiveCustomer() {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -551,8 +552,8 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("26. Negative - Update Communication Details: Fails for inactive customer")
-        void test26_updateCommunicationDetails_Negative_Inactive() {
+        @DisplayName("Negative - Update Communication Details: Fails for inactive customer")
+        void shouldThrowExceptionWhenUpdatingCommunicationDetailsOfInactiveCustomer() {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -568,8 +569,8 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("27. Negative - Generate Invoice: Fails for inactive customer")
-        void test27_generateInvoice_Negative_Inactive() {
+        @DisplayName("Negative - Generate Invoice: Fails for inactive customer")
+        void shouldThrowExceptionWhenGeneratingInvoiceForInactiveCustomer() {
                 Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
                                 "John",
                                 "Doe",
@@ -582,20 +583,20 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("28. Negative - Generate Invoice: Fails for non-existent customer")
-        void test28_generateInvoice_Negative_NotFound() {
+        @DisplayName("Negative - Generate Invoice: Fails for non-existent customer")
+        void shouldThrowExceptionWhenGeneratingInvoiceForNonExistentCustomer() {
                 assertThrows(CustomerNotFoundException.class, () -> shopService.generateInvoice(UUID.randomUUID()));
         }
 
         @Test
-        @DisplayName("29. Negative - Remove Customer: Fails for non-existent ID")
-        void test29_removeCustomer_Negative_NotFound() {
+        @DisplayName("Negative - Remove Customer: Fails for non-existent ID")
+        void shouldThrowExceptionWhenRemovingNonExistentCustomer() {
                 assertThrows(CustomerNotFoundException.class, () -> shopService.removeCustomer(UUID.randomUUID()));
         }
 
         @Test
-        @DisplayName("30. Register Product: Successfully registers and returns the product")
-        void test30_registerProduct_Success() {
+        @DisplayName("Register Product: Successfully registers and returns the product")
+        void shouldRegisterProductWhenValidProductProvided() {
                 Product product = createDefaultStandardMailProduct("Shop Product", Brand.GMX, new BigDecimal("4.99"));
 
                 Product registered = shopService.registerProduct(product);
@@ -609,14 +610,14 @@ class ShopServiceImplTest {
         }
 
         @Test
-        @DisplayName("31. Register Product: Throws exception when product is null (Negative)")
-        void test31_registerProduct_Negative_NullInput() {
+        @DisplayName("Register Product: Throws exception when product is null (Negative)")
+        void shouldThrowExceptionWhenRegisteringNullProduct() {
                 assertThrows(ProductValidationException.class, () -> shopService.registerProduct(null));
         }
 
         @Test
-        @DisplayName("32. Register Product: Successfully registers different product types")
-        void test32_registerProduct_VariousTypes() {
+        @DisplayName("Register Product: Successfully registers different product types")
+        void shouldRegisterVariousProductTypesSuccessfully() {
                 Product standard = createDefaultStandardMailProduct("Std", Brand.WEB_DE, new BigDecimal("5.00"));
                 Product premium = createDefaultPremiumMailProduct("Prem", Brand.WEB_DE, new BigDecimal("10.00"));
 

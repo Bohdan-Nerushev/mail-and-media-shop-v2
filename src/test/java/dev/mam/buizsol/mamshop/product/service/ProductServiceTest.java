@@ -44,7 +44,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("01: Should successfully create product and retrieve by ID")
+        @DisplayName("Should successfully create product and retrieve by ID")
         void shouldSuccessfullyCreateProductAndRetrieveById() {
                 final Product product = createDefaultProduct(
                                 "Test Product",
@@ -63,7 +63,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("02: Should return empty Optional when product ID does not exist")
+        @DisplayName("Should return empty Optional when product ID does not exist")
         void shouldReturnEmptyOptionalWhenProductIdDoesNotExist() {
                 final UUID nonExistentId = UUID.randomUUID();
 
@@ -73,7 +73,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("03: Should throw IllegalArgumentException when creating product with null value")
+        @DisplayName("Should throw IllegalArgumentException when creating product with null value")
         void shouldThrowIllegalArgumentExceptionWhenCreatingProductWithNullValue() {
                 assertThrows(
                                 ProductValidationException.class,
@@ -81,7 +81,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("04: Should throw IllegalArgumentException when finding product by null ID")
+        @DisplayName("Should throw IllegalArgumentException when finding product by null ID")
         void shouldThrowIllegalArgumentExceptionWhenFindingProductByNullId() {
                 assertThrows(
                                 ProductValidationException.class,
@@ -89,7 +89,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("05: Should find all products of specific brand")
+        @DisplayName("Should find all products of specific brand")
         void shouldFindAllProductsOfSpecificBrand() {
                 final Product gmxProduct1 = createDefaultProduct(
                                 "GMX Product 1",
@@ -121,7 +121,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("06: Should return empty collection when no products exist for brand")
+        @DisplayName("Should return empty collection when no products exist for brand")
         void shouldReturnEmptyCollectionWhenNoProductsExistForBrand() {
                 final Product gmxProduct = createDefaultProduct(
                                 "GMX Product",
@@ -138,7 +138,7 @@ class ProductServiceTest {
 
         @ParameterizedTest
         @EnumSource(Brand.class)
-        @DisplayName("07: Should handle search for all available brands")
+        @DisplayName("Should handle search for all available brands")
         void shouldHandleSearchForAllAvailableBrands(final Brand brand) {
                 final Product product = createDefaultProduct(
                                 brand.name() + " Product",
@@ -155,7 +155,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("08: Should throw IllegalArgumentException when searching by null brand")
+        @DisplayName("Should throw IllegalArgumentException when searching by null brand")
         void shouldThrowIllegalArgumentExceptionWhenSearchingByNullBrand() {
                 assertThrows(
                                 ProductValidationException.class,
@@ -163,7 +163,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("09: Should successfully update monthly fee to valid value")
+        @DisplayName("Should successfully update monthly fee to valid value")
         void shouldSuccessfullyUpdateMonthlyFeeToValidValue() throws Exception {
                 final Product product = createDefaultProduct(
                                 "Fee Test",
@@ -180,7 +180,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("10: Should successfully update monthly fee to minimum valid boundary value")
+        @DisplayName("Should successfully update monthly fee to minimum valid boundary value")
         void shouldSuccessfullyUpdateMonthlyFeeToMinimumValidBoundaryValue() throws Exception {
                 final Product product = createDefaultProduct(
                                 "Boundary Test",
@@ -205,7 +205,7 @@ class ProductServiceTest {
                         "10.00, WEB_DE",
                         "99.99, MAIL_COM"
         })
-        @DisplayName("11: Should update monthly fee for various valid values and brands")
+        @DisplayName("Should update monthly fee for various valid values and brands")
         void shouldUpdateMonthlyFeeForVariousValidValuesAndBrands(
                         final String feeValue,
                         final Brand brand) throws Exception {
@@ -224,7 +224,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("12: Should update monthly fee without affecting other products")
+        @DisplayName("Should update monthly fee without affecting other products")
         void shouldUpdateMonthlyFeeWithoutAffectingOtherProducts() throws Exception {
                 final Product product1 = createDefaultProduct(
                                 "Product 1",
@@ -259,7 +259,7 @@ class ProductServiceTest {
                         "0.01",
                         "0.00"
         })
-        @DisplayName("13: Should throw IllegalArgumentException when monthly fee is at or below minimum threshold")
+        @DisplayName("Should throw IllegalArgumentException when monthly fee is at or below minimum threshold")
         void shouldThrowIllegalArgumentExceptionWhenMonthlyFeeIsAtOrBelowMinimumThreshold(
                         final String feeValue) throws Exception {
                 final Product product = createDefaultProduct(
@@ -287,7 +287,7 @@ class ProductServiceTest {
                         "-10.00",
                         "-99.99"
         })
-        @DisplayName("14: Should throw IllegalArgumentException when monthly fee is negative")
+        @DisplayName("Should throw IllegalArgumentException when monthly fee is negative")
         void shouldThrowIllegalArgumentExceptionWhenMonthlyFeeIsNegative(final String feeValue) throws Exception {
                 final Product product = createDefaultProduct(
                                 "Negative Fee Test",
@@ -304,7 +304,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("15: Should throw ProductNotFoundException when updating non-existent product")
+        @DisplayName("Should throw ProductNotFoundException when updating non-existent product")
         void shouldThrowProductNotFoundExceptionWhenUpdatingNonExistentProduct() {
                 final UUID nonExistentId = UUID.randomUUID();
                 final BigDecimal validFee = new BigDecimal("1.00");
@@ -318,7 +318,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("16: Should throw IllegalArgumentException when product ID is null")
+        @DisplayName("Should throw IllegalArgumentException when product ID is null")
         void shouldThrowIllegalArgumentExceptionWhenProductIdIsNull() throws Exception {
                 final BigDecimal validFee = new BigDecimal("1.00");
 
@@ -328,7 +328,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("17: Should throw IllegalArgumentException when monthly fee is null")
+        @DisplayName("Should throw IllegalArgumentException when monthly fee is null")
         void shouldThrowIllegalArgumentExceptionWhenMonthlyFeeIsNull() throws Exception {
                 final Product product = createDefaultProduct(
                                 "Null Fee Test",
@@ -343,7 +343,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("18: Should throw IllegalArgumentException when both ID and fee are null")
+        @DisplayName("Should throw IllegalArgumentException when both ID and fee are null")
         void shouldThrowIllegalArgumentExceptionWhenBothIdAndFeeAreNull() throws Exception {
                 assertThrows(
                                 ProductValidationException.class,
@@ -351,7 +351,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("20: Should handle minimum valid monthly fee boundary (0.11)")
+        @DisplayName("Should handle minimum valid monthly fee boundary (0.11)")
         void shouldHandleMinimumValidMonthlyFeeBoundary() {
                 final BigDecimal minimumValidFee = new BigDecimal("0.11");
                 final Product product = createDefaultProduct(
@@ -367,7 +367,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("21: Should reject maximum invalid monthly fee boundary (0.10)")
+        @DisplayName("Should reject maximum invalid monthly fee boundary (0.10)")
         void shouldRejectMaximumInvalidMonthlyFeeBoundary() throws Exception {
                 final Product product = createDefaultProduct(
                                 "Boundary Test",
@@ -384,7 +384,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("22: Should handle large monthly fee values")
+        @DisplayName("Should handle large monthly fee values")
         void shouldHandleLargeMonthlyFeeValues() throws Exception {
                 final Product product = createDefaultProduct(
                                 "Large Fee Test",
@@ -401,7 +401,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("23: Should handle zero setup fee")
+        @DisplayName("Should handle zero setup fee")
         void shouldHandleZeroSetupFee() {
                 final Product product = createDefaultProduct(
                                 "Zero Setup Fee",

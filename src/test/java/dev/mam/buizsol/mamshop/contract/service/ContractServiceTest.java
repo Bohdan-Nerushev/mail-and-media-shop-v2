@@ -62,8 +62,8 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("01. Success: createContract generates and saves a contract")
-    void test01_createContract_Success() throws BrandMismatchException {
+    @DisplayName("Success: createContract generates and saves a contract")
+    void shouldGenerateAndSaveContractWhenCustomerIsActiveAndDataIsValid() throws BrandMismatchException {
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract created = contractService.createContract(activeCustomer, matchingProduct);
@@ -76,8 +76,8 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("02. Success: findContractById returns contract when present")
-    void test02_findContractById_Success() {
+    @DisplayName("Success: findContractById returns contract when present")
+    void shouldReturnContractWhenIdExists() {
         UUID contractId = UUID.randomUUID();
         Contract contract = mock(Contract.class);
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
@@ -89,8 +89,8 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("03. Success: findContractsByCustomerId returns list of contracts")
-    void test03_findContractsByCustomerId_Success() {
+    @DisplayName("Success: findContractsByCustomerId returns list of contracts")
+    void shouldReturnListOfContractsWhenCustomerHasThem() {
         UUID customerId = UUID.randomUUID();
         List<Contract> contracts = List.of(mock(Contract.class), mock(Contract.class));
         when(contractRepository.findByCustomerId(customerId)).thenReturn(contracts);
@@ -102,8 +102,8 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("04. Success: updateContractStatus updates status correctly")
-    void test04_updateContractStatus_Success() throws ContractNotFoundException, BrandMismatchException {
+    @DisplayName("Success: updateContractStatus updates status correctly")
+    void shouldUpdateStatusWhenContractExists() throws ContractNotFoundException, BrandMismatchException {
         UUID contractId = UUID.randomUUID();
         Contract contract = new Contract(activeCustomer, matchingProduct);
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
@@ -116,8 +116,8 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("05. Negative: updateContractStatus throws exception when contract not found")
-    void test05_updateContractStatus_NotFound() {
+    @DisplayName("Negative: updateContractStatus throws exception when contract not found")
+    void shouldThrowExceptionWhenUpdatingStatusOfNonExistentContract() {
         UUID contractId = UUID.randomUUID();
         when(contractRepository.findById(contractId)).thenReturn(Optional.empty());
 
@@ -125,22 +125,22 @@ class ContractServiceTest {
                 () -> contractService.updateContractStatus(contractId, ContractStatus.INACTIVE));
     }
 
+    @DisplayName("Boundary/Negative: createContract throws exception on null parameters")
     @ParameterizedTest
     @CsvSource({
             "true, false",
             "false, true",
             "true, true"
     })
-    @DisplayName("06. Boundary/Negative: createContract throws exception on null parameters")
-    void test06_createContract_NullParams(boolean customerIsNull, boolean productIsNull) {
+    void shouldThrowExceptionWhenCreatingContractWithNullParameters(boolean customerIsNull, boolean productIsNull) {
         Customer customer = customerIsNull ? null : activeCustomer;
         Product product = productIsNull ? null : matchingProduct;
         assertThrows(ContractValidationException.class, () -> contractService.createContract(customer, product));
     }
 
     @Test
-    @DisplayName("07. Negative: createContract throws exception on brand mismatch")
-    void test07_createContract_BrandMismatch() {
+    @DisplayName("Negative: createContract throws exception on brand mismatch")
+    void shouldThrowExceptionWhenCreatingContractWithBrandMismatch() {
         Product mismatchProduct = new StandardMailProduct(
                 "Mismatch Brand",
                 Brand.GMX,
@@ -151,8 +151,8 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("08. Negative: createContract throws exception when customer is inactive")
-    void test08_createContract_CustomerInactive() {
+    @DisplayName("Negative: createContract throws exception when customer is inactive")
+    void shouldThrowExceptionWhenCreatingContractForInactiveCustomer() {
         Customer inactiveCustomer = mock(Customer.class);
         when(inactiveCustomer.getStatus()).thenReturn(CustomerStatus.INACTIVE);
         lenient().when(inactiveCustomer.getBrand()).thenReturn(Brand.WEB_DE);
@@ -161,20 +161,20 @@ class ContractServiceTest {
                 () -> contractService.createContract(inactiveCustomer, matchingProduct));
     }
 
+    @DisplayName("Boundary/Negative: updateContractStatus throws exception on null parameters")
     @ParameterizedTest
     @CsvSource(value = {
             ", ACTIVE",
             "550e8400-e29b-41df-a447-4462db01c001, ",
             ", "
     }, nullValues = { "" })
-    @DisplayName("09. Boundary/Negative: updateContractStatus throws exception on null parameters")
-    void test09_updateContractStatus_NullParams(UUID id, ContractStatus status) {
+    void shouldThrowExceptionWhenUpdatingStatusWithNullParameters(UUID id, ContractStatus status) {
         assertThrows(ContractValidationException.class, () -> contractService.updateContractStatus(id, status));
     }
 
     @Test
-    @DisplayName("10. Boundary: findContractsByCustomerId returns empty list when no contracts exist")
-    void test10_findContractsByCustomerId_Empty() {
+    @DisplayName("Boundary: findContractsByCustomerId returns empty list when no contracts exist")
+    void shouldReturnEmptyListWhenNoContractsForCustomer() {
         UUID customerId = UUID.randomUUID();
         when(contractRepository.findByCustomerId(customerId)).thenReturn(List.of());
 
@@ -184,8 +184,8 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("11. Success: findContractsByProductId returns list of contracts")
-    void test11_findContractsByProductId_Success() {
+    @DisplayName("Success: findContractsByProductId returns list of contracts")
+    void shouldReturnListOfContractsWhenProductHasThem() {
         UUID productId = UUID.randomUUID();
         List<Contract> contracts = List.of(mock(Contract.class));
         when(contractRepository.findByProductId(productId)).thenReturn(contracts);
@@ -197,8 +197,8 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("12. Boundary: findContractsByProductId returns empty list when no contracts exist")
-    void test12_findContractsByProductId_Empty() {
+    @DisplayName("Boundary: findContractsByProductId returns empty list when no contracts exist")
+    void shouldReturnEmptyListWhenNoContractsForProduct() {
         UUID productId = UUID.randomUUID();
         when(contractRepository.findByProductId(productId)).thenReturn(List.of());
 
@@ -208,8 +208,8 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("13. Success: verify ContractService is a Singleton")
-    void test13_singleton_Identity() {
+    @DisplayName("Success: verify ContractService is a Singleton")
+    void shouldReturnSameInstanceWhenGetInstanceIsCalled() {
         ContractService instance1 = ContractService.getInstance();
         ContractService instance2 = ContractService.getInstance();
 

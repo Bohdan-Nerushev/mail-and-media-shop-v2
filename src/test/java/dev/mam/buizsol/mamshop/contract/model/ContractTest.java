@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 class ContractTest {
 
     @Test
-    @DisplayName("01. Creating a contract for an active customer with the corresponding product")
+    @DisplayName("Creating a contract for an active customer with the corresponding product")
     void shouldCreateContractWhenCustomerIsActiveAndBrandsMatch() throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
@@ -46,7 +46,7 @@ class ContractTest {
     }
 
     @Test
-    @DisplayName("02. Verify that only IDs are saved, not objects")
+    @DisplayName("Verify that only IDs are saved, not objects")
     void shouldStoreOnlyIdsAndNotFullObjects() throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
@@ -68,7 +68,7 @@ class ContractTest {
     }
 
     @Test
-    @DisplayName("03. Checking the creation date")
+    @DisplayName("Checking the creation date")
     void shouldSetCreationDateToCurrentDate() throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
@@ -85,7 +85,7 @@ class ContractTest {
     }
 
     @Test
-    @DisplayName("04. Attempting to create with different brands → BrandMismatchException")
+    @DisplayName("Attempting to create with different brands → BrandMismatchException")
     void shouldThrowExceptionWhenBrandsDoNotMatch() {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
@@ -97,7 +97,7 @@ class ContractTest {
     }
 
     @Test
-    @DisplayName("05. Attempting to create for an inactive customer → CustomerNotActiveException")
+    @DisplayName("Attempting to create for an inactive customer → CustomerNotActiveException")
     void shouldThrowExceptionWhenCustomerIsNotActive() {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
@@ -110,14 +110,14 @@ class ContractTest {
     }
 
     @Test
-    @DisplayName("06. Attempting to create a client with a null parameter → IllegalArgumentException")
+    @DisplayName("Attempting to create a client with a null parameter → IllegalArgumentException")
     void shouldThrowExceptionWhenCustomerIsNull() {
         Product product = mock(Product.class);
         assertThrows(ContractValidationException.class, () -> new Contract(null, product));
     }
 
     @Test
-    @DisplayName("07. Attempting to create a product with a null parameter → IllegalArgumentException")
+    @DisplayName("Attempting to create a product with a null parameter → IllegalArgumentException")
     void shouldThrowExceptionWhenProductIsNull() {
         Customer customer = mock(Customer.class);
         assertThrows(ContractValidationException.class, () -> new Contract(customer, null));
@@ -125,7 +125,7 @@ class ContractTest {
 
     @ParameterizedTest
     @EnumSource(Brand.class)
-    @DisplayName("08. Parameterized test: creating a contract for all brands")
+    @DisplayName("Parameterized test: creating a contract for all brands")
     void shouldCreateContractForAllBrands(Brand brand) throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
@@ -142,7 +142,7 @@ class ContractTest {
     }
 
     @Test
-    @DisplayName("09. Contract status update")
+    @DisplayName("Contract status update")
     void shouldUpdateContractStatus() throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
@@ -167,7 +167,7 @@ class ContractTest {
     }
 
     @Test
-    @DisplayName("10. Attempting to update status to null → IllegalArgumentException")
+    @DisplayName("Attempting to update status to null → IllegalArgumentException")
     void shouldThrowExceptionWhenUpdatingStatusWithNull() throws BrandMismatchException {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);

@@ -43,13 +43,13 @@ class BundleProductTest {
                 return new BundleProduct(mail, partner);
         }
 
+        @DisplayName("Success: Create BundleProduct and verify summation logic for different brands")
         @ParameterizedTest(name = "[{index}] Brand: {0}, Mail: {1}, Partner: {3}")
         @CsvSource({
                         "GMX, S-Mail, 1.00, P-Cloud, 5.00, 2.00, 9.99, 3.00",
                         "WEB_DE, P-Mail, 10.00, P-Music, 15.00, 5.00, 24.99, 15.00"
         })
-        @DisplayName("1. Success: Create BundleProduct and verify summation logic for different brands")
-        void test1_CreateBundleProduct_Success(
+        void shouldCreateBundleProductAndCalculateTotalsWhenValidDataProvided(
                         final Brand brand,
                         final String mailName,
                         final BigDecimal mailMonthly,
@@ -75,8 +75,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("2. Negative: Failure when creating bundle with mismatched brands")
-        void test2_CreateBundleProduct_MismatchedBrands_ThrowsException() {
+        @DisplayName("Negative: Failure when creating bundle with mismatched brands")
+        void shouldThrowExceptionWhenCreatingBundleWithMismatchedBrands() {
                 StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, new BigDecimal("1.00"));
                 PartnerProduct partner = createDefaultPartnerProduct("Cloud", Brand.WEB_DE, BigDecimal.ZERO,
                                 new BigDecimal("2.00"));
@@ -89,8 +89,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("3. Negative: Failure with null MailProduct")
-        void test3_CreateBundleProduct_NullMail_ThrowsException() {
+        @DisplayName("Negative: Failure with null MailProduct")
+        void shouldThrowExceptionWhenCreatingBundleWithNullMail() {
                 final PartnerProduct partner = createDefaultPartnerProduct("P", Brand.GMX, BigDecimal.ZERO,
                                 BigDecimal.ONE);
 
@@ -102,8 +102,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("4. Negative: Failure with null PartnerProduct")
-        void test4_CreateBundleProduct_NullPartner_ThrowsException() {
+        @DisplayName("Negative: Failure with null PartnerProduct")
+        void shouldThrowExceptionWhenCreatingBundleWithNullPartner() {
                 final MailProduct mail = createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
 
                 final ProductValidationException exception = assertThrows(
@@ -114,8 +114,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("5. Negative: Failure with both components null")
-        void test5_CreateBundleProduct_BothNull_ThrowsException() {
+        @DisplayName("Negative: Failure with both components null")
+        void shouldThrowExceptionWhenCreatingBundleWithBothComponentsNull() {
                 final ProductValidationException exception = assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultBundleProduct(null, null));
@@ -124,8 +124,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("6. Boundary: Success with large fees summation")
-        void test6_CreateBundleProduct_LargeFees_Success() {
+        @DisplayName("Boundary: Success with large fees summation")
+        void shouldCalculateTotalsCorrectlyWhenLargeFeesProvided() {
                 BigDecimal largeFee = new BigDecimal("1000000.00");
                 PremiumMailProduct mail = createDefaultPremiumMailProduct("Rich Mail", Brand.GMX, largeFee);
                 PartnerProduct partner = createDefaultPartnerProduct("Rich Cloud", Brand.GMX, largeFee, largeFee);
@@ -137,8 +137,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("7. Polymorphism: Verify calls via Product base class")
-        void test7_BundleProduct_PolymorphicCalls() {
+        @DisplayName("Polymorphism: Verify calls via Product base class")
+        void shouldCalculateTotalsCorrectlyWhenCalledPolymorphically() {
                 MailProduct mail = createDefaultStandardMailProduct("Base Mail", Brand.WEB_DE, new BigDecimal("1.50"));
                 PartnerProduct partner = createDefaultPartnerProduct("Base Cloud", Brand.WEB_DE,
                                 new BigDecimal("10.00"),
@@ -151,8 +151,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("8. Success: Verify getters for components")
-        void test8_BundleProduct_VerifyGetters() {
+        @DisplayName("Success: Verify getters for components")
+        void shouldReturnCorrectComponentsWhenGettersCalled() {
                 StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, new BigDecimal("1.00"));
                 PartnerProduct partner = createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO,
                                 new BigDecimal("1.00"));
@@ -164,8 +164,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("9. Negative: setMonthlyFee throws UnsupportedOperationException")
-        void test9_SetMonthlyFee_ThrowsException() {
+        @DisplayName("Negative: setMonthlyFee throws UnsupportedOperationException")
+        void shouldThrowExceptionWhenAttemptingToSetMonthlyFee() {
                 StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, new BigDecimal("1.00"));
                 PartnerProduct partner = createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO,
                                 new BigDecimal("1.00"));
@@ -176,8 +176,8 @@ class BundleProductTest {
         }
 
         @Test
-        @DisplayName("10. Dynamic: Bundle fee updates when components change")
-        void test10_DynamicFeeCalculation() {
+        @DisplayName("Dynamic: Bundle fee updates when components change")
+        void shouldUpdateBundleFeeWhenComponentFeeChanges() {
                 BigDecimal initialFee = new BigDecimal("1.00");
                 StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, initialFee);
                 PartnerProduct partner = createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO,

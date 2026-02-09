@@ -51,8 +51,8 @@ class ContractRepositoryTest {
     }
 
     @Test
-    @DisplayName("01. Success: save stores a contract and returns it")
-    void test01_save_Success() throws BrandMismatchException {
+    @DisplayName("Success: save stores a contract and returns it")
+    void shouldStoreContractCorrectlyWhenSaveIsCalled() throws BrandMismatchException {
         Contract contract = new Contract(testCustomer, testProduct);
 
         Contract saved = contractRepository.save(contract);
@@ -66,8 +66,8 @@ class ContractRepositoryTest {
     }
 
     @Test
-    @DisplayName("02. Success: update modifies existing contract")
-    void test02_update_Success() throws BrandMismatchException {
+    @DisplayName("Success: update modifies existing contract")
+    void shouldModifyExistingContractWhenUpdateIsCalled() throws BrandMismatchException {
         Contract contract = new Contract(testCustomer, testProduct);
         contractRepository.save(contract);
         contract.updateStatus(ContractStatus.INACTIVE);
@@ -79,8 +79,8 @@ class ContractRepositoryTest {
     }
 
     @Test
-    @DisplayName("03. Success: findByCustomerId returns all contracts for customer")
-    void test03_findByCustomerId_Success() throws BrandMismatchException {
+    @DisplayName("Success: findByCustomerId returns all contracts for customer")
+    void shouldReturnAllContractsByCustomerIdWhenCustomerHasThem() throws BrandMismatchException {
         UUID customerId = testCustomer.getId();
         Contract contract1 = new Contract(testCustomer, testProduct);
         Contract contract2 = new Contract(testCustomer, testProduct);
@@ -94,8 +94,8 @@ class ContractRepositoryTest {
     }
 
     @Test
-    @DisplayName("04. Success: findByProductId returns all contracts for product")
-    void test04_findByProductId_Success() throws BrandMismatchException {
+    @DisplayName("Success: findByProductId returns all contracts for product")
+    void shouldReturnAllContractsByProductIdWhenProductHasThem() throws BrandMismatchException {
         UUID productId = testProduct.getId();
         Contract contract = new Contract(testCustomer, testProduct);
         contractRepository.save(contract);
@@ -106,24 +106,24 @@ class ContractRepositoryTest {
     }
 
     @Test
-    @DisplayName("05. Boundary: findById returns empty Optional for non-existent ID")
-    void test05_findById_NotFound() {
+    @DisplayName("Boundary: findById returns empty Optional for non-existent ID")
+    void shouldReturnEmptyOptionalWhenIdDoesNotExist() {
         Optional<Contract> result = contractRepository.findById(UUID.randomUUID());
 
         assertTrue(result.isEmpty());
     }
 
+    @DisplayName("Negative: save and update throw exception on null")
     @ParameterizedTest
     @NullSource
-    @DisplayName("06. Negative: save and update throw exception on null")
-    void test06_saveAndUpdate_NullParam(Contract contract) {
+    void shouldThrowExceptionWhenSaveOrUpdateWithNullIsCalled(Contract contract) {
         assertThrows(ContractValidationException.class, () -> contractRepository.save(contract));
         assertThrows(ContractValidationException.class, () -> contractRepository.update(contract));
     }
 
     @Test
-    @DisplayName("07. Boundary: findAll returns list containing saved contracts")
-    void test07_findAll_Success() throws BrandMismatchException {
+    @DisplayName("Boundary: findAll returns list containing saved contracts")
+    void shouldReturnListContainingAllSavedContracts() throws BrandMismatchException {
         Contract contract = new Contract(testCustomer, testProduct);
         contractRepository.save(contract);
 
@@ -134,30 +134,30 @@ class ContractRepositoryTest {
     }
 
     @Test
-    @DisplayName("08. Negative: search by null IDs throws exception")
-    void test08_searchMethods_NullParam() {
+    @DisplayName("Negative: search by null IDs throws exception")
+    void shouldThrowExceptionWhenSearchingByNullId() {
         assertThrows(ContractValidationException.class, () -> contractRepository.findById(null));
         assertThrows(ContractValidationException.class, () -> contractRepository.findByCustomerId(null));
         assertThrows(ContractValidationException.class, () -> contractRepository.findByProductId(null));
     }
 
     @Test
-    @DisplayName("09. Boundary: findByCustomerId returns empty list when no match found")
-    void test09_findByCustomerId_Empty() {
+    @DisplayName("Boundary: findByCustomerId returns empty list when no match found")
+    void shouldReturnEmptyListWhenNoContractsExistsForCustomerId() {
         List<Contract> results = contractRepository.findByCustomerId(UUID.randomUUID());
         assertTrue(results.isEmpty());
     }
 
     @Test
-    @DisplayName("10. Boundary: findByProductId returns empty list when no match found")
-    void test10_findByProductId_Empty() {
+    @DisplayName("Boundary: findByProductId returns empty list when no match found")
+    void shouldReturnEmptyListWhenNoContractsExistsForProductId() {
         List<Contract> results = contractRepository.findByProductId(UUID.randomUUID());
         assertTrue(results.isEmpty());
     }
 
     @Test
-    @DisplayName("11. Success: findByCustomerId filters correct contracts among many")
-    void test11_findByCustomerId_ComplexFiltering() throws BrandMismatchException {
+    @DisplayName("Success: findByCustomerId filters correct contracts among many")
+    void shouldFilterCorrectContractsAmongManyByCustomerId() throws BrandMismatchException {
         Customer anotherCustomer = mock(Customer.class);
         when(anotherCustomer.getId()).thenReturn(UUID.randomUUID());
         when(anotherCustomer.getStatus()).thenReturn(CustomerStatus.ACTIVE);
@@ -180,8 +180,8 @@ class ContractRepositoryTest {
     }
 
     @Test
-    @DisplayName("12. Success: verify ContractRepository is a Singleton")
-    void test12_singleton_Identity() {
+    @DisplayName("Success: verify ContractRepository is a Singleton")
+    void shouldReturnSameInstanceWhenGetInstanceIsCalled() {
         ContractRepository instance1 = ContractRepository.getInstance();
         ContractRepository instance2 = ContractRepository.getInstance();
 

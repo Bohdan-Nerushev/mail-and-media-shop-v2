@@ -65,7 +65,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("01: Should save and retrieve product by ID")
+    @DisplayName("Should save and retrieve product by ID")
     void shouldSaveAndRetrieveProductById() {
         Product product = createMailProduct("Mail1",
                 Brand.GMX,
@@ -80,21 +80,21 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("02: Should return empty Optional when ID does not exist")
+    @DisplayName("Should return empty Optional when ID does not exist")
     void shouldReturnEmptyOptionalForNonExistentId() {
         Optional<Product> retrieved = repository.findById(UUID.randomUUID());
         assertTrue(retrieved.isEmpty());
     }
 
     @Test
-    @DisplayName("03: Should throw ProductValidationException when saving null product")
+    @DisplayName("Should throw ProductValidationException when saving null product")
     void shouldThrowExceptionWhenSavingNullProduct() {
         assertThrows(ProductValidationException.class, () -> repository.save(null));
     }
 
     @ParameterizedTest
     @EnumSource(Brand.class)
-    @DisplayName("04: Should find products by brand")
+    @DisplayName("Should find products by brand")
     void shouldFindProductsByBrand(Brand brand) {
         Product product1 = createMailProduct(
                 brand + " Mail1",
@@ -116,7 +116,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("05: Should return empty collection when brand has no products")
+    @DisplayName("Should return empty collection when brand has no products")
     void shouldReturnEmptyCollectionWhenBrandHasNoProducts() {
         Collection<Product> byBrand = repository.findByBrand(Brand.MAIL_COM);
         assertNotNull(byBrand);
@@ -124,7 +124,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("06: Should retrieve all products")
+    @DisplayName("Should retrieve all products")
     void shouldRetrieveAllProducts() {
         Product p1 = createMailProduct("Mail1",
                 Brand.GMX, "1.00",
@@ -145,7 +145,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("07: Should clear storage")
+    @DisplayName("Should clear storage")
     void shouldClearStorage() {
         Product product = createMailProduct(
                 "Mail1",
@@ -164,7 +164,7 @@ class ProductRepositoryTest {
             "0.11",
             "1000000.00"
     })
-    @DisplayName("08: Should handle valid monthly fees at boundaries")
+    @DisplayName("Should handle valid monthly fees at boundaries")
     void shouldHandleValidMonthlyFees(String monthlyFee) {
         Product product = createMailProduct("MailBoundary", Brand.MAIL_COM, "1.00", monthlyFee, 2L);
         repository.save(product);
@@ -180,26 +180,26 @@ class ProductRepositoryTest {
             "0.00",
             "-1.00"
     })
-    @DisplayName("09: Should reject invalid monthly fees")
+    @DisplayName("Should reject invalid monthly fees")
     void shouldRejectInvalidMonthlyFees(String monthlyFee) {
         assertThrows(ProductValidationException.class,
                 () -> createMailProduct("MailInvalid", Brand.GMX, "1.00", monthlyFee, 2L));
     }
 
     @Test
-    @DisplayName("10: Should throw exception when finding by null ID")
+    @DisplayName("Should throw exception when finding by null ID")
     void shouldThrowExceptionWhenFindingByNullId() {
         assertThrows(ProductValidationException.class, () -> repository.findById(null));
     }
 
     @Test
-    @DisplayName("11: Should throw exception when finding by null brand")
+    @DisplayName("Should throw exception when finding by null brand")
     void shouldThrowExceptionWhenFindingByNullBrand() {
         assertThrows(ProductValidationException.class, () -> repository.findByBrand(null));
     }
 
     @Test
-    @DisplayName("12: Should handle BundleProduct creation and retrieval")
+    @DisplayName("Should handle BundleProduct creation and retrieval")
     void shouldHandleBundleProduct() {
         MailProduct mail = (MailProduct) createMailProduct("Mail", Brand.WEB_DE, "2.00", "1.00", 3L);
         PartnerProduct partner = (PartnerProduct) createPartnerProduct("Partner", Brand.WEB_DE, "3.00", "2.00");
@@ -215,7 +215,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("13: Should reject BundleProduct with mismatched brands")
+    @DisplayName("Should reject BundleProduct with mismatched brands")
     void shouldRejectBundleWithMismatchedBrands() {
         MailProduct mail = (MailProduct) createMailProduct("Mail", Brand.GMX, "2.00", "1.00", 3L);
         PartnerProduct partner = (PartnerProduct) createPartnerProduct("Partner", Brand.WEB_DE, "3.00", "2.00");
@@ -224,7 +224,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("14: Should reject null in BundleProduct constructor")
+    @DisplayName("Should reject null in BundleProduct constructor")
     void shouldRejectNullInBundleConstructor() {
         MailProduct mail = null;
         PartnerProduct partner = (PartnerProduct) createPartnerProduct("Partner", Brand.MAIL_COM, "1.00", "0.50");
@@ -232,14 +232,14 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("15: Should reject MailProduct with invalid storage size")
+    @DisplayName("Should reject MailProduct with invalid storage size")
     void shouldRejectMailProductWithInvalidStorageSize() {
         assertThrows(ProductValidationException.class,
                 () -> createMailProduct("MailInvalid", Brand.GMX, "1.00", "0.50", 0L));
     }
 
     @Test
-    @DisplayName("16: Should update existing product in storage")
+    @DisplayName("Should update existing product in storage")
     void shouldUpdateExistingProduct() {
         final MailProduct product = (MailProduct) createMailProduct("Initial Mail",
                 Brand.GMX,
@@ -267,7 +267,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("17: Should save product when updating non-existent product")
+    @DisplayName("Should save product when updating non-existent product")
     void shouldSaveProductWhenUpdatingNonExistentProduct() {
         final Product product = createMailProduct("New Product",
                 Brand.WEB_DE,
@@ -284,7 +284,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("18: Should throw ProductValidationException when updating null product")
+    @DisplayName("Should throw ProductValidationException when updating null product")
     void shouldThrowExceptionWhenUpdatingNullProduct() {
         assertThatThrownBy(() -> repository.update(null))
                 .isInstanceOf(ProductValidationException.class)

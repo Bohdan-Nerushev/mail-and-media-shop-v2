@@ -53,8 +53,8 @@ class MailProductTest {
         }
 
         @Test
-        @DisplayName("1. Verify StandardMailProduct fixed attributes (Setup Fee, Storage)")
-        void test1_CreateStandardMailProduct_VerifyFixedFeesAndStorage() {
+        @DisplayName("Verify StandardMailProduct fixed attributes (Setup Fee, Storage)")
+        void shouldVerifyStandardMailProductFixedAttributes() {
                 final StandardMailProduct product = createDefaultStandardMailProduct(
                                 "Standard Mail Base",
                                 Brand.GMX,
@@ -66,8 +66,8 @@ class MailProductTest {
         }
 
         @Test
-        @DisplayName("2. Verify PremiumMailProduct fixed attributes (Setup Fee, Storage)")
-        void test2_CreatePremiumMailProduct_VerifyFixedFeesAndStorage() {
+        @DisplayName("Verify PremiumMailProduct fixed attributes (Setup Fee, Storage)")
+        void shouldVerifyPremiumMailProductFixedAttributes() {
                 final PremiumMailProduct product = createDefaultPremiumMailProduct(
                                 "Premium Mail Pro",
                                 Brand.WEB_DE,
@@ -79,8 +79,8 @@ class MailProductTest {
         }
 
         @Test
-        @DisplayName("3. Verify MailProduct success at boundary minimum monthly fee (0.11€)")
-        void test3_CreateMailProduct_Success_BoundaryMinimumMonthlyFee() {
+        @DisplayName("Verify MailProduct success at boundary minimum monthly fee (0.11€)")
+        void shouldCreateMailProductWhenMonthlyFeeIsAtMinimumAllowed() {
 
                 final BigDecimal minFee = new BigDecimal("0.11");
 
@@ -92,10 +92,10 @@ class MailProductTest {
                 assertEquals(minFee, product.getMonthlyFee());
         }
 
+        @DisplayName("Verify MailProduct failure when monthly fee is below or at the limit (<= 0.10€)")
         @ParameterizedTest(name = "[{index}] Monthly fee {0} € should be invalid")
         @ValueSource(strings = { "0.10", "0.09", "0.00", "-0.01", "-100.00" })
-        @DisplayName("4. Verify MailProduct failure when monthly fee is below or at the limit (<= 0.10€)")
-        void test4_CreateMailProduct_ThrowsException_MonthlyFeeBelowOrAtLimit(
+        void shouldThrowExceptionWhenMailProductMonthlyFeeIsInvalid(
                         final String feeString) {
 
                 final BigDecimal invalidFee = new BigDecimal(feeString);
@@ -110,11 +110,11 @@ class MailProductTest {
                 assertEquals("Monthly fee must be greater than 0.10 €", exception.getMessage());
         }
 
+        @DisplayName("Verify MailProduct failure with null, empty or blank name")
         @ParameterizedTest(name = "[{index}] Name: ''{0}''")
         @NullAndEmptySource
         @ValueSource(strings = { " ", "  ", "", "\t", "\n" })
-        @DisplayName("5. Verify MailProduct failure with null, empty or blank name")
-        void test5_CreateMailProduct_ThrowsException_InvalidName(
+        void shouldThrowExceptionWhenMailProductNameIsInvalid(
                         final String invalidName) {
 
                 final ProductValidationException exception = assertThrows(
@@ -128,8 +128,8 @@ class MailProductTest {
         }
 
         @Test
-        @DisplayName("6. Verify MailProduct failure with null brand")
-        void test6_CreateMailProduct_ThrowsException_NullBrand() {
+        @DisplayName("Verify MailProduct failure with null brand")
+        void shouldThrowExceptionWhenMailProductBrandIsNull() {
 
                 final ProductValidationException exception = assertThrows(
                                 ProductValidationException.class,
@@ -142,8 +142,8 @@ class MailProductTest {
         }
 
         @Test
-        @DisplayName("7. Verify MailProduct failure with null monthly fee")
-        void test7_CreateMailProduct_ThrowsException_NullMonthlyFee() {
+        @DisplayName("Verify MailProduct failure with null monthly fee")
+        void shouldThrowExceptionWhenMailProductMonthlyFeeIsNull() {
 
                 final ProductValidationException exception = assertThrows(
                                 ProductValidationException.class,
@@ -155,6 +155,7 @@ class MailProductTest {
                 assertEquals("Monthly fee must not be null", exception.getMessage());
         }
 
+        @DisplayName("Verify MailProduct success with various valid and large monthly fees")
         @ParameterizedTest(name = "[{index}] Monthly fee {0} €")
         @CsvSource(value = {
                         "0.11",
@@ -163,8 +164,7 @@ class MailProductTest {
                         "999.99",
                         "1000000"
         })
-        @DisplayName("8. Verify MailProduct success with various valid and large monthly fees")
-        void test8_CreateMailProduct_Success_VariousValidMonthlyFees(
+        void shouldCreateMailProductWhenMonthlyFeeIsValid(
                         final BigDecimal validFee) {
 
                 final StandardMailProduct product = createDefaultStandardMailProduct(
@@ -175,10 +175,10 @@ class MailProductTest {
                 assertEquals(validFee, product.getMonthlyFee());
         }
 
+        @DisplayName("Verify PremiumMailProduct failure when monthly fee is below or at the limit (<= 0.10€)")
         @ParameterizedTest(name = "[{index}] Monthly fee {0} € should be invalid")
         @ValueSource(strings = { "0.10", "0.09", "0.00", "-0.01", "-100.00" })
-        @DisplayName("9. Verify PremiumMailProduct failure when monthly fee is below or at the limit (<= 0.10€)")
-        void test9_CreatePremiumMailProduct_ThrowsException_MonthlyFeeBelowOrAtLimit(
+        void shouldThrowExceptionWhenPremiumMailProductMonthlyFeeIsInvalid(
                         final String feeString) {
 
                 final BigDecimal invalidFee = new BigDecimal(feeString);
@@ -193,11 +193,11 @@ class MailProductTest {
                 assertEquals("Monthly fee must be greater than 0.10 €", exception.getMessage());
         }
 
+        @DisplayName("Verify PremiumMailProduct failure with null, empty or blank name")
         @ParameterizedTest(name = "[{index}] Name: ''{0}''")
         @NullAndEmptySource
         @ValueSource(strings = { " ", "  ", "\t", "\n" })
-        @DisplayName("10. Verify PremiumMailProduct failure with null, empty or blank name")
-        void test10_CreatePremiumMailProduct_ThrowsException_InvalidName(
+        void shouldThrowExceptionWhenPremiumMailProductNameIsInvalid(
                         final String invalidName) {
 
                 final ProductValidationException exception = assertThrows(
@@ -210,6 +210,7 @@ class MailProductTest {
                 assertEquals("Product name must not be null or empty", exception.getMessage());
         }
 
+        @DisplayName("Verify PremiumMailProduct success with various valid monthly fees")
         @ParameterizedTest(name = "[{index}] Monthly fee {0} €")
         @CsvSource(value = {
                         "0.11",
@@ -219,8 +220,7 @@ class MailProductTest {
                         "1000",
                         "10000.50"
         })
-        @DisplayName("13. Verify PremiumMailProduct success with various valid monthly fees")
-        void test13_CreatePremiumMailProduct_Success_VariousValidMonthlyFees(
+        void shouldCreatePremiumMailProductWhenMonthlyFeeIsValid(
                         final BigDecimal validFee) {
 
                 final PremiumMailProduct product = createDefaultPremiumMailProduct(
@@ -231,10 +231,10 @@ class MailProductTest {
                 assertEquals(validFee, product.getMonthlyFee());
         }
 
+        @DisplayName("Verify StandardMailProduct creation with all available brands")
         @ParameterizedTest(name = "[{index}] Brand: {0}")
         @ValueSource(strings = { "GMX", "WEB_DE" })
-        @DisplayName("14. Verify StandardMailProduct creation with all available brands")
-        void test14_CreateStandardMailProduct_AllBrands(String brandName) {
+        void shouldCreateStandardMailProductForAllBrands(String brandName) {
                 Brand brand = Brand.valueOf(brandName);
                 final StandardMailProduct product = createDefaultStandardMailProduct(
                                 "Brand Test Mail",
@@ -245,8 +245,8 @@ class MailProductTest {
         }
 
         @Test
-        @DisplayName("11. Verify PremiumMailProduct failure with null brand")
-        void test11_CreatePremiumMailProduct_ThrowsException_NullBrand() {
+        @DisplayName("Verify PremiumMailProduct failure with null brand")
+        void shouldThrowExceptionWhenPremiumMailProductBrandIsNull() {
 
                 final ProductValidationException exception = assertThrows(
                                 ProductValidationException.class,
@@ -259,8 +259,8 @@ class MailProductTest {
         }
 
         @Test
-        @DisplayName("12. Verify PremiumMailProduct success at boundary minimum monthly fee (0.11€)")
-        void test12_CreatePremiumMailProduct_Success_BoundaryMinimumMonthlyFee() {
+        @DisplayName("Verify PremiumMailProduct success at boundary minimum monthly fee (0.11€)")
+        void shouldCreatePremiumMailProductWhenMonthlyFeeIsAtMinimumAllowed() {
 
                 final BigDecimal minFee = new BigDecimal("0.11");
 
@@ -273,8 +273,8 @@ class MailProductTest {
         }
 
         @Test
-        @DisplayName("15. Negative: Failure with invalid storage size (< 1GB)")
-        void test15_CreateMailProduct_InvalidStorageSize() {
+        @DisplayName("Negative: Failure with invalid storage size (< 1GB)")
+        void shouldThrowExceptionWhenStorageSizeIsInvalid() {
                 final ProductValidationException exception = assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultMailProduct("Small Storage", Brand.GMX, BigDecimal.ZERO,

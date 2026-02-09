@@ -55,8 +55,8 @@ class CustomerRepositoryTest {
     }
 
     @Test
-    @DisplayName("01: Should successfully save and retrieve a single customer by its identifier")
-    void test01_saveAndRetrieveCustomer() {
+    @DisplayName("Should successfully save and retrieve a single customer by its identifier")
+    void shouldSaveAndRetrieveCustomerCorrectly() {
         final UUID customerId = UUID.randomUUID();
         when(customer.getId()).thenReturn(customerId);
 
@@ -70,8 +70,8 @@ class CustomerRepositoryTest {
 
     @ParameterizedTest
     @EnumSource(Brand.class)
-    @DisplayName("02: Should find all customers even when they belong to different brands")
-    void test02_findAllWithDifferentBrands(final Brand brand) {
+    @DisplayName("Should find all customers even when they belong to different brands")
+    void shouldFindAllCustomersWithDifferentBrands(final Brand brand) {
         final UUID customerId = UUID.randomUUID();
         when(customer.getId()).thenReturn(customerId);
         when(customer.getBrand()).thenReturn(brand);
@@ -84,15 +84,15 @@ class CustomerRepositoryTest {
     }
 
     @Test
-    @DisplayName("03: Should return empty optional when attempting to find a customer by a non-existent identifier")
-    void test03_findNonExistentReturnsEmpty() {
+    @DisplayName("Should return empty optional when attempting to find a customer by a non-existent identifier")
+    void shouldReturnEmptyOptionalWhenFindingNonExistentCustomer() {
         final Optional<Customer> found = repository.findById(UUID.randomUUID());
         assertFalse(found.isPresent());
     }
 
     @Test
-    @DisplayName("04: Should successfully update existing customer data in storage")
-    void test04_updateExistingCustomer() throws CustomerNotFoundException {
+    @DisplayName("Should successfully update existing customer data in storage")
+    void shouldUpdateExistingCustomerCorrectly() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         when(customer.getId()).thenReturn(customerId);
 
@@ -105,8 +105,8 @@ class CustomerRepositoryTest {
     }
 
     @Test
-    @DisplayName("05: Should successfully delete an existing customer from storage")
-    void test05_deleteExistingCustomer() throws CustomerNotFoundException {
+    @DisplayName("Should successfully delete an existing customer from storage")
+    void shouldDeleteExistingCustomerCorrectly() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         when(customer.getId()).thenReturn(customerId);
 
@@ -118,42 +118,42 @@ class CustomerRepositoryTest {
     }
 
     @Test
-    @DisplayName("06: Should throw CustomerNotFoundException when attempting to delete a non-existent customer")
-    void test06_throwExceptionOnDeleteNonExistent() {
+    @DisplayName("Should throw CustomerNotFoundException when attempting to delete a non-existent customer")
+    void shouldThrowExceptionWhenDeletingNonExistentCustomer() {
         final UUID nonExistentId = UUID.randomUUID();
         assertThrows(CustomerNotFoundException.class, () -> repository.delete(nonExistentId));
     }
 
     @Test
-    @DisplayName("07: Should throw CustomerNotFoundException when attempting to update a non-existent customer")
-    void test07_throwExceptionOnUpdateNonExistent() {
+    @DisplayName("Should throw CustomerNotFoundException when attempting to update a non-existent customer")
+    void shouldThrowExceptionWhenUpdatingNonExistentCustomer() {
         when(customer.getId()).thenReturn(UUID.randomUUID());
         assertThrows(CustomerNotFoundException.class, () -> repository.update(customer));
     }
 
     @Test
-    @DisplayName("08: Should throw IllegalArgumentException when passing null to save method (Negative)")
-    void test08_throwExceptionOnSaveNull() {
+    @DisplayName("Should throw IllegalArgumentException when passing null to save method (Negative)")
+    void shouldThrowExceptionWhenSavingNullCustomer() {
         assertThrows(CustomerValidationException.class, () -> repository.save(null));
     }
 
     @Test
-    @DisplayName("09: Should throw IllegalArgumentException when searching by null identifier (Negative)")
-    void test09_throwExceptionOnFindNullId() {
+    @DisplayName("Should throw IllegalArgumentException when searching by null identifier (Negative)")
+    void shouldThrowExceptionWhenFindingByNullId() {
         assertThrows(CustomerValidationException.class, () -> repository.findById(null));
     }
 
     @Test
-    @DisplayName("10: Should handle empty storage state returning an empty collection (Boundary)")
-    void test10_findAllOnEmptyStorage() {
+    @DisplayName("Should handle empty storage state returning an empty collection (Boundary)")
+    void shouldReturnEmptyCollectionWhenStorageIsEmpty() {
         final Collection<Customer> all = repository.findAll();
         assertTrue(all.isEmpty());
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 1, 5, 20 })
-    @DisplayName("11: Should handle multiple concurrent-like entries and maintain correct size (Boundary)")
-    void test11_multipleEntriesSize(final int count) {
+    @DisplayName("Should handle multiple concurrent-like entries and maintain correct size (Boundary)")
+    void shouldMaintainCorrectSizeWhenMultipleEntriesAreSaved(final int count) {
         for (int i = 0; i < count; i++) {
             final Customer c = mock(Customer.class);
             when(c.getId()).thenReturn(UUID.randomUUID());
@@ -163,38 +163,20 @@ class CustomerRepositoryTest {
     }
 
     @Test
-    @DisplayName("12: Should throw IllegalArgumentException when passing null to update method (Negative)")
-    void test12_throwExceptionOnUpdateNull() {
+    @DisplayName("Should throw IllegalArgumentException when passing null to update method (Negative)")
+    void shouldThrowExceptionWhenUpdatingNullCustomer() {
         assertThrows(CustomerValidationException.class, () -> repository.update(null));
     }
 
     @Test
-    @DisplayName("13: Should throw IllegalArgumentException when passing null to delete method (Negative)")
-    void test13_throwExceptionOnDeleteNull() {
+    @DisplayName("Should throw IllegalArgumentException when passing null to delete method (Negative)")
+    void shouldThrowExceptionWhenDeletingNullId() {
         assertThrows(CustomerValidationException.class, () -> repository.delete(null));
     }
 
     @Test
-    @DisplayName("14: Should throw IllegalArgumentException when passing null to find method (Negative)")
-    void test14_throwExceptionOnFindNullId() {
-        assertThrows(CustomerValidationException.class, () -> repository.findById(null));
-    }
-
-    @Test
-    @DisplayName("15: Should throw IllegalArgumentException when passing null to update method (Negative)")
-    void test15_throwExceptionOnUpdateNullId() {
-        assertThrows(CustomerValidationException.class, () -> repository.update(null));
-    }
-
-    @Test
-    @DisplayName("16: Should throw IllegalArgumentException when passing null to delete method (Negative)")
-    void test16_throwExceptionOnDeleteNullId() {
-        assertThrows(CustomerValidationException.class, () -> repository.delete(null));
-    }
-
-    @Test
-    @DisplayName("17: Negativ customer not found Exception")
-    void test17_throwExceptionOnCustomerNotFound() {
+    @DisplayName("Negativ customer not found Exception")
+    void shouldThrowExceptionWhenGettingByIdNonExistentCustomer() {
         assertThrows(CustomerNotFoundException.class, () -> repository.getById(UUID.randomUUID()));
     }
 }
