@@ -20,11 +20,6 @@ import java.util.UUID;
 public interface ShopService {
 
         @NotNull
-        static ShopService getInstance() {
-                return ShopServiceImpl.getInstance();
-        }
-
-        @NotNull
         Customer registerCustomer(@NotNull @Valid final Customer customer);
 
         @NotNull

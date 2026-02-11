@@ -7,6 +7,9 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -14,21 +17,14 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Repository
 final class ProductRepositoryImpl implements ProductRepository {
 
     private final Map<UUID, Product> storage;
 
-    private ProductRepositoryImpl() {
+    @Autowired
+    ProductRepositoryImpl() {
         this.storage = new ConcurrentHashMap<>();
-    }
-
-    private static final class Holder {
-        private static final ProductRepositoryImpl INSTANCE = new ProductRepositoryImpl();
-    }
-
-    @NotNull
-    static ProductRepository getInstance() {
-        return Holder.INSTANCE;
     }
 
     @Override

@@ -5,6 +5,8 @@ import dev.mam.buizsol.mamshop.contract.model.Contract;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,21 +17,14 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Repository
 final class ContractRepositoryImpl implements ContractRepository {
 
     private final Map<UUID, Contract> storage;
 
-    private ContractRepositoryImpl() {
+    @Autowired
+    ContractRepositoryImpl() {
         this.storage = new ConcurrentHashMap<>();
-    }
-
-    private static final class Holder {
-        private static final ContractRepositoryImpl INSTANCE = new ContractRepositoryImpl();
-    }
-
-    @NotNull
-    static ContractRepository getInstance() {
-        return Holder.INSTANCE;
     }
 
     @Override

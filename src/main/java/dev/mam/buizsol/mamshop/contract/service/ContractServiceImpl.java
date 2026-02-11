@@ -10,27 +10,23 @@ import dev.mam.buizsol.mamshop.product.model.Product;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Service
+@Validated
 final class ContractServiceImpl implements ContractService {
 
     private final ContractRepository repository;
 
-    private ContractServiceImpl(
-            @NotNull final ContractRepository repository) {
+    @Autowired
+    ContractServiceImpl(@NotNull final ContractRepository repository) {
         this.repository = repository;
-    }
-
-    private static final class Holder {
-        private static final ContractServiceImpl INSTANCE = new ContractServiceImpl(ContractRepository.getInstance());
-    }
-
-    @NotNull
-    static ContractService getInstance() {
-        return Holder.INSTANCE;
     }
 
     @Override

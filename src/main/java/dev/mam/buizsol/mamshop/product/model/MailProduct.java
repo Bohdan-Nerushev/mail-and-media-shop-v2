@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullProduct;
+
 import java.math.BigDecimal;
 
 public abstract class MailProduct extends Product {
@@ -20,7 +22,7 @@ public abstract class MailProduct extends Product {
             @NotNull final BigDecimal monthlyFee,
             @NotNull final Long storageSizeGB) {
         super(name, brand, setupFee, monthlyFee);
-        validateNotNull(storageSizeGB, "Storage size");
+        validateNotNullProduct(storageSizeGB, "Storage size");
         if (storageSizeGB < 1L) {
             throw new ProductValidationException("Storage size must be at least 1GB");
         }

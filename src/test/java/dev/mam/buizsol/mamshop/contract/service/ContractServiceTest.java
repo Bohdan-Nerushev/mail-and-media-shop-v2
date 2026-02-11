@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,12 +32,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ContractService Tests")
 class ContractServiceTest {
 
     @Mock
@@ -51,9 +53,6 @@ class ContractServiceTest {
     @BeforeEach
     void setUp() {
         activeCustomer = mock(Customer.class);
-        lenient().when(activeCustomer.getStatus()).thenReturn(CustomerStatus.ACTIVE);
-        lenient().when(activeCustomer.getBrand()).thenReturn(Brand.WEB_DE);
-        lenient().when(activeCustomer.getId()).thenReturn(UUID.randomUUID());
 
         matchingProduct = new StandardMailProduct(
                 "Test Product",
@@ -64,6 +63,7 @@ class ContractServiceTest {
     @Test
     @DisplayName("Success: createContract generates and saves a contract")
     void shouldGenerateAndSaveContractWhenCustomerIsActiveAndDataIsValid() throws BrandMismatchException {
+        setupActiveCustomer();
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract created = contractService.createContract(activeCustomer, matchingProduct);
@@ -104,6 +104,7 @@ class ContractServiceTest {
     @Test
     @DisplayName("Success: updateContractStatus updates status correctly")
     void shouldUpdateStatusWhenContractExists() throws ContractNotFoundException, BrandMismatchException {
+        setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
         Contract contract = new Contract(activeCustomer, matchingProduct);
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
@@ -141,6 +142,7 @@ class ContractServiceTest {
     @Test
     @DisplayName("Negative: createContract throws exception on brand mismatch")
     void shouldThrowExceptionWhenCreatingContractWithBrandMismatch() {
+        when(activeCustomer.getBrand()).thenReturn(Brand.WEB_DE);
         Product mismatchProduct = new StandardMailProduct(
                 "Mismatch Brand",
                 Brand.GMX,
@@ -155,7 +157,8 @@ class ContractServiceTest {
     void shouldThrowExceptionWhenCreatingContractForInactiveCustomer() {
         Customer inactiveCustomer = mock(Customer.class);
         when(inactiveCustomer.getStatus()).thenReturn(CustomerStatus.INACTIVE);
-        lenient().when(inactiveCustomer.getBrand()).thenReturn(Brand.WEB_DE);
+        when(inactiveCustomer.getId()).thenReturn(UUID.randomUUID());
+        when(inactiveCustomer.getBrand()).thenReturn(Brand.WEB_DE);
 
         assertThrows(CustomerNotActiveException.class,
                 () -> contractService.createContract(inactiveCustomer, matchingProduct));
@@ -208,11 +211,57 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("Success: verify ContractService is a Singleton")
-    void shouldReturnSameInstanceWhenGetInstanceIsCalled() {
-        ContractService instance1 = ContractService.getInstance();
-        ContractService instance2 = ContractService.getInstance();
+    @DisplayName("Boundary: updateContractStatus with same status should succeed")
+    void shouldUpdateStatusSuccessfullyWhenStatusIsTheSame() throws ContractNotFoundException, BrandMismatchException {
+        setupActiveCustomer();
+        UUID contractId = UUID.randomUUID();
+        Contract contract = new Contract(activeCustomer, matchingProduct);
+        contract.updateStatus(ContractStatus.ACTIVE);
+        when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
+        when(contractRepository.update(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertEquals(instance1, instance2);
+        Contract updated = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
+
+        assertEquals(ContractStatus.ACTIVE, updated.getStatus());
+        verify(contractRepository).update(contract);
+    }
+
+    @Test
+    @DisplayName("Boundary: multiple consecutive status updates should work correctly")
+    void shouldHandleMultipleConsecutiveStatusUpdates() throws ContractNotFoundException, BrandMismatchException {
+        setupActiveCustomer();
+        UUID contractId = UUID.randomUUID();
+        Contract contract = new Contract(activeCustomer, matchingProduct);
+        when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
+        when(contractRepository.update(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Contract updated1 = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
+        assertEquals(ContractStatus.ACTIVE, updated1.getStatus());
+
+        Contract updated2 = contractService.updateContractStatus(contractId, ContractStatus.INACTIVE);
+        assertEquals(ContractStatus.INACTIVE, updated2.getStatus());
+
+        Contract updated3 = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
+        assertEquals(ContractStatus.ACTIVE, updated3.getStatus());
+
+        verify(contractRepository, times(3)).update(contract);
+    }
+
+    @Test
+    @DisplayName("Boundary: contract creation date should always be current date")
+    void shouldSetCreationDateToCurrentDateWhenCreatingContract() throws BrandMismatchException {
+        setupActiveCustomer();
+        when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Contract created = contractService.createContract(activeCustomer, matchingProduct);
+
+        assertEquals(LocalDate.now(), created.getCreationDate());
+        verify(contractRepository).save(any(Contract.class));
+    }
+
+    private void setupActiveCustomer() {
+        when(activeCustomer.getStatus()).thenReturn(CustomerStatus.ACTIVE);
+        when(activeCustomer.getBrand()).thenReturn(Brand.WEB_DE);
+        when(activeCustomer.getId()).thenReturn(UUID.randomUUID());
     }
 }

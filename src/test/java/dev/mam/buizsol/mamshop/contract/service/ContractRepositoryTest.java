@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@DisplayName("ContractRepository Tests")
 class ContractRepositoryTest {
 
     private ContractRepository contractRepository;
@@ -37,7 +38,7 @@ class ContractRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        contractRepository = ContractRepositoryImpl.getInstance();
+        contractRepository = new ContractRepositoryImpl();
 
         testCustomer = mock(Customer.class);
         when(testCustomer.getStatus()).thenReturn(CustomerStatus.ACTIVE);
@@ -177,14 +178,5 @@ class ContractRepositoryTest {
         assertTrue(results.contains(target1));
         assertTrue(results.contains(target2));
         assertTrue(results.stream().noneMatch(c -> c.getCustomerId().equals(anotherCustomer.getId())));
-    }
-
-    @Test
-    @DisplayName("Success: verify ContractRepository is a Singleton")
-    void shouldReturnSameInstanceWhenGetInstanceIsCalled() {
-        ContractRepository instance1 = ContractRepository.getInstance();
-        ContractRepository instance2 = ContractRepository.getInstance();
-
-        assertEquals(instance1, instance2);
     }
 }

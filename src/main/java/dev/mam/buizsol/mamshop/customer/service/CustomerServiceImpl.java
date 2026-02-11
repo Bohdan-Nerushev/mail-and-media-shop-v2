@@ -9,11 +9,16 @@ import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Service
+@Validated
 final class CustomerServiceImpl implements CustomerService {
 
     private static final String CUSTOMER_ID_FIELD_NAME = "Customer ID";
@@ -21,24 +26,12 @@ final class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    private CustomerServiceImpl() {
-        this(CustomerRepository.getInstance());
-    }
-
+    @Autowired
     CustomerServiceImpl(@NotNull final CustomerRepository customerRepository) {
         if (customerRepository == null) {
             throw new CustomerValidationException("CustomerRepository must not be null");
         }
         this.customerRepository = customerRepository;
-    }
-
-    private static final class Holder {
-        private static final CustomerServiceImpl INSTANCE = new CustomerServiceImpl();
-    }
-
-    @NotNull
-    static CustomerService getInstance() {
-        return Holder.INSTANCE;
     }
 
     @Override

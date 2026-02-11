@@ -14,11 +14,17 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Service
+@Validated
 final class BillingServiceImpl implements BillingService {
 
     private final CustomerService customerService;
@@ -27,6 +33,7 @@ final class BillingServiceImpl implements BillingService {
 
     private static final BigDecimal MIN_DISCOUNT = new BigDecimal("0.10");
 
+    @Autowired
     BillingServiceImpl(
             @NotNull final CustomerService customerService,
             @NotNull final ProductService productService,
@@ -34,18 +41,6 @@ final class BillingServiceImpl implements BillingService {
         this.customerService = customerService;
         this.productService = productService;
         this.contractService = contractService;
-    }
-
-    private static final class Holder {
-        private static final BillingServiceImpl INSTANCE = new BillingServiceImpl(
-                CustomerService.getInstance(),
-                ProductService.getInstance(),
-                ContractService.getInstance());
-    }
-
-    @NotNull
-    static BillingService getInstance() {
-        return Holder.INSTANCE;
     }
 
     @Override

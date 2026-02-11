@@ -13,11 +13,6 @@ import java.util.UUID;
 
 public interface ProductService {
 
-        @NotNull
-        static ProductService getInstance() {
-                return ProductServiceImpl.getInstance();
-        }
-
         void createProduct(@NotNull @Valid final Product product);
 
         @NotNull

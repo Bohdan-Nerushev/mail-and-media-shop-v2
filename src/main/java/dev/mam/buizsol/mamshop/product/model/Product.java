@@ -1,11 +1,14 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
-import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateMonthlyFeeProduct;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotBlankProduct;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullProduct;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateSetupFeeProduct;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -35,12 +38,12 @@ public abstract class Product {
             @NotNull final BigDecimal setupFee,
             @NotNull final BigDecimal monthlyFee) {
 
-        validateNotBlank(name, "Product name");
-        validateNotNull(brand, "Brand");
-        validateNotNull(setupFee, "Setup fee");
-        validateNotNull(monthlyFee, "Monthly fee");
-        validateSetupFee(setupFee);
-        validateMonthlyFee(monthlyFee);
+        validateNotBlankProduct(name, "Product name");
+        validateNotNullProduct(brand, "Brand");
+        validateNotNullProduct(setupFee, "Setup fee");
+        validateNotNullProduct(monthlyFee, "Monthly fee");
+        validateSetupFeeProduct(setupFee);
+        validateMonthlyFeeProduct(monthlyFee);
 
         this.id = UUID.randomUUID();
         this.name = name;
@@ -76,38 +79,9 @@ public abstract class Product {
 
     public void setMonthlyFee(
             @NotNull final BigDecimal monthlyFee) {
-        validateNotNull(monthlyFee, "Monthly fee");
-        validateMonthlyFee(monthlyFee);
+        validateNotNullProduct(monthlyFee, "Monthly fee");
+        validateMonthlyFeeProduct(monthlyFee);
         this.monthlyFee = monthlyFee;
     }
 
-    private void validateMonthlyFee(
-            @NotNull final BigDecimal monthlyFee) {
-        if (monthlyFee.compareTo(new BigDecimal("0.10")) <= 0) {
-            throw new ProductValidationException("Monthly fee must be greater than 0.10 €");
-        }
-    }
-
-    private void validateSetupFee(
-            final BigDecimal setupFee) {
-        if (setupFee.compareTo(BigDecimal.ZERO) < 0) {
-            throw new ProductValidationException("Setup fee must not be negative");
-        }
-    }
-
-    protected void validateNotBlank(
-            @Nullable final String value,
-            @NotNull final String fieldName) {
-        if (value == null || value.isBlank()) {
-            throw new ProductValidationException(fieldName + " must not be null or empty");
-        }
-    }
-
-    protected void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new ProductValidationException(fieldName + " must not be null");
-        }
-    }
 }

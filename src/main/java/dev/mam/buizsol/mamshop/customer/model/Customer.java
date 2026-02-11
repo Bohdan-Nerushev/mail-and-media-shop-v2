@@ -1,10 +1,12 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
-import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotBlankCustomer;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullCustomer;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -42,12 +44,12 @@ public class Customer {
             @NotNull @Valid final CommunicationDetails communicationDetails,
             @NotNull final Brand brand) {
 
-        validateNotBlank(firstName, "First name");
-        validateNotBlank(lastName, "Last name");
-        validateNotNull(birthDate, "Birth date");
-        validateNotNull(address, "Address");
-        validateNotNull(communicationDetails, "Communication details");
-        validateNotNull(brand, "Brand");
+        validateNotBlankCustomer(firstName, "First name");
+        validateNotBlankCustomer(lastName, "Last name");
+        validateNotNullCustomer(birthDate, "Birth date");
+        validateNotNullCustomer(address, "Address");
+        validateNotNullCustomer(communicationDetails, "Communication details");
+        validateNotNullCustomer(brand, "Brand");
 
         this.id = UUID.randomUUID();
         this.firstName = firstName;
@@ -87,7 +89,7 @@ public class Customer {
 
     public void setAddress(
             @NotNull @Valid final Address address) {
-        validateNotNull(address, "Address");
+        validateNotNullCustomer(address, "Address");
         this.address = address;
     }
 
@@ -98,7 +100,7 @@ public class Customer {
 
     public void setInvoiceAddress(
             @NotNull @Valid final Address invoiceAddress) {
-        validateNotNull(invoiceAddress, "Invoice address");
+        validateNotNullCustomer(invoiceAddress, "Invoice address");
         this.invoiceAddress = invoiceAddress;
     }
 
@@ -109,7 +111,7 @@ public class Customer {
 
     public void setCommunicationDetails(
             @NotNull @Valid final CommunicationDetails communicationDetails) {
-        validateNotNull(communicationDetails, "Communication details");
+        validateNotNullCustomer(communicationDetails, "Communication details");
         this.communicationDetails = communicationDetails;
     }
 
@@ -125,24 +127,8 @@ public class Customer {
 
     public void setStatus(
             @NotNull final CustomerStatus status) {
-        validateNotNull(status, "Status");
+        validateNotNullCustomer(status, "Status");
         this.status = status;
-    }
-
-    private void validateNotBlank(
-            @NotNull final String value,
-            @NotNull final String fieldName) {
-        if (value == null || value.isBlank()) {
-            throw new CustomerValidationException(fieldName + " must not be null or empty");
-        }
-    }
-
-    private void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new CustomerValidationException(fieldName + " must not be null");
-        }
     }
 
     @Override

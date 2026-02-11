@@ -11,11 +11,6 @@ import java.util.UUID;
 public interface BillingService {
 
     @NotNull
-    static BillingService getInstance() {
-        return BillingServiceImpl.getInstance();
-    }
-
-    @NotNull
     Invoice generateInvoice(@NotNull UUID customerId) throws CustomerNotFoundException, ProductNotFoundException;
 
     @NotNull

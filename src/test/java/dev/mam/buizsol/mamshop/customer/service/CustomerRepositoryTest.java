@@ -5,7 +5,6 @@ import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("CustomerRepository Tests")
 class CustomerRepositoryTest {
 
     @Mock
@@ -38,20 +38,10 @@ class CustomerRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = CustomerRepository.getInstance();
+        repository = new CustomerRepositoryImpl();
         if (customer != null) {
             clearInvocations(customer);
         }
-    }
-
-    @AfterEach
-    public void cleanStorage() {
-        repository.findAll().forEach(c -> {
-            try {
-                repository.delete(c.getId());
-            } catch (final CustomerNotFoundException e) {
-            }
-        });
     }
 
     @Test

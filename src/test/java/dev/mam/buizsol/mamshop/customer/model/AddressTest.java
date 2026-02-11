@@ -3,6 +3,7 @@ package dev.mam.buizsol.mamshop.customer.model;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("Address Tests")
 class AddressTest {
 
     private Address createDefaultAddress(

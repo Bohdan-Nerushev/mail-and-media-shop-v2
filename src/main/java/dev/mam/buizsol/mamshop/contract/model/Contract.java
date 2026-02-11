@@ -1,14 +1,14 @@
 package dev.mam.buizsol.mamshop.contract.model;
 
 import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
-import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
-import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
-import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateBrandMatch;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateCustomerActive;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullContract;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -34,8 +34,8 @@ public class Contract {
             @NotNull @Valid final Customer customer,
             @NotNull @Valid final Product product) throws BrandMismatchException {
 
-        validateNotNull(customer, "Customer");
-        validateNotNull(product, "Product");
+        validateNotNullContract(customer, "Customer");
+        validateNotNullContract(product, "Product");
         validateBrandMatch(customer, product);
         validateCustomerActive(customer);
 
@@ -73,35 +73,8 @@ public class Contract {
 
     public void updateStatus(
             @NotNull final ContractStatus status) {
-        validateNotNull(status, "Status");
+        validateNotNullContract(status, "Status");
         this.status = status;
     }
 
-    private void validateBrandMatch(
-            @NotNull final Customer customer,
-            @NotNull final Product product) throws BrandMismatchException {
-        if (!customer.getBrand().equals(product.getBrand())) {
-            throw new BrandMismatchException(String.format(
-                    "Customer brand %s does not match product brand %s",
-                    customer.getBrand(),
-                    product.getBrand()));
-        }
-    }
-
-    private void validateCustomerActive(
-            @NotNull final Customer customer) {
-        if (customer.getStatus() != CustomerStatus.ACTIVE) {
-            throw new CustomerNotActiveException(String.format(
-                    "Customer %s is not active",
-                    customer.getId()));
-        }
-    }
-
-    private void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new ContractValidationException(fieldName + " must not be null");
-        }
-    }
 }

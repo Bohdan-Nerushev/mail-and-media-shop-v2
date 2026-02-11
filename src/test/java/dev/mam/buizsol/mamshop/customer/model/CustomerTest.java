@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("Customer Tests")
 class CustomerTest {
 
         private Address mainAddress;

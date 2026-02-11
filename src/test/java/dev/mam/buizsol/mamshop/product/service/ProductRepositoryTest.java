@@ -7,6 +7,7 @@ import dev.mam.buizsol.mamshop.product.model.MailProduct;
 import dev.mam.buizsol.mamshop.product.model.PartnerProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("ProductRepository Tests")
 class ProductRepositoryTest {
 
     private ProductRepository repository;
@@ -60,8 +62,7 @@ class ProductRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = ProductRepositoryImpl.getInstance();
-        repository.clearStorage();
+        repository = new ProductRepositoryImpl();
     }
 
     @Test

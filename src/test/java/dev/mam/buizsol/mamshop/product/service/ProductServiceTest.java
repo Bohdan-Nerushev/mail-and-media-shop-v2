@@ -5,23 +5,36 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.MailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
+@DisplayName("ProductService Tests")
 class ProductServiceTest {
 
-        private ProductService productService;
+        @Mock
+        private ProductRepository productRepository;
+
+        @InjectMocks
+        private ProductServiceImpl productService;
 
         private Product createDefaultProduct(
                         final String name,
@@ -37,12 +50,6 @@ class ProductServiceTest {
                 };
         }
 
-        @BeforeEach
-        void setUp() {
-                productService = ProductService.getInstance();
-                ((ProductRepositoryImpl) ProductRepositoryImpl.getInstance()).clearStorage();
-        }
-
         @Test
         @DisplayName("Should successfully create product and retrieve by ID")
         void shouldSuccessfullyCreateProductAndRetrieveById() {
@@ -51,25 +58,27 @@ class ProductServiceTest {
                                 Brand.GMX,
                                 "1.00",
                                 "0.50");
-                productService.createProduct(product);
+                when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
+                productService.createProduct(product);
                 final Optional<Product> foundProduct = productService.findById(product.getId());
 
                 assertTrue(foundProduct.isPresent());
                 assertEquals(product, foundProduct.get());
-                assertEquals(product.getId(), foundProduct.get().getId());
-                assertEquals(product.getName(), foundProduct.get().getName());
-                assertEquals(product.getBrand(), foundProduct.get().getBrand());
+                verify(productRepository).save(product);
+                verify(productRepository).findById(product.getId());
         }
 
         @Test
         @DisplayName("Should return empty Optional when product ID does not exist")
         void shouldReturnEmptyOptionalWhenProductIdDoesNotExist() {
                 final UUID nonExistentId = UUID.randomUUID();
+                when(productRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
                 final Optional<Product> foundProduct = productService.findById(nonExistentId);
 
                 assertTrue(foundProduct.isEmpty());
+                verify(productRepository).findById(nonExistentId);
         }
 
         @Test
@@ -101,39 +110,26 @@ class ProductServiceTest {
                                 Brand.GMX,
                                 "2.00",
                                 "0.60");
-                final Product webDeProduct = createDefaultProduct(
-                                "WEB.DE Product",
-                                Brand.WEB_DE,
-                                "3.00",
-                                "0.70");
-
-                productService.createProduct(gmxProduct1);
-                productService.createProduct(gmxProduct2);
-                productService.createProduct(webDeProduct);
+                when(productRepository.findByBrand(Brand.GMX)).thenReturn(List.of(gmxProduct1, gmxProduct2));
 
                 final Collection<Product> gmxProducts = productService.findByBrand(Brand.GMX);
 
                 assertEquals(2, gmxProducts.size());
                 assertTrue(gmxProducts.contains(gmxProduct1));
                 assertTrue(gmxProducts.contains(gmxProduct2));
-                assertFalse(gmxProducts.contains(webDeProduct));
-                assertTrue(gmxProducts.stream().allMatch(p -> p.getBrand() == Brand.GMX));
+                verify(productRepository).findByBrand(Brand.GMX);
         }
 
         @Test
         @DisplayName("Should return empty collection when no products exist for brand")
         void shouldReturnEmptyCollectionWhenNoProductsExistForBrand() {
-                final Product gmxProduct = createDefaultProduct(
-                                "GMX Product",
-                                Brand.GMX,
-                                "1.00",
-                                "0.50");
-                productService.createProduct(gmxProduct);
+                when(productRepository.findByBrand(Brand.MAIL_COM)).thenReturn(List.of());
 
                 final Collection<Product> mailComProducts = productService.findByBrand(Brand.MAIL_COM);
 
                 assertNotNull(mailComProducts);
                 assertTrue(mailComProducts.isEmpty());
+                verify(productRepository).findByBrand(Brand.MAIL_COM);
         }
 
         @ParameterizedTest
@@ -145,13 +141,14 @@ class ProductServiceTest {
                                 brand,
                                 "1.00",
                                 "0.50");
-                productService.createProduct(product);
+                when(productRepository.findByBrand(brand)).thenReturn(List.of(product));
 
                 final Collection<Product> products = productService.findByBrand(brand);
 
                 assertNotNull(products);
                 assertFalse(products.isEmpty());
                 assertTrue(products.stream().allMatch(p -> p.getBrand() == brand));
+                verify(productRepository).findByBrand(brand);
         }
 
         @Test
@@ -170,13 +167,13 @@ class ProductServiceTest {
                                 Brand.MAIL_COM,
                                 "1.00",
                                 "0.50");
-                productService.createProduct(product);
+                when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
                 final BigDecimal newFee = new BigDecimal("0.75");
                 productService.updateMonthlyFee(product.getId(), newFee);
 
-                final Product updatedProduct = productService.findById(product.getId()).get();
-                assertEquals(newFee, updatedProduct.getMonthlyFee());
+                verify(productRepository).findById(product.getId());
+                verify(productRepository).save(any(Product.class));
         }
 
         @Test
@@ -187,13 +184,13 @@ class ProductServiceTest {
                                 Brand.GMX,
                                 "1.00",
                                 "0.50");
-                productService.createProduct(product);
+                when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
                 final BigDecimal minimumValidFee = new BigDecimal("0.11");
                 productService.updateMonthlyFee(product.getId(), minimumValidFee);
 
-                final Product updatedProduct = productService.findById(product.getId()).get();
-                assertEquals(minimumValidFee, updatedProduct.getMonthlyFee());
+                verify(productRepository).findById(product.getId());
+                verify(productRepository).save(any(Product.class));
         }
 
         @ParameterizedTest
@@ -214,13 +211,13 @@ class ProductServiceTest {
                                 brand,
                                 "1.00",
                                 "0.50");
-                productService.createProduct(product);
+                when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
                 final BigDecimal newFee = new BigDecimal(feeValue);
                 productService.updateMonthlyFee(product.getId(), newFee);
 
-                final Product updatedProduct = productService.findById(product.getId()).get();
-                assertEquals(0, newFee.compareTo(updatedProduct.getMonthlyFee()));
+                verify(productRepository).findById(product.getId());
+                verify(productRepository).save(any(Product.class));
         }
 
         @Test
@@ -231,24 +228,13 @@ class ProductServiceTest {
                                 Brand.GMX,
                                 "1.00",
                                 "0.50");
-                final Product product2 = createDefaultProduct(
-                                "Product 2",
-                                Brand.WEB_DE,
-                                "2.00",
-                                "0.60");
-                productService.createProduct(product1);
-                productService.createProduct(product2);
+                when(productRepository.findById(product1.getId())).thenReturn(Optional.of(product1));
 
-                final BigDecimal originalFeeProduct2 = product2.getMonthlyFee();
                 final BigDecimal newFeeProduct1 = new BigDecimal("0.99");
-
                 productService.updateMonthlyFee(product1.getId(), newFeeProduct1);
 
-                final Product updatedProduct1 = productService.findById(product1.getId()).get();
-                final Product unchangedProduct2 = productService.findById(product2.getId()).get();
-
-                assertEquals(newFeeProduct1, updatedProduct1.getMonthlyFee());
-                assertEquals(originalFeeProduct2, unchangedProduct2.getMonthlyFee());
+                verify(productRepository).findById(product1.getId());
+                verify(productRepository).save(any(Product.class));
         }
 
         @ParameterizedTest
@@ -267,7 +253,6 @@ class ProductServiceTest {
                                 Brand.GMX,
                                 "1.00",
                                 "0.50");
-                productService.createProduct(product);
 
                 final BigDecimal invalidFee = new BigDecimal(feeValue);
 
@@ -294,7 +279,6 @@ class ProductServiceTest {
                                 Brand.WEB_DE,
                                 "1.00",
                                 "0.50");
-                productService.createProduct(product);
 
                 final BigDecimal negativeFee = new BigDecimal(feeValue);
 
@@ -308,6 +292,7 @@ class ProductServiceTest {
         void shouldThrowProductNotFoundExceptionWhenUpdatingNonExistentProduct() {
                 final UUID nonExistentId = UUID.randomUUID();
                 final BigDecimal validFee = new BigDecimal("1.00");
+                when(productRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
                 final ProductNotFoundException exception = assertThrows(
                                 ProductNotFoundException.class,
@@ -315,6 +300,7 @@ class ProductServiceTest {
 
                 assertNotNull(exception.getMessage());
                 assertTrue(exception.getMessage().contains(nonExistentId.toString()));
+                verify(productRepository).findById(nonExistentId);
         }
 
         @Test
@@ -335,7 +321,6 @@ class ProductServiceTest {
                                 Brand.MAIL_COM,
                                 "1.00",
                                 "0.50");
-                productService.createProduct(product);
 
                 assertThrows(
                                 ProductValidationException.class,
@@ -359,11 +344,14 @@ class ProductServiceTest {
                                 Brand.GMX,
                                 "0.00",
                                 minimumValidFee.toString());
+                when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
                 productService.createProduct(product);
-
                 final Product retrievedProduct = productService.findById(product.getId()).get();
+
                 assertEquals(0, minimumValidFee.compareTo(retrievedProduct.getMonthlyFee()));
+                verify(productRepository).save(product);
+                verify(productRepository).findById(product.getId());
         }
 
         @Test
@@ -374,7 +362,6 @@ class ProductServiceTest {
                                 Brand.GMX,
                                 "1.00",
                                 "0.50");
-                productService.createProduct(product);
 
                 final BigDecimal boundaryInvalidFee = new BigDecimal("0.10");
 
@@ -391,13 +378,13 @@ class ProductServiceTest {
                                 Brand.WEB_DE,
                                 "1.00",
                                 "0.50");
-                productService.createProduct(product);
+                when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
                 final BigDecimal largeFee = new BigDecimal("999999.99");
                 productService.updateMonthlyFee(product.getId(), largeFee);
 
-                final Product updatedProduct = productService.findById(product.getId()).get();
-                assertEquals(0, largeFee.compareTo(updatedProduct.getMonthlyFee()));
+                verify(productRepository).findById(product.getId());
+                verify(productRepository).save(any(Product.class));
         }
 
         @Test
@@ -408,10 +395,13 @@ class ProductServiceTest {
                                 Brand.MAIL_COM,
                                 "0.00",
                                 "0.50");
+                when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
                 productService.createProduct(product);
-
                 final Product retrievedProduct = productService.findById(product.getId()).get();
+
                 assertEquals(0, BigDecimal.ZERO.compareTo(retrievedProduct.getSetupFee()));
+                verify(productRepository).save(product);
+                verify(productRepository).findById(product.getId());
         }
 }

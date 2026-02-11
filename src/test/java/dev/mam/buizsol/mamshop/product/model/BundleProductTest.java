@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("BundleProduct Tests")
 class BundleProductTest {
 
         private StandardMailProduct createDefaultStandardMailProduct(

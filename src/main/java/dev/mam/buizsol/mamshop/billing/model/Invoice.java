@@ -1,10 +1,8 @@
 package dev.mam.buizsol.mamshop.billing.model;
 
-import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
-import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
-import jakarta.annotation.Nullable;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -12,6 +10,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateDiscount;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullInvoice;
 
 public final class Invoice {
 
@@ -55,7 +56,7 @@ public final class Invoice {
             @NotNull @Valid Address invoiceAddress,
             @NotNull List<@Valid InvoiceItem> items,
             @NotNull BigDecimal discount) {
-        validateNotNull(items, "Items list");
+        validateNotNullInvoice(items, "Items list");
         validateDiscount(discount);
 
         this.brand = brand;
@@ -131,23 +132,5 @@ public final class Invoice {
     @NotNull
     public BigDecimal getTotalAmount() {
         return totalAmount;
-    }
-
-    protected void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new InvoiceValidationException(fieldName + " must not be null");
-        }
-    }
-
-    protected void validateDiscount(
-            @NotNull final BigDecimal discount) {
-        if (discount == null) {
-            throw new InvalidInvoiceDiscountException("Discount must not be null");
-        }
-        if (discount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new InvalidInvoiceDiscountException("Discount cannot be negative");
-        }
     }
 }

@@ -16,11 +16,6 @@ import java.util.UUID;
 public interface ContractService {
 
         @NotNull
-        static ContractService getInstance() {
-                return ContractServiceImpl.getInstance();
-        }
-
-        @NotNull
         Contract createContract(
                         @NotNull @Valid final Customer customer,
                         @NotNull @Valid final Product product) throws BrandMismatchException;

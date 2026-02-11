@@ -6,6 +6,8 @@ import dev.mam.buizsol.mamshop.customer.model.Customer;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
@@ -13,21 +15,14 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Repository
 final class CustomerRepositoryImpl implements CustomerRepository {
 
     private final Map<UUID, Customer> storage;
 
-    private CustomerRepositoryImpl() {
+    @Autowired
+    CustomerRepositoryImpl() {
         this.storage = new ConcurrentHashMap<>();
-    }
-
-    private static final class Holder {
-        private static final CustomerRepositoryImpl INSTANCE = new CustomerRepositoryImpl();
-    }
-
-    @NotNull
-    static CustomerRepository getInstance() {
-        return Holder.INSTANCE;
     }
 
     @Override

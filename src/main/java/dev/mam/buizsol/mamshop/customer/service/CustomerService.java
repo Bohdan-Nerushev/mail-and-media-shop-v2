@@ -14,11 +14,6 @@ import java.util.UUID;
 public interface CustomerService {
 
     @NotNull
-    static CustomerService getInstance() {
-        return CustomerServiceImpl.getInstance();
-    }
-
-    @NotNull
     Customer createCustomer(@Valid @NotNull final Customer customer);
 
     void updateAddress(@NotNull UUID customerId, @Valid @NotNull Address address) throws CustomerNotFoundException;

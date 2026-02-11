@@ -21,15 +21,19 @@ import dev.mam.buizsol.mamshop.product.service.ProductService;
 import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+import jakarta.annotation.PostConstruct;
 
 import dev.mam.buizsol.mamshop.product.service.ProductCatalogLoader;
 
 import java.util.List;
 import java.util.UUID;
 
-public class ShopServiceImpl implements ShopService {
-
-    private static final ShopServiceImpl INSTANCE = new ShopServiceImpl();
+@Service
+@Validated
+final class ShopServiceImpl implements ShopService {
 
     private final CustomerService customerService;
     private final ProductService productService;
@@ -38,16 +42,21 @@ public class ShopServiceImpl implements ShopService {
 
     private static final String CSV_PATH = "/products.csv";
 
-    private ShopServiceImpl() {
-        this.customerService = CustomerService.getInstance();
-        this.productService = ProductService.getInstance();
-        this.contractService = ContractService.getInstance();
-        this.billingService = BillingService.getInstance();
-        ProductCatalogLoader.load(this.productService, CSV_PATH);
+    @Autowired
+    ShopServiceImpl(
+            @NotNull final CustomerService customerService,
+            @NotNull final ProductService productService,
+            @NotNull final ContractService contractService,
+            @NotNull final BillingService billingService) {
+        this.customerService = customerService;
+        this.productService = productService;
+        this.contractService = contractService;
+        this.billingService = billingService;
     }
 
-    public static ShopServiceImpl getInstance() {
-        return INSTANCE;
+    @PostConstruct
+    private void init() {
+        ProductCatalogLoader.load(this.productService, CSV_PATH);
     }
 
     @Override

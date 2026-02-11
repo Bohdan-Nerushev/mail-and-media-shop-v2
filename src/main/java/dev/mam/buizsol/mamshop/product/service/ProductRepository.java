@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
-interface ProductRepository {
+public interface ProductRepository {
 
         void save(@NotNull @Valid final Product product);
 

@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("PartnerProduct Tests")
 class PartnerProductTest {
 
     private PartnerProduct createPartnerProduct(

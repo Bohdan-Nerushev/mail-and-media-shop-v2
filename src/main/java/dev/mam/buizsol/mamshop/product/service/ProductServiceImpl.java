@@ -7,28 +7,25 @@ import dev.mam.buizsol.mamshop.product.model.Product;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Service
+@Validated
 final class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repository;
 
-    private ProductServiceImpl(
+    @Autowired
+    ProductServiceImpl(
             @NotNull final ProductRepository repository) {
         this.repository = repository;
-    }
-
-    private static final class Holder {
-        private static final ProductServiceImpl INSTANCE = new ProductServiceImpl(ProductRepositoryImpl.getInstance());
-    }
-
-    @NotNull
-    static ProductService getInstance() {
-        return Holder.INSTANCE;
     }
 
     @Override
@@ -76,7 +73,7 @@ final class ProductServiceImpl implements ProductService {
     private void notZeroOrNegative(
             @Nullable final BigDecimal value,
             @NotNull final String fieldName) {
-        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
+        if (value == null || value.compareTo(new BigDecimal("0.10")) <= 0) {
             throw new ProductValidationException(fieldName + " must be greater than 0.10 €");
         }
     }

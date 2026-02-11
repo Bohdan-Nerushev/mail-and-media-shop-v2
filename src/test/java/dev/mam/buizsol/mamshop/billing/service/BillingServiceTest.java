@@ -18,6 +18,7 @@ import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("BillingService Tests")
 class BillingServiceTest {
 
     @Mock
@@ -161,11 +162,20 @@ class BillingServiceTest {
         assertEquals(testProduct.getMonthlyFee(), item.monthlyFee());
     }
 
-    @DisplayName("Invalid discount validation checks")
-    @ParameterizedTest(name = "Invalid discount validation - value: {0}")
-    @ValueSource(strings = { "0.01", "0.05", "0.10", "-0.01", "-1.00" })
-    void shouldThrowExceptionWhenDiscountIsInvalid(BigDecimal invalidDiscount) {
-        lenient().when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
+    @DisplayName("Invalid small positive discount validation checks")
+    @ParameterizedTest(name = "Invalid small positive discount validation - value: {0}")
+    @ValueSource(strings = { "0.01", "0.05", "0.10" })
+    void shouldThrowExceptionWhenDiscountIsSmallPositive(BigDecimal invalidDiscount) {
+        assertThrows(InvalidInvoiceDiscountException.class,
+                () -> billingService.generateInvoice(customerId, invalidDiscount));
+    }
+
+    @DisplayName("Invalid negative discount validation checks")
+    @ParameterizedTest(name = "Invalid negative discount validation - value: {0}")
+    @ValueSource(strings = { "-0.01", "-1.00" })
+    void shouldThrowExceptionWhenDiscountIsNegative(BigDecimal invalidDiscount) {
+        when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
+        when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of());
 
         assertThrows(InvalidInvoiceDiscountException.class,
                 () -> billingService.generateInvoice(customerId, invalidDiscount));

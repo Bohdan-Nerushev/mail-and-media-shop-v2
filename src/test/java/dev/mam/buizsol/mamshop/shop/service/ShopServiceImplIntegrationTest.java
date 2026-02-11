@@ -18,11 +18,15 @@ import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchExc
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,19 +34,18 @@ import java.util.List;
 import java.util.UUID;
 
 import dev.mam.buizsol.mamshop.product.service.ProductService;
+import dev.mam.buizsol.mamshop.config.AppConfig;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringJUnitConfig(classes = AppConfig.class)
+@DisplayName("ShopServiceImpl Integration Test")
 class ShopServiceImplIntegrationTest {
 
+        @Autowired
         private ShopServiceImpl shopService;
+        @Autowired
         private ProductService productService;
-
-        @BeforeEach
-        void setUp() {
-                shopService = (ShopServiceImpl) ShopService.getInstance();
-                productService = ProductService.getInstance();
-        }
 
         private Product createDefaultStandardMailProduct(
                         final String name,
