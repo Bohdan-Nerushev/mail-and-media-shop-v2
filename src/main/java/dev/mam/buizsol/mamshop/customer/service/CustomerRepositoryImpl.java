@@ -1,12 +1,13 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +32,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     public void save(
-            @Valid final Customer customer) {
+            @Valid @NotNull final Customer customer) {
         validateNotNull(customer, "Customer");
         storage.put(customer.getId(), customer);
     }
@@ -46,8 +47,8 @@ final class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     @NotNull
-    public Collection<Customer> findAll() {
-        return Collections.unmodifiableCollection(storage.values());
+    public List<Customer> findAll() {
+        return List.copyOf(storage.values());
     }
 
     @Override
@@ -62,8 +63,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     public void update(
-            @Valid final Customer customer
-    ) throws CustomerNotFoundException {
+            @Valid @NotNull final Customer customer) throws CustomerNotFoundException {
         validateNotNull(customer, "Customer");
         if (!storage.containsKey(customer.getId())) {
             throw new CustomerNotFoundException("Customer with ID " + customer.getId() + " not found");
@@ -72,10 +72,10 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     private void validateNotNull(
-            final Object value,
-            final String fieldName) {
+            @Nullable final Object value,
+            @NotNull final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new CustomerValidationException(fieldName + " must not be null");
         }
     }
 

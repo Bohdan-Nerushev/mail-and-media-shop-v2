@@ -1,11 +1,16 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CommunicationDetailsTest {
 
@@ -18,59 +23,59 @@ class CommunicationDetailsTest {
     }
 
     @Test
-    @DisplayName("1. Positive: Successful creation with valid data")
+    @DisplayName("Positive: Successful creation with valid data")
     void shouldCreateCommunicationDetailsWhenDataIsValid() {
         CommunicationDetails details = createDefaultCommunicationDetails("test@example.com", "+123456789");
-        Assertions.assertEquals("test@example.com", details.email());
-        Assertions.assertEquals("+123456789", details.telephone());
+        assertEquals("test@example.com", details.email());
+        assertEquals("+123456789", details.telephone());
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = { " ", "\t", "\n" })
-    @DisplayName("2. Negative: Validation of 'email' field")
+    @DisplayName("Negative: Validation of 'email' field")
     void shouldThrowExceptionWhenEmailIsInvalid(String invalidEmail) {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        assertThrows(CustomerValidationException.class,
                 () -> createDefaultCommunicationDetails(invalidEmail, "+123456789"));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = { " ", "\t", "\n" })
-    @DisplayName("3. Negative: Validation of 'telephone' field")
+    @DisplayName("Negative: Validation of 'telephone' field")
     void shouldThrowExceptionWhenTelephoneIsInvalid(String invalidPhone) {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        assertThrows(CustomerValidationException.class,
                 () -> createDefaultCommunicationDetails("test@example.com", invalidPhone));
     }
 
     @Test
-    @DisplayName("4. Boundary: Extremely long email string")
+    @DisplayName("Boundary: Extremely long email string")
     void shouldHandleExtremelyLongEmail() {
         String longEmail = "a".repeat(250) + "@example.com";
         CommunicationDetails details = createDefaultCommunicationDetails(longEmail, "123");
-        Assertions.assertEquals(longEmail, details.email());
+        assertEquals(longEmail, details.email());
     }
 
     @Test
-    @DisplayName("5. Boundary: Shortest valid phone number")
+    @DisplayName("Boundary: Shortest valid phone number")
     void shouldHandleShortTelephone() {
         CommunicationDetails details = createDefaultCommunicationDetails("a@b.c", "0");
-        Assertions.assertEquals("0", details.telephone());
+        assertEquals("0", details.telephone());
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "user@domain.com", "user.name@sub.domain.org", "123@456.789" })
-    @DisplayName("6. Positive: Support for various email formats")
+    @DisplayName("Positive: Support for various email formats")
     void shouldHandleVariousEmailFormats(String email) {
         CommunicationDetails details = createDefaultCommunicationDetails(email, "12345");
-        Assertions.assertEquals(email, details.email());
+        assertEquals(email, details.email());
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "+4912345678", "004912345678", "123", "0151-1234567" })
-    @DisplayName("7. Positive: Support for various telephone formats")
+    @DisplayName("Positive: Support for various telephone formats")
     void shouldHandleVariousTelephoneFormats(String phone) {
         CommunicationDetails details = createDefaultCommunicationDetails("test@test.com", phone);
-        Assertions.assertEquals(phone, details.telephone());
+        assertEquals(phone, details.telephone());
     }
 }

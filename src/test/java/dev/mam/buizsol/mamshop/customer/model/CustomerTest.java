@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
-import org.junit.jupiter.api.Assertions;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,13 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CustomerTest {
 
@@ -54,15 +62,15 @@ class CustomerTest {
         }
 
         private CommunicationDetails createDefaultCommunicationDetails(
-                String email,
-                String telephone) {
+                        String email,
+                        String telephone) {
                 return new CommunicationDetails(
-                        email,
-                        telephone);
+                                email,
+                                telephone);
         }
 
         @Test
-        @DisplayName("1. Positive: Successful creation with all required data and generated ID")
+        @DisplayName("Positive: Successful creation with all required data and generated ID")
         void shouldCreateCustomerWhenDataIsValid() {
                 Customer customer = createDefaultCustomer(
                                 "John",
@@ -73,18 +81,20 @@ class CustomerTest {
                                 communicationDetails,
                                 Brand.GMX);
 
-                Assertions.assertNotNull(customer.getId());
-                Assertions.assertNotNull(customer.getId().toString());
-                Assertions.assertEquals("John", customer.getFirstName());
-                Assertions.assertEquals("Doe", customer.getLastName());
-                Assertions.assertEquals(LocalDate.of(1990, 1, 1), customer.getBirthDate());
-                Assertions.assertEquals(mainAddress, customer.getAddress());
-                Assertions.assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
-                Assertions.assertEquals(Brand.GMX, customer.getBrand());
+                assertNotNull(customer.getId());
+                assertNotNull(customer.getId().toString());
+                assertEquals("John", customer.getFirstName());
+                assertEquals("Doe", customer.getLastName());
+                assertEquals(LocalDate.of(1990, 1, 1), customer.getBirthDate());
+                assertEquals(mainAddress, customer.getAddress());
+                assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
+                assertEquals(Brand.GMX, customer.getBrand());
+                assertEquals(customer.toString(),
+                                "Customer{id=" + customer.getId() + ", brand=GMX, status=INACTIVE}");
         }
 
         @Test
-        @DisplayName("2. Positive: Invoice address fallback to main address")
+        @DisplayName("Positive: Invoice address fallback to main address")
         void shouldUseMainAddressAsInvoiceAddressWhenNotProvided() {
                 Customer customer = createDefaultCustomer(
                                 "John",
@@ -95,12 +105,12 @@ class CustomerTest {
                                 communicationDetails,
                                 Brand.GMX);
 
-                Assertions.assertEquals(customer.getAddress(), customer.getInvoiceAddress());
-                Assertions.assertSame(customer.getAddress(), customer.getInvoiceAddress());
+                assertEquals(customer.getAddress(), customer.getInvoiceAddress());
+                assertSame(customer.getAddress(), customer.getInvoiceAddress());
         }
 
         @Test
-        @DisplayName("3. Positive: Address duplication handling by value")
+        @DisplayName("Positive: Address duplication handling by value")
         void shouldHandleAddressesWithSameContentAsDuplicateButDifferentObjects() {
                 Address duplicateAddress = createDefaultAddress("Main St", "10", "12345", "Berlin", "Germany");
 
@@ -113,16 +123,16 @@ class CustomerTest {
                                 communicationDetails,
                                 Brand.GMX);
 
-                Assertions.assertEquals(customer.getAddress(), customer.getInvoiceAddress());
-                Assertions.assertNotSame(customer.getAddress(), customer.getInvoiceAddress());
+                assertEquals(customer.getAddress(), customer.getInvoiceAddress());
+                assertNotSame(customer.getAddress(), customer.getInvoiceAddress());
         }
 
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = { " ", "\t", "\n" })
-        @DisplayName("4. Negative: Validation of first name field in constructor")
+        @DisplayName("Negative: Validation of first name field in constructor")
         void shouldThrowExceptionWhenFirstNameIsInvalid(String invalidName) {
-                Assertions.assertThrows(IllegalArgumentException.class,
+                assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer(invalidName, "Doe", LocalDate.now(),
                                                 mainAddress, null, communicationDetails, Brand.GMX));
         }
@@ -130,55 +140,56 @@ class CustomerTest {
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = { " ", "\t", "\n" })
-        @DisplayName("5. Negative: Validation of last name field in constructor")
+        @DisplayName("Negative: Validation of last name field in constructor")
         void shouldThrowExceptionWhenLastNameIsInvalid(String invalidName) {
-                Assertions.assertThrows(IllegalArgumentException.class,
+                assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer("John", invalidName, LocalDate.now(),
                                                 mainAddress, null, communicationDetails, Brand.GMX));
         }
 
         @Test
-        @DisplayName("6. Negative: Validation of birth date (null check)")
+        @DisplayName("Negative: Validation of birth date (null check)")
         void shouldThrowExceptionWhenBirthDateIsNull() {
-                Assertions.assertThrows(IllegalArgumentException.class,
+                assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer("John", "Doe", null, mainAddress, null,
                                                 communicationDetails, Brand.GMX));
         }
 
         @Test
-        @DisplayName("7. Negative: Validation of address (null check)")
+        @DisplayName("Negative: Validation of address (null check)")
         void shouldThrowExceptionWhenAddressIsNull() {
-                Assertions.assertThrows(IllegalArgumentException.class,
+                assertThrows(CustomerValidationException.class,
                                 () -> createDefaultCustomer("John", "Doe", LocalDate.now(), null, null,
                                                 communicationDetails, Brand.GMX));
         }
 
         @Test
-        @DisplayName("8. Positive: Activate customer changes status to ACTIVE")
+        @DisplayName("Positive: Activate customer changes status to ACTIVE")
         void shouldActivateCustomerAndChangeStatus() {
                 Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
                                 communicationDetails, Brand.GMX);
-                Assertions.assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
+                assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
 
                 customer.setStatus(CustomerStatus.ACTIVE);
 
-                Assertions.assertEquals(CustomerStatus.ACTIVE, customer.getStatus());
+                assertEquals(CustomerStatus.ACTIVE, customer.getStatus());
         }
 
         @Test
-        @DisplayName("9. Positive: Deactivate customer changes status to INACTIVE")
+        @DisplayName("Positive: Deactivate customer changes status to INACTIVE")
         void shouldDeactivateCustomerAndChangeStatus() {
                 Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
                                 communicationDetails, Brand.GMX);
                 customer.setStatus(CustomerStatus.ACTIVE);
-                Assertions.assertEquals(CustomerStatus.ACTIVE, customer.getStatus());
+                assertEquals(CustomerStatus.ACTIVE, customer.getStatus());
 
                 customer.setStatus(CustomerStatus.INACTIVE);
-                Assertions.assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
+
+                assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
         }
 
         @Test
-        @DisplayName("10. Boundary: Extremely long name handling")
+        @DisplayName("Boundary: Extremely long name handling")
         void shouldHandleExtremelyLongNames() {
                 String longName = "A".repeat(2000);
                 Customer customer = createDefaultCustomer(
@@ -189,12 +200,12 @@ class CustomerTest {
                                 null,
                                 communicationDetails,
                                 Brand.GMX);
-                Assertions.assertEquals(longName, customer.getFirstName());
-                Assertions.assertEquals(longName, customer.getLastName());
+                assertEquals(longName, customer.getFirstName());
+                assertEquals(longName, customer.getLastName());
         }
 
         @Test
-        @DisplayName("11. Boundary: Birth date as today")
+        @DisplayName("Boundary: Birth date as today")
         void shouldAllowBirthDateToBeToday() {
                 LocalDate today = LocalDate.now();
                 Customer customer = createDefaultCustomer(
@@ -205,11 +216,11 @@ class CustomerTest {
                                 null,
                                 communicationDetails,
                                 Brand.GMX);
-                Assertions.assertEquals(today, customer.getBirthDate());
+                assertEquals(today, customer.getBirthDate());
         }
 
         @Test
-        @DisplayName("12. Boundary: Birth date in far past")
+        @DisplayName("Boundary: Birth date in far past")
         void shouldAllowBirthDateInFarPast() {
                 LocalDate farPast = LocalDate.of(1900, 1, 1);
                 Customer customer = createDefaultCustomer(
@@ -220,11 +231,11 @@ class CustomerTest {
                                 null,
                                 communicationDetails,
                                 Brand.GMX);
-                Assertions.assertEquals(farPast, customer.getBirthDate());
+                assertEquals(farPast, customer.getBirthDate());
         }
 
         @Test
-        @DisplayName("13. Boundary: ID generation uniqueness")
+        @DisplayName("Boundary: ID generation uniqueness")
         void shouldGenerateUniqueIdsForDifferentCustomers() {
                 Customer customer1 = createDefaultCustomer("John1", "Doe1", LocalDate.of(1991, 1, 1), mainAddress, null,
                                 communicationDetails, Brand.GMX);
@@ -233,9 +244,9 @@ class CustomerTest {
                 Customer customer3 = createDefaultCustomer("John3", "Doe3", LocalDate.of(1993, 1, 3), mainAddress, null,
                                 communicationDetails, Brand.WEB_DE);
 
-                Assertions.assertNotNull(customer1.getId(), "ID should not be null");
-                Assertions.assertNotEquals(customer1.getId(), customer2.getId(), "IDs should be unique");
-                Assertions.assertNotEquals(customer2.getId(), customer3.getId(), "IDs should be unique");
-                Assertions.assertNotEquals(customer1.getId(), customer3.getId(), "IDs should be unique");
+                assertNotNull(customer1.getId(), "ID should not be null");
+                assertNotEquals(customer1.getId(), customer2.getId(), "IDs should be unique");
+                assertNotEquals(customer2.getId(), customer3.getId(), "IDs should be unique");
+                assertNotEquals(customer1.getId(), customer3.getId(), "IDs should be unique");
         }
 }

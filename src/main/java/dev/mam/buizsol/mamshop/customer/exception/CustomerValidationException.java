@@ -10,4 +10,3 @@ public final class CustomerValidationException extends RuntimeException {
         super(message);
     }
 }
-

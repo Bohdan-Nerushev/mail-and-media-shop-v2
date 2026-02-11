@@ -1,21 +1,23 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
-import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class CustomerServiceImpl implements CustomerService {
+final class CustomerServiceImpl implements CustomerService {
+
+    private static final String CUSTOMER_ID_FIELD_NAME = "Customer ID";
+    private static final String CUSTOMER_FIELD_NAME = "Customer";
 
     private final CustomerRepository customerRepository;
 
@@ -25,7 +27,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     CustomerServiceImpl(@NotNull final CustomerRepository customerRepository) {
         if (customerRepository == null) {
-            throw new IllegalArgumentException("CustomerRepository must not be null");
+            throw new CustomerValidationException("CustomerRepository must not be null");
         }
         this.customerRepository = customerRepository;
     }
@@ -35,39 +37,42 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @NotNull
-    public static CustomerService getInstance() {
+    static CustomerService getInstance() {
         return Holder.INSTANCE;
     }
 
     @Override
     @NotNull
-    public Customer createCustomer(@NotNull final Customer customer) {
-        validateNotNull(customer, "Customer");
+    public Customer createCustomer(@Valid @NotNull final Customer customer) {
+        validateNotNull(customer, CUSTOMER_FIELD_NAME);
         customerRepository.save(customer);
         return customer;
     }
 
     @Override
-    public void updateAddress(@NotNull final UUID customerId, @Valid final Address address) throws CustomerNotFoundException {
-        validateNotNull(customerId, "ID");
+    public void updateAddress(
+            @NotNull final UUID customerId,
+            @Valid @NotNull final Address address) throws CustomerNotFoundException {
+        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
         final var customer = customerRepository.getById(customerId);
         customer.setAddress(address);
         customerRepository.update(customer);
     }
 
     @Override
-    public void updateInvoiceAddress(@NotNull final UUID customerId, @Valid final Address address)
-            throws CustomerNotFoundException {
-        validateNotNull(customerId, "ID");
-        final Customer customer = customerRepository.getById(customerId);
+    public void updateInvoiceAddress(
+            @NotNull final UUID customerId,
+            @Valid @NotNull final Address address) throws CustomerNotFoundException {
+        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
+        final var customer = customerRepository.getById(customerId);
         customer.setInvoiceAddress(address);
         customerRepository.update(customer);
     }
 
     @Override
     public void updateCommunicationDetails(@NotNull final UUID customerId,
-            @NotNull final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
-        validateNotNull(customerId, "ID");
+            @Valid @NotNull final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
+        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
         final Customer customer = customerRepository.getById(customerId);
         customer.setCommunicationDetails(communicationDetails);
         customerRepository.update(customer);
@@ -75,7 +80,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void activateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
-        validateNotNull(customerId, "ID");
+        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
         final Customer customer = customerRepository.getById(customerId);
         customer.setStatus(CustomerStatus.ACTIVE);
         customerRepository.update(customer);
@@ -83,7 +88,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deactivateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
-        validateNotNull(customerId, "ID");
+        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
         final Customer customer = customerRepository.getById(customerId);
         customer.setStatus(CustomerStatus.INACTIVE);
         customerRepository.update(customer);
@@ -91,27 +96,28 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
-       validateNotNull(customerId, "ID");
+        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
         customerRepository.delete(customerId);
     }
 
     @Override
     @NotNull
-    public Optional<Customer> findCustomerById(@NotNull final UUID id) {
-        validateNotNull(id, "ID");
-        return customerRepository.findById(id);
+    public Optional<Customer> findCustomerById(@NotNull final UUID customerId) {
+        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
+        return customerRepository.findById(customerId);
     }
 
     @Override
     @NotNull
-    public Collection<Customer> findAllCustomers() {
-        return customerRepository.findAll();
+    public List<Customer> findAllCustomers() {
+        return List.copyOf(customerRepository.findAll());
     }
 
-
-    private void validateNotNull(final Object value, final String fieldName) {
+    private void validateNotNull(
+            @Nullable final Object value,
+            @NotNull final String fieldName) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must not be null");
+            throw new CustomerValidationException(fieldName + " must not be null");
         }
     }
 }

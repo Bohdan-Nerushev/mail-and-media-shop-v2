@@ -2,15 +2,12 @@ package dev.mam.buizsol.mamshop.customer.service;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
-import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,25 +19,26 @@ public interface CustomerService {
     }
 
     @NotNull
-    Customer createCustomer(@NotNull Customer customer);
+    Customer createCustomer(@Valid @NotNull final Customer customer);
 
-    void updateAddress(@NotNull UUID id, @NotNull Address address) throws CustomerNotFoundException;
+    void updateAddress(@NotNull UUID customerId, @Valid @NotNull Address address) throws CustomerNotFoundException;
 
-    void updateInvoiceAddress(@NotNull UUID id, @NotNull Address address) throws CustomerNotFoundException;
-
-    void updateCommunicationDetails(@NotNull UUID id, @NotNull CommunicationDetails communicationDetails)
+    void updateInvoiceAddress(@NotNull UUID customerId, @Valid @NotNull Address address)
             throws CustomerNotFoundException;
 
-    void activateCustomer(@NotNull UUID id) throws CustomerNotFoundException;
+    void updateCommunicationDetails(
+            @NotNull UUID customerId,
+            @Valid @NotNull CommunicationDetails communicationDetails) throws CustomerNotFoundException;
 
-    void deactivateCustomer(@NotNull UUID id) throws CustomerNotFoundException;
+    void activateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-    void deleteCustomer(@NotNull UUID id) throws CustomerNotFoundException;
+    void deactivateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
+
+    void deleteCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
     @NotNull
-    Optional<Customer> findCustomerById(@NotNull UUID id);
+    Optional<Customer> findCustomerById(@NotNull UUID customerId);
 
     @NotNull
-    Collection<Customer> findAllCustomers();
-
+    List<Customer> findAllCustomers();
 }
