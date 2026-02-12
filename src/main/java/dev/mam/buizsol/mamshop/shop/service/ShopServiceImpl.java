@@ -21,8 +21,6 @@ import dev.mam.buizsol.mamshop.product.service.ProductService;
 import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import jakarta.annotation.PostConstruct;
 
@@ -31,7 +29,6 @@ import dev.mam.buizsol.mamshop.product.service.ProductCatalogLoader;
 import java.util.List;
 import java.util.UUID;
 
-@Service
 @Validated
 final class ShopServiceImpl implements ShopService {
 
@@ -42,7 +39,6 @@ final class ShopServiceImpl implements ShopService {
 
     private static final String CSV_PATH = "/products.csv";
 
-    @Autowired
     ShopServiceImpl(
             @NotNull final CustomerService customerService,
             @NotNull final ProductService productService,
