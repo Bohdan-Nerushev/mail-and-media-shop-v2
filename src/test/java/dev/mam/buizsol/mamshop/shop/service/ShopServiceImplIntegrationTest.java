@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.shop.service;
 
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
+import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
@@ -14,11 +15,8 @@ import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
-import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -345,7 +343,7 @@ class ShopServiceImplIntegrationTest {
                                 new BigDecimal("2.50"));
                 productService.createProduct(product);
 
-                assertThrows(CustomerAndProductBrandMismatchException.class,
+                assertThrows(BrandMismatchException.class,
                                 () -> shopService.purchaseProduct(customer.getId(), product.getId()));
         }
 

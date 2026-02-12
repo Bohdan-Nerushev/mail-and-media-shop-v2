@@ -1,14 +1,11 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
-import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Repository;
-import org.springframework.beans.factory.annotation.Autowired;
-
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullCustomer;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,7 +17,6 @@ final class CustomerRepositoryImpl implements CustomerRepository {
 
     private final Map<UUID, Customer> storage;
 
-    @Autowired
     CustomerRepositoryImpl() {
         this.storage = new ConcurrentHashMap<>();
     }
@@ -28,7 +24,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public void save(
             @Valid @NotNull final Customer customer) {
-        validateNotNull(customer, "Customer");
+        validateNotNullCustomer(customer, "Customer");
         storage.put(customer.getId(), customer);
     }
 
@@ -36,7 +32,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     @NotNull
     public Optional<Customer> findById(
             @NotNull final UUID id) {
-        validateNotNull(id, "ID");
+        validateNotNullCustomer(id, "ID");
         return Optional.ofNullable(storage.get(id));
     }
 
@@ -49,7 +45,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public void delete(
             @NotNull final UUID id) throws CustomerNotFoundException {
-        validateNotNull(id, "ID");
+        validateNotNullCustomer(id, "ID");
         Customer deletedObject = storage.remove(id);
         if (deletedObject == null) {
             throw new CustomerNotFoundException("Customer with ID " + id + " not found");
@@ -59,19 +55,10 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public void update(
             @Valid @NotNull final Customer customer) throws CustomerNotFoundException {
-        validateNotNull(customer, "Customer");
+        validateNotNullCustomer(customer, "Customer");
         if (!storage.containsKey(customer.getId())) {
             throw new CustomerNotFoundException("Customer with ID " + customer.getId() + " not found");
         }
         storage.put(customer.getId(), customer);
     }
-
-    private void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new CustomerValidationException(fieldName + " must not be null");
-        }
-    }
-
 }

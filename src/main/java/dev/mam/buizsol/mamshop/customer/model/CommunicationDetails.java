@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotBlankCustomer;
 
 public record CommunicationDetails(
-        @Email String email,
+        @Email @NotBlank String email,
         @NotBlank String telephone) {
 
     public CommunicationDetails {

@@ -1,12 +1,11 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
-import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullProduct;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateStorageSize;
 
 import java.math.BigDecimal;
 
@@ -22,10 +21,7 @@ public abstract class MailProduct extends Product {
             @NotNull final BigDecimal monthlyFee,
             @NotNull final Long storageSizeGB) {
         super(name, brand, setupFee, monthlyFee);
-        validateNotNullProduct(storageSizeGB, "Storage size");
-        if (storageSizeGB < 1L) {
-            throw new ProductValidationException("Storage size must be at least 1GB");
-        }
+        validateStorageSize(storageSizeGB);
         this.storageSize = storageSizeGB;
     }
 

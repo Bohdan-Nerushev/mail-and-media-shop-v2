@@ -29,18 +29,21 @@ public class ValidationUtils {
     }
 
     public static void validateDiscount(
-            @NotNull final BigDecimal discount) {
+            @Nullable final BigDecimal discount) {
         if (discount == null) {
             throw new InvalidInvoiceDiscountException("Discount must not be null");
         }
         if (discount.compareTo(BigDecimal.ZERO) < 0) {
             throw new InvalidInvoiceDiscountException("Discount cannot be negative");
         }
+        if (discount.compareTo(BigDecimal.ZERO) > 0 && discount.compareTo(new BigDecimal("0.10")) <= 0) {
+            throw new InvalidInvoiceDiscountException("Discount must be greater than 0.10 €");
+        }
     }
 
     public static void validateBrandMatch(
             @NotNull final Customer customer,
-            @NotNull final Product product) throws BrandMismatchException {
+            @NotNull final Product product) {
         if (!customer.getBrand().equals(product.getBrand())) {
             throw new BrandMismatchException(String.format(
                     "Customer brand %s does not match product brand %s",
@@ -91,7 +94,8 @@ public class ValidationUtils {
     }
 
     public static void validateMonthlyFeeProduct(
-            @NotNull final BigDecimal monthlyFee) {
+            @Nullable final BigDecimal monthlyFee) {
+        validateNotNullProduct(monthlyFee, "Monthly fee");
         if (monthlyFee.compareTo(new BigDecimal("0.10")) <= 0) {
             throw new ProductValidationException("Monthly fee must be greater than 0.10 €");
         }
@@ -136,5 +140,12 @@ public class ValidationUtils {
             throw new ProductValidationException("Brands must match for bundle product");
         }
         return mail.getBrand();
+    }
+
+    public static void validateStorageSize(
+            @Nullable final Long storageSize) {
+        if (storageSize == null || storageSize < 1L) {
+            throw new ProductValidationException("Storage size must be at least 1GB");
+        }
     }
 }

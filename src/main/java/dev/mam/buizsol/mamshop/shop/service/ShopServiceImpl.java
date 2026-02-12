@@ -2,28 +2,26 @@ package dev.mam.buizsol.mamshop.shop.service;
 
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.service.BillingService;
-import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
-import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
-import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
-import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 import jakarta.annotation.PostConstruct;
 
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateCustomerActive;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateBrandMatch;
 import dev.mam.buizsol.mamshop.product.service.ProductCatalogLoader;
 
 import java.util.List;
@@ -150,7 +148,7 @@ final class ShopServiceImpl implements ShopService {
     @Override
     @NotNull
     public List<Product> loadAllProductsForBrand(
-            final @NotNull @Valid Brand brand) {
+            @NotNull final Brand brand) {
         return List.copyOf(productService.findByBrand(brand));
     }
 
@@ -159,28 +157,21 @@ final class ShopServiceImpl implements ShopService {
     public Contract purchaseProduct(
             @NotNull final UUID customerId,
             @NotNull final UUID productId)
-            throws CustomerNotFoundException, ProductNotFoundException, BrandMismatchException {
+            throws CustomerNotFoundException, ProductNotFoundException {
 
         final Customer customer = loadCustomer(customerId);
-        if (customer.getStatus() != CustomerStatus.ACTIVE) {
-            throw new CustomerNotActiveException("Customer must be active to purchase products");
-        }
+        validateCustomerActive(customer);
 
         final Product product = productService.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
 
-        if (customer.getBrand() != product.getBrand()) {
-            throw new CustomerAndProductBrandMismatchException(
-                    "Customer brand " + customer.getBrand() + " does not match product brand " + product.getBrand());
-        }
+        validateBrandMatch(customer, product);
 
         return contractService.createContract(customer, product);
     }
 
     private void checkCustomerActive(@NotNull final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
-        if (customer.getStatus() != CustomerStatus.ACTIVE) {
-            throw new CustomerNotActiveException("Customer is not active");
-        }
+        validateCustomerActive(customer);
     }
 }

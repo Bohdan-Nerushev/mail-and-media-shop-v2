@@ -1,11 +1,9 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
-import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullContract;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -22,7 +20,6 @@ final class ContractRepositoryImpl implements ContractRepository {
 
     private final Map<UUID, Contract> storage;
 
-    @Autowired
     ContractRepositoryImpl() {
         this.storage = new ConcurrentHashMap<>();
     }
@@ -31,7 +28,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @NotNull
     public Contract save(
             @NotNull @Valid final Contract contract) {
-        validateNotNull(contract, "Contract");
+        validateNotNullContract(contract, "Contract");
         storage.put(contract.getId(), contract);
         return contract;
     }
@@ -40,7 +37,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @NotNull
     public Contract update(
             @NotNull @Valid final Contract contract) {
-        validateNotNull(contract, "Contract");
+        validateNotNullContract(contract, "Contract");
         storage.put(contract.getId(), contract);
         return contract;
     }
@@ -49,7 +46,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @NotNull
     public Optional<Contract> findById(
             @NotNull final UUID id) {
-        validateNotNull(id, "ID");
+        validateNotNullContract(id, "ID");
         return Optional.ofNullable(storage.get(id));
     }
 
@@ -57,7 +54,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @NotNull
     public List<Contract> findByCustomerId(
             @NotNull final UUID customerId) {
-        validateNotNull(customerId, "Customer ID");
+        validateNotNullContract(customerId, "Customer ID");
         return storage.values().stream()
                 .filter(contract -> contract.getCustomerId().equals(customerId))
                 .collect(Collectors.toList());
@@ -67,7 +64,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     @NotNull
     public List<Contract> findByProductId(
             @NotNull final UUID productId) {
-        validateNotNull(productId, "Product ID");
+        validateNotNullContract(productId, "Product ID");
         return storage.values().stream()
                 .filter(contract -> contract.getProductId().equals(productId))
                 .collect(Collectors.toList());
@@ -77,13 +74,5 @@ final class ContractRepositoryImpl implements ContractRepository {
     @NotNull
     public List<Contract> findAll() {
         return Collections.unmodifiableList(new ArrayList<>(storage.values()));
-    }
-
-    private void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new ContractValidationException(fieldName + " must not be null");
-        }
     }
 }

@@ -5,7 +5,6 @@ import dev.mam.buizsol.mamshop.product.model.PartnerProduct;
 import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.io.BufferedReader;
@@ -22,7 +21,7 @@ public final class ProductCatalogLoader {
     }
 
     public static void load(
-            @NotNull @Valid final ProductService productService,
+            @NotNull final ProductService productService,
             @NotNull final String csvPath) {
         final InputStream inputStream = ProductCatalogLoader.class.getResourceAsStream(csvPath);
         if (inputStream == null) {
@@ -32,8 +31,8 @@ public final class ProductCatalogLoader {
     }
 
     static void load(
-            @NotNull @Valid final ProductService productService,
-            @NotNull @Valid final InputStream inputStream) {
+            @NotNull final ProductService productService,
+            @NotNull final InputStream inputStream) {
         try (final BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             reader.lines()
@@ -45,6 +44,7 @@ public final class ProductCatalogLoader {
         }
     }
 
+    @NotNull
     private static Product parseProductFromCsvLine(@NotNull final String line) {
         final String[] parts = line.split(",");
         validateCsvStructure(parts, line);
@@ -62,30 +62,32 @@ public final class ProductCatalogLoader {
     }
 
     private static void validateCsvStructure(
-            final String[] parts,
-            final String line) {
+            @NotNull final String[] parts,
+            @NotNull final String line) {
         if (parts.length < 4) {
             throw new IllegalArgumentException("Invalid CSV line format (at least 4 columns required): " + line);
         }
     }
 
+    @NotNull
     private static Product createMailProduct(
-            final String type,
-            final String name,
-            final Brand brand,
-            final BigDecimal monthlyFee) {
+            @NotNull final String type,
+            @NotNull final String name,
+            @NotNull final Brand brand,
+            @NotNull final BigDecimal monthlyFee) {
         if ("STANDARD".equals(type)) {
             return new StandardMailProduct(name, brand, monthlyFee);
         }
         return new PremiumMailProduct(name, brand, monthlyFee);
     }
 
+    @NotNull
     private static Product createPartnerProduct(
-            final String[] parts,
-            final String name,
-            final Brand brand,
-            final BigDecimal monthlyFee,
-            final String line) {
+            @NotNull final String[] parts,
+            @NotNull final String name,
+            @NotNull final Brand brand,
+            @NotNull final BigDecimal monthlyFee,
+            @NotNull final String line) {
         if (parts.length < 5) {
             throw new IllegalArgumentException("Partner product requires setup fee in CSV at line: " + line);
         }

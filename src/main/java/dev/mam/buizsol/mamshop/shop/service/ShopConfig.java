@@ -4,6 +4,8 @@ import dev.mam.buizsol.mamshop.billing.service.BillingService;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
 import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
+import jakarta.validation.constraints.NotNull;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,11 +13,12 @@ import org.springframework.context.annotation.Configuration;
 public class ShopConfig {
 
     @Bean
+    @NotNull
     public ShopService shopService(
-            final CustomerService customerService,
-            final ProductService productService,
-            final ContractService contractService,
-            final BillingService billingService) {
+            @NotNull final CustomerService customerService,
+            @NotNull final ProductService productService,
+            @NotNull final ContractService contractService,
+            @NotNull final BillingService billingService) {
         return new ShopServiceImpl(
                 customerService,
                 productService,

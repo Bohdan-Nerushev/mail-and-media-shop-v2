@@ -18,7 +18,7 @@ public interface ContractService {
         @NotNull
         Contract createContract(
                         @NotNull @Valid final Customer customer,
-                        @NotNull @Valid final Product product) throws BrandMismatchException;
+                        @NotNull @Valid final Product product);
 
         @NotNull
         Optional<Contract> findContractById(

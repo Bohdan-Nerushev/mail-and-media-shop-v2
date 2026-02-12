@@ -2,8 +2,8 @@ package dev.mam.buizsol.mamshop.billing.service;
 
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
-import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
-import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateDiscount;
+import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullInvoice;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
@@ -28,8 +28,6 @@ final class BillingServiceImpl implements BillingService {
     private final ProductService productService;
     private final ContractService contractService;
 
-    private static final BigDecimal MIN_DISCOUNT = new BigDecimal("0.10");
-
     BillingServiceImpl(
             @NotNull final CustomerService customerService,
             @NotNull final ProductService productService,
@@ -50,12 +48,8 @@ final class BillingServiceImpl implements BillingService {
     @NotNull
     public Invoice generateInvoice(@NotNull final UUID customerId, @NotNull final BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException {
-        validateNotNull(customerId, "Customer ID");
-        validateNotNull(discount, "Discount");
-
-        if (discount.compareTo(BigDecimal.ZERO) > 0 && discount.compareTo(MIN_DISCOUNT) <= 0) {
-            throw new InvalidInvoiceDiscountException("Discount must be greater than 0.10 €");
-        }
+        validateNotNullInvoice(customerId, "Customer ID");
+        validateDiscount(discount);
 
         final Customer customer = customerService.findCustomerById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + customerId + " not found"));
@@ -86,11 +80,5 @@ final class BillingServiceImpl implements BillingService {
                 customer.getInvoiceAddress(),
                 items,
                 discount);
-    }
-
-    private void validateNotNull(final Object value, final String fieldName) {
-        if (value == null) {
-            throw new InvoiceValidationException(fieldName + " must not be null");
-        }
     }
 }

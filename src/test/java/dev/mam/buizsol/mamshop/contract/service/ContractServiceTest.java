@@ -1,6 +1,5 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
-import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
@@ -37,6 +36,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ContractService Tests")
 class ContractServiceTest {
@@ -62,7 +63,7 @@ class ContractServiceTest {
 
     @Test
     @DisplayName("Success: createContract generates and saves a contract")
-    void shouldGenerateAndSaveContractWhenCustomerIsActiveAndDataIsValid() throws BrandMismatchException {
+    void shouldGenerateAndSaveContractWhenCustomerIsActiveAndDataIsValid() {
         setupActiveCustomer();
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -103,7 +104,7 @@ class ContractServiceTest {
 
     @Test
     @DisplayName("Success: updateContractStatus updates status correctly")
-    void shouldUpdateStatusWhenContractExists() throws ContractNotFoundException, BrandMismatchException {
+    void shouldUpdateStatusWhenContractExists() throws ContractNotFoundException {
         setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
         Contract contract = new Contract(activeCustomer, matchingProduct);
@@ -212,7 +213,7 @@ class ContractServiceTest {
 
     @Test
     @DisplayName("Boundary: updateContractStatus with same status should succeed")
-    void shouldUpdateStatusSuccessfullyWhenStatusIsTheSame() throws ContractNotFoundException, BrandMismatchException {
+    void shouldUpdateStatusSuccessfullyWhenStatusIsTheSame() throws ContractNotFoundException {
         setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
         Contract contract = new Contract(activeCustomer, matchingProduct);
@@ -228,7 +229,7 @@ class ContractServiceTest {
 
     @Test
     @DisplayName("Boundary: multiple consecutive status updates should work correctly")
-    void shouldHandleMultipleConsecutiveStatusUpdates() throws ContractNotFoundException, BrandMismatchException {
+    void shouldHandleMultipleConsecutiveStatusUpdates() throws ContractNotFoundException {
         setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
         Contract contract = new Contract(activeCustomer, matchingProduct);
@@ -249,7 +250,7 @@ class ContractServiceTest {
 
     @Test
     @DisplayName("Boundary: contract creation date should always be current date")
-    void shouldSetCreationDateToCurrentDateWhenCreatingContract() throws BrandMismatchException {
+    void shouldSetCreationDateToCurrentDateWhenCreatingContract() {
         setupActiveCustomer();
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

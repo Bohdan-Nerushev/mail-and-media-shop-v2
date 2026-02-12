@@ -2,7 +2,6 @@ package dev.mam.buizsol.mamshop.customer.model;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

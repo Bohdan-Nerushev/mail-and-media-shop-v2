@@ -15,9 +15,9 @@ public class Customer {
 
     @NotNull
     private final UUID id;
-    @NotNull
+    @NotBlank
     private final String firstName;
-    @NotNull
+    @NotBlank
     private final String lastName;
     @NotNull
     private final LocalDate birthDate;

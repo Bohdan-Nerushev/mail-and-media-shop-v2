@@ -18,7 +18,6 @@ import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -174,9 +173,6 @@ class BillingServiceTest {
     @ParameterizedTest(name = "Invalid negative discount validation - value: {0}")
     @ValueSource(strings = { "-0.01", "-1.00" })
     void shouldThrowExceptionWhenDiscountIsNegative(BigDecimal invalidDiscount) {
-        when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
-        when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of());
-
         assertThrows(InvalidInvoiceDiscountException.class,
                 () -> billingService.generateInvoice(customerId, invalidDiscount));
     }
@@ -214,7 +210,11 @@ class BillingServiceTest {
             "null, null"
     }, nullValues = { "null" })
     void shouldThrowExceptionWhenArgumentsAreNull(UUID cid, BigDecimal disc) {
-        assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(cid, disc));
+        if (cid == null) {
+            assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(cid, disc));
+        } else {
+            assertThrows(InvalidInvoiceDiscountException.class, () -> billingService.generateInvoice(cid, disc));
+        }
     }
 
     @Test
