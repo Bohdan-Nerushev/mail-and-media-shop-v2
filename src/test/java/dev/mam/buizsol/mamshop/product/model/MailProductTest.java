@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.nullable;
 
 @DisplayName("MailProduct Tests")
 class MailProductTest {
@@ -282,5 +283,18 @@ class MailProductTest {
                                                 BigDecimal.ONE, 0L));
 
                 assertEquals("Storage size must be at least 1GB", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Negative: Failure with invalid storage size (< 1GB)")
+        void shouldThrowProductValidationExceptionWhenStorageSizeIsInvalid() {
+                assertThrows(
+                                ProductValidationException.class,
+                                () -> createDefaultMailProduct("Small Storage", Brand.GMX, BigDecimal.ZERO,
+                                                BigDecimal.ONE, 0L));
+                assertThrows(
+                                ProductValidationException.class,
+                                () -> createDefaultMailProduct("Small Storage", Brand.GMX, BigDecimal.ZERO,
+                                                BigDecimal.ONE, null));
         }
 }

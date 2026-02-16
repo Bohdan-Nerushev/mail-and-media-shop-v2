@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ShopServiceImplIntegrationTest {
 
         @Autowired
-        private ShopServiceImpl shopService;
+        private ShopService shopService;
         @Autowired
         private ProductService productService;
 
@@ -596,36 +596,14 @@ class ShopServiceImplIntegrationTest {
         }
 
         @Test
-        @DisplayName("Register Product: Successfully registers and returns the product")
-        void shouldRegisterProductWhenValidProductProvided() {
-                Product product = createDefaultStandardMailProduct("Shop Product", Brand.GMX, new BigDecimal("4.99"));
+        @DisplayName("Positive - Load All Products for Brand: Returns non-empty list")
+        void shouldHaveProductsInCatalogAfterInitialization() {
+                List<Product> products = shopService.loadAllProductsForBrand(Brand.GMX);
+                List<Product> products3 = shopService.loadAllProductsForBrand(Brand.MAIL_COM);
+                List<Product> products4 = shopService.loadAllProductsForBrand(Brand.WEB_DE);
 
-                Product registered = shopService.registerProduct(product);
-
-                assertNotNull(registered);
-                assertEquals(product.getId(), registered.getId());
-
-                java.util.Optional<Product> found = productService.findById(product.getId());
-                assertTrue(found.isPresent());
-                assertEquals(product.getName(), found.get().getName());
-        }
-
-        @Test
-        @DisplayName("Register Product: Throws exception when product is null (Negative)")
-        void shouldThrowExceptionWhenRegisteringNullProduct() {
-                assertThrows(ProductValidationException.class, () -> shopService.registerProduct(null));
-        }
-
-        @Test
-        @DisplayName("Register Product: Successfully registers different product types")
-        void shouldRegisterVariousProductTypesSuccessfully() {
-                Product standard = createDefaultStandardMailProduct("Std", Brand.WEB_DE, new BigDecimal("5.00"));
-                Product premium = createDefaultPremiumMailProduct("Prem", Brand.WEB_DE, new BigDecimal("10.00"));
-
-                shopService.registerProduct(standard);
-                shopService.registerProduct(premium);
-
-                assertTrue(productService.findById(standard.getId()).isPresent());
-                assertTrue(productService.findById(premium.getId()).isPresent());
+                assertFalse(products.isEmpty());
+                assertFalse(products3.isEmpty());
+                assertFalse(products4.isEmpty());
         }
 }

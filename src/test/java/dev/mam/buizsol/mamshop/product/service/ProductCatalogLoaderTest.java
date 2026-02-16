@@ -5,6 +5,7 @@ import dev.mam.buizsol.mamshop.product.model.PartnerProduct;
 import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,10 +31,17 @@ class ProductCatalogLoaderTest {
     @Mock
     private ProductService productService;
 
+    private ProductCatalogLoader productCatalogLoader;
+
+    @BeforeEach
+    void setUp() {
+        productCatalogLoader = new ProductCatalogLoader(productService);
+    }
+
     @Test
     @DisplayName("Should successfully load products from valid CSV")
     void shouldLoadValidProducts() {
-        ProductCatalogLoader.load(productService, "/valid_products.csv");
+        productCatalogLoader.load("/valid_products.csv");
 
         final ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
         verify(productService, times(3)).createProduct(captor.capture());
@@ -62,7 +70,7 @@ class ProductCatalogLoaderTest {
     @Test
     @DisplayName("Should throw IllegalStateException when CSV file is missing")
     void shouldThrowExceptionWhenFileNotFound() {
-        assertThatThrownBy(() -> ProductCatalogLoader.load(productService, "/non_existent.csv"))
+        assertThatThrownBy(() -> productCatalogLoader.load("/non_existent.csv"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("not found in resources");
     }
@@ -70,7 +78,7 @@ class ProductCatalogLoaderTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when CSV line is malformed")
     void shouldThrowExceptionWhenLineIsMalformed() {
-        assertThatThrownBy(() -> ProductCatalogLoader.load(productService, "/invalid_format.csv"))
+        assertThatThrownBy(() -> productCatalogLoader.load("/invalid_format.csv"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Invalid CSV line format");
     }
@@ -78,7 +86,7 @@ class ProductCatalogLoaderTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when Partner product lacks setup fee")
     void shouldThrowExceptionWhenPartnerLacksSetupFee() {
-        assertThatThrownBy(() -> ProductCatalogLoader.load(productService, "/missing_setup_fee.csv"))
+        assertThatThrownBy(() -> productCatalogLoader.load("/missing_setup_fee.csv"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Partner product requires setup fee");
     }
@@ -86,7 +94,7 @@ class ProductCatalogLoaderTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when unknown product type is encountered")
     void shouldThrowExceptionWhenUnknownProductType() {
-        assertThatThrownBy(() -> ProductCatalogLoader.load(productService, "/unknown_type.csv"))
+        assertThatThrownBy(() -> productCatalogLoader.load("/unknown_type.csv"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unknown product type: UNKNOWN");
     }
@@ -94,7 +102,7 @@ class ProductCatalogLoaderTest {
     @Test
     @DisplayName("Should skip blank or empty lines in CSV")
     void shouldSkipBlankLines() {
-        ProductCatalogLoader.load(productService, "/empty_lines.csv");
+        productCatalogLoader.load("/empty_lines.csv");
 
         verify(productService, times(2)).createProduct(any(Product.class));
     }

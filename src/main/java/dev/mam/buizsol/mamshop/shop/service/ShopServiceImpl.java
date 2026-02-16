@@ -34,6 +34,7 @@ final class ShopServiceImpl implements ShopService {
     private final ProductService productService;
     private final ContractService contractService;
     private final BillingService billingService;
+    private final ProductCatalogLoader productCatalogLoader;
 
     private static final String CSV_PATH = "/products.csv";
 
@@ -41,16 +42,18 @@ final class ShopServiceImpl implements ShopService {
             @NotNull final CustomerService customerService,
             @NotNull final ProductService productService,
             @NotNull final ContractService contractService,
-            @NotNull final BillingService billingService) {
+            @NotNull final BillingService billingService,
+            @NotNull final ProductCatalogLoader productCatalogLoader) {
         this.customerService = customerService;
         this.productService = productService;
         this.contractService = contractService;
         this.billingService = billingService;
+        this.productCatalogLoader = productCatalogLoader;
     }
 
     @PostConstruct
     private void init() {
-        ProductCatalogLoader.load(this.productService, CSV_PATH);
+        productCatalogLoader.load(CSV_PATH);
     }
 
     @Override
@@ -58,13 +61,6 @@ final class ShopServiceImpl implements ShopService {
     public Customer registerCustomer(
             @NotNull @Valid final Customer customer) {
         return customerService.createCustomer(customer);
-    }
-
-    @NotNull
-    protected Product registerProduct(
-            @NotNull @Valid final Product product) {
-        productService.createProduct(product);
-        return product;
     }
 
     @Override

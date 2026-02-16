@@ -6,6 +6,7 @@ import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,13 +16,17 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
+@Component
 public final class ProductCatalogLoader {
 
-    private ProductCatalogLoader() {
+    private final ProductService productService;
+
+    public ProductCatalogLoader(
+            @NotNull final ProductService productService) {
+        this.productService = productService;
     }
 
-    public static void load(
-            @NotNull final ProductService productService,
+    public void load(
             @NotNull final String csvPath) {
         final InputStream inputStream = ProductCatalogLoader.class.getResourceAsStream(csvPath);
         if (inputStream == null) {
