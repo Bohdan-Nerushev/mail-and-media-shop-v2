@@ -42,11 +42,11 @@ class InvoiceTest {
 
         Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, testAddress, List.of(item1, item2), discount);
 
-        assertEquals(new BigDecimal("30.00"), invoice.getTotalSetupFee());
-        assertEquals(new BigDecimal("20.00"), invoice.getTotalMonthlyFee());
-        assertEquals(new BigDecimal("43.00"), invoice.getTotalAmount());
-        assertEquals(LocalDate.now(), invoice.getInvoiceDate());
-        assertEquals(Brand.GMX, invoice.getBrand());
+        assertEquals(new BigDecimal("30.00"), invoice.totalSetupFee());
+        assertEquals(new BigDecimal("20.00"), invoice.totalMonthlyFee());
+        assertEquals(new BigDecimal("43.00"), invoice.totalAmount());
+        assertEquals(LocalDate.now(), invoice.invoiceDate());
+        assertEquals(Brand.GMX, invoice.brand());
     }
 
     @Test
@@ -55,8 +55,8 @@ class InvoiceTest {
         Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, testAddress, Collections.emptyList(),
                 BigDecimal.ZERO);
 
-        assertEquals(BigDecimal.ZERO, invoice.getDiscount());
-        assertEquals(BigDecimal.ZERO, invoice.getTotalAmount());
+        assertEquals(BigDecimal.ZERO, invoice.discount());
+        assertEquals(BigDecimal.ZERO, invoice.totalAmount());
     }
 
     @DisplayName("Verification that invalid discounts (negative/null) throw exception")
@@ -86,7 +86,7 @@ class InvoiceTest {
         Invoice invoice = new Invoice(Brand.MAIL_COM, customerId, testAddress, testAddress, Collections.emptyList(),
                 discount);
 
-        assertEquals(expectedTotal, invoice.getTotalAmount());
+        assertEquals(expectedTotal, invoice.totalAmount());
     }
 
     @Test
@@ -100,7 +100,7 @@ class InvoiceTest {
 
         Invoice invoice = new Invoice(Brand.WEB_DE, customerId, testAddress, testAddress, items, BigDecimal.ZERO);
 
-        assertThrows(UnsupportedOperationException.class, () -> invoice.getItems().add(item));
+        assertThrows(UnsupportedOperationException.class, () -> invoice.items().add(item));
     }
 
     @Test
@@ -111,8 +111,8 @@ class InvoiceTest {
         Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, invoiceAddress, Collections.emptyList(),
                 BigDecimal.ZERO);
 
-        assertEquals(testAddress, invoice.getAddress());
-        assertEquals(invoiceAddress, invoice.getInvoiceAddress());
+        assertEquals(testAddress, invoice.address());
+        assertEquals(invoiceAddress, invoice.invoiceAddress());
     }
 
     @Test
@@ -134,9 +134,9 @@ class InvoiceTest {
 
         BigDecimal expectedSetup = fee.add(fee);
         BigDecimal expectedMonthly = fee.add(fee);
-        assertEquals(expectedSetup, invoice.getTotalSetupFee());
-        assertEquals(expectedMonthly, invoice.getTotalMonthlyFee());
-        assertEquals(expectedSetup.add(expectedMonthly), invoice.getTotalAmount());
+        assertEquals(expectedSetup, invoice.totalSetupFee());
+        assertEquals(expectedMonthly, invoice.totalMonthlyFee());
+        assertEquals(expectedSetup.add(expectedMonthly), invoice.totalAmount());
     }
 
     @Test
@@ -148,7 +148,7 @@ class InvoiceTest {
 
         Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, testAddress, List.of(item), highDiscount);
 
-        assertEquals(new BigDecimal("-5.00"), invoice.getTotalAmount());
+        assertEquals(new BigDecimal("-5.00"), invoice.totalAmount());
     }
 
     @Test
@@ -162,8 +162,8 @@ class InvoiceTest {
 
         final Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, testAddress, items, BigDecimal.ZERO);
 
-        assertEquals(new BigDecimal("1000.00"), invoice.getTotalSetupFee());
-        assertEquals(new BigDecimal("2000.00"), invoice.getTotalMonthlyFee());
-        assertEquals(new BigDecimal("3000.00"), invoice.getTotalAmount());
+        assertEquals(new BigDecimal("1000.00"), invoice.totalSetupFee());
+        assertEquals(new BigDecimal("2000.00"), invoice.totalMonthlyFee());
+        assertEquals(new BigDecimal("3000.00"), invoice.totalAmount());
     }
 }

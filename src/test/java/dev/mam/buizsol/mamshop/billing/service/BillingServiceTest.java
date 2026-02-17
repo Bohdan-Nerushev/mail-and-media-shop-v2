@@ -85,9 +85,9 @@ class BillingServiceTest {
         Invoice invoice = billingService.generateInvoice(customerId);
 
         assertNotNull(invoice);
-        assertEquals(customerId, invoice.getCustomerId());
-        assertEquals(BigDecimal.ZERO, invoice.getDiscount());
-        assertEquals(1, invoice.getItems().size());
+        assertEquals(customerId, invoice.customerId());
+        assertEquals(BigDecimal.ZERO, invoice.discount());
+        assertEquals(1, invoice.items().size());
     }
 
     @Test
@@ -100,7 +100,7 @@ class BillingServiceTest {
         Invoice invoice = billingService.generateInvoice(customerId, discount);
 
         assertNotNull(invoice);
-        assertEquals(discount, invoice.getDiscount());
+        assertEquals(discount, invoice.discount());
     }
 
     @Test
@@ -131,9 +131,9 @@ class BillingServiceTest {
 
         Invoice invoice = billingService.generateInvoice(customerId, discount);
 
-        assertEquals(new BigDecimal("9.98"), invoice.getTotalSetupFee());
-        assertEquals(new BigDecimal("20.00"), invoice.getTotalMonthlyFee());
-        assertEquals(new BigDecimal("24.98"), invoice.getTotalAmount());
+        assertEquals(new BigDecimal("9.98"), invoice.totalSetupFee());
+        assertEquals(new BigDecimal("20.00"), invoice.totalMonthlyFee());
+        assertEquals(new BigDecimal("24.98"), invoice.totalAmount());
     }
 
     @Test
@@ -151,7 +151,7 @@ class BillingServiceTest {
         when(productService.findById(testProduct.getId())).thenReturn(Optional.of(testProduct));
 
         Invoice invoice = billingService.generateInvoice(customerId);
-        InvoiceItem item = invoice.getItems().get(0);
+        InvoiceItem item = invoice.items().get(0);
 
         assertEquals(testProduct.getId(), item.productId());
         assertEquals(testProduct.getName(), item.productName());
@@ -196,10 +196,10 @@ class BillingServiceTest {
 
         Invoice invoice = billingService.generateInvoice(customerId);
 
-        assertTrue(invoice.getItems().isEmpty());
-        assertEquals(BigDecimal.ZERO, invoice.getTotalSetupFee());
-        assertEquals(BigDecimal.ZERO, invoice.getTotalMonthlyFee());
-        assertEquals(BigDecimal.ZERO, invoice.getTotalAmount());
+        assertTrue(invoice.items().isEmpty());
+        assertEquals(BigDecimal.ZERO, invoice.totalSetupFee());
+        assertEquals(BigDecimal.ZERO, invoice.totalMonthlyFee());
+        assertEquals(BigDecimal.ZERO, invoice.totalAmount());
     }
 
     @DisplayName("Null arguments validation for generateInvoice")
@@ -240,7 +240,7 @@ class BillingServiceTest {
         Invoice invoice = billingService.generateInvoice(customerId, validDiscount);
 
         assertNotNull(invoice);
-        assertEquals(validDiscount, invoice.getDiscount());
+        assertEquals(validDiscount, invoice.discount());
     }
 
     @Test
@@ -263,8 +263,8 @@ class BillingServiceTest {
 
         Invoice invoice = billingService.generateInvoice(customerId);
 
-        assertEquals(1, invoice.getItems().size());
-        assertEquals(testProduct.getId(), invoice.getItems().get(0).productId());
+        assertEquals(1, invoice.items().size());
+        assertEquals(testProduct.getId(), invoice.items().get(0).productId());
     }
 
     @Test
@@ -292,9 +292,9 @@ class BillingServiceTest {
 
         Invoice invoice = billingService.generateInvoice(customerId);
 
-        assertEquals(2, invoice.getItems().size());
-        assertEquals(c1Id, invoice.getItems().get(0).contractId());
-        assertEquals(c2Id, invoice.getItems().get(1).contractId());
+        assertEquals(2, invoice.items().size());
+        assertEquals(c1Id, invoice.items().get(0).contractId());
+        assertEquals(c2Id, invoice.items().get(1).contractId());
     }
 
     @Test
@@ -318,9 +318,9 @@ class BillingServiceTest {
 
         Invoice invoice = billingService.generateInvoice(customerId);
 
-        assertEquals(count, invoice.getItems().size());
+        assertEquals(count, invoice.items().size());
         BigDecimal expectedTotal = testProduct.getSetupFee().add(testProduct.getMonthlyFee())
                 .multiply(new BigDecimal(count));
-        assertEquals(expectedTotal, invoice.getTotalAmount());
+        assertEquals(expectedTotal, invoice.totalAmount());
     }
 }

@@ -14,7 +14,6 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
-import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -422,8 +421,8 @@ class ShopServiceImplIntegrationTest {
 
                 Invoice invoice = shopService.generateInvoice(customer.getId());
                 assertNotNull(invoice);
-                assertEquals(customer.getId(), invoice.getCustomerId());
-                assertFalse(invoice.getItems().isEmpty());
+                assertEquals(customer.getId(), invoice.customerId());
+                assertFalse(invoice.items().isEmpty());
         }
 
         @ParameterizedTest

@@ -14,40 +14,23 @@ import java.util.UUID;
 import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateDiscount;
 import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullInvoice;
 
-public final class Invoice {
+public record Invoice(
+        @NotNull Brand brand,
+        @NotNull LocalDate invoiceDate,
+        @NotNull UUID customerId,
+        @NotNull @Valid Address address,
+        @NotNull @Valid Address invoiceAddress,
+        @NotNull List<@Valid InvoiceItem> items,
+        @NotNull BigDecimal totalSetupFee,
+        @NotNull BigDecimal totalMonthlyFee,
+        @NotNull @PositiveOrZero BigDecimal discount,
+        @NotNull BigDecimal totalAmount) {
 
-    @NotNull
-    private final Brand brand;
-
-    @NotNull
-    private final LocalDate invoiceDate;
-
-    @NotNull
-    private final UUID customerId;
-
-    @NotNull
-    @Valid
-    private final Address address;
-
-    @NotNull
-    @Valid
-    private final Address invoiceAddress;
-
-    @NotNull
-    private final List<@Valid InvoiceItem> items;
-
-    @NotNull
-    private final BigDecimal totalSetupFee;
-
-    @NotNull
-    private final BigDecimal totalMonthlyFee;
-
-    @NotNull
-    @PositiveOrZero
-    private final BigDecimal discount;
-
-    @NotNull
-    private final BigDecimal totalAmount;
+    public Invoice {
+        validateNotNullInvoice(items, "Items list");
+        validateDiscount(discount);
+        items = List.copyOf(items);
+    }
 
     public Invoice(
             @NotNull Brand brand,
@@ -56,81 +39,37 @@ public final class Invoice {
             @NotNull @Valid Address invoiceAddress,
             @NotNull List<@Valid InvoiceItem> items,
             @NotNull BigDecimal discount) {
-        validateNotNullInvoice(items, "Items list");
-        validateDiscount(discount);
-
-        this.brand = brand;
-        this.customerId = customerId;
-        this.address = address;
-        this.invoiceAddress = invoiceAddress;
-        this.items = List.copyOf(items);
-        this.discount = discount;
-        this.invoiceDate = LocalDate.now();
-
-        this.totalSetupFee = calculateTotalSetupFee();
-        this.totalMonthlyFee = calculateTotalMonthlyFee();
-        this.totalAmount = totalSetupFee.add(totalMonthlyFee).subtract(discount);
+        this(
+                brand,
+                LocalDate.now(),
+                customerId,
+                address,
+                invoiceAddress,
+                items,
+                calculateTotalSetupFee(items),
+                calculateTotalMonthlyFee(items),
+                discount,
+                calculateTotalAmount(items, discount));
     }
 
-    private BigDecimal calculateTotalSetupFee() {
+    private static BigDecimal calculateTotalSetupFee(List<InvoiceItem> items) {
+        validateNotNullInvoice(items, "Items list");
         return items.stream()
                 .map(InvoiceItem::setupFee)
-                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private BigDecimal calculateTotalMonthlyFee() {
+    private static BigDecimal calculateTotalMonthlyFee(List<InvoiceItem> items) {
+        validateNotNullInvoice(items, "Items list");
         return items.stream()
                 .map(InvoiceItem::monthlyFee)
-                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    @NotNull
-    public Brand getBrand() {
-        return brand;
-    }
-
-    @NotNull
-    public LocalDate getInvoiceDate() {
-        return invoiceDate;
-    }
-
-    @NotNull
-    public UUID getCustomerId() {
-        return customerId;
-    }
-
-    @NotNull
-    public Address getAddress() {
-        return address;
-    }
-
-    @NotNull
-    public Address getInvoiceAddress() {
-        return invoiceAddress;
-    }
-
-    @NotNull
-    public List<InvoiceItem> getItems() {
-        return items;
-    }
-
-    @NotNull
-    public BigDecimal getTotalSetupFee() {
-        return totalSetupFee;
-    }
-
-    @NotNull
-    public BigDecimal getTotalMonthlyFee() {
-        return totalMonthlyFee;
-    }
-
-    @NotNull
-    public BigDecimal getDiscount() {
-        return discount;
-    }
-
-    @NotNull
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
+    private static BigDecimal calculateTotalAmount(List<InvoiceItem> items, BigDecimal discount) {
+        validateDiscount(discount);
+        return calculateTotalSetupFee(items)
+                .add(calculateTotalMonthlyFee(items))
+                .subtract(discount);
     }
 }

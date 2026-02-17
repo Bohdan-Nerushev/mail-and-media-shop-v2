@@ -302,9 +302,9 @@ public class MaMShopApplication {
                 try {
                         final Invoice invoice = shop.generateInvoice(customerId);
                         System.out.println(
-                                        "--- Invoice for Customer " + customerId + " (" + invoice.getBrand() + ") ---");
-                        System.out.println("Total Amount: " + invoice.getTotalAmount());
-                        System.out.println("Items: " + invoice.getItems().size());
+                                        "--- Invoice for Customer " + customerId + " (" + invoice.brand() + ") ---");
+                        System.out.println("Total Amount: " + invoice.totalAmount());
+                        System.out.println("Items: " + invoice.items().size());
                         System.out.println("-------------------------------------");
                 } catch (Exception e) {
                         System.err.println("Failed to generate invoice: " + e.getMessage());
