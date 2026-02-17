@@ -13,14 +13,12 @@ import java.util.UUID;
 
 public interface ProductService {
 
-        void createProduct(@NotNull @Valid final Product product);
+        void createProduct(final Product product);
 
-        @NotNull
-        Optional<Product> findById(@NotNull final UUID id);
+        Optional<Product> findById(final UUID id);
 
-        @NotNull
-        List<Product> findByBrand(@NotNull final Brand brand);
+        List<Product> findByBrand(final Brand brand);
 
-        void updateMonthlyFee(@NotNull final UUID id, @NotNull final BigDecimal monthlyFee)
+        void updateMonthlyFee(final UUID id, final BigDecimal monthlyFee)
                         throws ProductNotFoundException;
 }

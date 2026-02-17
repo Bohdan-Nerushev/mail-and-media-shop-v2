@@ -15,25 +15,20 @@ import java.util.UUID;
 
 public interface ContractService {
 
-        @NotNull
         Contract createContract(
-                        @NotNull @Valid final Customer customer,
-                        @NotNull @Valid final Product product);
+                        final Customer customer,
+                        final Product product);
 
-        @NotNull
         Optional<Contract> findContractById(
-                        @NotNull final UUID id);
+                        final UUID id);
 
-        @NotNull
         List<Contract> findContractsByCustomerId(
-                        @NotNull final UUID customerId);
+                        final UUID customerId);
 
-        @NotNull
         List<Contract> findContractsByProductId(
-                        @NotNull final UUID productId);
+                        final UUID productId);
 
-        @NotNull
         Contract updateContractStatus(
-                        @NotNull final UUID contractId,
-                        @NotNull final ContractStatus status) throws ContractNotFoundException;
+                        final UUID contractId,
+                        final ContractStatus status) throws ContractNotFoundException;
 }

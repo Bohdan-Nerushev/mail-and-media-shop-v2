@@ -10,10 +10,8 @@ import java.util.UUID;
 
 public interface BillingService {
 
-    @NotNull
-    Invoice generateInvoice(@NotNull UUID customerId) throws CustomerNotFoundException, ProductNotFoundException;
+    Invoice generateInvoice(UUID customerId) throws CustomerNotFoundException, ProductNotFoundException;
 
-    @NotNull
-    Invoice generateInvoice(@NotNull UUID customerId, @NotNull BigDecimal discount)
+    Invoice generateInvoice(UUID customerId, BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException;
 }

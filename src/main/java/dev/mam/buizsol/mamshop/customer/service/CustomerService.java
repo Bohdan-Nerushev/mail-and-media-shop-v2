@@ -13,27 +13,24 @@ import java.util.UUID;
 
 public interface CustomerService {
 
-    @NotNull
-    Customer createCustomer(@Valid @NotNull final Customer customer);
+    Customer createCustomer(final Customer customer);
 
-    void updateAddress(@NotNull UUID customerId, @Valid @NotNull Address address) throws CustomerNotFoundException;
+    void updateAddress(UUID customerId, Address address) throws CustomerNotFoundException;
 
-    void updateInvoiceAddress(@NotNull UUID customerId, @Valid @NotNull Address address)
+    void updateInvoiceAddress(UUID customerId, Address address)
             throws CustomerNotFoundException;
 
     void updateCommunicationDetails(
-            @NotNull UUID customerId,
-            @Valid @NotNull CommunicationDetails communicationDetails) throws CustomerNotFoundException;
+            UUID customerId,
+            CommunicationDetails communicationDetails) throws CustomerNotFoundException;
 
-    void activateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
+    void activateCustomer(UUID customerId) throws CustomerNotFoundException;
 
-    void deactivateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
+    void deactivateCustomer(UUID customerId) throws CustomerNotFoundException;
 
-    void deleteCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
+    void deleteCustomer(UUID customerId) throws CustomerNotFoundException;
 
-    @NotNull
-    Optional<Customer> findCustomerById(@NotNull UUID customerId);
+    Optional<Customer> findCustomerById(UUID customerId);
 
-    @NotNull
     List<Customer> findAllCustomers();
 }
