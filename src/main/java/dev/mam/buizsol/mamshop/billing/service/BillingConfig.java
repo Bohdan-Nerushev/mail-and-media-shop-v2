@@ -12,11 +12,10 @@ import org.springframework.context.annotation.Configuration;
 public class BillingConfig {
 
     @Bean
-    @NotNull
     public BillingService billingService(
-            @NotNull final CustomerService customerService,
-            @NotNull final ProductService productService,
-            @NotNull final ContractService contractService) {
+            final CustomerService customerService,
+            final ProductService productService,
+            final ContractService contractService) {
         return new BillingServiceImpl(
                 customerService,
                 productService,

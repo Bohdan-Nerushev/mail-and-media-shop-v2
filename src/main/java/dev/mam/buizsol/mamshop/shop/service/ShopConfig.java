@@ -14,13 +14,12 @@ import org.springframework.context.annotation.Configuration;
 public class ShopConfig {
 
     @Bean
-    @NotNull
     public ShopService shopService(
-            @NotNull final CustomerService customerService,
-            @NotNull final ProductService productService,
-            @NotNull final ContractService contractService,
-            @NotNull final BillingService billingService,
-            @NotNull final ProductCatalogLoader productCatalogLoader) {
+            final CustomerService customerService,
+            final ProductService productService,
+            final ContractService contractService,
+            final BillingService billingService,
+            final ProductCatalogLoader productCatalogLoader) {
         return new ShopServiceImpl(
                 customerService,
                 productService,
