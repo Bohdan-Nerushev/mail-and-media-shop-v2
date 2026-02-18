@@ -16,10 +16,10 @@ public class Customer {
 
     @NotNull
     private final UUID id;
-    @Size(max = 100)
+    @Size(min = 1, max = 100)
     @NotBlank
     private final String firstName;
-    @Size(max = 100)
+    @Size(min = 1, max = 100)
     @NotBlank
     private final String lastName;
     @NotNull

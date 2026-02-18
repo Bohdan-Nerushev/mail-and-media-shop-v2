@@ -20,7 +20,7 @@ public abstract class Product {
     private final UUID id;
 
     @NotBlank
-    @Size(max = 100)
+    @Size(min = 1, max = 100)
     private final String name;
 
     @NotNull

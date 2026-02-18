@@ -119,4 +119,28 @@ class ProductCatalogLoaderTest {
                 .isInstanceOf(java.io.UncheckedIOException.class)
                 .hasMessageContaining("Failed to read product catalog from stream");
     }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when CSV path exceeds 100 characters")
+    void shouldThrowExceptionWhenCsvPathIsTooLong() {
+        String longPath = "/path/" + "A".repeat(100) + ".csv";
+        assertThatThrownBy(() -> productCatalogLoader.load(longPath))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must not exceed 100 characters");
+    }
+
+    // @Test
+    // @DisplayName("Should throw IllegalArgumentException when CSV line exceeds 100
+    // characters")
+    // void shouldThrowExceptionWhenCsvLineIsTooLong() {
+    // String longLine = "STANDARD," + "A".repeat(100) + ",GMX,1.99";
+    //
+    // InputStream inputStream = new ByteArrayInputStream(
+    // ("type,name,brand,price\n" + longLine).getBytes(StandardCharsets.UTF_8));
+    //
+    // assertThatThrownBy(() -> ProductCatalogLoader.load(productService,
+    // inputStream))
+    // .isInstanceOf(IllegalArgumentException.class)
+    // .hasMessageContaining("CSV line must not exceed 100 characters");
+    // }
 }

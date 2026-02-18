@@ -124,11 +124,23 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("Boundary: Success with minimum allowed monthly fee (0.11)")
+    @DisplayName("Boundary: Success with maximum allowed monthly fee (0.11)")
     void shouldSucceedWhenMonthlyFeeIsAtMinimumAllowed() {
         BigDecimal minFee = new BigDecimal("0.11");
         Product p = createDefaultProduct("P", Brand.GMX, BigDecimal.ZERO, minFee);
 
         assertEquals(minFee, p.getMonthlyFee());
+    }
+
+    @Test
+    @DisplayName("Negative: Failure with too long name (> 100 characters)")
+    void shouldThrowExceptionWhenProductNameIsTooLong() {
+        String longName = "A".repeat(101);
+
+        ProductValidationException exception = assertThrows(
+                ProductValidationException.class,
+                () -> createDefaultProduct(longName, Brand.GMX, BigDecimal.ZERO, BigDecimal.ONE));
+
+        assertEquals("Product name must not exceed 100 characters", exception.getMessage());
     }
 }

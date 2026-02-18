@@ -13,8 +13,8 @@ import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.MailProduct;
 import dev.mam.buizsol.mamshop.product.model.PartnerProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
 
@@ -72,13 +72,23 @@ public class ValidationUtils {
     public static void validateCustomerModel(
             @Nullable final String value,
             @NotNull final String fieldName) {
+        validateCustomerModel(value, fieldName, 100);
+    }
+
+    public static void validateCustomerModel(
+            @Nullable final String value,
+            @NotNull final String fieldName,
+            final int maxLength) {
         if (value == null || value.isBlank()) {
             throw new CustomerValidationException(fieldName + " must not be null or empty");
+        }
+        if (value.length() > maxLength) {
+            throw new CustomerValidationException(fieldName + " must not exceed " + maxLength + " characters");
         }
     }
 
     public static void validateNotNullCustomer(
-            @jakarta.annotation.Nullable final Object value,
+            @Nullable final Object value,
             @NotNull final String fieldName) {
         if (value == null) {
             throw new CustomerValidationException(fieldName + " must not be null");
@@ -88,8 +98,18 @@ public class ValidationUtils {
     public static void validateNotBlankCustomer(
             @Nullable final String value,
             @NotNull final String fieldName) {
+        validateNotBlankCustomer(value, fieldName, 100);
+    }
+
+    public static void validateNotBlankCustomer(
+            @Nullable final String value,
+            @NotNull final String fieldName,
+            final int maxLength) {
         if (value == null || value.isBlank()) {
             throw new CustomerValidationException(fieldName + " must not be null or empty");
+        }
+        if (value.length() > maxLength) {
+            throw new CustomerValidationException(fieldName + " must not exceed " + maxLength + " characters");
         }
     }
 
@@ -111,8 +131,18 @@ public class ValidationUtils {
     public static void validateNotBlankProduct(
             @Nullable final String value,
             @NotNull final String fieldName) {
+        validateNotBlankProduct(value, fieldName, 100);
+    }
+
+    public static void validateNotBlankProduct(
+            @Nullable final String value,
+            @NotNull final String fieldName,
+            final int maxLength) {
         if (value == null || value.isBlank()) {
             throw new ProductValidationException(fieldName + " must not be null or empty");
+        }
+        if (value.length() > maxLength) {
+            throw new ProductValidationException(fieldName + " must not exceed " + maxLength + " characters");
         }
     }
 

@@ -90,9 +90,89 @@ class AddressTest {
     @Test
     @DisplayName("Boundary: Extremely long string for street")
     void shouldHandleExtremelyLongStreet() {
-        String longStreet = "A".repeat(1000);
+        String longStreet = "A".repeat(200);
         Address address = createDefaultAddress(longStreet, "1", "12345", "Berlin", "Germany");
         assertEquals(longStreet, address.street());
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'street' field")
+    void shouldThrowExceptionWhenStreetIsTooLong() {
+        String longStreet = "A".repeat(251);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultAddress(longStreet, "1", "12345", "Berlin", "Germany"));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'number' field")
+    void shouldThrowExceptionWhenNumberIsTooLong() {
+        String longNumber = "A".repeat(101);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultAddress("Main St", longNumber, "12345", "Berlin", "Germany"));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'postcode' field")
+    void shouldThrowExceptionWhenPostcodeIsTooLong() {
+        String longPostcode = "A".repeat(101);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultAddress("Main St", "10", longPostcode, "Berlin", "Germany"));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'city' field")
+    void shouldThrowExceptionWhenCityIsTooLong() {
+        String longCity = "A".repeat(101);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultAddress("Main St", "10", "12345", longCity, "Germany"));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'country' field")
+    void shouldThrowExceptionWhenCountryIsTooLong() {
+        String longCountry = "A".repeat(101);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultAddress("Main St", "10", "12345", "Berlin", longCountry));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'street' field")
+    void shouldThrowExceptionWhenStreetIsTooShort() {
+        String shortStreet = "A".repeat(0);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultAddress(shortStreet, "1", "12345", "Berlin", "Germany"));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'number' field")
+    void shouldThrowExceptionWhenNumberIsTooShort() {
+        String shortNumber = "A".repeat(0);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultAddress("Main St", shortNumber, "12345", "Berlin", "Germany"));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'postcode' field")
+    void shouldThrowExceptionWhenPostcodeIsTooShort() {
+        String shortPostcode = "A".repeat(0);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultAddress("Main St", "10", shortPostcode, "Berlin", "Germany"));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'city' field")
+    void shouldThrowExceptionWhenCityIsTooShort() {
+        String shortCity = "A".repeat(0);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultAddress("Main St", "10", "12345", shortCity, "Germany"));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'country' field")
+    void shouldThrowExceptionWhenCountryIsTooShort() {
+        String shortCountry = "A".repeat(0);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultAddress("Main St", "10", "12345", "Berlin", shortCountry));
     }
 
     @Test

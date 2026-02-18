@@ -49,11 +49,27 @@ class CommunicationDetailsTest {
     }
 
     @Test
-    @DisplayName("Boundary: Extremely long email string")
-    void shouldHandleExtremelyLongEmail() {
-        String longEmail = "a".repeat(250) + "@example.com";
-        CommunicationDetails details = createDefaultCommunicationDetails(longEmail, "123");
-        assertEquals(longEmail, details.email());
+    @DisplayName("Negative: Validation of 'telephone' field, String to Long ")
+    void shouldThrowExceptionWhenTelephoneIsTooLong() {
+        String longTelephone = "1".repeat(250);
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultCommunicationDetails("test@example.com", longTelephone));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'email' field, String to small ")
+    void shouldThrowExceptionWhenEmailIsTooSmall() {
+        String longEmail = "";
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultCommunicationDetails(longEmail, "123"));
+    }
+
+    @Test
+    @DisplayName("Negative: Validation of 'telephone' field, String to small ")
+    void shouldThrowExceptionWhenTelephoneIsTooSmall() {
+        String longTelephone = "";
+        assertThrows(CustomerValidationException.class,
+                () -> createDefaultCommunicationDetails("test@example.com", longTelephone));
     }
 
     @Test

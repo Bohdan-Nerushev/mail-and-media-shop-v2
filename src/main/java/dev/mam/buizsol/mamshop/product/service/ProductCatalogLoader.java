@@ -17,7 +17,10 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.validation.annotation.Validated;
+
 @Component
+@Validated
 public final class ProductCatalogLoader {
 
     private final ProductService productService;
@@ -29,6 +32,9 @@ public final class ProductCatalogLoader {
 
     public void load(
             @NotNull @Size(max = 100) final String csvPath) {
+        if (csvPath == null || csvPath.length() > 100) {
+            throw new IllegalArgumentException("CSV path must not be null and must not exceed 100 characters");
+        }
         final InputStream inputStream = ProductCatalogLoader.class.getResourceAsStream(csvPath);
         if (inputStream == null) {
             throw new IllegalStateException("Product catalog file '" + csvPath + "' not found in resources.");
@@ -52,6 +58,9 @@ public final class ProductCatalogLoader {
 
     @NotNull
     private static Product parseProductFromCsvLine(@NotNull @Size(max = 100) final String line) {
+        if (line == null || line.length() > 100) {
+            throw new IllegalArgumentException("CSV line must not be null and must not exceed 100 characters");
+        }
         final String[] parts = line.split(",");
         validateCsvStructure(parts, line);
 

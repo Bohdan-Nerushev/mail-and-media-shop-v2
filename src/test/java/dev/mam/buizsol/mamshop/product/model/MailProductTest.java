@@ -297,4 +297,24 @@ class MailProductTest {
                                 () -> createDefaultMailProduct("Small Storage", Brand.GMX, BigDecimal.ZERO,
                                                 BigDecimal.ONE, null));
         }
+
+        @Test
+        @DisplayName("Negative: StandardMailProduct failure with too long name (> 100 characters)")
+        void shouldThrowExceptionWhenStandardMailProductNameIsTooLong() {
+                String longName = "A".repeat(101);
+                ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
+                                () -> createDefaultStandardMailProduct(longName, Brand.GMX, BigDecimal.ONE));
+                assertEquals("Product name must not exceed 100 characters", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Negative: PremiumMailProduct failure with too long name (> 100 characters)")
+        void shouldThrowExceptionWhenPremiumMailProductNameIsTooLong() {
+                String longName = "A".repeat(101);
+                ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
+                                () -> createDefaultPremiumMailProduct(longName, Brand.GMX, BigDecimal.ONE));
+                assertEquals("Product name must not exceed 100 characters", exception.getMessage());
+        }
 }

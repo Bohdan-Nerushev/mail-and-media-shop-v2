@@ -126,4 +126,16 @@ class PartnerProductTest {
 
         assertEquals("Setup fee must not be negative", exception.getMessage());
     }
+
+    @Test
+    @DisplayName("Negative: Failure with too long name (> 100 characters)")
+    void shouldThrowExceptionWhenProductNameIsTooLong() {
+        String longName = "A".repeat(101);
+
+        ProductValidationException exception = assertThrows(
+                ProductValidationException.class,
+                () -> createPartnerProduct(longName, Brand.GMX, BigDecimal.ZERO, BigDecimal.ONE));
+
+        assertEquals("Product name must not exceed 100 characters", exception.getMessage());
+    }
 }

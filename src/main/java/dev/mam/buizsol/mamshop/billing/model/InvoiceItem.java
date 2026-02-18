@@ -11,7 +11,7 @@ import java.util.UUID;
 public record InvoiceItem(
         @NotNull UUID productId,
 
-        @NotBlank @Size(max = 150) String productName,
+        @NotBlank @Size(min = 1, max = 150) String productName,
 
         @NotNull UUID contractId,
 

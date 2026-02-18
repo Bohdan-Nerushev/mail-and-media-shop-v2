@@ -190,19 +190,13 @@ class CustomerTest {
         }
 
         @Test
-        @DisplayName("Boundary: Extremely long name handling")
+        @DisplayName("Boundary: Extremely long firstname and lastname handling")
         void shouldHandleExtremelyLongNames() {
-                String longName = "A".repeat(2000);
-                Customer customer = createDefaultCustomer(
-                                longName,
-                                longName,
-                                LocalDate.of(1990, 1, 1),
-                                mainAddress,
-                                null,
-                                communicationDetails,
-                                Brand.GMX);
-                assertEquals(longName, customer.getFirstName());
-                assertEquals(longName, customer.getLastName());
+                String longName = "A".repeat(201);
+                assertThrows(CustomerValidationException.class,
+                                () -> createDefaultCustomer(longName, longName,
+                                                LocalDate.of(1990, 1, 1),
+                                                mainAddress, null, communicationDetails, Brand.GMX));
         }
 
         @Test
