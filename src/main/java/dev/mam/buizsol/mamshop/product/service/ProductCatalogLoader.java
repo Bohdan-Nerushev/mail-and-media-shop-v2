@@ -6,6 +6,7 @@ import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -22,12 +23,12 @@ public final class ProductCatalogLoader {
     private final ProductService productService;
 
     public ProductCatalogLoader(
-            @NotNull final ProductService productService) {
+            final ProductService productService) {
         this.productService = productService;
     }
 
     public void load(
-            @NotNull final String csvPath) {
+            @NotNull @Size(max = 100) final String csvPath) {
         final InputStream inputStream = ProductCatalogLoader.class.getResourceAsStream(csvPath);
         if (inputStream == null) {
             throw new IllegalStateException("Product catalog file '" + csvPath + "' not found in resources.");
@@ -50,7 +51,7 @@ public final class ProductCatalogLoader {
     }
 
     @NotNull
-    private static Product parseProductFromCsvLine(@NotNull final String line) {
+    private static Product parseProductFromCsvLine(@NotNull @Size(max = 100) final String line) {
         final String[] parts = line.split(",");
         validateCsvStructure(parts, line);
 

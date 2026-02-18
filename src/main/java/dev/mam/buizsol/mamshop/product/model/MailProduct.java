@@ -4,6 +4,7 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateStorageSize;
 
@@ -15,7 +16,7 @@ public abstract class MailProduct extends Product {
     private final Long storageSize;
 
     protected MailProduct(
-            @NotBlank final String name,
+            @NotBlank @Size(max = 100) final String name,
             @NotNull final Brand brand,
             @NotNull final BigDecimal setupFee,
             @NotNull final BigDecimal monthlyFee,

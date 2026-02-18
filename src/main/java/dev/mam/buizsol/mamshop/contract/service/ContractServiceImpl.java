@@ -21,7 +21,7 @@ final class ContractServiceImpl implements ContractService {
 
     private final ContractRepository repository;
 
-    ContractServiceImpl(@NotNull final ContractRepository repository) {
+    ContractServiceImpl(final ContractRepository repository) {
         this.repository = repository;
     }
 

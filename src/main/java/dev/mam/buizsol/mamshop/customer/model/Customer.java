@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotBlankCustomer;
 import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullCustomer;
@@ -15,8 +16,10 @@ public class Customer {
 
     @NotNull
     private final UUID id;
+    @Size(max = 100)
     @NotBlank
     private final String firstName;
+    @Size(max = 100)
     @NotBlank
     private final String lastName;
     @NotNull

@@ -21,7 +21,7 @@ final class ProductServiceImpl implements ProductService {
     private final ProductRepository repository;
 
     ProductServiceImpl(
-            @NotNull final ProductRepository repository) {
+            final ProductRepository repository) {
         validateNotNullProduct(repository, "Repository");
         this.repository = repository;
     }

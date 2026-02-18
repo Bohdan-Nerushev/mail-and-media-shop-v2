@@ -23,7 +23,7 @@ final class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    CustomerServiceImpl(@NotNull final CustomerRepository customerRepository) {
+    CustomerServiceImpl(final CustomerRepository customerRepository) {
         validateNotNullCustomer(customerRepository, "Repository");
         this.customerRepository = customerRepository;
     }

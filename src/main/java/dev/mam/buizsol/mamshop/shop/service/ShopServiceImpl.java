@@ -39,11 +39,11 @@ final class ShopServiceImpl implements ShopService {
     private static final String CSV_PATH = "/products.csv";
 
     ShopServiceImpl(
-            @NotNull final CustomerService customerService,
-            @NotNull final ProductService productService,
-            @NotNull final ContractService contractService,
-            @NotNull final BillingService billingService,
-            @NotNull final ProductCatalogLoader productCatalogLoader) {
+            final CustomerService customerService,
+            final ProductService productService,
+            final ContractService contractService,
+            final BillingService billingService,
+            final ProductCatalogLoader productCatalogLoader) {
         this.customerService = customerService;
         this.productService = productService;
         this.contractService = contractService;

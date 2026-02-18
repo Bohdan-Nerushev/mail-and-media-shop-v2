@@ -1,15 +1,16 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateCustomerModel;
 
 public record Address(
-        @NotBlank String street,
-        @NotBlank String number,
-        @NotBlank String postcode,
-        @NotBlank String city,
-        @NotBlank String country) {
+        @NotBlank @Size(max = 200) String street,
+        @NotBlank @Size(max = 100) String number,
+        @NotBlank @Size(max = 100) String postcode,
+        @NotBlank @Size(max = 100) String city,
+        @NotBlank @Size(max = 100) String country) {
 
     public Address {
         validateCustomerModel(street, "Street");
@@ -18,6 +19,5 @@ public record Address(
         validateCustomerModel(city, "City");
         validateCustomerModel(country, "Country");
     }
-
 
 }

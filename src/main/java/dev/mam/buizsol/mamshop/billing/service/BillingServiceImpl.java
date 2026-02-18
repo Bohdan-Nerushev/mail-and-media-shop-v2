@@ -29,9 +29,9 @@ final class BillingServiceImpl implements BillingService {
     private final ContractService contractService;
 
     BillingServiceImpl(
-            @NotNull final CustomerService customerService,
-            @NotNull final ProductService productService,
-            @NotNull final ContractService contractService) {
+            final CustomerService customerService,
+            final ProductService productService,
+            final ContractService contractService) {
         this.customerService = customerService;
         this.productService = productService;
         this.contractService = contractService;

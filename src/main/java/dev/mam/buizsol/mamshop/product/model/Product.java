@@ -4,6 +4,7 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateMonthlyFeeProduct;
 import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotBlankProduct;
@@ -19,6 +20,7 @@ public abstract class Product {
     private final UUID id;
 
     @NotBlank
+    @Size(max = 100)
     private final String name;
 
     @NotNull
