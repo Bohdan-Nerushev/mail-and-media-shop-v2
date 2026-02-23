@@ -1,9 +1,9 @@
 package dev.mam.buizsol.mamshop.billing.service;
 
+import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
+import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateDiscount;
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullInvoice;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
@@ -13,15 +13,12 @@ import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Validated
 final class BillingServiceImpl implements BillingService {
 
     private final CustomerService customerService;
@@ -38,18 +35,33 @@ final class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    @NotNull
-    public Invoice generateInvoice(@NotNull final UUID customerId)
+    public Invoice generateInvoice(
+            final UUID customerId)
             throws CustomerNotFoundException, ProductNotFoundException {
+        if (customerId == null) {
+            throw new InvoiceValidationException("Customer ID must not be null");
+        }
         return generateInvoice(customerId, BigDecimal.ZERO);
     }
 
     @Override
-    @NotNull
-    public Invoice generateInvoice(@NotNull final UUID customerId, @NotNull final BigDecimal discount)
+    public Invoice generateInvoice(
+            final UUID customerId,
+            final BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException {
-        validateNotNullInvoice(customerId, "Customer ID");
-        validateDiscount(discount);
+
+        if (customerId == null) {
+            throw new InvoiceValidationException("Customer ID must not be null");
+        }
+        if (discount == null) {
+            throw new InvalidInvoiceDiscountException("Discount must not be null");
+        }
+        if (discount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidInvoiceDiscountException("Discount cannot be negative");
+        }
+        if (discount.compareTo(BigDecimal.ZERO) > 0 && discount.compareTo(new BigDecimal("0.10")) <= 0) {
+            throw new InvalidInvoiceDiscountException("Discount must be greater than 0.10 €");
+        }
 
         final Customer customer = customerService.findCustomerById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + customerId + " not found"));

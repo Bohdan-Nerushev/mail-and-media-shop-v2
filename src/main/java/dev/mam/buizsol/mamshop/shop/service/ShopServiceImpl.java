@@ -6,28 +6,24 @@ import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
+import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.validation.annotation.Validated;
 import jakarta.annotation.PostConstruct;
 
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateCustomerActive;
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateBrandMatch;
 import dev.mam.buizsol.mamshop.product.service.ProductCatalogLoader;
 
 import java.util.List;
 import java.util.UUID;
 
-@Validated
 final class ShopServiceImpl implements ShopService {
 
     private final CustomerService customerService;
@@ -57,117 +53,113 @@ final class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    @NotNull
     public Customer registerCustomer(
-            @NotNull @Valid final Customer customer) {
+            final Customer customer) {
         return customerService.createCustomer(customer);
     }
 
     @Override
-    @NotNull
     public Customer loadCustomer(
-            @NotNull final UUID customerId) throws CustomerNotFoundException {
+            final UUID customerId) throws CustomerNotFoundException {
         return customerService.findCustomerById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + customerId));
     }
 
     @Override
     public void removeCustomer(
-            @NotNull final UUID customerId) throws CustomerNotFoundException {
+            final UUID customerId) throws CustomerNotFoundException {
         customerService.deleteCustomer(customerId);
     }
 
     @Override
     public void activateCustomer(
-            @NotNull final UUID customerId) throws CustomerNotFoundException {
+            final UUID customerId) throws CustomerNotFoundException {
         customerService.activateCustomer(customerId);
     }
 
     @Override
     public void deactivateCustomer(
-            @NotNull final UUID customerId) throws CustomerNotFoundException {
+            final UUID customerId) throws CustomerNotFoundException {
         customerService.deactivateCustomer(customerId);
     }
 
     @Override
-    @NotNull
     public Customer updateAddress(
-            @NotNull final UUID customerId,
-            @NotNull @Valid final Address address) throws CustomerNotFoundException {
+            final UUID customerId,
+            final Address address) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateAddress(customerId, address);
         return loadCustomer(customerId);
     }
 
     @Override
-    @NotNull
     public Customer updateInvoiceAddress(
-            @NotNull final UUID customerId,
-            @NotNull @Valid final Address invoiceAddress) throws CustomerNotFoundException {
+            final UUID customerId,
+            final Address invoiceAddress) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateInvoiceAddress(customerId, invoiceAddress);
         return loadCustomer(customerId);
     }
 
     @Override
-    @NotNull
     public Customer updateCommunicationDetails(
-            @NotNull final UUID customerId,
-            @NotNull @Valid final CommunicationDetails details) throws CustomerNotFoundException {
+            final UUID customerId,
+            final CommunicationDetails details) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateCommunicationDetails(customerId, details);
         return loadCustomer(customerId);
     }
 
     @Override
-    @NotNull
     public List<Contract> loadAllContracts(
-            @NotNull final UUID customerId) throws CustomerNotFoundException {
+            final UUID customerId) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         return List.copyOf(contractService.findContractsByCustomerId(customerId));
     }
 
     @Override
-    @NotNull
     public Invoice generateInvoice(
-            @NotNull final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
+            final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
         checkCustomerActive(customerId);
         return billingService.generateInvoice(customerId);
     }
 
     @Override
     public void activateContract(
-            @NotNull final UUID contractId) throws ContractNotFoundException {
+            final UUID contractId) throws ContractNotFoundException {
         contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
     }
 
     @Override
-    @NotNull
     public List<Product> loadAllProductsForBrand(
-            @NotNull final Brand brand) {
+            final Brand brand) {
         return List.copyOf(productService.findByBrand(brand));
     }
 
     @Override
-    @NotNull
     public Contract purchaseProduct(
-            @NotNull final UUID customerId,
-            @NotNull final UUID productId)
+            final UUID customerId,
+            final UUID productId)
             throws CustomerNotFoundException, ProductNotFoundException {
 
         final Customer customer = loadCustomer(customerId);
-        validateCustomerActive(customer);
+        if (customer.getStatus() != CustomerStatus.ACTIVE) {
+            throw new CustomerNotActiveException(
+                    "Customer " + customerId + " is not active");
+        }
 
         final Product product = productService.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
 
-        validateBrandMatch(customer, product);
-
         return contractService.createContract(customer, product);
     }
 
-    private void checkCustomerActive(@NotNull final UUID customerId) throws CustomerNotFoundException {
+    private void checkCustomerActive(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
-        validateCustomerActive(customer);
+        if (customer.getStatus() != CustomerStatus.ACTIVE) {
+            throw new CustomerNotActiveException(
+                    "Customer " + customerId + " is not active");
+        }
     }
+
 }

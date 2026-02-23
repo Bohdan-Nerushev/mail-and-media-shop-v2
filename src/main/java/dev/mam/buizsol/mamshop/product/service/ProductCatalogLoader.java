@@ -20,8 +20,7 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.validation.annotation.Validated;
 
 @Component
-@Validated
-public final class ProductCatalogLoader {
+public class ProductCatalogLoader {
 
     private final ProductService productService;
 
@@ -62,7 +61,9 @@ public final class ProductCatalogLoader {
             throw new IllegalArgumentException("CSV line must not be null and must not exceed 100 characters");
         }
         final String[] parts = line.split(",");
-        validateCsvStructure(parts, line);
+        if (parts.length < 4) {
+            throw new IllegalArgumentException("Invalid CSV line format (at least 4 columns required): " + line);
+        }
 
         final String type = parts[0].trim().toUpperCase();
         final String name = parts[1].trim();
@@ -74,14 +75,6 @@ public final class ProductCatalogLoader {
             case "PARTNER" -> createPartnerProduct(parts, name, brand, monthlyFee, line);
             default -> throw new IllegalArgumentException("Unknown product type: " + type);
         };
-    }
-
-    private static void validateCsvStructure(
-            @NotNull final String[] parts,
-            @NotNull final String line) {
-        if (parts.length < 4) {
-            throw new IllegalArgumentException("Invalid CSV line format (at least 4 columns required): " + line);
-        }
     }
 
     @NotNull

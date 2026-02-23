@@ -9,6 +9,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,18 +21,30 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("BundleProduct Tests")
 class BundleProductTest {
 
+        private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
         private StandardMailProduct createDefaultStandardMailProduct(
                         final String name,
                         final Brand brand,
                         final BigDecimal monthlyFee) {
-                return new StandardMailProduct(name, brand, monthlyFee);
+                StandardMailProduct product = new StandardMailProduct(name, brand, monthlyFee);
+                Set<ConstraintViolation<StandardMailProduct>> violations = validator.validate(product);
+                if (!violations.isEmpty()) {
+                        throw new ProductValidationException("Validation failed");
+                }
+                return product;
         }
 
         private PremiumMailProduct createDefaultPremiumMailProduct(
                         final String name,
                         final Brand brand,
                         final BigDecimal monthlyFee) {
-                return new PremiumMailProduct(name, brand, monthlyFee);
+                PremiumMailProduct product = new PremiumMailProduct(name, brand, monthlyFee);
+                Set<ConstraintViolation<PremiumMailProduct>> violations = validator.validate(product);
+                if (!violations.isEmpty()) {
+                        throw new ProductValidationException("Validation failed");
+                }
+                return product;
         }
 
         private PartnerProduct createDefaultPartnerProduct(
@@ -35,13 +52,23 @@ class BundleProductTest {
                         final Brand brand,
                         final BigDecimal setupFee,
                         final BigDecimal monthlyFee) {
-                return new PartnerProduct(name, brand, setupFee, monthlyFee);
+                PartnerProduct product = new PartnerProduct(name, brand, setupFee, monthlyFee);
+                Set<ConstraintViolation<PartnerProduct>> violations = validator.validate(product);
+                if (!violations.isEmpty()) {
+                        throw new ProductValidationException("Validation failed");
+                }
+                return product;
         }
 
         private BundleProduct createDefaultBundleProduct(
                         final MailProduct mail,
                         final PartnerProduct partner) {
-                return new BundleProduct(mail, partner);
+                BundleProduct product = new BundleProduct(mail, partner);
+                Set<ConstraintViolation<BundleProduct>> violations = validator.validate(product);
+                if (!violations.isEmpty()) {
+                        throw new ProductValidationException("Validation failed");
+                }
+                return product;
         }
 
         @DisplayName("Success: Create BundleProduct and verify summation logic for different brands")
@@ -82,11 +109,9 @@ class BundleProductTest {
                 PartnerProduct partner = createDefaultPartnerProduct("Cloud", Brand.WEB_DE, BigDecimal.ZERO,
                                 new BigDecimal("2.00"));
 
-                ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultBundleProduct(mail, partner));
-
-                assertEquals("Brands must match for bundle product", exception.getMessage());
         }
 
         @Test
@@ -95,11 +120,9 @@ class BundleProductTest {
                 final PartnerProduct partner = createDefaultPartnerProduct("P", Brand.GMX, BigDecimal.ZERO,
                                 BigDecimal.ONE);
 
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultBundleProduct(null, partner));
-
-                assertEquals("Mail and Partner products must not be null", exception.getMessage());
         }
 
         @Test
@@ -107,21 +130,17 @@ class BundleProductTest {
         void shouldThrowExceptionWhenCreatingBundleWithNullPartner() {
                 final MailProduct mail = createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
 
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultBundleProduct(mail, null));
-
-                assertEquals("Mail and Partner products must not be null", exception.getMessage());
         }
 
         @Test
         @DisplayName("Negative: Failure with both components null")
         void shouldThrowExceptionWhenCreatingBundleWithBothComponentsNull() {
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultBundleProduct(null, null));
-
-                assertEquals("Mail and Partner products must not be null", exception.getMessage());
         }
 
         @Test

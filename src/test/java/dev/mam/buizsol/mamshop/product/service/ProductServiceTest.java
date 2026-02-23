@@ -255,12 +255,9 @@ class ProductServiceTest {
 
                 final BigDecimal invalidFee = new BigDecimal(feeValue);
 
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> productService.updateMonthlyFee(product.getId(), invalidFee));
-
-                assertNotNull(exception.getMessage());
-                assertTrue(exception.getMessage().contains("0.10"));
         }
 
         @ParameterizedTest

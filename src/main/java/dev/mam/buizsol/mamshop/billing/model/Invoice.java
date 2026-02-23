@@ -1,5 +1,7 @@
 package dev.mam.buizsol.mamshop.billing.model;
 
+import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
+import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 
@@ -10,9 +12,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateDiscount;
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullInvoice;
 
 public record Invoice(
         @NotNull Brand brand,
@@ -27,8 +26,12 @@ public record Invoice(
         @NotNull BigDecimal totalAmount) {
 
     public Invoice {
-        validateNotNullInvoice(items, "Items list");
-        validateDiscount(discount);
+        if (items == null)
+            throw new InvoiceValidationException("Items list must not be null");
+        if (discount == null)
+            throw new InvalidInvoiceDiscountException("Discount must not be null");
+        if (discount.compareTo(BigDecimal.ZERO) < 0)
+            throw new InvalidInvoiceDiscountException("Discount must not be negative");
         items = List.copyOf(items);
     }
 
@@ -53,21 +56,26 @@ public record Invoice(
     }
 
     private static BigDecimal calculateTotalSetupFee(List<InvoiceItem> items) {
-        validateNotNullInvoice(items, "Items list");
+        if (items == null)
+            return BigDecimal.ZERO;
         return items.stream()
                 .map(InvoiceItem::setupFee)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static BigDecimal calculateTotalMonthlyFee(List<InvoiceItem> items) {
-        validateNotNullInvoice(items, "Items list");
+        if (items == null)
+            return BigDecimal.ZERO;
         return items.stream()
                 .map(InvoiceItem::monthlyFee)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static BigDecimal calculateTotalAmount(List<InvoiceItem> items, BigDecimal discount) {
-        validateDiscount(discount);
+        if (discount == null)
+            throw new InvalidInvoiceDiscountException("Discount must not be null");
+        if (items == null)
+            throw new InvoiceValidationException("Items list must not be null");
         return calculateTotalSetupFee(items)
                 .add(calculateTotalMonthlyFee(items))
                 .subtract(discount);

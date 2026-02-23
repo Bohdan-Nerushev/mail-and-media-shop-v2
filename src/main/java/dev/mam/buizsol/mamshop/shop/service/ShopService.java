@@ -13,10 +13,12 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.UUID;
 
+@Validated
 public interface ShopService {
 
         Customer registerCustomer(final Customer customer);
@@ -41,14 +43,17 @@ public interface ShopService {
                         final UUID customerId,
                         final CommunicationDetails details) throws CustomerNotFoundException;
 
-        List<Contract> loadAllContracts( final UUID customerId) throws CustomerNotFoundException;
+        @NotNull
+        List<Contract> loadAllContracts(@NotNull final UUID customerId)
+                        throws CustomerNotFoundException;
 
         Invoice generateInvoice(final UUID customerId)
                         throws CustomerNotFoundException, ProductNotFoundException;
 
         void activateContract(final UUID contractId) throws ContractNotFoundException;
 
-        List<Product> loadAllProductsForBrand(final Brand brand);
+        @NotNull
+        List<Product> loadAllProductsForBrand(@NotNull final Brand brand);
 
         Contract purchaseProduct(
                         final UUID customerId,

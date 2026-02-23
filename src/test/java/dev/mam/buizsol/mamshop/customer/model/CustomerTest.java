@@ -11,6 +11,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -20,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Customer Tests")
 class CustomerTest {
+
+        private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
         private Address mainAddress;
         private CommunicationDetails communicationDetails;
@@ -38,7 +45,7 @@ class CustomerTest {
                         Address invoiAddress,
                         CommunicationDetails communicationDetails,
                         Brand brand) {
-                return new Customer(
+                Customer customer = new Customer(
                                 firstName,
                                 lastName,
                                 birthDate,
@@ -46,6 +53,11 @@ class CustomerTest {
                                 invoiAddress,
                                 communicationDetails,
                                 brand);
+                Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
+                if (!violations.isEmpty()) {
+                        throw new CustomerValidationException("Validation failed");
+                }
+                return customer;
         }
 
         private Address createDefaultAddress(

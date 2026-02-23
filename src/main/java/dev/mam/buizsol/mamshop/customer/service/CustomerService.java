@@ -11,26 +11,32 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.validation.annotation.Validated;
+
+@Validated
 public interface CustomerService {
 
-    Customer createCustomer(final Customer customer);
+        @NotNull
+        Customer createCustomer(@Valid @NotNull final Customer customer);
 
-    void updateAddress(UUID customerId, Address address) throws CustomerNotFoundException;
+        void updateAddress(@NotNull UUID customerId, @Valid @NotNull Address address) throws CustomerNotFoundException;
 
-    void updateInvoiceAddress(UUID customerId, Address address)
-            throws CustomerNotFoundException;
+        void updateInvoiceAddress(@NotNull UUID customerId, @Valid @NotNull Address address)
+                        throws CustomerNotFoundException;
 
-    void updateCommunicationDetails(
-            UUID customerId,
-            CommunicationDetails communicationDetails) throws CustomerNotFoundException;
+        void updateCommunicationDetails(
+                        @NotNull UUID customerId,
+                        @Valid @NotNull CommunicationDetails communicationDetails) throws CustomerNotFoundException;
 
-    void activateCustomer(UUID customerId) throws CustomerNotFoundException;
+        void activateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-    void deactivateCustomer(UUID customerId) throws CustomerNotFoundException;
+        void deactivateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-    void deleteCustomer(UUID customerId) throws CustomerNotFoundException;
+        void deleteCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-    Optional<Customer> findCustomerById(UUID customerId);
+        @NotNull
+        Optional<Customer> findCustomerById(@NotNull UUID customerId);
 
-    List<Customer> findAllCustomers();
+        @NotNull
+        List<Customer> findAllCustomers();
 }

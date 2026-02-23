@@ -6,11 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateMonthlyFeeProduct;
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotBlankProduct;
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullProduct;
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateSetupFeeProduct;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -39,13 +34,6 @@ public abstract class Product {
             @NotNull final Brand brand,
             @NotNull final BigDecimal setupFee,
             @NotNull final BigDecimal monthlyFee) {
-
-        validateNotBlankProduct(name, "Product name");
-        validateNotNullProduct(brand, "Brand");
-        validateNotNullProduct(setupFee, "Setup fee");
-        validateNotNullProduct(monthlyFee, "Monthly fee");
-        validateSetupFeeProduct(setupFee);
-        validateMonthlyFeeProduct(monthlyFee);
 
         this.id = UUID.randomUUID();
         this.name = name;
@@ -81,8 +69,6 @@ public abstract class Product {
 
     public void setMonthlyFee(
             @NotNull final BigDecimal monthlyFee) {
-        validateNotNullProduct(monthlyFee, "Monthly fee");
-        validateMonthlyFeeProduct(monthlyFee);
         this.monthlyFee = monthlyFee;
     }
 
