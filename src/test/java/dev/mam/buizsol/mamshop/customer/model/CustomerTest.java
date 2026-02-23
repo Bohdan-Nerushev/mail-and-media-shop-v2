@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Customer Tests")
+@DisplayName("Customer Record Tests")
 class CustomerTest {
 
         private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();

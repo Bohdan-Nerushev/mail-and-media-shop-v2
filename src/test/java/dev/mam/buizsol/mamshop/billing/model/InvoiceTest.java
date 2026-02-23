@@ -19,7 +19,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("Invoice Tests")
+@DisplayName("Invoice Record Tests")
 class InvoiceTest {
 
     private Address testAddress;
