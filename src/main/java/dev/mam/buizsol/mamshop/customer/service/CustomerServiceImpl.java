@@ -42,9 +42,8 @@ final class CustomerServiceImpl implements CustomerService {
         if (customerId == null || address == null) {
             throw new CustomerValidationException("Parameters must not be null");
         }
-        final var customer = customerRepository.getById(customerId);
-        customer.setAddress(address);
-        customerRepository.update(customer);
+        final Customer customer = customerRepository.getById(customerId);
+        customerRepository.update(customer.withAddress(address));
     }
 
     @Override
@@ -54,9 +53,8 @@ final class CustomerServiceImpl implements CustomerService {
         if (customerId == null || address == null) {
             throw new CustomerValidationException("Parameters must not be null");
         }
-        final var customer = customerRepository.getById(customerId);
-        customer.setInvoiceAddress(address);
-        customerRepository.update(customer);
+        final Customer customer = customerRepository.getById(customerId);
+        customerRepository.update(customer.withInvoiceAddress(address));
     }
 
     @Override
@@ -67,8 +65,7 @@ final class CustomerServiceImpl implements CustomerService {
             throw new CustomerValidationException("Parameters must not be null");
         }
         final Customer customer = customerRepository.getById(customerId);
-        customer.setCommunicationDetails(communicationDetails);
-        customerRepository.update(customer);
+        customerRepository.update(customer.withCommunicationDetails(communicationDetails));
     }
 
     @Override
@@ -78,8 +75,7 @@ final class CustomerServiceImpl implements CustomerService {
             throw new CustomerValidationException("Customer ID must not be null");
         }
         final Customer customer = customerRepository.getById(customerId);
-        customer.setStatus(CustomerStatus.ACTIVE);
-        customerRepository.update(customer);
+        customerRepository.update(customer.withStatus(CustomerStatus.ACTIVE));
     }
 
     @Override
@@ -89,8 +85,7 @@ final class CustomerServiceImpl implements CustomerService {
             throw new CustomerValidationException("Customer ID must not be null");
         }
         final Customer customer = customerRepository.getById(customerId);
-        customer.setStatus(CustomerStatus.INACTIVE);
-        customerRepository.update(customer);
+        customerRepository.update(customer.withStatus(CustomerStatus.INACTIVE));
     }
 
     @Override

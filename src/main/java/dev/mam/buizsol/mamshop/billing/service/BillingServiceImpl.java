@@ -70,26 +70,26 @@ final class BillingServiceImpl implements BillingService {
         final List<InvoiceItem> items = new ArrayList<>();
 
         for (final Contract contract : contracts) {
-            if (contract.getStatus() == ContractStatus.ACTIVE) {
-                final Product product = productService.findById(contract.getProductId())
-                        .orElseThrow(() -> new ProductNotFoundException("Product with ID " + contract.getProductId()
-                                + " not found for contract " + contract.getId()));
+            if (contract.status() == ContractStatus.ACTIVE) {
+                final Product product = productService.findById(contract.productId())
+                        .orElseThrow(() -> new ProductNotFoundException("Product with ID " + contract.productId()
+                                + " not found for contract " + contract.id()));
 
                 items.add(new InvoiceItem(
                         product.getId(),
                         product.getName(),
-                        contract.getId(),
-                        contract.getCreationDate(),
+                        contract.id(),
+                        contract.creationDate(),
                         product.getSetupFee(),
                         product.getMonthlyFee()));
             }
         }
 
         return new Invoice(
-                customer.getBrand(),
-                customer.getId(),
-                customer.getAddress(),
-                customer.getInvoiceAddress(),
+                customer.brand(),
+                customer.id(),
+                customer.address(),
+                customer.invoiceAddress(),
                 items,
                 discount);
     }

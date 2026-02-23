@@ -25,7 +25,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
         if (customer == null) {
             throw new CustomerValidationException("Customer must not be null");
         }
-        storage.put(customer.getId(), customer);
+        storage.put(customer.id(), customer);
     }
 
     @Override
@@ -60,9 +60,9 @@ final class CustomerRepositoryImpl implements CustomerRepository {
         if (customer == null) {
             throw new CustomerValidationException("Customer must not be null");
         }
-        if (!storage.containsKey(customer.getId())) {
-            throw new CustomerNotFoundException("Customer with ID " + customer.getId() + " not found");
+        if (!storage.containsKey(customer.id())) {
+            throw new CustomerNotFoundException("Customer with ID " + customer.id() + " not found");
         }
-        storage.put(customer.getId(), customer);
+        storage.put(customer.id(), customer);
     }
 }

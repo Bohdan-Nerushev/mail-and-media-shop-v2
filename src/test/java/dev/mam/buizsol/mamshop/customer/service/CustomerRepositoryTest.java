@@ -48,7 +48,7 @@ class CustomerRepositoryTest {
     @DisplayName("Should successfully save and retrieve a single customer by its identifier")
     void shouldSaveAndRetrieveCustomerCorrectly() {
         final UUID customerId = UUID.randomUUID();
-        when(customer.getId()).thenReturn(customerId);
+        when(customer.id()).thenReturn(customerId);
 
         repository.save(customer);
 
@@ -63,14 +63,14 @@ class CustomerRepositoryTest {
     @DisplayName("Should find all customers even when they belong to different brands")
     void shouldFindAllCustomersWithDifferentBrands(final Brand brand) {
         final UUID customerId = UUID.randomUUID();
-        when(customer.getId()).thenReturn(customerId);
-        when(customer.getBrand()).thenReturn(brand);
+        when(customer.id()).thenReturn(customerId);
+        when(customer.brand()).thenReturn(brand);
 
         repository.save(customer);
 
         final Collection<Customer> all = repository.findAll();
 
-        assertTrue(all.stream().anyMatch(c -> c.getBrand() == brand));
+        assertTrue(all.stream().anyMatch(c -> c.brand() == brand));
     }
 
     @Test
@@ -84,7 +84,7 @@ class CustomerRepositoryTest {
     @DisplayName("Should successfully update existing customer data in storage")
     void shouldUpdateExistingCustomerCorrectly() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
-        when(customer.getId()).thenReturn(customerId);
+        when(customer.id()).thenReturn(customerId);
 
         repository.save(customer);
         repository.update(customer);
@@ -98,7 +98,7 @@ class CustomerRepositoryTest {
     @DisplayName("Should successfully delete an existing customer from storage")
     void shouldDeleteExistingCustomerCorrectly() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
-        when(customer.getId()).thenReturn(customerId);
+        when(customer.id()).thenReturn(customerId);
 
         repository.save(customer);
         repository.delete(customerId);
@@ -117,7 +117,7 @@ class CustomerRepositoryTest {
     @Test
     @DisplayName("Should throw CustomerNotFoundException when attempting to update a non-existent customer")
     void shouldThrowExceptionWhenUpdatingNonExistentCustomer() {
-        when(customer.getId()).thenReturn(UUID.randomUUID());
+        when(customer.id()).thenReturn(UUID.randomUUID());
         assertThrows(CustomerNotFoundException.class, () -> repository.update(customer));
     }
 
@@ -146,7 +146,7 @@ class CustomerRepositoryTest {
     void shouldMaintainCorrectSizeWhenMultipleEntriesAreSaved(final int count) {
         for (int i = 0; i < count; i++) {
             final Customer c = mock(Customer.class);
-            when(c.getId()).thenReturn(UUID.randomUUID());
+            when(c.id()).thenReturn(UUID.randomUUID());
             repository.save(c);
         }
         assertEquals(count, repository.findAll().size());

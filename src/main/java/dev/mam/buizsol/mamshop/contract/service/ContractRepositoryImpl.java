@@ -28,7 +28,7 @@ final class ContractRepositoryImpl implements ContractRepository {
         if (contract == null) {
             throw new ContractValidationException("Contract must not be null");
         }
-        storage.put(contract.getId(), contract);
+        storage.put(contract.id(), contract);
         return contract;
     }
 
@@ -38,7 +38,7 @@ final class ContractRepositoryImpl implements ContractRepository {
         if (contract == null) {
             throw new ContractValidationException("Contract must not be null");
         }
-        storage.put(contract.getId(), contract);
+        storage.put(contract.id(), contract);
         return contract;
     }
 
@@ -58,7 +58,7 @@ final class ContractRepositoryImpl implements ContractRepository {
             throw new ContractValidationException("Customer ID must not be null");
         }
         return storage.values().stream()
-                .filter(contract -> contract.getCustomerId().equals(customerId))
+                .filter(contract -> contract.customerId().equals(customerId))
                 .collect(Collectors.toList());
     }
 
@@ -69,7 +69,7 @@ final class ContractRepositoryImpl implements ContractRepository {
             throw new ContractValidationException("Product ID must not be null");
         }
         return storage.values().stream()
-                .filter(contract -> contract.getProductId().equals(productId))
+                .filter(contract -> contract.productId().equals(productId))
                 .collect(Collectors.toList());
     }
 

@@ -70,9 +70,9 @@ class ContractServiceTest {
         Contract created = contractService.createContract(activeCustomer, matchingProduct);
 
         assertNotNull(created);
-        assertEquals(activeCustomer.getId(), created.getCustomerId());
-        assertEquals(matchingProduct.getId(), created.getProductId());
-        assertEquals(ContractStatus.INACTIVE, created.getStatus());
+        assertEquals(activeCustomer.id(), created.customerId());
+        assertEquals(matchingProduct.getId(), created.productId());
+        assertEquals(ContractStatus.INACTIVE, created.status());
         verify(contractRepository).save(any(Contract.class));
     }
 
@@ -107,13 +107,13 @@ class ContractServiceTest {
     void shouldUpdateStatusWhenContractExists() throws ContractNotFoundException {
         setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
-        Contract contract = new Contract(activeCustomer, matchingProduct);
+        Contract contract = Contract.create(activeCustomer, matchingProduct);
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
         when(contractRepository.update(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract updated = contractService.updateContractStatus(contractId, ContractStatus.INACTIVE);
 
-        assertEquals(ContractStatus.INACTIVE, updated.getStatus());
+        assertEquals(ContractStatus.INACTIVE, updated.status());
         verify(contractRepository).update(contract);
     }
 
@@ -143,7 +143,7 @@ class ContractServiceTest {
     @Test
     @DisplayName("Negative: createContract throws exception on brand mismatch")
     void shouldThrowExceptionWhenCreatingContractWithBrandMismatch() {
-        when(activeCustomer.getBrand()).thenReturn(Brand.WEB_DE);
+        when(activeCustomer.brand()).thenReturn(Brand.WEB_DE);
         Product mismatchProduct = new StandardMailProduct(
                 "Mismatch Brand",
                 Brand.GMX,
@@ -157,8 +157,8 @@ class ContractServiceTest {
     @DisplayName("Negative: createContract throws exception when customer is inactive")
     void shouldThrowExceptionWhenCreatingContractForInactiveCustomer() {
         Customer inactiveCustomer = mock(Customer.class);
-        when(inactiveCustomer.getStatus()).thenReturn(CustomerStatus.INACTIVE);
-        when(inactiveCustomer.getBrand()).thenReturn(Brand.WEB_DE);
+        when(inactiveCustomer.status()).thenReturn(CustomerStatus.INACTIVE);
+        when(inactiveCustomer.brand()).thenReturn(Brand.WEB_DE);
 
         assertThrows(CustomerNotActiveException.class,
                 () -> contractService.createContract(inactiveCustomer, matchingProduct));
@@ -200,40 +200,40 @@ class ContractServiceTest {
     }
 
     @Test
-    @DisplayName("Boundary: updateContractStatus with same status should succeed")
+    @DisplayName("Success: update status when status is already the same")
     void shouldUpdateStatusSuccessfullyWhenStatusIsTheSame() throws ContractNotFoundException {
         setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
-        Contract contract = new Contract(activeCustomer, matchingProduct);
-        contract.updateStatus(ContractStatus.ACTIVE);
+        Contract contract = Contract.create(activeCustomer, matchingProduct).withStatus(ContractStatus.ACTIVE);
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
         when(contractRepository.update(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract updated = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
 
-        assertEquals(ContractStatus.ACTIVE, updated.getStatus());
-        verify(contractRepository).update(contract);
+        assertEquals(ContractStatus.ACTIVE, updated.status());
+        verify(contractRepository).update(any(Contract.class));
     }
 
     @Test
-    @DisplayName("Boundary: multiple consecutive status updates should work correctly")
+    @DisplayName("Success: handle multiple consecutive status updates")
     void shouldHandleMultipleConsecutiveStatusUpdates() throws ContractNotFoundException {
         setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
-        Contract contract = new Contract(activeCustomer, matchingProduct);
+        Contract contract = Contract.create(activeCustomer, matchingProduct);
+
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
         when(contractRepository.update(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract updated1 = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
-        assertEquals(ContractStatus.ACTIVE, updated1.getStatus());
+        assertEquals(ContractStatus.ACTIVE, updated1.status());
 
         Contract updated2 = contractService.updateContractStatus(contractId, ContractStatus.INACTIVE);
-        assertEquals(ContractStatus.INACTIVE, updated2.getStatus());
+        assertEquals(ContractStatus.INACTIVE, updated2.status());
 
         Contract updated3 = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
-        assertEquals(ContractStatus.ACTIVE, updated3.getStatus());
+        assertEquals(ContractStatus.ACTIVE, updated3.status());
 
-        verify(contractRepository, times(3)).update(contract);
+        verify(contractRepository, times(3)).update(any(Contract.class));
     }
 
     @Test
@@ -244,13 +244,13 @@ class ContractServiceTest {
 
         Contract created = contractService.createContract(activeCustomer, matchingProduct);
 
-        assertEquals(LocalDate.now(), created.getCreationDate());
+        assertEquals(LocalDate.now(), created.creationDate());
         verify(contractRepository).save(any(Contract.class));
     }
 
     private void setupActiveCustomer() {
-        when(activeCustomer.getStatus()).thenReturn(CustomerStatus.ACTIVE);
-        when(activeCustomer.getBrand()).thenReturn(Brand.WEB_DE);
-        when(activeCustomer.getId()).thenReturn(UUID.randomUUID());
+        when(activeCustomer.status()).thenReturn(CustomerStatus.ACTIVE);
+        when(activeCustomer.brand()).thenReturn(Brand.WEB_DE);
+        when(activeCustomer.id()).thenReturn(UUID.randomUUID());
     }
 }

@@ -12,76 +12,48 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class Contract {
+public record Contract(
+        @NotNull UUID id,
+        @NotNull UUID customerId,
+        @NotNull UUID productId,
+        @NotNull LocalDate creationDate,
+        @NotNull ContractStatus status) {
 
-    @NotNull
-    private final UUID id;
+    public Contract {
+        if (id == null || customerId == null || productId == null || creationDate == null || status == null) {
+            throw new ContractValidationException("All contract fields must not be null");
+        }
+    }
 
-    @NotNull
-    private final UUID customerId;
-
-    @NotNull
-    private final UUID productId;
-
-    @NotNull
-    private final LocalDate creationDate;
-
-    @NotNull
-    private ContractStatus status;
-
-    public Contract(
+    public static Contract create(
             @NotNull @Valid final Customer customer,
-            @NotNull @Valid final Product product) throws BrandMismatchException {
+            @NotNull @Valid final Product product) {
 
         if (customer == null || product == null) {
             throw new ContractValidationException("Customer and Product must not be null");
         }
-        if (!customer.getBrand().equals(product.getBrand())) {
+        if (!customer.brand().equals(product.getBrand())) {
             throw new BrandMismatchException(String.format(
                     "Customer brand %s does not match product brand %s",
-                    customer.getBrand(), product.getBrand()));
+                    customer.brand(), product.getBrand()));
         }
-        if (customer.getStatus() != CustomerStatus.ACTIVE) {
+        if (customer.status() != CustomerStatus.ACTIVE) {
             throw new CustomerNotActiveException("Customer is not active");
         }
 
-        this.id = UUID.randomUUID();
-        this.customerId = customer.getId();
-        this.productId = product.getId();
-        this.creationDate = LocalDate.now();
-        this.status = ContractStatus.INACTIVE;
+        return new Contract(
+                UUID.randomUUID(),
+                customer.id(),
+                product.getId(),
+                LocalDate.now(),
+                ContractStatus.INACTIVE);
     }
 
     @NotNull
-    public UUID getId() {
-        return id;
-    }
-
-    @NotNull
-    public UUID getCustomerId() {
-        return customerId;
-    }
-
-    @NotNull
-    public UUID getProductId() {
-        return productId;
-    }
-
-    @NotNull
-    public LocalDate getCreationDate() {
-        return creationDate;
-    }
-
-    @NotNull
-    public ContractStatus getStatus() {
-        return status;
-    }
-
-    public void updateStatus(
-            @NotNull final ContractStatus status) {
-        if (status == null)
+    public Contract withStatus(@NotNull final ContractStatus newStatus) {
+        if (newStatus == null) {
             throw new ContractValidationException("Status must not be null");
-        this.status = status;
+        }
+        return new Contract(id, customerId, productId, creationDate, newStatus);
     }
-
 }

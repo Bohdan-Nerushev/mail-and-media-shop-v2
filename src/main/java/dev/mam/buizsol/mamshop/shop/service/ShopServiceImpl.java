@@ -143,7 +143,7 @@ final class ShopServiceImpl implements ShopService {
             throws CustomerNotFoundException, ProductNotFoundException {
 
         final Customer customer = loadCustomer(customerId);
-        if (customer.getStatus() != CustomerStatus.ACTIVE) {
+        if (customer.status() != CustomerStatus.ACTIVE) {
             throw new CustomerNotActiveException(
                     "Customer " + customerId + " is not active");
         }
@@ -156,7 +156,7 @@ final class ShopServiceImpl implements ShopService {
 
     private void checkCustomerActive(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
-        if (customer.getStatus() != CustomerStatus.ACTIVE) {
+        if (customer.status() != CustomerStatus.ACTIVE) {
             throw new CustomerNotActiveException(
                     "Customer " + customerId + " is not active");
         }

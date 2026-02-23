@@ -24,7 +24,7 @@ final class ContractServiceImpl implements ContractService {
     public Contract createContract(
             final Customer customer,
             final Product product) {
-        return repository.save(new Contract(customer, product));
+        return repository.save(Contract.create(customer, product));
     }
 
     @Override
@@ -49,11 +49,8 @@ final class ContractServiceImpl implements ContractService {
     public Contract updateContractStatus(
             final UUID contractId,
             final ContractStatus changeStatus) throws ContractNotFoundException {
-
-        Contract contract = repository.findById(contractId)
+        return repository.findById(contractId)
+                .map(contract -> repository.update(contract.withStatus(changeStatus)))
                 .orElseThrow(() -> new ContractNotFoundException("Contract with ID " + contractId + " not found"));
-
-        contract.updateStatus(changeStatus);
-        return repository.update(contract);
     }
 }

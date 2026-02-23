@@ -41,9 +41,9 @@ class ContractRepositoryTest {
         contractRepository = new ContractRepositoryImpl();
 
         testCustomer = mock(Customer.class);
-        when(testCustomer.getStatus()).thenReturn(CustomerStatus.ACTIVE);
-        when(testCustomer.getBrand()).thenReturn(Brand.WEB_DE);
-        when(testCustomer.getId()).thenReturn(UUID.randomUUID());
+        when(testCustomer.status()).thenReturn(CustomerStatus.ACTIVE);
+        when(testCustomer.brand()).thenReturn(Brand.WEB_DE);
+        when(testCustomer.id()).thenReturn(UUID.randomUUID());
 
         testProduct = new StandardMailProduct(
                 "Test Product",
@@ -54,14 +54,14 @@ class ContractRepositoryTest {
     @Test
     @DisplayName("Success: save stores a contract and returns it")
     void shouldStoreContractCorrectlyWhenSaveIsCalled() throws BrandMismatchException {
-        Contract contract = new Contract(testCustomer, testProduct);
+        Contract contract = Contract.create(testCustomer, testProduct);
 
         Contract saved = contractRepository.save(contract);
 
         assertNotNull(saved);
-        assertEquals(contract.getId(), saved.getId());
+        assertEquals(contract.id(), saved.id());
 
-        Optional<Contract> found = contractRepository.findById(contract.getId());
+        Optional<Contract> found = contractRepository.findById(contract.id());
         assertTrue(found.isPresent());
         assertEquals(contract, found.get());
     }
@@ -69,22 +69,22 @@ class ContractRepositoryTest {
     @Test
     @DisplayName("Success: update modifies existing contract")
     void shouldModifyExistingContractWhenUpdateIsCalled() throws BrandMismatchException {
-        Contract contract = new Contract(testCustomer, testProduct);
+        Contract contract = Contract.create(testCustomer, testProduct);
         contractRepository.save(contract);
-        contract.updateStatus(ContractStatus.INACTIVE);
+        Contract updatedInstance = contract.withStatus(ContractStatus.ACTIVE);
 
-        Contract updated = contractRepository.update(contract);
+        Contract updated = contractRepository.update(updatedInstance);
 
-        assertEquals(ContractStatus.INACTIVE, updated.getStatus());
-        assertEquals(ContractStatus.INACTIVE, contractRepository.findById(contract.getId()).get().getStatus());
+        assertEquals(ContractStatus.ACTIVE, updated.status());
+        assertEquals(ContractStatus.ACTIVE, contractRepository.findById(contract.id()).get().status());
     }
 
     @Test
     @DisplayName("Success: findByCustomerId returns all contracts for customer")
     void shouldReturnAllContractsByCustomerIdWhenCustomerHasThem() throws BrandMismatchException {
-        UUID customerId = testCustomer.getId();
-        Contract contract1 = new Contract(testCustomer, testProduct);
-        Contract contract2 = new Contract(testCustomer, testProduct);
+        UUID customerId = testCustomer.id();
+        Contract contract1 = Contract.create(testCustomer, testProduct);
+        Contract contract2 = Contract.create(testCustomer, testProduct);
         contractRepository.save(contract1);
         contractRepository.save(contract2);
 
@@ -98,12 +98,12 @@ class ContractRepositoryTest {
     @DisplayName("Success: findByProductId returns all contracts for product")
     void shouldReturnAllContractsByProductIdWhenProductHasThem() throws BrandMismatchException {
         UUID productId = testProduct.getId();
-        Contract contract = new Contract(testCustomer, testProduct);
+        Contract contract = Contract.create(testCustomer, testProduct);
         contractRepository.save(contract);
 
         List<Contract> results = contractRepository.findByProductId(productId);
 
-        assertTrue(results.stream().anyMatch(c -> c.getProductId().equals(productId)));
+        assertTrue(results.stream().anyMatch(c -> c.productId().equals(productId)));
     }
 
     @Test
@@ -125,13 +125,13 @@ class ContractRepositoryTest {
     @Test
     @DisplayName("Boundary: findAll returns list containing saved contracts")
     void shouldReturnListContainingAllSavedContracts() throws BrandMismatchException {
-        Contract contract = new Contract(testCustomer, testProduct);
+        Contract contract = Contract.create(testCustomer, testProduct);
         contractRepository.save(contract);
 
         List<Contract> all = contractRepository.findAll();
 
         assertTrue(all.size() >= 1);
-        assertTrue(all.stream().anyMatch(c -> c.getId().equals(contract.getId())));
+        assertTrue(all.stream().anyMatch(c -> c.id().equals(contract.id())));
     }
 
     @Test
@@ -160,23 +160,23 @@ class ContractRepositoryTest {
     @DisplayName("Success: findByCustomerId filters correct contracts among many")
     void shouldFilterCorrectContractsAmongManyByCustomerId() throws BrandMismatchException {
         Customer anotherCustomer = mock(Customer.class);
-        when(anotherCustomer.getId()).thenReturn(UUID.randomUUID());
-        when(anotherCustomer.getStatus()).thenReturn(CustomerStatus.ACTIVE);
-        when(anotherCustomer.getBrand()).thenReturn(Brand.WEB_DE);
+        when(anotherCustomer.id()).thenReturn(UUID.randomUUID());
+        when(anotherCustomer.status()).thenReturn(CustomerStatus.ACTIVE);
+        when(anotherCustomer.brand()).thenReturn(Brand.WEB_DE);
 
-        Contract target1 = new Contract(testCustomer, testProduct);
-        Contract target2 = new Contract(testCustomer, testProduct);
-        Contract other = new Contract(anotherCustomer, testProduct);
+        Contract target1 = Contract.create(testCustomer, testProduct);
+        Contract target2 = Contract.create(testCustomer, testProduct);
+        Contract other = Contract.create(anotherCustomer, testProduct);
 
         contractRepository.save(target1);
         contractRepository.save(target2);
         contractRepository.save(other);
 
-        List<Contract> results = contractRepository.findByCustomerId(testCustomer.getId());
+        List<Contract> results = contractRepository.findByCustomerId(testCustomer.id());
 
         assertEquals(2, results.size());
         assertTrue(results.contains(target1));
         assertTrue(results.contains(target2));
-        assertTrue(results.stream().noneMatch(c -> c.getCustomerId().equals(anotherCustomer.getId())));
+        assertTrue(results.stream().noneMatch(c -> c.customerId().equals(anotherCustomer.id())));
     }
 }

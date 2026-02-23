@@ -146,12 +146,12 @@ public class MaMShopApplication {
                                         Brand.MAIL_COM);
                         shop.registerCustomer(customerMailActive);
 
-                        shop.activateCustomer(customerGMXActive.getId());
-                        shop.activateCustomer(customerWebDeActive.getId());
-                        shop.activateCustomer(customerMailActive.getId());
+                        shop.activateCustomer(customerGMXActive.id());
+                        shop.activateCustomer(customerWebDeActive.id());
+                        shop.activateCustomer(customerMailActive.id());
 
                         shop.updateAddress(
-                                        customerGMXActive.getId(),
+                                        customerGMXActive.id(),
                                         new Address(
                                                         "Main St",
                                                         "10",
@@ -159,7 +159,7 @@ public class MaMShopApplication {
                                                         "Berlin",
                                                         "Germany"));
                         shop.updateInvoiceAddress(
-                                        customerGMXActive.getId(),
+                                        customerGMXActive.id(),
                                         new Address(
                                                         "Bill St",
                                                         "5",
@@ -167,7 +167,7 @@ public class MaMShopApplication {
                                                         "Munich",
                                                         "Germany"));
                         shop.updateCommunicationDetails(
-                                        customerGMXActive.getId(),
+                                        customerGMXActive.id(),
                                         new CommunicationDetails(
                                                         "gmx.active@example.com",
                                                         "+49123456789"));
@@ -186,17 +186,17 @@ public class MaMShopApplication {
 
                         printContractSummary(
                                         shop,
-                                        customerGMXActive.getId());
+                                        customerGMXActive.id());
 
                         generateAndPrintInvoice(
                                         shop,
-                                        customerGMXActive.getId());
+                                        customerGMXActive.id());
                         generateAndPrintInvoice(
                                         shop,
-                                        customerWebDeActive.getId());
+                                        customerWebDeActive.id());
                         generateAndPrintInvoice(
                                         shop,
-                                        customerMailActive.getId());
+                                        customerMailActive.id());
 
                         demonstrateExceptionScenarios(
                                         shop,
@@ -205,9 +205,9 @@ public class MaMShopApplication {
 
                         demonstrateUtilityMethods(
                                         shop,
-                                        customerMailActive.getId());
-                        shop.deactivateCustomer(customerGMXActive.getId());
-                        shop.removeCustomer(customerWebDeActive.getId());
+                                        customerMailActive.id());
+                        shop.deactivateCustomer(customerGMXActive.id());
+                        shop.removeCustomer(customerWebDeActive.id());
 
                         System.out.println("Utility: Also removed webInactive for cleanup.");
 
@@ -247,7 +247,7 @@ public class MaMShopApplication {
                         final Address invoiceAddress,
                         final CommunicationDetails communicationDetails,
                         final Brand brand) {
-                return new Customer(
+                return Customer.create(
                                 firstName,
                                 lastName,
                                 birthDate,
@@ -268,17 +268,17 @@ public class MaMShopApplication {
         private static void purchaseProductsForCustomer(
                         final ShopService shop,
                         final Customer customer) {
-                final List<Product> products = shop.loadAllProductsForBrand(customer.getBrand());
+                final List<Product> products = shop.loadAllProductsForBrand(customer.brand());
                 for (int i = 0; i < Math.min(
                                 5,
                                 products.size()); i++) {
                         try {
                                 final Contract contract = shop.purchaseProduct(
-                                                customer.getId(),
+                                                customer.id(),
                                                 products.get(i).getId());
-                                shop.activateContract(contract.getId());
+                                shop.activateContract(contract.id());
                         } catch (Exception e) {
-                                System.err.println("Purchase failed for customer " + customer.getId() + ": "
+                                System.err.println("Purchase failed for customer " + customer.id() + ": "
                                                 + e.getMessage());
                         }
                 }
@@ -318,19 +318,19 @@ public class MaMShopApplication {
                 System.out.println("Demonstrating exception scenarios:");
 
                 try {
-                        final List<Product> products = shop.loadAllProductsForBrand(inactive.getBrand());
+                        final List<Product> products = shop.loadAllProductsForBrand(inactive.brand());
                         shop.purchaseProduct(
-                                        inactive.getId(),
+                                        inactive.id(),
                                         products.get(0).getId());
                 } catch (Exception e) {
                         System.out.println("Expected (Inactive): " + e.getMessage());
                 }
 
                 try {
-                        final Brand otherBrand = mismatchBrand.getBrand() == Brand.GMX ? Brand.WEB_DE : Brand.GMX;
+                        final Brand otherBrand = mismatchBrand.brand() == Brand.GMX ? Brand.WEB_DE : Brand.GMX;
                         final List<Product> products = shop.loadAllProductsForBrand(otherBrand);
                         shop.purchaseProduct(
-                                        mismatchBrand.getId(),
+                                        mismatchBrand.id(),
                                         products.get(0).getId());
                 } catch (Exception e) {
                         System.out.println("Expected (Brand Mismatch): " + e.getMessage());
@@ -342,7 +342,7 @@ public class MaMShopApplication {
                         final UUID customerId) {
                 try {
                         final Customer loaded = shop.loadCustomer(customerId);
-                        System.out.println("Utility: Loaded " + loaded.getFirstName());
+                        System.out.println("Utility: Loaded " + loaded.firstName());
                         shop.removeCustomer(customerId);
                         System.out.println("Utility: Removed customer successfully.");
                         try {
