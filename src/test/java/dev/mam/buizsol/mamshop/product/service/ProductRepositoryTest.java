@@ -41,10 +41,10 @@ class ProductRepositoryTest {
             Long storageSize) {
         MailProduct product = new MailProduct(
                 name,
-                brand, new BigDecimal(setupFee),
+                brand,
+                new BigDecimal(setupFee),
                 new BigDecimal(monthlyFee),
-                storageSize) {
-        };
+                storageSize);
         Set<ConstraintViolation<MailProduct>> violations = validator.validate(product);
         if (!violations.isEmpty()) {
             throw new ProductValidationException("Validation failed");
@@ -221,8 +221,8 @@ class ProductRepositoryTest {
         Optional<Product> retrieved = repository.findById(bundle.getId());
         assertTrue(retrieved.isPresent());
         assertEquals(bundle, retrieved.get());
-        assertEquals(mail, ((BundleProduct) retrieved.get()).getMailProduct());
-        assertEquals(partner, ((BundleProduct) retrieved.get()).getPartnerProduct());
+        assertEquals(mail, ((BundleProduct) retrieved.get()).mailProduct());
+        assertEquals(partner, ((BundleProduct) retrieved.get()).partnerProduct());
     }
 
     @Test
@@ -260,9 +260,9 @@ class ProductRepositoryTest {
         repository.save(product);
 
         final BigDecimal newMonthlyFee = new BigDecimal("0.75");
-        product.setMonthlyFee(newMonthlyFee);
+        final MailProduct updatedProduct = product.withMonthlyFee(newMonthlyFee);
 
-        repository.update(product);
+        repository.update(updatedProduct);
 
         final Optional<Product> retrieved = repository.findById(product.getId());
         assertThat(retrieved)

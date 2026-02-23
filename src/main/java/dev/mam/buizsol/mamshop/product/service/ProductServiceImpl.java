@@ -65,7 +65,7 @@ final class ProductServiceImpl implements ProductService {
         Product product = repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with ID " + id + " not found"));
 
-        product.setMonthlyFee(monthlyFee);
+        product = product.withMonthlyFee(monthlyFee);
         repository.save(product);
     }
 

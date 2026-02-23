@@ -61,7 +61,7 @@ class BundleProductTest {
         }
 
         private BundleProduct createDefaultBundleProduct(
-                        final MailProduct mail,
+                        final Product mail,
                         final PartnerProduct partner) {
                 BundleProduct product = new BundleProduct(mail, partner);
                 Set<ConstraintViolation<BundleProduct>> violations = validator.validate(product);
@@ -87,7 +87,7 @@ class BundleProductTest {
                         final BigDecimal expectedSetup,
                         final BigDecimal expectedMonthly) {
 
-                final MailProduct mail = mailName.startsWith("S")
+                final Product mail = mailName.startsWith("S")
                                 ? createDefaultStandardMailProduct(mailName, brand, mailMonthly)
                                 : createDefaultPremiumMailProduct(mailName, brand, mailMonthly);
 
@@ -128,7 +128,7 @@ class BundleProductTest {
         @Test
         @DisplayName("Negative: Failure with null PartnerProduct")
         void shouldThrowExceptionWhenCreatingBundleWithNullPartner() {
-                final MailProduct mail = createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
+                final Product mail = createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
 
                 assertThrows(
                                 ProductValidationException.class,
@@ -159,7 +159,7 @@ class BundleProductTest {
         @Test
         @DisplayName("Polymorphism: Verify calls via Product base class")
         void shouldCalculateTotalsCorrectlyWhenCalledPolymorphically() {
-                MailProduct mail = createDefaultStandardMailProduct("Base Mail", Brand.WEB_DE, new BigDecimal("1.50"));
+                Product mail = createDefaultStandardMailProduct("Base Mail", Brand.WEB_DE, new BigDecimal("1.50"));
                 PartnerProduct partner = createDefaultPartnerProduct("Base Cloud", Brand.WEB_DE,
                                 new BigDecimal("10.00"),
                                 new BigDecimal("3.50"));
@@ -179,8 +179,8 @@ class BundleProductTest {
 
                 BundleProduct bundle = createDefaultBundleProduct(mail, partner);
 
-                assertEquals(mail, bundle.getMailProduct());
-                assertEquals(partner, bundle.getPartnerProduct());
+                assertEquals(mail, bundle.mailProduct());
+                assertEquals(partner, bundle.partnerProduct());
         }
 
         @Test
@@ -192,12 +192,12 @@ class BundleProductTest {
                 BundleProduct bundle = createDefaultBundleProduct(mail, partner);
 
                 assertThrows(UnsupportedOperationException.class,
-                                () -> bundle.setMonthlyFee(new BigDecimal("5.00")));
+                                () -> bundle.withMonthlyFee(new BigDecimal("5.00")));
         }
 
         @Test
-        @DisplayName("Dynamic: Bundle fee updates when components change")
-        void shouldUpdateBundleFeeWhenComponentFeeChanges() {
+        @DisplayName("Immutability: Bundle fee calculated from components at creation")
+        void shouldCalculateBundleFeeFromComponentsAtCreation() {
                 BigDecimal initialFee = new BigDecimal("1.00");
                 StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, initialFee);
                 PartnerProduct partner = createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO,
@@ -207,9 +207,12 @@ class BundleProductTest {
                 assertEquals(new BigDecimal("2.00"), bundle.getMonthlyFee());
 
                 BigDecimal newFee = new BigDecimal("5.00");
-                mail.setMonthlyFee(newFee);
+                StandardMailProduct updatedMail = mail.withMonthlyFee(newFee);
+                BundleProduct updatedBundle = createDefaultBundleProduct(updatedMail, partner);
 
-                assertEquals(newFee.add(partner.getMonthlyFee()), bundle.getMonthlyFee(),
-                                "Bundle fee should reflect component change");
+                assertEquals(new BigDecimal("6.00"), updatedBundle.getMonthlyFee(),
+                                "New bundle fee should reflect component change");
+                assertEquals(new BigDecimal("2.00"), bundle.getMonthlyFee(),
+                                "Original bundle fee should remain unchanged");
         }
 }

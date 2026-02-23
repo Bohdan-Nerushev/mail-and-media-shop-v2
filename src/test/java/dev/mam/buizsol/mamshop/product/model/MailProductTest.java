@@ -60,8 +60,7 @@ class MailProductTest {
                                 brand,
                                 setupFee,
                                 monthlyFee,
-                                storageSize) {
-                };
+                                storageSize);
                 validate(product);
                 return product;
         }
@@ -71,9 +70,7 @@ class MailProductTest {
                 if (violations.isEmpty()) {
                         return;
                 }
-                String message = violations.size() == 1
-                                ? violations.iterator().next().getMessage()
-                                : "Validation failed";
+                String message = violations.iterator().next().getMessage();
                 throw new ProductValidationException(message);
         }
 
@@ -87,7 +84,7 @@ class MailProductTest {
 
                 assertNotNull(product.getId());
                 assertEquals(new BigDecimal("4.99"), product.getSetupFee());
-                assertEquals(4L, product.getStorageSize());
+                assertEquals(4L, product.storageSize());
         }
 
         @Test
@@ -100,7 +97,7 @@ class MailProductTest {
 
                 assertNotNull(product.getId());
                 assertEquals(new BigDecimal("9.99"), product.getSetupFee());
-                assertEquals(8L, product.getStorageSize());
+                assertEquals(8L, product.storageSize());
         }
 
         @Test

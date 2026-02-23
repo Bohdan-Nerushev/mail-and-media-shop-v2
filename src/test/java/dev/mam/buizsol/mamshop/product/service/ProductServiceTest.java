@@ -45,8 +45,7 @@ class ProductServiceTest {
                                 brand,
                                 new BigDecimal(setupFee),
                                 new BigDecimal(monthlyFee),
-                                1024L) {
-                };
+                                1024L);
         }
 
         @Test

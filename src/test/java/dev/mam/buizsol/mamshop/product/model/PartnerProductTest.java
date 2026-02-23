@@ -35,9 +35,7 @@ class PartnerProductTest {
         if (violations.isEmpty()) {
             return product;
         }
-        String message = violations.size() == 1
-                ? violations.iterator().next().getMessage()
-                : "Validation failed";
+        String message = violations.iterator().next().getMessage();
         throw new ProductValidationException(message);
     }
 

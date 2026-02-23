@@ -7,69 +7,35 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
-public abstract class Product {
+public interface Product {
 
     @NotNull
-    private final UUID id;
+    UUID getId();
 
     @NotBlank
     @Size(min = 1, max = 100, message = "Product name must not exceed 100 characters")
-    private final String name;
+    String getName();
 
     @NotNull
-    private final Brand brand;
+    Brand getBrand();
 
     @NotNull
     @DecimalMin(value = "0.00")
-    private final BigDecimal setupFee;
+    BigDecimal getSetupFee();
 
     @NotNull
     @DecimalMin(value = "0.11")
-    private BigDecimal monthlyFee;
-
-    protected Product(
-            @NotBlank final String name,
-            @NotNull final Brand brand,
-            @NotNull final BigDecimal setupFee,
-            @NotNull final BigDecimal monthlyFee) {
-
-        this.id = UUID.randomUUID();
-        this.name = name;
-        this.brand = brand;
-        this.setupFee = setupFee;
-        this.monthlyFee = monthlyFee;
-    }
+    BigDecimal getMonthlyFee();
 
     @NotNull
-    public UUID getId() {
-        return id;
-    }
+    Product withMonthlyFee(@NotNull BigDecimal monthlyFee);
 
     @NotNull
-    public String getName() {
-        return name;
-    }
-
-    @NotNull
-    public Brand getBrand() {
-        return brand;
-    }
-
-    @NotNull
-    public BigDecimal getSetupFee() {
-        return setupFee;
-    }
-
-    @NotNull
-    public BigDecimal getMonthlyFee() {
-        return monthlyFee;
-    }
-
-    public void setMonthlyFee(
-            @NotNull final BigDecimal monthlyFee) {
-        this.monthlyFee = monthlyFee;
+    default Optional<Long> getStorageSize() {
+        return Optional.empty();
     }
 
 }
