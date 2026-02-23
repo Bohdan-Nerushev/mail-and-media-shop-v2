@@ -35,10 +35,13 @@ class ProductTest {
         Product p = new Product(name, brand, setupFee, monthlyFee) {
         };
         Set<ConstraintViolation<Product>> violations = validator.validate(p);
-        if (!violations.isEmpty()) {
-            throw new ProductValidationException("Validation failed");
+        if (violations.isEmpty()) {
+            return p;
         }
-        return p;
+        String message = violations.size() == 1
+                ? violations.iterator().next().getMessage()
+                : "Validation failed";
+        throw new ProductValidationException(message);
     }
 
     @Test

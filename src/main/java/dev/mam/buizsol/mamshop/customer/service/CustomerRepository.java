@@ -10,20 +10,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Repository
 public interface CustomerRepository {
 
-        void save(final Customer customer);
+        void save(@Valid @NotNull final Customer customer);
 
-        Optional<Customer> findById(final UUID id);
+        @NotNull
+        Optional<Customer> findById(@NotNull final UUID id);
 
-        default Customer getById(final UUID id) throws CustomerNotFoundException {
+        @NotNull
+        default Customer getById(@NotNull final UUID id) throws CustomerNotFoundException {
                 return findById(id).orElseThrow(
-                        () -> new CustomerNotFoundException("Customer with ID " + id + " not found"));
+                                () -> new CustomerNotFoundException("Customer with ID " + id + " not found"));
         }
 
+        @NotNull
         List<Customer> findAll();
 
-        void delete(final UUID id) throws CustomerNotFoundException;
+        void delete(@NotNull final UUID id) throws CustomerNotFoundException;
 
-        void update(final Customer customer) throws CustomerNotFoundException;
+        void update(@Valid @NotNull final Customer customer) throws CustomerNotFoundException;
 }

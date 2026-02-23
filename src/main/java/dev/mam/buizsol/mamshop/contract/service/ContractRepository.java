@@ -10,15 +10,21 @@ import java.util.UUID;
 
 public interface ContractRepository {
 
-        Contract save(final Contract contract);
+        @NotNull
+        Contract save(@NotNull @Valid final Contract contract);
 
-        Contract update(final Contract contract);
+        @NotNull
+        Contract update(@NotNull @Valid final Contract contract);
 
-        Optional<Contract> findById(final UUID id);
+        @NotNull
+        Optional<Contract> findById(@NotNull final UUID id);
 
-        List<Contract> findByCustomerId(final UUID customerId);
+        @NotNull
+        List<Contract> findByCustomerId(@NotNull final UUID customerId);
 
-        List<Contract> findByProductId(final UUID productId);
+        @NotNull
+        List<Contract> findByProductId(@NotNull final UUID productId);
 
+        @NotNull
         List<Contract> findAll();
 }

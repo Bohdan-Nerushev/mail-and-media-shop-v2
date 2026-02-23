@@ -17,8 +17,6 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.validation.annotation.Validated;
-
 @Component
 public class ProductCatalogLoader {
 

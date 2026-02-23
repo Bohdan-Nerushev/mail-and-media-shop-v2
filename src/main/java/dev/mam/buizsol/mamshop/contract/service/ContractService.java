@@ -1,5 +1,6 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
+import dev.mam.buizsol.mamshop.contract.validation.BrandMatch;
 import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
@@ -16,20 +17,26 @@ import java.util.UUID;
 @Validated
 public interface ContractService {
 
+        @NotNull
+        @BrandMatch
         Contract createContract(
-                        final Customer customer,
-                        final Product product);
+                        @NotNull @Valid final Customer customer,
+                        @NotNull @Valid final Product product);
 
+        @NotNull
         Optional<Contract> findContractById(
-                        final UUID id);
+                        @NotNull final UUID id);
 
+        @NotNull
         List<Contract> findContractsByCustomerId(
-                        final UUID customerId);
+                        @NotNull final UUID customerId);
 
+        @NotNull
         List<Contract> findContractsByProductId(
-                        final UUID productId);
+                        @NotNull final UUID productId);
 
+        @NotNull
         Contract updateContractStatus(
-                        final UUID contractId,
-                        final ContractStatus status) throws ContractNotFoundException;
+                        @NotNull final UUID contractId,
+                        @NotNull final ContractStatus status) throws ContractNotFoundException;
 }

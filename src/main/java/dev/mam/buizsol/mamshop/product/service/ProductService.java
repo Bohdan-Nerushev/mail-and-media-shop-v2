@@ -17,11 +17,13 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public interface ProductService {
 
-        void createProduct(final Product product);
+        void createProduct(@NotNull @Valid final Product product);
 
-        Optional<Product> findById(final UUID id);
+        @NotNull
+        Optional<Product> findById(@NotNull final UUID id);
 
-        List<Product> findByBrand(final Brand brand);
+        @NotNull
+        List<Product> findByBrand(@NotNull final Brand brand);
 
         void updateMonthlyFee(
                         @NotNull final UUID id,

@@ -1,7 +1,7 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
-import jakarta.validation.constraints.Min;
+import dev.mam.buizsol.mamshop.product.validation.ValidStorageSize;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 
 public abstract class MailProduct extends Product {
 
-    @Min(1)
+    @ValidStorageSize
     private final Long storageSize;
 
     protected MailProduct(

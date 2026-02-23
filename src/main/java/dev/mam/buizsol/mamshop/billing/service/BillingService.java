@@ -13,7 +13,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public interface BillingService {
 
-    Invoice generateInvoice(UUID customerId) throws CustomerNotFoundException, ProductNotFoundException;
+    @NotNull
+    Invoice generateInvoice(@NotNull UUID customerId) throws CustomerNotFoundException, ProductNotFoundException;
 
     @NotNull
     Invoice generateInvoice(@NotNull UUID customerId, @NotNull @InvoiceDiscount BigDecimal discount)

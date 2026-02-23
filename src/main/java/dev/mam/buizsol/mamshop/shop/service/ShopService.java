@@ -21,42 +21,49 @@ import java.util.UUID;
 @Validated
 public interface ShopService {
 
-        Customer registerCustomer(final Customer customer);
+        @NotNull
+        Customer registerCustomer(@NotNull @Valid final Customer customer);
 
-        Customer loadCustomer(final UUID customerId) throws CustomerNotFoundException;
+        @NotNull
+        Customer loadCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
 
-        void removeCustomer(final UUID customerId) throws CustomerNotFoundException;
+        void removeCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
 
-        void activateCustomer(final UUID customerId) throws CustomerNotFoundException;
+        void activateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
 
-        void deactivateCustomer(final UUID customerId) throws CustomerNotFoundException;
+        void deactivateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
 
+        @NotNull
         Customer updateAddress(
-                        final UUID customerId,
-                        final Address address) throws CustomerNotFoundException;
+                        @NotNull final UUID customerId,
+                        @NotNull @Valid final Address address) throws CustomerNotFoundException;
 
+        @NotNull
         Customer updateInvoiceAddress(
-                        final UUID customerId,
-                        final Address invoiceAddress) throws CustomerNotFoundException;
+                        @NotNull final UUID customerId,
+                        @NotNull @Valid final Address invoiceAddress) throws CustomerNotFoundException;
 
+        @NotNull
         Customer updateCommunicationDetails(
-                        final UUID customerId,
-                        final CommunicationDetails details) throws CustomerNotFoundException;
+                        @NotNull final UUID customerId,
+                        @NotNull @Valid final CommunicationDetails details) throws CustomerNotFoundException;
 
         @NotNull
         List<Contract> loadAllContracts(@NotNull final UUID customerId)
                         throws CustomerNotFoundException;
 
-        Invoice generateInvoice(final UUID customerId)
+        @NotNull
+        Invoice generateInvoice(@NotNull final UUID customerId)
                         throws CustomerNotFoundException, ProductNotFoundException;
 
-        void activateContract(final UUID contractId) throws ContractNotFoundException;
+        void activateContract(@NotNull final UUID contractId) throws ContractNotFoundException;
 
         @NotNull
         List<Product> loadAllProductsForBrand(@NotNull final Brand brand);
 
+        @NotNull
         Contract purchaseProduct(
-                        final UUID customerId,
-                        final UUID productId)
+                        @NotNull final UUID customerId,
+                        @NotNull final UUID productId)
                         throws CustomerNotFoundException, ProductNotFoundException, BrandMismatchException;
 }

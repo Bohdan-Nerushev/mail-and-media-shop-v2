@@ -15,7 +15,7 @@ public abstract class Product {
     private final UUID id;
 
     @NotBlank
-    @Size(min = 1, max = 100)
+    @Size(min = 1, max = 100, message = "Product name must not exceed 100 characters")
     private final String name;
 
     @NotNull

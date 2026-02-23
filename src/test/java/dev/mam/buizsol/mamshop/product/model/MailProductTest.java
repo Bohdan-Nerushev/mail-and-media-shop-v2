@@ -68,9 +68,13 @@ class MailProductTest {
 
         private void validate(final Product product) {
                 Set<ConstraintViolation<Product>> violations = validator.validate(product);
-                if (!violations.isEmpty()) {
-                        throw new ProductValidationException("Validation failed");
+                if (violations.isEmpty()) {
+                        return;
                 }
+                String message = violations.size() == 1
+                                ? violations.iterator().next().getMessage()
+                                : "Validation failed";
+                throw new ProductValidationException(message);
         }
 
         @Test

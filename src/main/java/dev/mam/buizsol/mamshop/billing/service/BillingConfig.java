@@ -3,7 +3,6 @@ package dev.mam.buizsol.mamshop.billing.service;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
 import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
-import jakarta.validation.constraints.NotNull;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

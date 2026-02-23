@@ -32,10 +32,13 @@ class PartnerProductTest {
             final BigDecimal monthlyFee) {
         PartnerProduct product = new PartnerProduct(name, brand, setupFee, monthlyFee);
         Set<ConstraintViolation<PartnerProduct>> violations = validator.validate(product);
-        if (!violations.isEmpty()) {
-            throw new ProductValidationException("Validation failed");
+        if (violations.isEmpty()) {
+            return product;
         }
-        return product;
+        String message = violations.size() == 1
+                ? violations.iterator().next().getMessage()
+                : "Validation failed";
+        throw new ProductValidationException(message);
     }
 
     @DisplayName("Success: Create PartnerProduct with valid diverse data")
