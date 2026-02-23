@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 @Component
-public final class ProductCatalogLoader {
+public class ProductCatalogLoader {
 
     private final ProductService productService;
 
@@ -52,7 +52,9 @@ public final class ProductCatalogLoader {
     @NotNull
     private static Product parseProductFromCsvLine(@NotNull final String line) {
         final String[] parts = line.split(",");
-        validateCsvStructure(parts, line);
+        if (parts.length < 4) {
+            throw new IllegalArgumentException("Invalid CSV line format (at least 4 columns required): " + line);
+        }
 
         final String type = parts[0].trim().toUpperCase();
         final String name = parts[1].trim();
@@ -64,14 +66,6 @@ public final class ProductCatalogLoader {
             case "PARTNER" -> createPartnerProduct(parts, name, brand, monthlyFee, line);
             default -> throw new IllegalArgumentException("Unknown product type: " + type);
         };
-    }
-
-    private static void validateCsvStructure(
-            @NotNull final String[] parts,
-            @NotNull final String line) {
-        if (parts.length < 4) {
-            throw new IllegalArgumentException("Invalid CSV line format (at least 4 columns required): " + line);
-        }
     }
 
     @NotNull

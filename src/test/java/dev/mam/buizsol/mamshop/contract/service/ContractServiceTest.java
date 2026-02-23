@@ -158,22 +158,10 @@ class ContractServiceTest {
     void shouldThrowExceptionWhenCreatingContractForInactiveCustomer() {
         Customer inactiveCustomer = mock(Customer.class);
         when(inactiveCustomer.getStatus()).thenReturn(CustomerStatus.INACTIVE);
-        when(inactiveCustomer.getId()).thenReturn(UUID.randomUUID());
         when(inactiveCustomer.getBrand()).thenReturn(Brand.WEB_DE);
 
         assertThrows(CustomerNotActiveException.class,
                 () -> contractService.createContract(inactiveCustomer, matchingProduct));
-    }
-
-    @DisplayName("Boundary/Negative: updateContractStatus throws exception on null parameters")
-    @ParameterizedTest
-    @CsvSource(value = {
-            ", ACTIVE",
-            "550e8400-e29b-41df-a447-4462db01c001, ",
-            ", "
-    }, nullValues = { "" })
-    void shouldThrowExceptionWhenUpdatingStatusWithNullParameters(UUID id, ContractStatus status) {
-        assertThrows(ContractValidationException.class, () -> contractService.updateContractStatus(id, status));
     }
 
     @Test

@@ -8,7 +8,7 @@ import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +17,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -53,28 +52,34 @@ class CustomerServiceTest {
                 address, invoiceAddress, communicationDetails, brand);
     }
 
-    @Mock
     private Address address;
 
-    @Mock
     private CommunicationDetails communicationDetails;
 
     @Mock
     private CustomerRepository customerRepository;
 
-    @InjectMocks
     private CustomerServiceImpl customerService;
+
+    @BeforeEach
+    void setUp() {
+        address = new Address("Street", "1", "12345", "City", "Country");
+        communicationDetails = new CommunicationDetails("john.doe@example.com", "123456789");
+        customerService = new CustomerServiceImpl(customerRepository);
+    }
 
     @Test
     @DisplayName("Create customer with valid data should succeed")
     void shouldCreateCustomerWhenDataIsValid() {
-        final Customer customer = customerService.createCustomer(createDefaultCustomer(
+        final Customer customer = createDefaultCustomer(
                 "John", "Doe", LocalDate.of(1990, 1, 1),
-                address, null, communicationDetails, Brand.GMX));
+                address, null, communicationDetails, Brand.GMX);
 
-        assertNotNull(customer.getId());
-        assertEquals("John", customer.getFirstName());
-        assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
+        final Customer created = customerService.createCustomer(customer);
+
+        assertNotNull(created.getId());
+        assertEquals("John", created.getFirstName());
+        assertEquals(CustomerStatus.INACTIVE, created.getStatus());
         verify(customerRepository).save(any(Customer.class));
     }
 

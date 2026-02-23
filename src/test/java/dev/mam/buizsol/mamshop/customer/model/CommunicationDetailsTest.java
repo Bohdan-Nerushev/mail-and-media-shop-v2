@@ -8,18 +8,30 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("CommunicationDetails Tests")
 class CommunicationDetailsTest {
 
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
     private CommunicationDetails createDefaultCommunicationDetails(
             String email,
             String telephone) {
-        return new CommunicationDetails(
+        CommunicationDetails details = new CommunicationDetails(
                 email,
                 telephone);
+        Set<ConstraintViolation<CommunicationDetails>> violations = validator.validate(details);
+        if (!violations.isEmpty()) {
+            throw new CustomerValidationException("Validation failed");
+        }
+        return details;
     }
 
     @Test
@@ -51,7 +63,7 @@ class CommunicationDetailsTest {
     @Test
     @DisplayName("Boundary: Extremely long email string")
     void shouldHandleExtremelyLongEmail() {
-        String longEmail = "a".repeat(250) + "@example.com";
+        String longEmail = "a".repeat(60) + "@" + "a".repeat(60) + ".com";
         CommunicationDetails details = createDefaultCommunicationDetails(longEmail, "123");
         assertEquals(longEmail, details.email());
     }

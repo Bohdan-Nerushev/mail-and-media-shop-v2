@@ -2,13 +2,16 @@ package dev.mam.buizsol.mamshop.customer.model;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -17,18 +20,25 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("Address Tests")
 class AddressTest {
 
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
     private Address createDefaultAddress(
             String street,
             String number,
             String postcode,
             String city,
             String country) {
-        return new Address(
+        Address address = new Address(
                 street,
                 number,
                 postcode,
                 city,
                 country);
+        Set<ConstraintViolation<Address>> violations = validator.validate(address);
+        if (!violations.isEmpty()) {
+            throw new CustomerValidationException("Validation failed");
+        }
+        return address;
     }
 
     @Test

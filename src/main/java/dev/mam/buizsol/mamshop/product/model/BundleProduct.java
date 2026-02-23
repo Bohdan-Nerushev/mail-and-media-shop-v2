@@ -1,10 +1,10 @@
 package dev.mam.buizsol.mamshop.product.model;
 
+import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateProductComponents;
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateMatchingBrandsProduct;
 
 import java.math.BigDecimal;
 
@@ -22,8 +22,8 @@ public class BundleProduct extends Product {
             @NotNull @Valid final MailProduct mailProduct,
             @NotNull @Valid final PartnerProduct partnerProduct) {
         super(
-                generateName(mailProduct, partnerProduct),
-                validateMatchingBrandsProduct(mailProduct, partnerProduct),
+                generateBundleName(mailProduct, partnerProduct),
+                validateBrands(mailProduct, partnerProduct),
                 calculateTotalSetupFee(mailProduct, partnerProduct),
                 calculateTotalMonthlyFee(mailProduct, partnerProduct));
         this.mailProduct = mailProduct;
@@ -52,24 +52,31 @@ public class BundleProduct extends Product {
         return calculateTotalMonthlyFee(mailProduct, partnerProduct);
     }
 
-    private static String generateName(
-            final MailProduct mail,
-            final PartnerProduct partner) {
-        validateProductComponents(mail, partner);
+    private static String generateBundleName(final MailProduct mail, final PartnerProduct partner) {
+        if (mail == null || partner == null)
+            throw new ProductValidationException("Mail and Partner products must not be null");
         return "Bundle: " + mail.getName() + " " + partner.getName();
     }
 
-    private static BigDecimal calculateTotalSetupFee(
-            final MailProduct mail,
-            final PartnerProduct partner) {
-        validateProductComponents(mail, partner);
+    private static BigDecimal calculateTotalSetupFee(final MailProduct mail, final PartnerProduct partner) {
+        if (mail == null || partner == null)
+            return BigDecimal.ZERO;
         return mail.getSetupFee().add(partner.getSetupFee());
     }
 
-    private static BigDecimal calculateTotalMonthlyFee(
-            final MailProduct mail,
-            final PartnerProduct partner) {
-        validateProductComponents(mail, partner);
+    private static BigDecimal calculateTotalMonthlyFee(final MailProduct mail, final PartnerProduct partner) {
+        if (mail == null || partner == null)
+            return BigDecimal.ZERO;
         return mail.getMonthlyFee().add(partner.getMonthlyFee());
+    }
+
+    private static Brand validateBrands(MailProduct mail,
+            PartnerProduct partner) {
+        if (mail == null || partner == null)
+            throw new ProductValidationException("Mail and Partner products must not be null");
+        if (mail.getBrand() != partner.getBrand()) {
+            throw new ProductValidationException("Brands must match for bundle product");
+        }
+        return mail.getBrand();
     }
 }

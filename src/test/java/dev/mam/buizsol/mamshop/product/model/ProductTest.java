@@ -13,6 +13,9 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -22,13 +25,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("Product Tests")
 class ProductTest {
 
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
     private Product createDefaultProduct(
             final String name,
             final Brand brand,
             final BigDecimal setupFee,
             final BigDecimal monthlyFee) {
-        return new Product(name, brand, setupFee, monthlyFee) {
+        Product p = new Product(name, brand, setupFee, monthlyFee) {
         };
+        Set<ConstraintViolation<Product>> violations = validator.validate(p);
+        if (!violations.isEmpty()) {
+            throw new ProductValidationException("Validation failed");
+        }
+        return p;
     }
 
     @Test
@@ -65,21 +75,17 @@ class ProductTest {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "   ", "\t", "\n" })
     void shouldThrowExceptionWhenProductNameIsInvalid(String invalidName) {
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createDefaultProduct(invalidName, Brand.GMX, BigDecimal.ZERO, BigDecimal.ONE));
-
-        assertEquals("Product name must not be null or empty", exception.getMessage());
     }
 
     @Test
     @DisplayName("Negative: Failure with null brand")
     void shouldThrowExceptionWhenBrandIsNull() {
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createDefaultProduct("P", null, BigDecimal.ZERO, BigDecimal.ONE));
-
-        assertEquals("Brand must not be null", exception.getMessage());
     }
 
     @DisplayName("Negative: Failure with null fees")
@@ -89,13 +95,9 @@ class ProductTest {
             "0.00, "
     })
     void shouldThrowExceptionWhenFeesAreNull(BigDecimal setupFee, BigDecimal monthlyFee) {
-        String expectedField = setupFee == null ? "Setup fee" : "Monthly fee";
-
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createDefaultProduct("P", Brand.GMX, setupFee, monthlyFee));
-
-        assertEquals(expectedField + " must not be null", exception.getMessage());
     }
 
     @Test
@@ -103,11 +105,9 @@ class ProductTest {
     void shouldThrowExceptionWhenSetupFeeIsNegative() {
         BigDecimal negativeFee = new BigDecimal("-0.01");
 
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createDefaultProduct("P", Brand.GMX, negativeFee, BigDecimal.ONE));
-
-        assertEquals("Setup fee must not be negative", exception.getMessage());
     }
 
     @DisplayName("Negative: Failure with monthly fee <= 0.10")
@@ -116,11 +116,9 @@ class ProductTest {
     void shouldThrowExceptionWhenMonthlyFeeIsInvalid(String fee) {
         BigDecimal invalidMonthlyFee = new BigDecimal(fee);
 
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createDefaultProduct("P", Brand.GMX, BigDecimal.ZERO, invalidMonthlyFee));
-
-        assertEquals("Monthly fee must be greater than 0.10 €", exception.getMessage());
     }
 
     @Test

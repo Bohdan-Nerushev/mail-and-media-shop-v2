@@ -1,12 +1,10 @@
 package dev.mam.buizsol.mamshop.customer.model;
-
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotBlankCustomer;
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullCustomer;
+import jakarta.validation.constraints.Past;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -38,18 +36,26 @@ public class Customer {
     public Customer(
             @NotBlank final String firstName,
             @NotBlank final String lastName,
-            @NotNull final LocalDate birthDate,
+            @NotNull @Past final LocalDate birthDate,
             @NotNull @Valid final Address address,
             @Nullable @Valid final Address invoiceAddress,
             @NotNull @Valid final CommunicationDetails communicationDetails,
             @NotNull final Brand brand) {
 
-        validateNotBlankCustomer(firstName, "First name");
-        validateNotBlankCustomer(lastName, "Last name");
-        validateNotNullCustomer(birthDate, "Birth date");
-        validateNotNullCustomer(address, "Address");
-        validateNotNullCustomer(communicationDetails, "Communication details");
-        validateNotNullCustomer(brand, "Brand");
+        if (firstName == null || firstName.isBlank() || lastName == null || lastName.isBlank()) {
+            throw new CustomerValidationException("First name and last name must not be blank");
+        }
+        if (birthDate == null || birthDate.isAfter(LocalDate.now()) || address == null || communicationDetails == null
+                || brand == null) {
+            throw new CustomerValidationException("Mandatory fields must not be null");
+        }
+        if (firstName == null || firstName.isBlank() || lastName == null || lastName.isBlank()) {
+            throw new CustomerValidationException("First name and last name must not be blank");
+        }
+        if (birthDate == null || birthDate.isAfter(LocalDate.now()) || address == null || communicationDetails == null
+                || brand == null) {
+            throw new CustomerValidationException("Mandatory fields must not be null");
+        }
 
         this.id = UUID.randomUUID();
         this.firstName = firstName;
@@ -89,7 +95,6 @@ public class Customer {
 
     public void setAddress(
             @NotNull @Valid final Address address) {
-        validateNotNullCustomer(address, "Address");
         this.address = address;
     }
 
@@ -100,7 +105,6 @@ public class Customer {
 
     public void setInvoiceAddress(
             @NotNull @Valid final Address invoiceAddress) {
-        validateNotNullCustomer(invoiceAddress, "Invoice address");
         this.invoiceAddress = invoiceAddress;
     }
 
@@ -111,7 +115,6 @@ public class Customer {
 
     public void setCommunicationDetails(
             @NotNull @Valid final CommunicationDetails communicationDetails) {
-        validateNotNullCustomer(communicationDetails, "Communication details");
         this.communicationDetails = communicationDetails;
     }
 
@@ -127,7 +130,6 @@ public class Customer {
 
     public void setStatus(
             @NotNull final CustomerStatus status) {
-        validateNotNullCustomer(status, "Status");
         this.status = status;
     }
 

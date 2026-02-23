@@ -1,11 +1,8 @@
 package dev.mam.buizsol.mamshop.product.service;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-
-import static dev.mam.buizsol.mamshop.config.ValidationUtils.validateNotNullProduct;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -25,35 +22,40 @@ final class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public void save(@NotNull @Valid final Product product) {
-        validateNotNullProduct(product, "Product");
+    public void save(final Product product) {
+        if (product == null) {
+            throw new ProductValidationException("Product must not be null");
+        }
         storage.put(product.getId(), product);
     }
 
     @Override
-    public void update(@NotNull @Valid final Product product) {
-        validateNotNullProduct(product, "Product");
+    public void update(final Product product) {
+        if (product == null) {
+            throw new ProductValidationException("Product must not be null");
+        }
         storage.put(product.getId(), product);
     }
 
     @Override
-    @NotNull
-    public Optional<Product> findById(@NotNull final UUID id) {
-        validateNotNullProduct(id, "ID");
+    public Optional<Product> findById(final UUID id) {
+        if (id == null) {
+            throw new ProductValidationException("ID must not be null");
+        }
         return Optional.ofNullable(storage.get(id));
     }
 
     @Override
-    @NotNull
-    public Collection<Product> findByBrand(@NotNull final Brand brand) {
-        validateNotNullProduct(brand, "Brand");
+    public Collection<Product> findByBrand(final Brand brand) {
+        if (brand == null) {
+            throw new ProductValidationException("Brand must not be null");
+        }
         return storage.values().stream()
                 .filter(product -> product.getBrand() == brand)
                 .toList();
     }
 
     @Override
-    @NotNull
     public Collection<Product> findAll() {
         return Collections.unmodifiableCollection(storage.values());
     }
