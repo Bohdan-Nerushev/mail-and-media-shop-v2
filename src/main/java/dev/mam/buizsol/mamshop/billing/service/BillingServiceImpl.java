@@ -13,6 +13,7 @@ import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,16 +28,20 @@ final class BillingServiceImpl implements BillingService {
     private final ProductService productService;
     private final ContractService contractService;
 
-    private final BigDecimal ZERO = BigDecimal.ZERO;
-    private final BigDecimal DISCOUNT = new BigDecimal("0.10");
+    private final BigDecimal ZERO;
+    private final BigDecimal DISCOUNT;
 
     BillingServiceImpl(
             final CustomerService customerService,
             final ProductService productService,
-            final ContractService contractService) {
+            final ContractService contractService,
+            @Value("${billing.zero-amount}") final BigDecimal zero,
+            @Value("${billing.minimal-discount-amount}") final BigDecimal discount) {
         this.customerService = customerService;
         this.productService = productService;
         this.contractService = contractService;
+        this.ZERO = zero;
+        this.DISCOUNT = discount;
     }
 
     @Override

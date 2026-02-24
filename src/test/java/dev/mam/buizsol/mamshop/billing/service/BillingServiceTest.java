@@ -57,7 +57,14 @@ class BillingServiceTest {
 
     @BeforeEach
     void setUp() {
-        billingService = new BillingServiceImpl(customerService, productService, contractService);
+        final BigDecimal zero = BigDecimal.ZERO;
+        final BigDecimal minimalDiscount = new BigDecimal("0.10");
+        billingService = new BillingServiceImpl(
+                customerService,
+                productService,
+                contractService,
+                zero,
+                minimalDiscount);
 
         Address address = new Address("Street", "1", "12345", "City", "Country");
         CommunicationDetails communication = new CommunicationDetails("test@test.com", "123456789");
@@ -236,7 +243,8 @@ class BillingServiceTest {
     @DisplayName("Verification of valid boundary discount values")
     @ParameterizedTest(name = "Boundary discount values - value: {0}")
     @ValueSource(strings = { "0.00", "0.11", "0.10001", "1.00", "5.00", "100.00" })
-    void shouldGenerateInvoiceWhenValidBoundaryDiscountsProvided(BigDecimal validDiscount) throws Exception {
+    void shouldGenerateInvoiceWhenValidBoundaryDiscountsProvided(final String validDiscountStr) throws Exception {
+        final BigDecimal validDiscount = new BigDecimal(validDiscountStr);
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
         when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of());
 
