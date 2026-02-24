@@ -4,13 +4,10 @@ import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
 public interface CustomerRepository {
 
         void save(@Valid @NotNull final Customer customer);

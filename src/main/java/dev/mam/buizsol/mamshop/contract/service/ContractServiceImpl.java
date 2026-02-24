@@ -53,4 +53,9 @@ final class ContractServiceImpl implements ContractService {
                 .map(contract -> repository.update(contract.withStatus(changeStatus)))
                 .orElseThrow(() -> new ContractNotFoundException("Contract with ID " + contractId + " not found"));
     }
+
+    @Override
+    public List<Contract> findAllContracts() {
+        return List.copyOf(repository.findAll());
+    }
 }

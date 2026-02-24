@@ -39,4 +39,7 @@ public interface ContractService {
         Contract updateContractStatus(
                         @NotNull final UUID contractId,
                         @NotNull final ContractStatus status) throws ContractNotFoundException;
+
+        @NotNull
+        List<Contract> findAllContracts();
 }

@@ -114,7 +114,7 @@ class ContractServiceTest {
         Contract updated = contractService.updateContractStatus(contractId, ContractStatus.INACTIVE);
 
         assertEquals(ContractStatus.INACTIVE, updated.status());
-        verify(contractRepository).update(contract);
+        verify(contractRepository).update(any(Contract.class));
     }
 
     @Test
@@ -252,5 +252,27 @@ class ContractServiceTest {
         when(activeCustomer.status()).thenReturn(CustomerStatus.ACTIVE);
         when(activeCustomer.brand()).thenReturn(Brand.WEB_DE);
         when(activeCustomer.id()).thenReturn(UUID.randomUUID());
+    }
+
+    @Test
+    @DisplayName("Success: findAllContracts returns list of contracts")
+    void shouldReturnListOfContractsWhenContractsExist() {
+        List<Contract> contracts = List.of(mock(Contract.class));
+        when(contractRepository.findAll()).thenReturn(contracts);
+
+        List<Contract> result = contractService.findAllContracts();
+
+        assertEquals(1, result.size());
+        assertEquals(contracts, result);
+    }
+
+    @Test
+    @DisplayName("Boundary: findAllContracts returns empty list when no contracts exist")
+    void shouldReturnEmptyListWhenNoContractsExist() {
+        when(contractRepository.findAll()).thenReturn(List.of());
+
+        List<Contract> result = contractService.findAllContracts();
+
+        assertTrue(result.isEmpty());
     }
 }

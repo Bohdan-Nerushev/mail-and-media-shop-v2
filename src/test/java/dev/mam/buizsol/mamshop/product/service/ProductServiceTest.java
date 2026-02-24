@@ -171,7 +171,7 @@ class ProductServiceTest {
                 productService.updateMonthlyFee(product.getId(), newFee);
 
                 verify(productRepository).findById(product.getId());
-                verify(productRepository).save(any(Product.class));
+                verify(productRepository).update(any(Product.class));
         }
 
         @Test
@@ -188,7 +188,7 @@ class ProductServiceTest {
                 productService.updateMonthlyFee(product.getId(), minimumValidFee);
 
                 verify(productRepository).findById(product.getId());
-                verify(productRepository).save(any(Product.class));
+                verify(productRepository).update(any(Product.class));
         }
 
         @ParameterizedTest
@@ -215,7 +215,7 @@ class ProductServiceTest {
                 productService.updateMonthlyFee(product.getId(), newFee);
 
                 verify(productRepository).findById(product.getId());
-                verify(productRepository).save(any(Product.class));
+                verify(productRepository).update(any(Product.class));
         }
 
         @Test
@@ -232,7 +232,7 @@ class ProductServiceTest {
                 productService.updateMonthlyFee(product1.getId(), newFeeProduct1);
 
                 verify(productRepository).findById(product1.getId());
-                verify(productRepository).save(any(Product.class));
+                verify(productRepository).update(any(Product.class));
         }
 
         @ParameterizedTest
@@ -379,7 +379,7 @@ class ProductServiceTest {
                 productService.updateMonthlyFee(product.getId(), largeFee);
 
                 verify(productRepository).findById(product.getId());
-                verify(productRepository).save(any(Product.class));
+                verify(productRepository).update(any(Product.class));
         }
 
         @Test

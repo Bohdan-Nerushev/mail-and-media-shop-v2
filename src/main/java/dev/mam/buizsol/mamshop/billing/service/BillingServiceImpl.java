@@ -25,6 +25,9 @@ final class BillingServiceImpl implements BillingService {
     private final ProductService productService;
     private final ContractService contractService;
 
+    private final BigDecimal ZERO = BigDecimal.ZERO;
+    private final BigDecimal DISCOUNT = new BigDecimal("0.10");
+
     BillingServiceImpl(
             final CustomerService customerService,
             final ProductService productService,
@@ -41,7 +44,7 @@ final class BillingServiceImpl implements BillingService {
         if (customerId == null) {
             throw new InvoiceValidationException("Customer ID must not be null");
         }
-        return generateInvoice(customerId, BigDecimal.ZERO);
+        return generateInvoice(customerId, ZERO);
     }
 
     @Override
@@ -56,10 +59,10 @@ final class BillingServiceImpl implements BillingService {
         if (discount == null) {
             throw new InvalidInvoiceDiscountException("Discount must not be null");
         }
-        if (discount.compareTo(BigDecimal.ZERO) < 0) {
+        if (discount.compareTo(ZERO) < 0) {
             throw new InvalidInvoiceDiscountException("Discount cannot be negative");
         }
-        if (discount.compareTo(BigDecimal.ZERO) > 0 && discount.compareTo(new BigDecimal("0.10")) <= 0) {
+        if (discount.compareTo(ZERO) > 0 && discount.compareTo(DISCOUNT) <= 0) {
             throw new InvalidInvoiceDiscountException("Discount must be greater than 0.10 €");
         }
 

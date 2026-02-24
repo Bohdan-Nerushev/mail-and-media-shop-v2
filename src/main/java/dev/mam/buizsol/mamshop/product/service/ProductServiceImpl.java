@@ -15,6 +15,8 @@ final class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repository;
 
+    private final BigDecimal DISCOUNT = new BigDecimal("0.10");
+
     ProductServiceImpl(
             final ProductRepository repository) {
         this.repository = repository;
@@ -58,7 +60,7 @@ final class ProductServiceImpl implements ProductService {
         if (monthlyFee == null) {
             throw new ProductValidationException("Monthly fee must not be null");
         }
-        if (monthlyFee.compareTo(new BigDecimal("0.10")) <= 0) {
+        if (monthlyFee.compareTo(DISCOUNT) <= 0) {
             throw new ProductValidationException("Monthly fee must be greater than 0.10");
         }
 
@@ -66,7 +68,7 @@ final class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException("Product with ID " + id + " not found"));
 
         product = product.withMonthlyFee(monthlyFee);
-        repository.save(product);
+        repository.update(product);
     }
 
 }

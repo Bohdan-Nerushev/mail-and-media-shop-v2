@@ -22,15 +22,25 @@ public class ProductCatalogLoader {
 
     private final ProductService productService;
 
+    private final int MAX_CSV_PATH_LENGTH = 100;
+    private static final int MAX_CSV_PATH_STATIC = 100;
+
+    private final int MIN_COLUMNS_VALUE = 4;
+    private static final int MIN_COLUMNS_VALUE_STATIC = 4;
+
+    private final int MAX_COLUMNS_VALUE = 5;
+    private static final int MAX_COLUMNS_VALUE_STATIC = 5;
+
     public ProductCatalogLoader(
             final ProductService productService) {
         this.productService = productService;
     }
 
     public void load(
-            @NotNull @Size(max = 100) final String csvPath) {
-        if (csvPath == null || csvPath.length() > 100) {
-            throw new IllegalArgumentException("CSV path must not be null and must not exceed 100 characters");
+            @NotNull @Size(max = MAX_CSV_PATH_LENGTH) final String csvPath) {
+        if (csvPath == null || csvPath.length() > MAX_CSV_PATH_LENGTH) {
+            throw new IllegalArgumentException(
+                    String.format("CSV path must not be null and must not exceed %d characters", MAX_CSV_PATH_LENGTH));
         }
         final InputStream inputStream = ProductCatalogLoader.class.getResourceAsStream(csvPath);
         if (inputStream == null) {
@@ -54,13 +64,16 @@ public class ProductCatalogLoader {
     }
 
     @NotNull
-    private static Product parseProductFromCsvLine(@NotNull @Size(max = 100) final String line) {
-        if (line == null || line.length() > 100) {
-            throw new IllegalArgumentException("CSV line must not be null and must not exceed 100 characters");
+    private static Product parseProductFromCsvLine(@NotNull @Size(max = MAX_CSV_PATH_STATIC) final String line) {
+        if (line == null || line.length() > MAX_CSV_PATH_STATIC) {
+            throw new IllegalArgumentException(
+                    String.format("CSV line must not be null and must not exceed %d characters", MAX_CSV_PATH_STATIC));
         }
         final String[] parts = line.split(",");
-        if (parts.length < 4) {
-            throw new IllegalArgumentException("Invalid CSV line format (at least 4 columns required): " + line);
+        if (parts.length < MIN_COLUMNS_VALUE_STATIC) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid CSV line format (at least %d columns required): ", MIN_COLUMNS_VALUE_STATIC)
+                            + line);
         }
 
         final String type = parts[0].trim().toUpperCase();
@@ -94,7 +107,7 @@ public class ProductCatalogLoader {
             @NotNull final Brand brand,
             @NotNull final BigDecimal monthlyFee,
             @NotNull final String line) {
-        if (parts.length < 5) {
+        if (parts.length < MAX_COLUMNS_VALUE_STATIC) {
             throw new IllegalArgumentException("Partner product requires setup fee in CSV at line: " + line);
         }
         final BigDecimal setupFee = new BigDecimal(parts[4].trim());

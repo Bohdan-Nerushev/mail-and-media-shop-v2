@@ -17,7 +17,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 public class AppConfig {
 
     @Bean
-    public LocalValidatorFactoryBean validator() {
+    public static LocalValidatorFactoryBean validator() {
         return new LocalValidatorFactoryBean();
     }
 

@@ -597,12 +597,12 @@ class ShopServiceImplIntegrationTest {
         @Test
         @DisplayName("Positive - Load All Products for Brand: Returns non-empty list")
         void shouldHaveProductsInCatalogAfterInitialization() {
-                List<Product> products = shopService.loadAllProductsForBrand(Brand.GMX);
-                List<Product> products3 = shopService.loadAllProductsForBrand(Brand.MAIL_COM);
-                List<Product> products4 = shopService.loadAllProductsForBrand(Brand.WEB_DE);
+                List<Product> gmxProducts = shopService.loadAllProductsForBrand(Brand.GMX);
+                List<Product> mailComProducts = shopService.loadAllProductsForBrand(Brand.MAIL_COM);
+                List<Product> webDeProducts = shopService.loadAllProductsForBrand(Brand.WEB_DE);
 
-                assertFalse(products.isEmpty());
-                assertFalse(products3.isEmpty());
-                assertFalse(products4.isEmpty());
+                assertFalse(gmxProducts.isEmpty());
+                assertFalse(mailComProducts.isEmpty());
+                assertFalse(webDeProducts.isEmpty());
         }
 }

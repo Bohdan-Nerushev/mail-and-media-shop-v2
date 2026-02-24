@@ -128,19 +128,4 @@ class ProductCatalogLoaderTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("must not exceed 100 characters");
     }
-
-    // @Test
-    // @DisplayName("Should throw IllegalArgumentException when CSV line exceeds 100
-    // characters")
-    // void shouldThrowExceptionWhenCsvLineIsTooLong() {
-    // String longLine = "STANDARD," + "A".repeat(100) + ",GMX,1.99";
-    //
-    // InputStream inputStream = new ByteArrayInputStream(
-    // ("type,name,brand,price\n" + longLine).getBytes(StandardCharsets.UTF_8));
-    //
-    // assertThatThrownBy(() -> ProductCatalogLoader.load(productService,
-    // inputStream))
-    // .isInstanceOf(IllegalArgumentException.class)
-    // .hasMessageContaining("CSV line must not exceed 100 characters");
-    // }
 }

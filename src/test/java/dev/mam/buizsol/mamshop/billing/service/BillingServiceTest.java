@@ -165,7 +165,8 @@ class BillingServiceTest {
     @DisplayName("Invalid small positive discount validation checks")
     @ParameterizedTest(name = "Invalid small positive discount validation - value: {0}")
     @ValueSource(strings = { "0.01", "0.05", "0.10" })
-    void shouldThrowExceptionWhenDiscountIsSmallPositive(BigDecimal invalidDiscount) {
+    void shouldThrowExceptionWhenDiscountIsSmallPositive(String invalidDiscountStr) {
+        BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
         assertThrows(InvalidInvoiceDiscountException.class,
                 () -> billingService.generateInvoice(customerId, invalidDiscount));
     }
@@ -173,7 +174,8 @@ class BillingServiceTest {
     @DisplayName("Invalid negative discount validation checks")
     @ParameterizedTest(name = "Invalid negative discount validation - value: {0}")
     @ValueSource(strings = { "-0.01", "-1.00" })
-    void shouldThrowExceptionWhenDiscountIsNegative(BigDecimal invalidDiscount) {
+    void shouldThrowExceptionWhenDiscountIsNegative(String invalidDiscountStr) {
+        BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
         assertThrows(InvalidInvoiceDiscountException.class,
                 () -> billingService.generateInvoice(customerId, invalidDiscount));
     }
