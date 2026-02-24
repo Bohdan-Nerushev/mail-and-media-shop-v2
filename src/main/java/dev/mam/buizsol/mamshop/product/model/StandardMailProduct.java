@@ -55,7 +55,6 @@ public record StandardMailProduct(
     }
 
     @Override
-    @NotNull
     public Optional<Long> getStorageSize() {
         return Optional.ofNullable(storageSize);
     }
