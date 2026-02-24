@@ -13,12 +13,14 @@ import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 final class BillingServiceImpl implements BillingService {
 
     private final CustomerService customerService;

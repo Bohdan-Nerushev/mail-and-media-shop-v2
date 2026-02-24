@@ -18,12 +18,13 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
 import jakarta.annotation.PostConstruct;
-
+import org.springframework.stereotype.Service;
 import dev.mam.buizsol.mamshop.product.service.ProductCatalogLoader;
 
 import java.util.List;
 import java.util.UUID;
 
+@Service
 final class ShopServiceImpl implements ShopService {
 
     private final CustomerService customerService;
