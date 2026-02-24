@@ -9,6 +9,7 @@ import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.shop.service.ShopService;
+import lombok.extern.slf4j.Slf4j;
 import dev.mam.buizsol.mamshop.config.AppConfig;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -16,17 +17,18 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 public class MaMShopApplication {
 
         public static void main(final String[] args) throws Exception {
                 try (var context = new AnnotationConfigApplicationContext(AppConfig.class)) {
                         final ShopService shop = context.getBean(ShopService.class);
 
-                        System.out.println("================================");
-                        System.out.println("MaM Shop Application Demo Start");
-                        System.out.println("================================");
+                        log.info("================================");
+                        log.info("MaM Shop Application Demo Start");
+                        log.info("================================");
 
-                        System.out.println("Product catalog initialized automatically.");
+                        log.info("Product catalog initialized automatically.");
 
                         final Customer customerGMXInactive = createCustomer(
                                         "Maxim",
@@ -50,6 +52,7 @@ public class MaMShopApplication {
                                         Brand.GMX);
 
                         shop.registerCustomer(customerGMXInactive);
+                        log.info("Customer registered: {}", customerGMXInactive.id(), customerGMXInactive.brand());
 
                         final Customer customerGMXActive = createCustomer(
                                         "Olena",
@@ -67,6 +70,8 @@ public class MaMShopApplication {
                                                         "+380679876543"),
                                         Brand.GMX);
                         shop.registerCustomer(customerGMXActive);
+                        log.info("Customer registered: id:{}, brand:{}", customerGMXActive.id(),
+                                        customerGMXActive.brand());
 
                         final Customer customerWebDeInactive = createCustomer(
                                         "Andriy",
@@ -89,6 +94,8 @@ public class MaMShopApplication {
                                                         "+380631112233"),
                                         Brand.WEB_DE);
                         shop.registerCustomer(customerWebDeInactive);
+                        log.info("Customer registered: id:{}, brand:{}", customerWebDeInactive.id(),
+                                        customerWebDeInactive.brand());
 
                         final Customer customerWebDeActive = createCustomer(
                                         "Svitlana",
@@ -106,6 +113,8 @@ public class MaMShopApplication {
                                                         "+380995554433"),
                                         Brand.WEB_DE);
                         shop.registerCustomer(customerWebDeActive);
+                        log.info("Customer registered: id:{}, brand:{}", customerWebDeActive.id(),
+                                        customerWebDeActive.brand());
 
                         final Customer customerMailInactive = createCustomer(
                                         "Ihor",
@@ -128,6 +137,8 @@ public class MaMShopApplication {
                                                         "+380687778899"),
                                         Brand.MAIL_COM);
                         shop.registerCustomer(customerMailInactive);
+                        log.info("Customer registered: id:{}, brand:{}", customerMailInactive.id(),
+                                        customerMailInactive.brand());
 
                         final Customer customerMailActive = createCustomer(
                                         "Nataliia",
@@ -144,11 +155,26 @@ public class MaMShopApplication {
                                                         "n.melnyk@mail.com",
                                                         "+380932223344"),
                                         Brand.MAIL_COM);
+
+                        log.info("Customer registered: id:{}, brand:{}", customerMailActive.id(),
+                                        customerMailActive.brand());
                         shop.registerCustomer(customerMailActive);
 
+                        log.info("Customer activated");
+
                         shop.activateCustomer(customerGMXActive.id());
+                        log.info("Customer activated: id:{}, brand:{}", customerGMXActive.id(),
+                                        customerGMXActive.brand());
+
                         shop.activateCustomer(customerWebDeActive.id());
+                        log.info("Customer activated: id:{}, brand:{}", customerWebDeActive.id(),
+                                        customerWebDeActive.brand());
+
                         shop.activateCustomer(customerMailActive.id());
+                        log.info("Customer activated: id:{}, brand:{}", customerMailActive.id(),
+                                        customerMailActive.brand());
+
+                        log.info("Customer address updated");
 
                         shop.updateAddress(
                                         customerGMXActive.id(),
@@ -158,6 +184,9 @@ public class MaMShopApplication {
                                                         "12345",
                                                         "Berlin",
                                                         "Germany"));
+                        log.info("Customer address updated: id:{}, brand:{}", customerGMXActive.id(),
+                                        customerGMXActive.brand());
+
                         shop.updateInvoiceAddress(
                                         customerGMXActive.id(),
                                         new Address(
@@ -166,14 +195,21 @@ public class MaMShopApplication {
                                                         "54321",
                                                         "Munich",
                                                         "Germany"));
+                        log.info("Customer invoice address updated: id:{}, brand:{}", customerGMXActive.id(),
+                                        customerGMXActive.brand());
+
                         shop.updateCommunicationDetails(
                                         customerGMXActive.id(),
                                         new CommunicationDetails(
                                                         "gmx.active@example.com",
                                                         "+49123456789"));
+                        log.info("Customer communication details updated: id:{}, brand:{}", customerGMXActive.id(),
+                                        customerGMXActive.brand());
 
+                        log.info("Product summary:");
                         printProductSummary(shop);
 
+                        log.info("Purchase products for customer:");
                         purchaseProductsForCustomer(
                                         shop,
                                         customerGMXActive);
@@ -184,10 +220,12 @@ public class MaMShopApplication {
                                         shop,
                                         customerMailActive);
 
+                        log.info("Contract summary:");
                         printContractSummary(
                                         shop,
                                         customerGMXActive.id());
 
+                        log.info("Invoice:");
                         generateAndPrintInvoice(
                                         shop,
                                         customerGMXActive.id());
@@ -198,22 +236,25 @@ public class MaMShopApplication {
                                         shop,
                                         customerMailActive.id());
 
+                        log.info("Exception scenarios:");
                         demonstrateExceptionScenarios(
                                         shop,
                                         customerGMXInactive,
                                         customerWebDeActive);
 
+                        log.info("Utility methods:");
                         demonstrateUtilityMethods(
                                         shop,
                                         customerMailActive.id());
+
                         shop.deactivateCustomer(customerGMXActive.id());
+                        log.info("Utility: Also removed webInactive for cleanup.");
                         shop.removeCustomer(customerWebDeActive.id());
+                        log.info("Utility: Also removed webInactive for cleanup.");
 
-                        System.out.println("Utility: Also removed webInactive for cleanup.");
-
-                        System.out.println("================================");
-                        System.out.println("MaM Shop Application Demo End");
-                        System.out.println("================================");
+                        log.info("================================");
+                        log.info("MaM Shop Application Demo End");
+                        log.info("================================");
                 }
         }
 
@@ -258,10 +299,9 @@ public class MaMShopApplication {
         }
 
         private static void printProductSummary(final ShopService shop) {
-                System.out.println("Inventory Summary:");
                 for (final Brand brand : Brand.values()) {
                         final List<Product> products = shop.loadAllProductsForBrand(brand);
-                        System.out.println("- Brand " + brand + ": " + products.size() + " products.");
+                        log.info("- Brand {} : {} products.", brand, products.size());
                 }
         }
 
@@ -269,17 +309,19 @@ public class MaMShopApplication {
                         final ShopService shop,
                         final Customer customer) {
                 final List<Product> products = shop.loadAllProductsForBrand(customer.brand());
-                for (int i = 0; i < Math.min(
-                                5,
-                                products.size()); i++) {
+                log.info("Customer {} has {} products.", customer.id(), products.size());
+
+                for (int i = 0; i < Math.min(5, products.size()); i++) {
                         try {
-                                final Contract contract = shop.purchaseProduct(
-                                                customer.id(),
-                                                products.get(i).getId());
+                                final Contract contract = shop.purchaseProduct(customer.id(), products.get(i).getId());
+                                log.info("Contract {} purchased for customer {}", contract.id(), customer.id());
+
                                 shop.activateContract(contract.id());
+                                log.info("Contract {} activated for customer {}", contract.id(), customer.id());
+
                         } catch (Exception e) {
-                                System.err.println("Purchase failed for customer " + customer.id() + ": "
-                                                + e.getMessage());
+                                log.error("Purchase failed for customer; id: {}, error: {}", customer.id(),
+                                                e.getMessage());
                         }
                 }
         }
@@ -289,10 +331,9 @@ public class MaMShopApplication {
                         final UUID customerId) {
                 try {
                         final List<Contract> contracts = shop.loadAllContracts(customerId);
-                        System.out.println(
-                                        "Customer " + customerId + " has " + contracts.size() + " active contracts.");
+                        log.info("Customer {} has {} contracts.", customerId, contracts.size());
                 } catch (Exception e) {
-                        System.err.println("Failed to load contracts: " + e.getMessage());
+                        log.error("Failed to load contracts: {}", e.getMessage());
                 }
         }
 
@@ -301,13 +342,12 @@ public class MaMShopApplication {
                         final UUID customerId) {
                 try {
                         final Invoice invoice = shop.generateInvoice(customerId);
-                        System.out.println(
-                                        "--- Invoice for Customer " + customerId + " (" + invoice.brand() + ") ---");
-                        System.out.println("Total Amount: " + invoice.totalAmount());
-                        System.out.println("Items: " + invoice.items().size());
-                        System.out.println("-------------------------------------");
+                        log.info("--- Invoice for Customer {} ({}), Brand {} ---", customerId, invoice.brand());
+                        log.info("--- Total Amount: {}", invoice.totalAmount());
+                        log.info("--- Items: {}", invoice.items().size());
+                        log.info("-------------------------------------");
                 } catch (Exception e) {
-                        System.err.println("Failed to generate invoice: " + e.getMessage());
+                        log.error("Failed to generate invoice: {}", e.getMessage());
                 }
         }
 
@@ -319,21 +359,36 @@ public class MaMShopApplication {
 
                 try {
                         final List<Product> products = shop.loadAllProductsForBrand(inactive.brand());
+                        log.info("Customer {} has {} products.", inactive.id(), products.size());
+                        log.info("Customer {} has {} contracts.", inactive.id(),
+                                        shop.loadAllContracts(inactive.id()).size());
+
                         shop.purchaseProduct(
                                         inactive.id(),
                                         products.get(0).getId());
+                        log.info("Customer {} has {} contracts.", inactive.id(),
+                                        shop.loadAllContracts(inactive.id()).size());
+
                 } catch (Exception e) {
-                        System.out.println("Expected (Inactive): " + e.getMessage());
+                        log.error("Expected (Inactive): {}", e.getMessage());
                 }
 
                 try {
                         final Brand otherBrand = mismatchBrand.brand() == Brand.GMX ? Brand.WEB_DE : Brand.GMX;
+                        log.info("Customer {} has {} products.", mismatchBrand.id(),
+                                        shop.loadAllProductsForBrand(otherBrand).size());
+
                         final List<Product> products = shop.loadAllProductsForBrand(otherBrand);
+                        log.info("Customer {} has {} contracts.", mismatchBrand.id(),
+                                        shop.loadAllContracts(mismatchBrand.id()).size());
+
                         shop.purchaseProduct(
                                         mismatchBrand.id(),
                                         products.get(0).getId());
+                        log.info("Customer {} has {} contracts.", mismatchBrand.id(),
+                                        shop.loadAllContracts(mismatchBrand.id()).size());
                 } catch (Exception e) {
-                        System.out.println("Expected (Brand Mismatch): " + e.getMessage());
+                        log.error("Expected (Brand Mismatch): {}", e.getMessage());
                 }
         }
 
@@ -342,16 +397,19 @@ public class MaMShopApplication {
                         final UUID customerId) {
                 try {
                         final Customer loaded = shop.loadCustomer(customerId);
-                        System.out.println("Utility: Loaded " + loaded.firstName());
+                        log.info("Utility: Loaded {}", loaded.firstName());
+
                         shop.removeCustomer(customerId);
-                        System.out.println("Utility: Removed customer successfully.");
+                        log.info("Utility: Removed customer successfully.");
+
                         try {
                                 shop.loadCustomer(customerId);
+                                log.info("Utility: Confirmed customer is gone.");
                         } catch (CustomerNotFoundException e) {
-                                System.out.println("Utility: Confirmed customer is gone.");
+                                log.info("Utility: Customer not found.");
                         }
                 } catch (Exception e) {
-                        System.err.println("Utility test failed: " + e.getMessage());
+                        log.error("Utility test failed: {}", e.getMessage());
                 }
         }
 }
