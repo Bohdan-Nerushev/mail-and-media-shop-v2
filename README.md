@@ -12,6 +12,7 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
   - [Customer API](#customer-api)
   - [Contract API](#contract-api)
   - [Product API](#product-api)
+  - [Billing API](#billing-api)
 - [Common Response Schemas](#common-response-schemas)
 - [Error Handling](#error-handling)
 
@@ -39,7 +40,7 @@ http://localhost:8080/api/v1
 **Tag:** `Customer`  
 **Base path:** `/api/v1/customers`
 
-Manages the full lifecycle of a customer: registration, retrieval, activation, and removal.
+Manages the full lifecycle of a customer: registration, retrieval, activation, deactivation, and removal.
 Also exposes the product purchase operation that creates a contract.
 
 ---
@@ -196,7 +197,7 @@ curl -X GET http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963
 
 ### DELETE `/api/v1/customers/{customerId}` — Remove a Customer
 
-Changes the status of the specified customer to `INACTIVE` (soft delete — the record is not physically deleted).
+Changes the status of the specified customer to `REMOVED`.
 
 **HTTP Method:** `DELETE`
 
@@ -258,6 +259,133 @@ No response body is returned.
 
 ---
 
+### PUT `/api/v1/customers/{customerId}/deactivate` — Deactivate a Customer
+
+Changes the status of the specified customer to `INACTIVE`.
+
+**HTTP Method:** `PUT`
+
+#### Path Parameters
+
+| Parameter    | Type   | Required | Description                   |
+|--------------|--------|----------|-------------------------------|
+| `customerId` | `UUID` | Yes      | Unique identifier of the customer |
+
+#### Example Request (curl)
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/deactivate
+```
+
+#### Example Response — `204 No Content`
+
+No response body is returned.
+
+#### Response Status Codes
+
+| Status | Description                      |
+|--------|----------------------------------|
+| `204`  | Customer deactivated successfully |
+| `404`  | Customer not found               |
+| `500`  | Unexpected internal server error |
+
+---
+
+### PUT `/api/v1/customers/{customerId}/address` — Update Customer Address
+
+Updates the primary address of the customer.
+
+**HTTP Method:** `PUT`  
+**Request Content-Type:** `application/json`
+
+#### Path Parameters
+
+| Parameter    | Type   | Required | Description                   |
+|--------------|--------|----------|-------------------------------|
+| `customerId` | `UUID` | Yes      | Unique identifier of the customer |
+
+#### Request Body
+Standard `AddressRequestDTO` structure.
+
+#### Example Request (curl)
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/address \
+  -H "Content-Type: application/json" \
+  -d '{
+    "street": "Neustraße",
+    "number": "5",
+    "postcode": "10115",
+    "city": "Berlin",
+    "country": "Germany"
+  }'
+```
+
+#### Response Status Codes
+
+| Status | Description                      |
+|--------|----------------------------------|
+| `204`  | Address updated successfully     |
+| `404`  | Customer not found               |
+| `400`  | Invalid address data             |
+| `500`  | Unexpected internal server error |
+
+---
+
+### PUT `/api/v1/customers/{customerId}/invoice-address` — Update Invoice Address
+
+Updates the invoice address of the customer.
+
+**HTTP Method:** `PUT`  
+**Request Content-Type:** `application/json`
+
+#### Path Parameters
+
+| Parameter    | Type   | Required | Description                   |
+|--------------|--------|----------|-------------------------------|
+| `customerId` | `UUID` | Yes      | Unique identifier of the customer |
+
+#### Request Body
+Standard `AddressRequestDTO` structure.
+
+#### Response Status Codes
+
+| Status | Description                      |
+|--------|----------------------------------|
+| `204`  | Invoice address updated successfully |
+| `404`  | Customer not found               |
+| `400`  | Invalid address data             |
+| `500`  | Unexpected internal server error |
+
+---
+
+### PUT `/api/v1/customers/{customerId}/communication-details` — Update Communication Details
+
+Updates the email and telephone for a customer.
+
+**HTTP Method:** `PUT`  
+**Request Content-Type:** `application/json`
+
+#### Path Parameters
+
+| Parameter    | Type   | Required | Description                   |
+|--------------|--------|----------|-------------------------------|
+| `customerId` | `UUID` | Yes      | Unique identifier of the customer |
+
+#### Request Body
+Standard `CommunicationDetailsRequestDTO` structure.
+
+#### Response Status Codes
+
+| Status | Description                                  |
+|--------|----------------------------------------------|
+| `204`  | Communication details updated successfully  |
+| `404`  | Customer not found                           |
+| `400`  | Invalid communication data                   |
+| `500`  | Unexpected internal server error              |
+
+---
+
 ### POST `/api/v1/customers/{customerId}/purchases` — Purchase a Product
 
 Creates a new contract linking the specified customer to a selected product.
@@ -316,7 +444,7 @@ curl -X POST http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c96
 **Tag:** `Contract`  
 **Base path:** `/api/v1/customers/{customerId}/contracts`
 
-Provides read access to contracts associated with a specific customer.
+Provides management and read access to contracts associated with a specific customer.
 
 ---
 
@@ -333,12 +461,6 @@ Returns all contracts associated with the specified customer UUID.
 |--------------|--------|----------|-----------------------------------|
 | `customerId` | `UUID` | Yes      | Unique identifier of the customer |
 
-#### Example Request (curl)
-
-```bash
-curl -X GET http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/contracts
-```
-
 #### Example Response — `200 OK`
 
 ```json
@@ -349,18 +471,9 @@ curl -X GET http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963
     "productId": "7cb65f12-1234-4abc-a789-000000000001",
     "creationDate": "2026-02-25",
     "status": "ACTIVE"
-  },
-  {
-    "id": "b2c3d4e5-f6a7-8901-bcde-f01234567891",
-    "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "productId": "8dc76g23-2345-5bcd-b890-111111111002",
-    "creationDate": "2026-01-10",
-    "status": "INACTIVE"
   }
 ]
 ```
-
-> Returns an empty array `[]` if the customer exists but has no contracts.
 
 #### Response Status Codes
 
@@ -368,6 +481,29 @@ curl -X GET http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963
 |--------|----------------------------------|
 | `200`  | Contracts returned successfully  |
 | `404`  | Customer not found               |
+| `500`  | Unexpected internal server error |
+
+---
+
+### PUT `/api/v1/customers/{customerId}/contracts/{contractId}/activate` — Activate a Contract
+
+Changes the status of a specific contract to `ACTIVE`.
+
+**HTTP Method:** `PUT`
+
+#### Path Parameters
+
+| Parameter    | Type   | Required | Description                        |
+|--------------|--------|----------|------------------------------------|
+| `customerId` | `UUID` | Yes      | Unique identifier of the customer  |
+| `contractId` | `UUID` | Yes      | Unique identifier of the contract  |
+
+#### Response Status Codes
+
+| Status | Description                      |
+|--------|----------------------------------|
+| `204`  | Contract activated successfully |
+| `404`  | Contract not found               |
 | `500`  | Unexpected internal server error |
 
 ---
@@ -394,12 +530,6 @@ Returns all products available for the specified brand.
 |-----------|--------------------|----------|--------------------------------------------------|
 | `brand`   | `string (Brand enum)` | Yes   | One of: `GMX`, `WEB_DE`, `MAIL_COM`             |
 
-#### Example Request (curl)
-
-```bash
-curl -X GET "http://localhost:8080/api/v1/products?brand=GMX"
-```
-
 #### Example Response — `200 OK`
 
 ```json
@@ -411,19 +541,9 @@ curl -X GET "http://localhost:8080/api/v1/products?brand=GMX"
     "setupFee": 0.00,
     "monthlyFee": 4.99,
     "storageSize": 65536
-  },
-  {
-    "id": "7cb65f12-1234-4abc-a789-000000000002",
-    "name": "GMX MailPlus",
-    "brand": "GMX",
-    "setupFee": 9.99,
-    "monthlyFee": 9.99,
-    "storageSize": 524288
   }
 ]
 ```
-
-> Returns an empty array `[]` if no products are found for the specified brand.
 
 #### Response Status Codes
 
@@ -433,6 +553,54 @@ curl -X GET "http://localhost:8080/api/v1/products?brand=GMX"
 | `400`  | Invalid or missing `brand` query parameter      |
 | `404`  | Brand not found                                 |
 | `500`  | Unexpected internal server error                |
+
+---
+
+## Billing API
+
+**Tag:** `Billing`  
+**Base path:** `/api/v1/billing`
+
+Handles invoice generation for customers.
+
+---
+
+### POST `/api/v1/billing/{customerId}/invoice` — Generate Invoice for a Customer
+
+Generates an invoice for the specified customer based on their current active contracts.
+
+**HTTP Method:** `POST`  
+**Response Content-Type:** `application/json`
+
+#### Path Parameters
+
+| Parameter    | Type   | Required | Description                       |
+|--------------|--------|----------|-----------------------------------|
+| `customerId` | `UUID` | Yes      | Unique identifier of the customer |
+
+#### Example Response — `200 OK`
+
+```json
+{
+  "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "invoiceDate": "2026-02-26",
+  "totalAmount": 14.98,
+  "items": [
+    {
+      "description": "GMX ProMail",
+      "amount": 4.99
+    }
+  ]
+}
+```
+
+#### Response Status Codes
+
+| Status | Description                      |
+|--------|----------------------------------|
+| `200`  | Invoice generated successfully   |
+| `404`  | Customer not found               |
+| `500`  | Unexpected internal server error |
 
 ---
 
@@ -450,7 +618,7 @@ curl -X GET "http://localhost:8080/api/v1/products?brand=GMX"
   "invoiceAddress": "AddressRequestDTO | null",
   "communicationDetails": "CommunicationDetailsRequestDTO",
   "brand": "GMX | WEB_DE | MAIL_COM",
-  "status": "ACTIVE | INACTIVE"
+  "status": "ACTIVE | INACTIVE | REMOVED"
 }
 ```
 

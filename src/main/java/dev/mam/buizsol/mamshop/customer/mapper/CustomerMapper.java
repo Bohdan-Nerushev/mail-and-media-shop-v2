@@ -37,7 +37,7 @@ public class CustomerMapper {
                 customer.status());
     }
 
-    private Address toAddress(final AddressRequestDTO dto) {
+    public  Address toAddress(final AddressRequestDTO dto) {
         return new Address(
                 dto.street(),
                 dto.number(),
@@ -46,7 +46,7 @@ public class CustomerMapper {
                 dto.country());
     }
 
-    private AddressRequestDTO toAddressDTO(final Address address) {
+    public AddressRequestDTO toAddressDTO(final Address address) {
         return new AddressRequestDTO(
                 address.street(),
                 address.number(),
@@ -55,13 +55,13 @@ public class CustomerMapper {
                 address.country());
     }
 
-    private CommunicationDetails toCommunicationDetails(final CommunicationDetailsRequestDTO dto) {
+    public CommunicationDetails toCommunicationDetails(final CommunicationDetailsRequestDTO dto) {
         return new CommunicationDetails(
                 dto.email(),
                 dto.telephone());
     }
 
-    private CommunicationDetailsRequestDTO toCommunicationDetailsDTO(final CommunicationDetails communicationDetails) {
+    public CommunicationDetailsRequestDTO toCommunicationDetailsDTO(final CommunicationDetails communicationDetails) {
         return new CommunicationDetailsRequestDTO(
                 communicationDetails.email(),
                 communicationDetails.telephone());

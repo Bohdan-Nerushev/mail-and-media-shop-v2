@@ -2,6 +2,8 @@ package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
+
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -214,5 +216,29 @@ class BundleProductTest {
                                 "New bundle fee should reflect component change");
                 assertEquals(new BigDecimal("2.00"), bundle.getMonthlyFee(),
                                 "Original bundle fee should remain unchanged");
+        }
+
+        @Test
+        @DisplayName("Coverage: Test private calculation methods with nulls using reflection")
+        void shouldReturnZeroOrThrowWhenCallingPrivateMethodsWithNulls() throws Exception {
+
+                var setupFeeMethod = BundleProduct.class.getDeclaredMethod("calculateTotalSetupFee", Product.class,
+                                Product.class);
+                setupFeeMethod.setAccessible(true);
+                assertEquals(BigDecimal.ZERO, setupFeeMethod.invoke(null, null, null));
+
+                var monthlyFeeMethod = BundleProduct.class.getDeclaredMethod("calculateTotalMonthlyFee", Product.class,
+                                Product.class);
+                monthlyFeeMethod.setAccessible(true);
+                assertEquals(BigDecimal.ZERO, monthlyFeeMethod.invoke(null, null, null));
+
+                var validateBrandsMethod = BundleProduct.class.getDeclaredMethod("validateBrands", Product.class,
+                                Product.class);
+                validateBrandsMethod.setAccessible(true);
+                var exception = assertThrows(java.lang.reflect.InvocationTargetException.class,
+                                () -> validateBrandsMethod.invoke(null, null, null));
+                Assertions.assertThat(exception.getCause())
+                                .isInstanceOf(ProductValidationException.class)
+                                .hasMessage("Mail and Partner products must not be null");
         }
 }

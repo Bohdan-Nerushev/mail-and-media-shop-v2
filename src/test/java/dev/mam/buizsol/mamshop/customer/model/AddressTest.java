@@ -188,12 +188,12 @@ class AddressTest {
     @Test
     @DisplayName("Boundary: Minimal valid input (single characters)")
     void shouldHandleSingleCharacterInputs() {
-        Address address = createDefaultAddress("S", "1", "1", "B", "G");
+        Address address = createDefaultAddress("S", "1", "1", "B", "Gt");
         assertEquals("S", address.street());
         assertEquals("1", address.number());
         assertEquals("1", address.postcode());
         assertEquals("B", address.city());
-        assertEquals("G", address.country());
+        assertEquals("Gt", address.country());
     }
 
     @Test

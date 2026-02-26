@@ -13,7 +13,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -127,5 +129,19 @@ class ProductCatalogLoaderTest {
         assertThatThrownBy(() -> productCatalogLoader.load(longPath))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("must not exceed 100 characters");
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when CSV line exceeds 100 characters")
+    void shouldThrowExceptionWhenCsvLineIsTooLong() throws IOException {
+        String longLine = "PARTNER," + "A".repeat(100) + ",GMX,1.99,0.00";
+        byte[] csvContent = ("Type,Name,Brand,MonthlyFee,SetupFee\n" + longLine)
+                .getBytes(StandardCharsets.UTF_8);
+
+        try (InputStream is = new java.io.ByteArrayInputStream(csvContent)) {
+            assertThatThrownBy(() -> ProductCatalogLoader.load(productService, is))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("CSV line must not be null and must not exceed 100 characters");
+        }
     }
 }

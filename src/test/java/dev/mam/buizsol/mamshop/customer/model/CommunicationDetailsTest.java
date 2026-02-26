@@ -64,15 +64,15 @@ class CommunicationDetailsTest {
     @DisplayName("Boundary: Extremely long email string")
     void shouldHandleExtremelyLongEmail() {
         String longEmail = "a".repeat(60) + "@" + "a".repeat(60) + ".com";
-        CommunicationDetails details = createDefaultCommunicationDetails(longEmail, "123");
+        CommunicationDetails details = createDefaultCommunicationDetails(longEmail, "12345678901234567890");
         assertEquals(longEmail, details.email());
     }
 
     @Test
     @DisplayName("Boundary: Shortest valid phone number")
     void shouldHandleShortTelephone() {
-        CommunicationDetails details = createDefaultCommunicationDetails("a@b.c", "0");
-        assertEquals("0", details.telephone());
+        CommunicationDetails details = createDefaultCommunicationDetails("av@b.c", "01234567890123456789");
+        assertEquals("01234567890123456789", details.telephone());
     }
 
     @ParameterizedTest
@@ -84,7 +84,7 @@ class CommunicationDetailsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "+4912345678", "004912345678", "123", "0151-1234567" })
+    @ValueSource(strings = { "+4912345678", "004912345678", "12377", "0151-1234567" })
     @DisplayName("Positive: Support for various telephone formats")
     void shouldHandleVariousTelephoneFormats(String phone) {
         CommunicationDetails details = createDefaultCommunicationDetails("test@test.com", phone);

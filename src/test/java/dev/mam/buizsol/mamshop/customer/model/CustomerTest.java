@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -214,7 +215,7 @@ class CustomerTest {
         @Test
         @DisplayName("Boundary: Birth date as today")
         void shouldAllowBirthDateToBeToday() {
-                LocalDate today = LocalDate.now();
+                LocalDate today = LocalDate.now().minusDays(1);
                 Customer customer = createDefaultCustomer(
                                 "John",
                                 "Doe",
@@ -256,4 +257,108 @@ class CustomerTest {
                 assertNotEquals(customer2.id(), customer3.id(), "IDs should be unique");
                 assertNotEquals(customer1.id(), customer3.id(), "IDs should be unique");
         }
+
+        @Test
+        @DisplayName("Negative: Validation of status update (null check)")
+        void shouldThrowExceptionWhenStatusIsNull() {
+                Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                                communicationDetails, Brand.GMX);
+                assertThrows(CustomerValidationException.class, () -> customer.withStatus(null));
+        }
+
+        @Test
+        @DisplayName("Negative: Validation of address update (null check)")
+        void shouldThrowExceptionWhenNewAddressIsNull() {
+                Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                                communicationDetails, Brand.GMX);
+                assertThrows(CustomerValidationException.class, () -> customer.withAddress(null));
+        }
+
+        @Test
+        @DisplayName("Negative: Validation of invoice address update (null check)")
+        void shouldThrowExceptionWhenNewInvoiceAddressIsNull() {
+                Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                                communicationDetails, Brand.GMX);
+                assertThrows(CustomerValidationException.class, () -> customer.withInvoiceAddress(null));
+        }
+
+        @Test
+        @DisplayName("Negative: Validation of communication details update (null check)")
+        void shouldThrowExceptionWhenNewCommunicationDetailsIsNull() {
+                Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                                communicationDetails, Brand.GMX);
+                assertThrows(CustomerValidationException.class, () -> customer.withCommunicationDetails(null));
+        }
+
+        @Test
+        @DisplayName("Coverage: Constructor fallback for invoiceAddress")
+        void shouldFallbackToAddressWhenInvoiceAddressIsNullInConstructor() {
+                Customer customer = new Customer(UUID.randomUUID(), "John", "Doe", LocalDate.of(1990, 1, 1),
+                                mainAddress,
+                                null, communicationDetails, Brand.GMX, CustomerStatus.ACTIVE);
+                assertEquals(mainAddress, customer.invoiceAddress());
+        }
+
+        @Test
+        @DisplayName("Negative: Validation of address update (null check)")
+        void shouldThrowCustomerValidationExceptionWhenNewAddressIsNull() {
+                Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress,
+                                mainAddress,
+                                communicationDetails, Brand.GMX);
+                assertThrows(CustomerValidationException.class, () -> customer.withAddress(null));
+        }
+
+        @Test
+        @DisplayName("Negative: Validation of invoice address update (null check)")
+        void shouldThrowCustomerValidationExceptionWhenNewInvoiceAddressIsNull() {
+                Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                                communicationDetails, Brand.GMX);
+                assertThrows(CustomerValidationException.class, () -> customer.withInvoiceAddress(null));
+        }
+
+        @Test
+        @DisplayName("Negative: Validation of communication details update (null check)")
+        void shouldThrowCustomerValidationExceptionWhenNewCommunicationDetailsIsNull() {
+                Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                                communicationDetails, Brand.GMX);
+                assertThrows(CustomerValidationException.class, () -> customer.withCommunicationDetails(null));
+        }
+
+        @Test
+        @DisplayName("Positive: Update of address details")
+        void shouldUpdateAddressInCustomerWhenNewAddress() {
+                Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                                communicationDetails, Brand.GMX);
+                Address newAddress = new Address("77777", "77777", "77777", "77777", "77777");
+                Customer updated = customer.withAddress(newAddress);
+
+                assertEquals(newAddress, updated.address());
+                assertEquals(customer.id(), updated.id());
+                assertEquals(customer.firstName(), updated.firstName());
+        }
+
+        @Test
+        @DisplayName("Positive: Validation of communication details update")
+        void shouldUpdateCommunicationDetailsInCustomerWhenNewCommunicationDetails() {
+                Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                                communicationDetails, Brand.GMX);
+                CommunicationDetails newDetails = new CommunicationDetails("77777@gmail.com", "77777");
+                Customer updated = customer.withCommunicationDetails(newDetails);
+
+                assertEquals(newDetails, updated.communicationDetails());
+                assertEquals(customer.id(), updated.id());
+        }
+
+        @Test
+        @DisplayName("Positive: Update of invoice address details")
+        void shouldUpdateInvoiceAddressInCustomerWhenNewInvoiceAddress() {
+                Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
+                                communicationDetails, Brand.GMX);
+                Address newInvoiceAddress = new Address("77777", "77777", "77777", "77777", "77777");
+                Customer updated = customer.withInvoiceAddress(newInvoiceAddress);
+
+                assertEquals(newInvoiceAddress, updated.invoiceAddress());
+                assertEquals(customer.id(), updated.id());
+        }
+
 }

@@ -183,4 +183,20 @@ class ContractTest {
 
         assertThrows(ContractValidationException.class, () -> contract.withStatus(null));
     }
+
+    @Test
+    @DisplayName("Negative: Failure when creating Contract with null fields")
+    void shouldThrowExceptionWhenContractConstructorHasNullFields() {
+        assertThrows(ContractValidationException.class,
+                () -> new Contract(null, UUID.randomUUID(), UUID.randomUUID(), LocalDate.now(), ContractStatus.ACTIVE));
+        assertThrows(ContractValidationException.class,
+                () -> new Contract(UUID.randomUUID(), null, UUID.randomUUID(), LocalDate.now(), ContractStatus.ACTIVE));
+        assertThrows(ContractValidationException.class,
+                () -> new Contract(UUID.randomUUID(), UUID.randomUUID(), null, LocalDate.now(), ContractStatus.ACTIVE));
+        assertThrows(ContractValidationException.class,
+                () -> new Contract(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), null,
+                        ContractStatus.ACTIVE));
+        assertThrows(ContractValidationException.class,
+                () -> new Contract(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), LocalDate.now(), null));
+    }
 }

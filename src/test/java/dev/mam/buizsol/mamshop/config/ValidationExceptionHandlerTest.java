@@ -118,4 +118,14 @@ class ValidationExceptionHandlerTest {
 
         assertThrows(ConstraintViolationException.class, () -> handler.handleValidationException(ex));
     }
+
+    @Test
+    @DisplayName("Should rethrow original exception if violations are null or empty")
+    void shouldRethrowExIfViolationsAreEmpty() {
+        ConstraintViolationException ex = new ConstraintViolationException(null);
+        assertThrows(ConstraintViolationException.class, () -> handler.handleValidationException(ex));
+
+        ConstraintViolationException ex2 = new ConstraintViolationException(java.util.Collections.emptySet());
+        assertThrows(ConstraintViolationException.class, () -> handler.handleValidationException(ex2));
+    }
 }

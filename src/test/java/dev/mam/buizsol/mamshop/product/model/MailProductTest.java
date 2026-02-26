@@ -321,4 +321,23 @@ class MailProductTest {
                                 () -> createDefaultPremiumMailProduct(longName, Brand.GMX, BigDecimal.ONE));
                 assertEquals("Product name must not exceed 100 characters", exception.getMessage());
         }
+
+        @Test
+        @DisplayName("Success: Verify withMonthlyFee return new instance with same data but new fee")
+        void shouldReturnNewInstanceWithUpdatedMonthlyFeeForPremiumProduct() {
+                final PremiumMailProduct initial = createDefaultPremiumMailProduct(
+                                "Premium Pro",
+                                Brand.WEB_DE,
+                                new BigDecimal("10.00"));
+
+                final BigDecimal newFee = new BigDecimal("15.00");
+                final PremiumMailProduct updated = initial.withMonthlyFee(newFee);
+
+                assertEquals(initial.id(), updated.id());
+                assertEquals(initial.name(), updated.name());
+                assertEquals(initial.brand(), updated.brand());
+                assertEquals(initial.setupFee(), updated.setupFee());
+                assertEquals(newFee, updated.monthlyFee());
+                assertEquals(initial.storageSize(), updated.storageSize());
+        }
 }

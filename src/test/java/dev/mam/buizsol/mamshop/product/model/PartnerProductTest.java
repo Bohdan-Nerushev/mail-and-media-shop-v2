@@ -139,4 +139,23 @@ class PartnerProductTest {
 
         assertEquals("Product name must not exceed 100 characters", exception.getMessage());
     }
+
+    @Test
+    @DisplayName("Success: Verify withMonthlyFee returns new instance with updated fee")
+    void shouldReturnNewInstanceWithUpdatedMonthlyFee() {
+        final PartnerProduct initial = createPartnerProduct(
+                "Cloud",
+                Brand.GMX,
+                new BigDecimal("5.00"),
+                new BigDecimal("10.00"));
+
+        final BigDecimal newFee = new BigDecimal("12.00");
+        final PartnerProduct updated = initial.withMonthlyFee(newFee);
+
+        assertEquals(initial.id(), updated.id());
+        assertEquals(initial.name(), updated.name());
+        assertEquals(initial.brand(), updated.brand());
+        assertEquals(initial.setupFee(), updated.setupFee());
+        assertEquals(newFee, updated.monthlyFee());
+    }
 }

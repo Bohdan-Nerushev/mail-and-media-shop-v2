@@ -405,4 +405,10 @@ class CustomerServiceTest {
         assertEquals(customers, result);
         verify(customerRepository).findAll();
     }
+
+    @Test
+    @DisplayName("Negative: createCustomer with null customer")
+    void shouldThrowExceptionWhenCreatingNullCustomer() {
+        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(null));
+    }
 }

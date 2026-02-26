@@ -228,6 +228,12 @@ class BillingServiceTest {
     }
 
     @Test
+    @DisplayName("Negative: generateInvoice with null customerId")
+    void shouldThrowExceptionWhenGeneratingInvoiceByNullCustomerId() {
+        assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(null));
+    }
+
+    @Test
     @DisplayName("Handling scenario when product is not found for a contract")
     void shouldThrowExceptionWhenProductInContractDoesNotExist() throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
