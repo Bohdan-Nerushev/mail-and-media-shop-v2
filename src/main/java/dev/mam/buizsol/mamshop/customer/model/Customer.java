@@ -15,7 +15,7 @@ public record Customer(
         @NotNull UUID id,
         @NotBlank @Size(min = 1, max = 100) String firstName,
         @NotBlank @Size(min = 1, max = 100) String lastName,
-        @NotNull LocalDate birthDate,
+        @NotNull @Past LocalDate birthDate,
         @NotNull @Valid Address address,
         @NotNull @Valid Address invoiceAddress,
         @NotNull @Valid CommunicationDetails communicationDetails,
@@ -60,7 +60,8 @@ public record Customer(
         if (newStatus == null) {
             throw new CustomerValidationException("Status must not be null");
         }
-        return new Customer(id, firstName, lastName, birthDate, address, invoiceAddress, communicationDetails, brand, newStatus);
+        return new Customer(id, firstName, lastName, birthDate, address, invoiceAddress, communicationDetails, brand,
+                newStatus);
     }
 
     @NotNull
@@ -68,7 +69,8 @@ public record Customer(
         if (newAddress == null) {
             throw new CustomerValidationException("Address must not be null");
         }
-        return new Customer(id, firstName, lastName, birthDate, newAddress, invoiceAddress, communicationDetails, brand, status);
+        return new Customer(id, firstName, lastName, birthDate, newAddress, invoiceAddress, communicationDetails, brand,
+                status);
     }
 
     @NotNull
@@ -76,7 +78,8 @@ public record Customer(
         if (newInvoiceAddress == null) {
             throw new CustomerValidationException("Invoice address must not be null");
         }
-        return new Customer(id, firstName, lastName, birthDate, address, newInvoiceAddress, communicationDetails, brand, status);
+        return new Customer(id, firstName, lastName, birthDate, address, newInvoiceAddress, communicationDetails, brand,
+                status);
     }
 
     @NotNull
@@ -92,4 +95,3 @@ public record Customer(
         return "Customer{id=" + id + ", brand=" + brand + ", status=" + status + '}';
     }
 }
-

@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-final class ProductServiceImpl implements ProductService {
+class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repository;
 

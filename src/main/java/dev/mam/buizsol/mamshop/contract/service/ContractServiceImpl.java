@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-final class ContractServiceImpl implements ContractService {
+class ContractServiceImpl implements ContractService {
 
     private final ContractRepository repository;
 

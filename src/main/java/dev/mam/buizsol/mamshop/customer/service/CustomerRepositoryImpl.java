@@ -11,7 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-final class CustomerRepositoryImpl implements CustomerRepository {
+class CustomerRepositoryImpl implements CustomerRepository {
 
     private final Map<UUID, Customer> storage;
 

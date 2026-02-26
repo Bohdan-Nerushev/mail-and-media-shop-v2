@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Repository
-final class ContractRepositoryImpl implements ContractRepository {
+class ContractRepositoryImpl implements ContractRepository {
 
     private final Map<UUID, Contract> storage;
 

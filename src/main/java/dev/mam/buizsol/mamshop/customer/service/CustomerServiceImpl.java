@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-final class CustomerServiceImpl implements CustomerService {
+class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
 

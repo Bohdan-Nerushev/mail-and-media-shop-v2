@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-final class ShopServiceImpl implements ShopService {
+class ShopServiceImpl implements ShopService {
 
     private final CustomerService customerService;
     private final ProductService productService;

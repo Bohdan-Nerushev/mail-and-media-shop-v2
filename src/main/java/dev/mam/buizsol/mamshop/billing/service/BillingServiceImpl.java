@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-final class BillingServiceImpl implements BillingService {
+class BillingServiceImpl implements BillingService {
 
     private final CustomerService customerService;
     private final ProductService productService;
