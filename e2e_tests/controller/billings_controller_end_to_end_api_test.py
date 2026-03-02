@@ -37,3 +37,9 @@ def test_generate_invoice_idempotency(customer_id, base_url, header):
     res2 = requests.post(url, headers=header)
     assert res2.status_code == 200
     print("Test Success: Invoice generation idempotency check passed.")
+
+def test_generate_invoice_inactive_customer(customer_id, base_url, header):
+    url = f"{base_url}/{customer_id}/invoice"
+    response = requests.post(url, headers=header)
+    assert response.status_code == 409, f"Expected 409 for inactive customer invoice generation, got {response.status_code}"
+    print("Test Success: Invoice generation for inactive customer handled (409) passed.")

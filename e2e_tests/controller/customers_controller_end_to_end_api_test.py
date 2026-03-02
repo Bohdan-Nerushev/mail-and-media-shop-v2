@@ -97,7 +97,6 @@ def test_email_unicode_special_chars(base_url, header, valid_customer_payload):
     assert response.status_code == 400, f"Expected 400 for special/unicode email, got {response.status_code}"
     print("Customer registration email unicode/special chars passed")
 
-
 def test_register_customer_null_fields(base_url, header, valid_customer_payload):
     fields_to_test = ["birthDate", "address", "communicationDetails", "brand"]
     for field in fields_to_test:
@@ -114,7 +113,6 @@ def test_get_customer_success(customer_id, base_url):
     response = requests.get(url)
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     print("Get customer success passed")
-
 
 def test_get_customer_not_found(base_url, invalid_customer_id):
     url = f"{base_url}/{invalid_customer_id}"
@@ -245,6 +243,20 @@ def test_purchase_product_idempotency(customer_id, product_id, base_url, header)
     c2 = requests.get(contracts_url).json()
     assert len(c1) == len(c2), f"Duplicate contract created! Count increased from {len(c1)} to {len(c2)}"
     print("Purchase product idempotency check passed")
+
+def test_purchase_product_verification(customer_id, product_id, base_url, header):
+    url = f"{base_url}/{customer_id}/purchases"
+    payload = {"productId": product_id}
+    response = requests.post(url, headers=header, json=payload)
+    assert response.status_code == 201, f"Expected 201, got {response.status_code}"
+    
+    contract = response.json()
+    assert contract["customerId"] == customer_id, "Wrong customerId in contract"
+    assert contract["productId"] == product_id, "Wrong productId in contract"
+    assert "id" in contract, "Missing contract ID"
+    assert "creationDate" in contract, "Missing creation date"
+    assert contract["status"] == "INACTIVE", "New contract should be INACTIVE"
+    print("Purchase product data verification passed")
 
 
 def test_delete_customer(customer_id,base_url):

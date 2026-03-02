@@ -27,7 +27,8 @@ from controller.customers_controller_end_to_end_api_test import (
     test_update_address_inactive_fail,
     test_purchase_customer_inactive_fail,
     test_delete_active_customer_fail,
-    test_purchase_product_idempotency
+    test_purchase_product_idempotency,
+    test_purchase_product_verification
 )
 from controller.contracts_controller_end_to_end_api_test import (
     test_get_contracts_success,
@@ -36,13 +37,15 @@ from controller.contracts_controller_end_to_end_api_test import (
     test_activate_contract_not_found,
     test_activate_contract_idempotency,
     test_activate_contract_forbidden,
-    test_get_contracts_inactive_customer
+    test_get_contracts_inactive_customer,
+    test_get_contracts_deleted_customer
 )
 from controller.billings_controller_end_to_end_api_test import (
     test_generate_invoice_success,
     test_generate_invoice_customer_not_found,
     test_generate_invoice_server_error,
-    test_generate_invoice_idempotency
+    test_generate_invoice_idempotency,
+    test_generate_invoice_inactive_customer
 )
 from controller.products_controller_end_to_end_api_test import (
     test_get_products_success,
@@ -121,6 +124,7 @@ if __name__ == "__main__":
     valid_prod_id = get_valid_product_id(BASE_URL_PRODUCTS, valid_customer_payload["brand"])
     test_purchase_customer_inactive_fail(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
     test_get_contracts_inactive_customer(customer_id, BASE_URL_CUSTOMERS)
+    test_generate_invoice_inactive_customer(customer_id, BASE_URL_BILLING, HEADERS)
 
     # 5. Retrieve and activate customer
     test_get_customer_success(customer_id, BASE_URL_CUSTOMERS)
@@ -137,6 +141,7 @@ if __name__ == "__main__":
 
     # 8. Purchase product and idempotency (Scenario 6)
     test_purchase_product_success(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
+    test_purchase_product_verification(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
     test_purchase_product_idempotency(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
 
     # 9. Contracts (Scenario 8 & 9)
@@ -171,5 +176,8 @@ if __name__ == "__main__":
     
     test_deactivate_customer(customer_id, BASE_URL_CUSTOMERS)
     test_delete_customer(customer_id, BASE_URL_CUSTOMERS)
+    
+    # 12. Final checks after deletion
+    test_get_contracts_deleted_customer(customer_id, BASE_URL_CUSTOMERS)
 
     print("\n=== All E2E Tests Completed Successfully ===")

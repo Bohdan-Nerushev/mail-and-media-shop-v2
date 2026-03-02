@@ -49,3 +49,9 @@ def test_get_contracts_inactive_customer(customer_id, base_url):
 
     assert response.status_code == 409, f"Expected 409 for inactive customer contracts retrieval, got {response.status_code}"
     print("Test Success: Retrieval of contracts for inactive customer handled (409) passed.")
+
+def test_get_contracts_deleted_customer(customer_id, base_url):
+    url = f"{base_url}/{customer_id}/contracts"
+    response = requests.get(url)
+    assert response.status_code == 404, f"Expected 404 for deleted customer contracts, got {response.status_code}"
+    print("Test Success: Contracts not accessible for deleted customer passed.")
