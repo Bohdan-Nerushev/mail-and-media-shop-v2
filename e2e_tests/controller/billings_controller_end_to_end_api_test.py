@@ -22,10 +22,18 @@ def test_generate_invoice_customer_not_found(base_url, invalid_customer_id, head
     assert response.status_code == 404, f"Expected 404, got {response.status_code}"
     print("Test Success: Correctly handled customer not found.")
 
-def test_generate_invoice_server_error(base_url, header, customer_id=None):
-    simulated_error_uuid = "00000000-0000-0000-0000-000000000500"
-    url = f"{base_url}/{simulated_error_uuid}/invoice"
+def test_generate_invoice_server_error(base_url, header, error_id):
+    url = f"{base_url}/{error_id}/invoice"
     response = requests.post(url, headers=header)
 
     assert response.status_code == 500, f"Expected 500, got {response.status_code}"
     print("Test Success: Correctly handled server error.")
+
+def test_generate_invoice_idempotency(customer_id, base_url, header):
+    url = f"{base_url}/{customer_id}/invoice"
+    res1 = requests.post(url, headers=header)
+    assert res1.status_code == 200
+    
+    res2 = requests.post(url, headers=header)
+    assert res2.status_code == 200
+    print("Test Success: Invoice generation idempotency check passed.")

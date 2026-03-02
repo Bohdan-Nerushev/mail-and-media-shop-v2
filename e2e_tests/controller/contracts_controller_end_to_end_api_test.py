@@ -19,16 +19,33 @@ def test_get_contracts_customer_not_found(base_url, invalid_customer_id):
     assert response.status_code == 404, f"Expected 404, got {response.status_code}"
     print("Test Success: Customer not found handled correctly.")
 
-
 def test_activate_contract_success(customer_id, contract_id, base_url):
     url = f"{base_url}/{customer_id}/contracts/{contract_id}/activate"
     response = requests.put(url)
     assert response.status_code == 204, f"Expected 204, got {response.status_code}"
     print("Test Success: Contract activated successfully.")
 
-
 def test_activate_contract_not_found(customer_id, base_url, invalid_contract_id):
     url = f"{base_url}/{customer_id}/contracts/{invalid_contract_id}/activate"
     response = requests.put(url)
     assert response.status_code == 404, f"Expected 404, got {response.status_code}"
     print("Test Success: Contract not found handled correctly.")
+
+def test_activate_contract_idempotency(customer_id, contract_id, base_url):
+    url = f"{base_url}/{customer_id}/contracts/{contract_id}/activate"
+    response = requests.put(url)
+    assert response.status_code in [204, 409], f"Contract activation idempotency failed, got {response.status_code}"
+    print("Test Success: Contract activation idempotency check passed.")
+
+def test_activate_contract_forbidden(wrong_customer_id, contract_id, base_url):
+    url = f"{base_url}/{wrong_customer_id}/contracts/{contract_id}/activate"
+    response = requests.put(url)
+    assert response.status_code in [400, 403, 404], f"Expected 400, 403 or 404 for wrong customer contract activation, got {response.status_code}"
+    print("Test Success: Access control for contract activation passed.")
+
+def test_get_contracts_inactive_customer(customer_id, base_url):
+    url = f"{base_url}/{customer_id}/contracts"
+    response = requests.get(url)
+
+    assert response.status_code == 409, f"Expected 409 for inactive customer contracts retrieval, got {response.status_code}"
+    print("Test Success: Retrieval of contracts for inactive customer handled (409) passed.")
