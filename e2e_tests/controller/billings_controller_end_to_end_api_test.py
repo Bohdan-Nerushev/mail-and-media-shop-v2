@@ -1,7 +1,11 @@
 import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def test_generate_invoice_success(valid_customer_id, base_url, header):
+def test_should_successfully_generate_invoice_when_valid_customer_id_is_provided(valid_customer_id, base_url, header):
+    """Test that the API generates an invoice correctly for a valid customer."""
     url = f"{base_url}/{valid_customer_id}/invoice"
     response = requests.post(url, headers=header)
 
@@ -13,33 +17,37 @@ def test_generate_invoice_success(valid_customer_id, base_url, header):
         assert field in data, f"Missing field: {field}"
 
     assert isinstance(data["items"], list), "Items should be a list"
-    print("Test Success: Invoice generated correctly.")
+    logger.info(f"Test Success: Invoice generated correctly for customer {valid_customer_id}.")
 
-def test_generate_invoice_customer_not_found(base_url, invalid_customer_id, header,  customer_id=None):
+def test_should_return_404_when_generating_invoice_for_non_existent_customer(base_url, invalid_customer_id, header,  customer_id=None):
+    """Verify that generating an invoice for a non-existent customer returns 404."""
     url = f"{base_url}/{invalid_customer_id}/invoice"
     response = requests.post(url, headers=header)
 
     assert response.status_code == 404, f"Expected 404, got {response.status_code}"
-    print("Test Success: Correctly handled customer not found.")
+    logger.info("Test Success: Correctly handled customer not found during invoice generation.")
 
-def test_generate_invoice_server_error(base_url, header, error_id):
+def test_should_return_500_when_server_error_occurs_during_invoice_generation(base_url, header, error_id):
+    """Verify that the API returns 500 when a simulated server error occurs."""
     url = f"{base_url}/{error_id}/invoice"
     response = requests.post(url, headers=header)
 
     assert response.status_code == 500, f"Expected 500, got {response.status_code}"
-    print("Test Success: Correctly handled server error.")
+    logger.info("Test Success: Correctly handled server error during invoice generation.")
 
-def test_generate_invoice_idempotency(customer_id, base_url, header):
+def test_should_handle_invoice_generation_idempotently_when_called_multiple_times(customer_id, base_url, header):
+    """Verify that repeated invoice generation requests for the same customer are idempotent."""
     url = f"{base_url}/{customer_id}/invoice"
     res1 = requests.post(url, headers=header)
     assert res1.status_code == 200
     
     res2 = requests.post(url, headers=header)
     assert res2.status_code == 200
-    print("Test Success: Invoice generation idempotency check passed.")
+    logger.info("Test Success: Invoice generation idempotency check passed.")
 
-def test_generate_invoice_inactive_customer(customer_id, base_url, header):
+def test_should_return_409_when_generating_invoice_for_inactive_customer(customer_id, base_url, header):
+    """Verify that generating an invoice for an inactive customer returns 409 Conflict."""
     url = f"{base_url}/{customer_id}/invoice"
     response = requests.post(url, headers=header)
     assert response.status_code == 409, f"Expected 409 for inactive customer invoice generation, got {response.status_code}"
-    print("Test Success: Invoice generation for inactive customer handled (409) passed.")
+    logger.info("Test Success: Invoice generation for inactive customer handled correctly (409).")

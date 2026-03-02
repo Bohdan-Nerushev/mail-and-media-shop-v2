@@ -1,5 +1,14 @@
 import copy
 import uuid
+import logging
+import os
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 from controller.customers_controller_end_to_end_api_test import (
     test_register_customer_success,
@@ -12,8 +21,8 @@ from controller.customers_controller_end_to_end_api_test import (
     test_update_communication_details,
     test_activate_customer,
     test_deactivate_customer,
-    test_purchase_product_success,
-    test_delete_customer,
+    test_should_purchase_product_successfully_when_valid_data_provided,
+    test_should_successfully_delete_customer_when_id_is_valid,
     get_valid_product_id,
     test_firstname_blank,
     test_lastname_blank,
@@ -27,33 +36,31 @@ from controller.customers_controller_end_to_end_api_test import (
     test_update_address_inactive_fail,
     test_purchase_customer_inactive_fail,
     test_delete_active_customer_fail,
-    test_purchase_product_idempotency,
-    test_purchase_product_verification
+    test_should_handle_product_purchase_idempotently_when_called_multiple_times,
+    test_should_verify_purchased_product_data_integrity_after_purchase
 )
 from controller.contracts_controller_end_to_end_api_test import (
-    test_get_contracts_success,
-    test_get_contracts_customer_not_found,
-    test_activate_contract_success,
-    test_activate_contract_not_found,
-    test_activate_contract_idempotency,
-    test_activate_contract_forbidden,
-    test_get_contracts_inactive_customer,
-    test_get_contracts_deleted_customer
+    test_should_successfully_list_contracts_when_customer_id_is_valid,
+    test_should_return_404_when_listing_contracts_for_non_existent_customer,
+    test_should_activate_contract_successfully_when_ids_are_valid,
+    test_should_return_404_when_activating_non_existent_contract,
+    test_should_handle_contract_activation_idempotently_when_called_multiple_times,
+    test_should_return_403_when_activating_contract_belonging_to_another_customer,
+    test_should_return_409_when_listing_contracts_for_inactive_customer,
+    test_should_return_404_when_listing_contracts_for_deleted_customer
 )
 from controller.billings_controller_end_to_end_api_test import (
-    test_generate_invoice_success,
-    test_generate_invoice_customer_not_found,
-    test_generate_invoice_server_error,
-    test_generate_invoice_idempotency,
-    test_generate_invoice_inactive_customer
+    test_should_successfully_generate_invoice_when_valid_customer_id_is_provided,
+    test_should_return_404_when_generating_invoice_for_non_existent_customer,
+    test_should_return_500_when_server_error_occurs_during_invoice_generation,
+    test_should_handle_invoice_generation_idempotently_when_called_multiple_times,
+    test_should_return_409_when_generating_invoice_for_inactive_customer
 )
 from controller.products_controller_end_to_end_api_test import (
-    test_get_products_success,
-    test_get_products_invalid_brand,
-    test_get_products_brand_not_found
+    test_should_successfully_retrieve_products_when_valid_brand_is_provided,
+    test_should_return_400_when_invalid_brand_format_is_provided,
+    test_should_return_200_when_valid_brand_has_no_products
 )
-
-import os
 
 # ---------------------------
 # Configuration (Environment Variables)
@@ -97,12 +104,12 @@ valid_customer_payload = {
 # Test Execution
 # ---------------------------
 if __name__ == "__main__":
-    print("=== Starting E2E Tests ===\n")
+    logger.info("=== Starting E2E Tests ===")
 
     # 1. Product tests (require only the base URL)
-    test_get_products_success(BASE_URL_PRODUCTS)
-    test_get_products_invalid_brand(BASE_URL_PRODUCTS)
-    test_get_products_brand_not_found(BASE_URL_PRODUCTS)
+    test_should_successfully_retrieve_products_when_valid_brand_is_provided(BASE_URL_PRODUCTS)
+    test_should_return_400_when_invalid_brand_format_is_provided(BASE_URL_PRODUCTS)
+    test_should_return_200_when_valid_brand_has_no_products(BASE_URL_PRODUCTS)
 
     # 2. Customer registration (returns ID for further tests)
     customer_id = test_register_customer_success(valid_customer_payload, BASE_URL_CUSTOMERS, HEADERS)
@@ -123,8 +130,8 @@ if __name__ == "__main__":
     test_update_address_inactive_fail(customer_id, BASE_URL_CUSTOMERS, HEADERS)
     valid_prod_id = get_valid_product_id(BASE_URL_PRODUCTS, valid_customer_payload["brand"])
     test_purchase_customer_inactive_fail(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
-    test_get_contracts_inactive_customer(customer_id, BASE_URL_CUSTOMERS)
-    test_generate_invoice_inactive_customer(customer_id, BASE_URL_BILLING, HEADERS)
+    test_should_return_409_when_listing_contracts_for_inactive_customer(customer_id, BASE_URL_CUSTOMERS)
+    test_should_return_409_when_generating_invoice_for_inactive_customer(customer_id, BASE_URL_BILLING, HEADERS)
 
     # 5. Retrieve and activate customer
     test_get_customer_success(customer_id, BASE_URL_CUSTOMERS)
@@ -140,44 +147,44 @@ if __name__ == "__main__":
     test_update_communication_details(customer_id, BASE_URL_CUSTOMERS, HEADERS, valid_customer_payload)
 
     # 8. Purchase product and idempotency (Scenario 6)
-    test_purchase_product_success(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
-    test_purchase_product_verification(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
-    test_purchase_product_idempotency(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
+    test_should_purchase_product_successfully_when_valid_data_provided(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
+    test_should_verify_purchased_product_data_integrity_after_purchase(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
+    test_should_handle_product_purchase_idempotently_when_called_multiple_times(customer_id, valid_prod_id, BASE_URL_CUSTOMERS, HEADERS)
 
     # 9. Contracts (Scenario 8 & 9)
-    contracts = test_get_contracts_success(customer_id, BASE_URL_CUSTOMERS)
-    test_get_contracts_customer_not_found(BASE_URL_CUSTOMERS, INVALID_CUSTOMER_ID)
+    contracts = test_should_successfully_list_contracts_when_customer_id_is_valid(customer_id, BASE_URL_CUSTOMERS)
+    test_should_return_404_when_listing_contracts_for_non_existent_customer(BASE_URL_CUSTOMERS, INVALID_CUSTOMER_ID)
     
     if contracts:
         contract_id = contracts[0]["id"]
-        test_activate_contract_success(customer_id, contract_id, BASE_URL_CUSTOMERS)
-        test_activate_contract_idempotency(customer_id, contract_id, BASE_URL_CUSTOMERS)
+        test_should_activate_contract_successfully_when_ids_are_valid(customer_id, contract_id, BASE_URL_CUSTOMERS)
+        test_should_handle_contract_activation_idempotently_when_called_multiple_times(customer_id, contract_id, BASE_URL_CUSTOMERS)
         
         # Scenario 9: try with another customer ID
         ANOTHER_CUSTOMER_ID = str(uuid.uuid4())
-        test_activate_contract_forbidden(ANOTHER_CUSTOMER_ID, contract_id, BASE_URL_CUSTOMERS)
+        test_should_return_403_when_activating_contract_belonging_to_another_customer(ANOTHER_CUSTOMER_ID, contract_id, BASE_URL_CUSTOMERS)
     
-    test_activate_contract_not_found(customer_id, BASE_URL_CUSTOMERS, INVALID_CONTRACT_ID)
+    test_should_return_404_when_activating_non_existent_contract(customer_id, BASE_URL_CUSTOMERS, INVALID_CONTRACT_ID)
 
     # 10. Billing (Scenario 7)
-    test_generate_invoice_success(customer_id, BASE_URL_BILLING, HEADERS)
-    test_generate_invoice_customer_not_found(BASE_URL_BILLING, INVALID_CUSTOMER_ID, HEADERS)
-    test_generate_invoice_idempotency(customer_id, BASE_URL_BILLING, HEADERS)
+    test_should_successfully_generate_invoice_when_valid_customer_id_is_provided(customer_id, BASE_URL_BILLING, HEADERS)
+    test_should_return_404_when_generating_invoice_for_non_existent_customer(BASE_URL_BILLING, INVALID_CUSTOMER_ID, HEADERS)
+    test_should_handle_invoice_generation_idempotently_when_called_multiple_times(customer_id, BASE_URL_BILLING, HEADERS)
     
     # Simulate a 500 error
     SIMULATED_ERROR_ID = "00000000-0000-0000-0000-000000000500"
     try:
-        test_generate_invoice_server_error(BASE_URL_BILLING, HEADERS, SIMULATED_ERROR_ID)
+        test_should_return_500_when_server_error_occurs_during_invoice_generation(BASE_URL_BILLING, HEADERS, SIMULATED_ERROR_ID)
     except AssertionError as e:
-        print(f"Server error simulation note: {e}")
+        logger.warning(f"Server error simulation note: {e}")
 
     # 11. Termination and constraints (Scenario 4)
     test_delete_active_customer_fail(customer_id, BASE_URL_CUSTOMERS)
     
     test_deactivate_customer(customer_id, BASE_URL_CUSTOMERS)
-    test_delete_customer(customer_id, BASE_URL_CUSTOMERS)
+    test_should_successfully_delete_customer_when_id_is_valid(customer_id, BASE_URL_CUSTOMERS)
     
     # 12. Final checks after deletion
-    test_get_contracts_deleted_customer(customer_id, BASE_URL_CUSTOMERS)
+    test_should_return_404_when_listing_contracts_for_deleted_customer(customer_id, BASE_URL_CUSTOMERS)
 
-    print("\n=== All E2E Tests Completed Successfully ===")
+    logger.info("=== All E2E Tests Completed Successfully ===")

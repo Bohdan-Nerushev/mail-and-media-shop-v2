@@ -1,5 +1,8 @@
 import requests
 import copy
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def test_register_customer_success(valid_customer_payload, base_url, header):
@@ -223,14 +226,16 @@ def get_valid_product_id(products_url, brand="GMX"):
     return products[0]["id"]
 
 
-def test_purchase_product_success(customer_id, product_id, base_url, header):
+def test_should_purchase_product_successfully_when_valid_data_provided(customer_id, product_id, base_url, header):
+    """Test that the API correctly processes a product purchase for an active customer."""
     url = f"{base_url}/{customer_id}/purchases"
     payload = {"productId": product_id}
     response = requests.post(url, headers=header, json=payload)
     assert response.status_code == 201, f"Expected 201, got {response.status_code}"
-    print("Purchase product success passed")
+    logger.info(f"Test Success: Product {product_id} purchased by customer {customer_id}.")
 
-def test_purchase_product_idempotency(customer_id, product_id, base_url, header):
+def test_should_handle_product_purchase_idempotently_when_called_multiple_times(customer_id, product_id, base_url, header):
+    """Verify that repeated purchase requests for the same product are handled idempotently."""
     url = f"{base_url}/{customer_id}/purchases"
     payload = {"productId": product_id}
     
@@ -242,9 +247,10 @@ def test_purchase_product_idempotency(customer_id, product_id, base_url, header)
     
     c2 = requests.get(contracts_url).json()
     assert len(c1) == len(c2), f"Duplicate contract created! Count increased from {len(c1)} to {len(c2)}"
-    print("Purchase product idempotency check passed")
+    logger.info("Test Success: Product purchase idempotency check passed.")
 
-def test_purchase_product_verification(customer_id, product_id, base_url, header):
+def test_should_verify_purchased_product_data_integrity_after_purchase(customer_id, product_id, base_url, header):
+    """Verify that the contract returned after a purchase has the correct customer, product, and initial status."""
     url = f"{base_url}/{customer_id}/purchases"
     payload = {"productId": product_id}
     response = requests.post(url, headers=header, json=payload)
@@ -256,11 +262,12 @@ def test_purchase_product_verification(customer_id, product_id, base_url, header
     assert "id" in contract, "Missing contract ID"
     assert "creationDate" in contract, "Missing creation date"
     assert contract["status"] == "INACTIVE", "New contract should be INACTIVE"
-    print("Purchase product data verification passed")
+    logger.info("Test Success: Product purchase data verification passed.")
 
 
-def test_delete_customer(customer_id,base_url):
+def test_should_successfully_delete_customer_when_id_is_valid(customer_id,base_url):
+    """Verify that a customer can be successfully deleted when they have no active contracts."""
     url = f"{base_url}/{customer_id}"
     response = requests.delete(url)
     assert response.status_code == 204, f"Expected 204, got {response.status_code}"
-    print("Delete customer passed")
+    logger.info(f"Test Success: Customer {customer_id} deleted successfully.")
