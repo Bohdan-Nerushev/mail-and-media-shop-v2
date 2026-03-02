@@ -56,7 +56,8 @@ public interface ShopService {
         Invoice generateInvoice(@NotNull final UUID customerId)
                         throws CustomerNotFoundException, ProductNotFoundException;
 
-        void activateContract(@NotNull final UUID contractId) throws ContractNotFoundException;
+        void activateContract(@NotNull final UUID customerId, @NotNull final UUID contractId)
+                        throws CustomerNotFoundException, ContractNotFoundException;
 
         @NotNull
         List<Product> loadAllProductsForBrand(@NotNull final Brand brand);

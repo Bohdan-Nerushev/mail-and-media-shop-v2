@@ -8,6 +8,7 @@ import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
@@ -18,12 +19,14 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import dev.mam.buizsol.mamshop.product.service.ProductCatalogLoader;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 class ShopServiceImpl implements ShopService {
 
@@ -69,12 +72,25 @@ class ShopServiceImpl implements ShopService {
     @Override
     public void removeCustomer(
             final UUID customerId) throws CustomerNotFoundException {
+        final Customer customer = loadCustomer(customerId);
+        final List<Contract> contracts = contractService.findContractsByCustomerId(customerId);
+        final boolean hasActiveContracts = contracts.stream()
+                .anyMatch(c -> c.status() == ContractStatus.ACTIVE);
+
+        if (customer.status() == CustomerStatus.ACTIVE && hasActiveContracts) {
+            throw new CustomerValidationException("Cannot remove active customer with active contracts");
+        }
         customerService.deleteCustomer(customerId);
     }
 
     @Override
     public void activateCustomer(
             final UUID customerId) throws CustomerNotFoundException {
+        final Customer customer = loadCustomer(customerId);
+        if (customer.status() == CustomerStatus.ACTIVE) {
+            log.info("Customer {} is already active, skipping", customerId);
+            return;
+        }
         customerService.activateCustomer(customerId);
     }
 
@@ -127,7 +143,20 @@ class ShopServiceImpl implements ShopService {
 
     @Override
     public void activateContract(
-            final UUID contractId) throws ContractNotFoundException {
+            final UUID customerId,
+            final UUID contractId) throws CustomerNotFoundException, ContractNotFoundException {
+        final Contract contract = contractService.findContractById(contractId)
+                .orElseThrow(() -> new ContractNotFoundException("Contract not found: " + contractId));
+
+        if (!contract.customerId().equals(customerId)) {
+            throw new CustomerValidationException("Contract does not belong to the specified customer");
+        }
+
+        if (contract.status() == ContractStatus.ACTIVE) {
+            log.info("Contract {} is already active, skipping", contractId);
+            return;
+        }
+
         contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
     }
 
@@ -151,6 +180,18 @@ class ShopServiceImpl implements ShopService {
 
         final Product product = productService.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
+
+        final boolean alreadyHasProduct = contractService.findContractsByCustomerId(customerId).stream()
+                .anyMatch(c -> c.productId().equals(productId));
+
+        if (alreadyHasProduct) {
+            log.info("Customer {} already has a contract for product {}, skipping creation", customerId, productId);
+
+            return contractService.findContractsByCustomerId(customerId).stream()
+                    .filter(c -> c.productId().equals(productId))
+                    .findFirst()
+                    .orElseThrow();
+        }
 
         return contractService.createContract(customer, product);
     }
