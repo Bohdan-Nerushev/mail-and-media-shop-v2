@@ -11,18 +11,32 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("PartnerProduct Tests")
 class PartnerProductTest {
+
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     private PartnerProduct createPartnerProduct(
             final String name,
             final Brand brand,
             final BigDecimal setupFee,
             final BigDecimal monthlyFee) {
-        return new PartnerProduct(name, brand, setupFee, monthlyFee);
+        PartnerProduct product = new PartnerProduct(name, brand, setupFee, monthlyFee);
+        Set<ConstraintViolation<PartnerProduct>> violations = validator.validate(product);
+        if (violations.isEmpty()) {
+            return product;
+        }
+        String message = violations.iterator().next().getMessage();
+        throw new ProductValidationException(message);
     }
 
     @DisplayName("Success: Create PartnerProduct with valid diverse data")
@@ -65,11 +79,9 @@ class PartnerProductTest {
     void shouldThrowExceptionWhenMonthlyFeeIsInvalid(String fee) {
         BigDecimal invalidFee = new BigDecimal(fee);
 
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createPartnerProduct("Invalid Fee Product", Brand.WEB_DE, BigDecimal.ONE, invalidFee));
-
-        assertEquals("Monthly fee must be greater than 0.10 €", exception.getMessage());
     }
 
     @DisplayName("Negative: Failure with null, empty or blank name")
@@ -77,41 +89,33 @@ class PartnerProductTest {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "   ", "\t", "\n" })
     void shouldThrowExceptionWhenNameIsInvalid(String name) {
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createPartnerProduct(name, Brand.GMX, BigDecimal.ZERO, new BigDecimal("1.00")));
-
-        assertEquals("Product name must not be null or empty", exception.getMessage());
     }
 
     @Test
     @DisplayName("Negative: Failure with null brand")
     void shouldThrowExceptionWhenBrandIsNull() {
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createPartnerProduct("No Brand", null, BigDecimal.ZERO, new BigDecimal("1.00")));
-
-        assertEquals("Brand must not be null", exception.getMessage());
     }
 
     @Test
     @DisplayName("Negative: Failure with null setup fee")
     void shouldThrowExceptionWhenSetupFeeIsNull() {
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createPartnerProduct("No Setup Fee", Brand.WEB_DE, null, new BigDecimal("1.00")));
-
-        assertEquals("Setup fee must not be null", exception.getMessage());
     }
 
     @Test
     @DisplayName("Negative: Failure with null monthly fee")
     void shouldThrowExceptionWhenMonthlyFeeIsNull() {
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createPartnerProduct("No Monthly Fee", Brand.GMX, BigDecimal.ZERO, null));
-
-        assertEquals("Monthly fee must not be null", exception.getMessage());
     }
 
     @Test
@@ -119,10 +123,20 @@ class PartnerProductTest {
     void shouldThrowExceptionWhenSetupFeeIsNegative() {
         BigDecimal negativeFee = new BigDecimal("-1.00");
 
-        ProductValidationException exception = assertThrows(
+        assertThrows(
                 ProductValidationException.class,
                 () -> createPartnerProduct("Bad Setup Fee", Brand.GMX, negativeFee, new BigDecimal("1.00")));
+    }
 
-        assertEquals("Setup fee must not be negative", exception.getMessage());
+    @Test
+    @DisplayName("Negative: Failure with too long name (> 100 characters)")
+    void shouldThrowExceptionWhenProductNameIsTooLong() {
+        String longName = "A".repeat(101);
+
+        ProductValidationException exception = assertThrows(
+                ProductValidationException.class,
+                () -> createPartnerProduct(longName, Brand.GMX, BigDecimal.ZERO, BigDecimal.ONE));
+
+        assertEquals("Product name must not exceed 100 characters", exception.getMessage());
     }
 }

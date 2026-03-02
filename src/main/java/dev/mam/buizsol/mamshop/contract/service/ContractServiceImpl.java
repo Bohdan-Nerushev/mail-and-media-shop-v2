@@ -1,94 +1,61 @@
 package dev.mam.buizsol.mamshop.contract.service;
 
-import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
-import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import jakarta.annotation.Nullable;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Service
 final class ContractServiceImpl implements ContractService {
 
     private final ContractRepository repository;
 
-    private ContractServiceImpl(
-            @NotNull final ContractRepository repository) {
+    ContractServiceImpl(final ContractRepository repository) {
         this.repository = repository;
     }
 
-    private static final class Holder {
-        private static final ContractServiceImpl INSTANCE = new ContractServiceImpl(ContractRepository.getInstance());
-    }
-
-    @NotNull
-    static ContractService getInstance() {
-        return Holder.INSTANCE;
-    }
-
     @Override
-    @NotNull
     public Contract createContract(
-            @NotNull @Valid final Customer customer,
-            @NotNull @Valid final Product product) throws BrandMismatchException {
-        validateNotNull(customer, "Customer");
-        validateNotNull(product, "Product");
-
-        Contract contract = new Contract(customer, product);
-        return repository.save(contract);
+            final Customer customer,
+            final Product product) {
+        return repository.save(Contract.create(customer, product));
     }
 
     @Override
-    @NotNull
     public Optional<Contract> findContractById(
-            @NotNull final UUID contractId) {
-        validateNotNull(contractId, "Contract ID");
+            final UUID contractId) {
         return repository.findById(contractId);
     }
 
     @Override
-    @NotNull
     public List<Contract> findContractsByCustomerId(
-            @NotNull final UUID customerId) {
-        validateNotNull(customerId, "Customer ID");
+            final UUID customerId) {
         return List.copyOf(repository.findByCustomerId(customerId));
     }
 
     @Override
-    @NotNull
     public List<Contract> findContractsByProductId(
-            @NotNull final UUID productId) {
-        validateNotNull(productId, "Product ID");
+            final UUID productId) {
         return List.copyOf(repository.findByProductId(productId));
     }
 
     @Override
-    @NotNull
     public Contract updateContractStatus(
-            @NotNull final UUID contractId,
-            @NotNull final ContractStatus changeStatus) throws ContractNotFoundException {
-        validateNotNull(contractId, "Contract ID");
-        validateNotNull(changeStatus, "Status");
-
-        Contract contract = repository.findById(contractId)
+            final UUID contractId,
+            final ContractStatus changeStatus) throws ContractNotFoundException {
+        return repository.findById(contractId)
+                .map(contract -> repository.update(contract.withStatus(changeStatus)))
                 .orElseThrow(() -> new ContractNotFoundException("Contract with ID " + contractId + " not found"));
-
-        contract.updateStatus(changeStatus);
-        return repository.update(contract);
     }
 
-    private void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new ContractValidationException(fieldName + " must not be null");
-        }
+    @Override
+    public List<Contract> findAllContracts() {
+        return List.copyOf(repository.findAll());
     }
 }

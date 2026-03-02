@@ -3,9 +3,7 @@ package dev.mam.buizsol.mamshop.product.service;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import jakarta.annotation.Nullable;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -14,53 +12,50 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Repository
 final class ProductRepositoryImpl implements ProductRepository {
 
     private final Map<UUID, Product> storage;
 
-    private ProductRepositoryImpl() {
+    ProductRepositoryImpl() {
         this.storage = new ConcurrentHashMap<>();
     }
 
-    private static final class Holder {
-        private static final ProductRepositoryImpl INSTANCE = new ProductRepositoryImpl();
-    }
-
-    @NotNull
-    static ProductRepository getInstance() {
-        return Holder.INSTANCE;
-    }
-
     @Override
-    public void save(@NotNull @Valid final Product product) {
-        validateNotNull(product, "Product");
+    public void save(final Product product) {
+        if (product == null) {
+            throw new ProductValidationException("Product must not be null");
+        }
         storage.put(product.getId(), product);
     }
 
     @Override
-    public void update(@NotNull @Valid final Product product) {
-        validateNotNull(product, "Product");
+    public void update(final Product product) {
+        if (product == null) {
+            throw new ProductValidationException("Product must not be null");
+        }
         storage.put(product.getId(), product);
     }
 
     @Override
-    @NotNull
-    public Optional<Product> findById(@NotNull final UUID id) {
-        validateNotNull(id, "ID");
+    public Optional<Product> findById(final UUID id) {
+        if (id == null) {
+            throw new ProductValidationException("ID must not be null");
+        }
         return Optional.ofNullable(storage.get(id));
     }
 
     @Override
-    @NotNull
-    public Collection<Product> findByBrand(@NotNull final Brand brand) {
-        validateNotNull(brand, "Brand");
+    public Collection<Product> findByBrand(final Brand brand) {
+        if (brand == null) {
+            throw new ProductValidationException("Brand must not be null");
+        }
         return storage.values().stream()
                 .filter(product -> product.getBrand() == brand)
                 .toList();
     }
 
     @Override
-    @NotNull
     public Collection<Product> findAll() {
         return Collections.unmodifiableCollection(storage.values());
     }
@@ -68,13 +63,5 @@ final class ProductRepositoryImpl implements ProductRepository {
     @Override
     public void clearStorage() {
         storage.clear();
-    }
-
-    private void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new ProductValidationException(fieldName + " must not be null");
-        }
     }
 }

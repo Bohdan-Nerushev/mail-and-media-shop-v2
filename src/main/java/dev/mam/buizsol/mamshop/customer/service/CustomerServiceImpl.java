@@ -6,118 +6,105 @@ import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
-import jakarta.annotation.Nullable;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Service
 final class CustomerServiceImpl implements CustomerService {
-
-    private static final String CUSTOMER_ID_FIELD_NAME = "Customer ID";
-    private static final String CUSTOMER_FIELD_NAME = "Customer";
 
     private final CustomerRepository customerRepository;
 
-    private CustomerServiceImpl() {
-        this(CustomerRepository.getInstance());
-    }
-
-    CustomerServiceImpl(@NotNull final CustomerRepository customerRepository) {
+    CustomerServiceImpl(
+            final CustomerRepository customerRepository) {
         if (customerRepository == null) {
-            throw new CustomerValidationException("CustomerRepository must not be null");
+            throw new CustomerValidationException("Customer repository must not be null");
         }
         this.customerRepository = customerRepository;
     }
 
-    private static final class Holder {
-        private static final CustomerServiceImpl INSTANCE = new CustomerServiceImpl();
-    }
-
-    @NotNull
-    static CustomerService getInstance() {
-        return Holder.INSTANCE;
-    }
-
     @Override
-    @NotNull
-    public Customer createCustomer(@Valid @NotNull final Customer customer) {
-        validateNotNull(customer, CUSTOMER_FIELD_NAME);
+    public Customer createCustomer(
+            final Customer customer) {
+        if (customer == null) {
+            throw new CustomerValidationException("Customer must not be null");
+        }
         customerRepository.save(customer);
         return customer;
     }
 
     @Override
     public void updateAddress(
-            @NotNull final UUID customerId,
-            @Valid @NotNull final Address address) throws CustomerNotFoundException {
-        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
-        final var customer = customerRepository.getById(customerId);
-        customer.setAddress(address);
-        customerRepository.update(customer);
+            final UUID customerId,
+            final Address address) throws CustomerNotFoundException {
+        if (customerId == null || address == null) {
+            throw new CustomerValidationException("Parameters must not be null");
+        }
+        final Customer customer = customerRepository.getById(customerId);
+        customerRepository.update(customer.withAddress(address));
     }
 
     @Override
     public void updateInvoiceAddress(
-            @NotNull final UUID customerId,
-            @Valid @NotNull final Address address) throws CustomerNotFoundException {
-        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
-        final var customer = customerRepository.getById(customerId);
-        customer.setInvoiceAddress(address);
-        customerRepository.update(customer);
-    }
-
-    @Override
-    public void updateCommunicationDetails(@NotNull final UUID customerId,
-            @Valid @NotNull final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
-        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
+            final UUID customerId,
+            final Address address) throws CustomerNotFoundException {
+        if (customerId == null || address == null) {
+            throw new CustomerValidationException("Parameters must not be null");
+        }
         final Customer customer = customerRepository.getById(customerId);
-        customer.setCommunicationDetails(communicationDetails);
-        customerRepository.update(customer);
+        customerRepository.update(customer.withInvoiceAddress(address));
     }
 
     @Override
-    public void activateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
-        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
+    public void updateCommunicationDetails(
+            final UUID customerId,
+            final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
+        if (customerId == null || communicationDetails == null) {
+            throw new CustomerValidationException("Parameters must not be null");
+        }
         final Customer customer = customerRepository.getById(customerId);
-        customer.setStatus(CustomerStatus.ACTIVE);
-        customerRepository.update(customer);
+        customerRepository.update(customer.withCommunicationDetails(communicationDetails));
     }
 
     @Override
-    public void deactivateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
-        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
+    public void activateCustomer(
+            final UUID customerId) throws CustomerNotFoundException {
+        if (customerId == null) {
+            throw new CustomerValidationException("Customer ID must not be null");
+        }
         final Customer customer = customerRepository.getById(customerId);
-        customer.setStatus(CustomerStatus.INACTIVE);
-        customerRepository.update(customer);
+        customerRepository.update(customer.withStatus(CustomerStatus.ACTIVE));
     }
 
     @Override
-    public void deleteCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException {
-        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
+    public void deactivateCustomer(
+            final UUID customerId) throws CustomerNotFoundException {
+        if (customerId == null) {
+            throw new CustomerValidationException("Customer ID must not be null");
+        }
+        final Customer customer = customerRepository.getById(customerId);
+        customerRepository.update(customer.withStatus(CustomerStatus.INACTIVE));
+    }
+
+    @Override
+    public void deleteCustomer(
+            final UUID customerId) throws CustomerNotFoundException {
+        if (customerId == null) {
+            throw new CustomerValidationException("Customer ID must not be null");
+        }
         customerRepository.delete(customerId);
     }
 
     @Override
-    @NotNull
-    public Optional<Customer> findCustomerById(@NotNull final UUID customerId) {
-        validateNotNull(customerId, CUSTOMER_ID_FIELD_NAME);
+    public Optional<Customer> findCustomerById(
+            final UUID customerId) {
         return customerRepository.findById(customerId);
     }
 
     @Override
-    @NotNull
     public List<Customer> findAllCustomers() {
         return List.copyOf(customerRepository.findAll());
-    }
-
-    private void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new CustomerValidationException(fieldName + " must not be null");
-        }
     }
 }

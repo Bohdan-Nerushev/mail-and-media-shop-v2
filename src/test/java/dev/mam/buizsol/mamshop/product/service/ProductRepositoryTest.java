@@ -6,6 +6,9 @@ import dev.mam.buizsol.mamshop.product.model.BundleProduct;
 import dev.mam.buizsol.mamshop.product.model.MailProduct;
 import dev.mam.buizsol.mamshop.product.model.PartnerProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,15 +19,19 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("ProductRepository Tests")
 class ProductRepositoryTest {
 
     private ProductRepository repository;
+
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     private Product createMailProduct(
             String name,
@@ -32,12 +39,17 @@ class ProductRepositoryTest {
             String setupFee,
             String monthlyFee,
             Long storageSize) {
-        return new MailProduct(
+        MailProduct product = new MailProduct(
                 name,
-                brand, new BigDecimal(setupFee),
+                brand,
+                new BigDecimal(setupFee),
                 new BigDecimal(monthlyFee),
-                storageSize) {
-        };
+                storageSize);
+        Set<ConstraintViolation<MailProduct>> violations = validator.validate(product);
+        if (!violations.isEmpty()) {
+            throw new ProductValidationException("Validation failed");
+        }
+        return product;
     }
 
     private Product createPartnerProduct(
@@ -60,8 +72,7 @@ class ProductRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = ProductRepositoryImpl.getInstance();
-        repository.clearStorage();
+        repository = new ProductRepositoryImpl();
     }
 
     @Test
@@ -210,8 +221,8 @@ class ProductRepositoryTest {
         Optional<Product> retrieved = repository.findById(bundle.getId());
         assertTrue(retrieved.isPresent());
         assertEquals(bundle, retrieved.get());
-        assertEquals(mail, ((BundleProduct) retrieved.get()).getMailProduct());
-        assertEquals(partner, ((BundleProduct) retrieved.get()).getPartnerProduct());
+        assertEquals(mail, ((BundleProduct) retrieved.get()).mailProduct());
+        assertEquals(partner, ((BundleProduct) retrieved.get()).partnerProduct());
     }
 
     @Test
@@ -249,9 +260,9 @@ class ProductRepositoryTest {
         repository.save(product);
 
         final BigDecimal newMonthlyFee = new BigDecimal("0.75");
-        product.setMonthlyFee(newMonthlyFee);
+        final MailProduct updatedProduct = product.withMonthlyFee(newMonthlyFee);
 
-        repository.update(product);
+        repository.update(updatedProduct);
 
         final Optional<Product> retrieved = repository.findById(product.getId());
         assertThat(retrieved)

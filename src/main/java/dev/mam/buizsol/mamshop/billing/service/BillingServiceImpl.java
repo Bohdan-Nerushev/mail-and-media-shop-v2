@@ -1,9 +1,9 @@
 package dev.mam.buizsol.mamshop.billing.service;
 
-import dev.mam.buizsol.mamshop.billing.model.Invoice;
-import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
 import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
 import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
+import dev.mam.buizsol.mamshop.billing.model.Invoice;
+import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
@@ -13,7 +13,7 @@ import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
-import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,44 +25,44 @@ final class BillingServiceImpl implements BillingService {
     private final ProductService productService;
     private final ContractService contractService;
 
-    private static final BigDecimal MIN_DISCOUNT = new BigDecimal("0.10");
+    private final BigDecimal ZERO = BigDecimal.ZERO;
+    private final BigDecimal DISCOUNT = new BigDecimal("0.10");
 
     BillingServiceImpl(
-            @NotNull final CustomerService customerService,
-            @NotNull final ProductService productService,
-            @NotNull final ContractService contractService) {
+            final CustomerService customerService,
+            final ProductService productService,
+            final ContractService contractService) {
         this.customerService = customerService;
         this.productService = productService;
         this.contractService = contractService;
     }
 
-    private static final class Holder {
-        private static final BillingServiceImpl INSTANCE = new BillingServiceImpl(
-                CustomerService.getInstance(),
-                ProductService.getInstance(),
-                ContractService.getInstance());
-    }
-
-    @NotNull
-    static BillingService getInstance() {
-        return Holder.INSTANCE;
+    @Override
+    public Invoice generateInvoice(
+            final UUID customerId)
+            throws CustomerNotFoundException, ProductNotFoundException {
+        if (customerId == null) {
+            throw new InvoiceValidationException("Customer ID must not be null");
+        }
+        return generateInvoice(customerId, ZERO);
     }
 
     @Override
-    @NotNull
-    public Invoice generateInvoice(@NotNull final UUID customerId)
+    public Invoice generateInvoice(
+            final UUID customerId,
+            final BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException {
-        return generateInvoice(customerId, BigDecimal.ZERO);
-    }
 
-    @Override
-    @NotNull
-    public Invoice generateInvoice(@NotNull final UUID customerId, @NotNull final BigDecimal discount)
-            throws CustomerNotFoundException, ProductNotFoundException {
-        validateNotNull(customerId, "Customer ID");
-        validateNotNull(discount, "Discount");
-
-        if (discount.compareTo(BigDecimal.ZERO) > 0 && discount.compareTo(MIN_DISCOUNT) <= 0) {
+        if (customerId == null) {
+            throw new InvoiceValidationException("Customer ID must not be null");
+        }
+        if (discount == null) {
+            throw new InvalidInvoiceDiscountException("Discount must not be null");
+        }
+        if (discount.compareTo(ZERO) < 0) {
+            throw new InvalidInvoiceDiscountException("Discount cannot be negative");
+        }
+        if (discount.compareTo(ZERO) > 0 && discount.compareTo(DISCOUNT) <= 0) {
             throw new InvalidInvoiceDiscountException("Discount must be greater than 0.10 €");
         }
 
@@ -73,33 +73,27 @@ final class BillingServiceImpl implements BillingService {
         final List<InvoiceItem> items = new ArrayList<>();
 
         for (final Contract contract : contracts) {
-            if (contract.getStatus() == ContractStatus.ACTIVE) {
-                final Product product = productService.findById(contract.getProductId())
-                        .orElseThrow(() -> new ProductNotFoundException("Product with ID " + contract.getProductId()
-                                + " not found for contract " + contract.getId()));
+            if (contract.status() == ContractStatus.ACTIVE) {
+                final Product product = productService.findById(contract.productId())
+                        .orElseThrow(() -> new ProductNotFoundException("Product with ID " + contract.productId()
+                                + " not found for contract " + contract.id()));
 
                 items.add(new InvoiceItem(
                         product.getId(),
                         product.getName(),
-                        contract.getId(),
-                        contract.getCreationDate(),
+                        contract.id(),
+                        contract.creationDate(),
                         product.getSetupFee(),
                         product.getMonthlyFee()));
             }
         }
 
         return new Invoice(
-                customer.getBrand(),
-                customer.getId(),
-                customer.getAddress(),
-                customer.getInvoiceAddress(),
+                customer.brand(),
+                customer.id(),
+                customer.address(),
+                customer.invoiceAddress(),
                 items,
                 discount);
-    }
-
-    private void validateNotNull(final Object value, final String fieldName) {
-        if (value == null) {
-            throw new InvoiceValidationException(fieldName + " must not be null");
-        }
     }
 }

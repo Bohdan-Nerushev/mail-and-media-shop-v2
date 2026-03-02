@@ -5,152 +5,91 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class Customer {
+public record Customer(
+        @NotNull UUID id,
+        @NotBlank @Size(min = 1, max = 100) String firstName,
+        @NotBlank @Size(min = 1, max = 100) String lastName,
+        @NotNull LocalDate birthDate,
+        @NotNull @Valid Address address,
+        @NotNull @Valid Address invoiceAddress,
+        @NotNull @Valid CommunicationDetails communicationDetails,
+        @NotNull Brand brand,
+        @NotNull CustomerStatus status) {
 
-    @NotNull
-    private final UUID id;
-    @NotNull
-    private final String firstName;
-    @NotNull
-    private final String lastName;
-    @NotNull
-    private final LocalDate birthDate;
-    @NotNull
-    @Valid
-    private Address address;
-    @NotNull
-    @Valid
-    private Address invoiceAddress;
-    @NotNull
-    @Valid
-    private CommunicationDetails communicationDetails;
-    @NotNull
-    private final Brand brand;
-    @NotNull
-    private CustomerStatus status;
+    public Customer {
+        if (firstName == null || firstName.isBlank() || lastName == null || lastName.isBlank()) {
+            throw new CustomerValidationException("First name and last name must not be blank");
+        }
+        if (birthDate == null || address == null || communicationDetails == null || brand == null) {
+            throw new CustomerValidationException("Mandatory fields must not be null");
+        }
+        if (invoiceAddress == null) {
+            invoiceAddress = address;
+        }
+    }
 
-    public Customer(
+    public static Customer create(
             @NotBlank final String firstName,
             @NotBlank final String lastName,
-            @NotNull final LocalDate birthDate,
+            @NotNull @Past final LocalDate birthDate,
             @NotNull @Valid final Address address,
             @Nullable @Valid final Address invoiceAddress,
             @NotNull @Valid final CommunicationDetails communicationDetails,
             @NotNull final Brand brand) {
 
-        validateNotBlank(firstName, "First name");
-        validateNotBlank(lastName, "Last name");
-        validateNotNull(birthDate, "Birth date");
-        validateNotNull(address, "Address");
-        validateNotNull(communicationDetails, "Communication details");
-        validateNotNull(brand, "Brand");
-
-        this.id = UUID.randomUUID();
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.birthDate = birthDate;
-        this.address = address;
-        this.invoiceAddress = invoiceAddress != null ? invoiceAddress : address;
-        this.communicationDetails = communicationDetails;
-        this.brand = brand;
-        this.status = CustomerStatus.INACTIVE;
+        return new Customer(
+                UUID.randomUUID(),
+                firstName,
+                lastName,
+                birthDate,
+                address,
+                invoiceAddress != null ? invoiceAddress : address,
+                communicationDetails,
+                brand,
+                CustomerStatus.INACTIVE);
     }
 
     @NotNull
-    public UUID getId() {
-        return id;
-    }
-
-    @NotNull
-    public String getFirstName() {
-        return firstName;
-    }
-
-    @NotNull
-    public String getLastName() {
-        return lastName;
-    }
-
-    @NotNull
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
-
-    @NotNull
-    public Address getAddress() {
-        return address;
-    }
-
-    public void setAddress(
-            @NotNull @Valid final Address address) {
-        validateNotNull(address, "Address");
-        this.address = address;
-    }
-
-    @NotNull
-    public Address getInvoiceAddress() {
-        return invoiceAddress;
-    }
-
-    public void setInvoiceAddress(
-            @NotNull @Valid final Address invoiceAddress) {
-        validateNotNull(invoiceAddress, "Invoice address");
-        this.invoiceAddress = invoiceAddress;
-    }
-
-    @NotNull
-    public CommunicationDetails getCommunicationDetails() {
-        return communicationDetails;
-    }
-
-    public void setCommunicationDetails(
-            @NotNull @Valid final CommunicationDetails communicationDetails) {
-        validateNotNull(communicationDetails, "Communication details");
-        this.communicationDetails = communicationDetails;
-    }
-
-    @NotNull
-    public Brand getBrand() {
-        return brand;
-    }
-
-    @NotNull
-    public CustomerStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(
-            @NotNull final CustomerStatus status) {
-        validateNotNull(status, "Status");
-        this.status = status;
-    }
-
-    private void validateNotBlank(
-            @NotNull final String value,
-            @NotNull final String fieldName) {
-        if (value == null || value.isBlank()) {
-            throw new CustomerValidationException(fieldName + " must not be null or empty");
+    public Customer withStatus(@NotNull final CustomerStatus newStatus) {
+        if (newStatus == null) {
+            throw new CustomerValidationException("Status must not be null");
         }
+        return new Customer(id, firstName, lastName, birthDate, address, invoiceAddress, communicationDetails, brand, newStatus);
     }
 
-    private void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new CustomerValidationException(fieldName + " must not be null");
+    @NotNull
+    public Customer withAddress(@NotNull @Valid final Address newAddress) {
+        if (newAddress == null) {
+            throw new CustomerValidationException("Address must not be null");
         }
+        return new Customer(id, firstName, lastName, birthDate, newAddress, invoiceAddress, communicationDetails, brand, status);
+    }
+
+    @NotNull
+    public Customer withInvoiceAddress(@NotNull @Valid final Address newInvoiceAddress) {
+        if (newInvoiceAddress == null) {
+            throw new CustomerValidationException("Invoice address must not be null");
+        }
+        return new Customer(id, firstName, lastName, birthDate, address, newInvoiceAddress, communicationDetails, brand, status);
+    }
+
+    @NotNull
+    public Customer withCommunicationDetails(@NotNull @Valid final CommunicationDetails newDetails) {
+        if (newDetails == null) {
+            throw new CustomerValidationException("Communication details must not be null");
+        }
+        return new Customer(id, firstName, lastName, birthDate, address, invoiceAddress, newDetails, brand, status);
     }
 
     @Override
     public String toString() {
-        return "Customer{" +
-                "id=" + id +
-                ", brand=" + brand +
-                ", status=" + status +
-                '}';
+        return "Customer{id=" + id + ", brand=" + brand + ", status=" + status + '}';
     }
 }
+

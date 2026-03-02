@@ -11,6 +11,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -18,7 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("Customer Record Tests")
 class CustomerTest {
+
+        private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
         private Address mainAddress;
         private CommunicationDetails communicationDetails;
@@ -37,7 +45,7 @@ class CustomerTest {
                         Address invoiAddress,
                         CommunicationDetails communicationDetails,
                         Brand brand) {
-                return new Customer(
+                Customer customer = Customer.create(
                                 firstName,
                                 lastName,
                                 birthDate,
@@ -45,6 +53,11 @@ class CustomerTest {
                                 invoiAddress,
                                 communicationDetails,
                                 brand);
+                Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
+                if (!violations.isEmpty()) {
+                        throw new CustomerValidationException("Validation failed");
+                }
+                return customer;
         }
 
         private Address createDefaultAddress(
@@ -81,16 +94,16 @@ class CustomerTest {
                                 communicationDetails,
                                 Brand.GMX);
 
-                assertNotNull(customer.getId());
-                assertNotNull(customer.getId().toString());
-                assertEquals("John", customer.getFirstName());
-                assertEquals("Doe", customer.getLastName());
-                assertEquals(LocalDate.of(1990, 1, 1), customer.getBirthDate());
-                assertEquals(mainAddress, customer.getAddress());
-                assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
-                assertEquals(Brand.GMX, customer.getBrand());
+                assertNotNull(customer.id());
+                assertNotNull(customer.id().toString());
+                assertEquals("John", customer.firstName());
+                assertEquals("Doe", customer.lastName());
+                assertEquals(LocalDate.of(1990, 1, 1), customer.birthDate());
+                assertEquals(mainAddress, customer.address());
+                assertEquals(CustomerStatus.INACTIVE, customer.status());
+                assertEquals(Brand.GMX, customer.brand());
                 assertEquals(customer.toString(),
-                                "Customer{id=" + customer.getId() + ", brand=GMX, status=INACTIVE}");
+                                "Customer{id=" + customer.id() + ", brand=GMX, status=INACTIVE}");
         }
 
         @Test
@@ -105,8 +118,8 @@ class CustomerTest {
                                 communicationDetails,
                                 Brand.GMX);
 
-                assertEquals(customer.getAddress(), customer.getInvoiceAddress());
-                assertSame(customer.getAddress(), customer.getInvoiceAddress());
+                assertEquals(customer.address(), customer.invoiceAddress());
+                assertSame(customer.address(), customer.invoiceAddress());
         }
 
         @Test
@@ -123,8 +136,8 @@ class CustomerTest {
                                 communicationDetails,
                                 Brand.GMX);
 
-                assertEquals(customer.getAddress(), customer.getInvoiceAddress());
-                assertNotSame(customer.getAddress(), customer.getInvoiceAddress());
+                assertEquals(customer.address(), customer.invoiceAddress());
+                assertNotSame(customer.address(), customer.invoiceAddress());
         }
 
         @ParameterizedTest
@@ -168,11 +181,11 @@ class CustomerTest {
         void shouldActivateCustomerAndChangeStatus() {
                 Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
                                 communicationDetails, Brand.GMX);
-                assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
+                assertEquals(CustomerStatus.INACTIVE, customer.status());
 
-                customer.setStatus(CustomerStatus.ACTIVE);
+                Customer newCustomer = customer.withStatus(CustomerStatus.ACTIVE);
 
-                assertEquals(CustomerStatus.ACTIVE, customer.getStatus());
+                assertEquals(CustomerStatus.ACTIVE, newCustomer.status());
         }
 
         @Test
@@ -180,28 +193,22 @@ class CustomerTest {
         void shouldDeactivateCustomerAndChangeStatus() {
                 Customer customer = createDefaultCustomer("John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null,
                                 communicationDetails, Brand.GMX);
-                customer.setStatus(CustomerStatus.ACTIVE);
-                assertEquals(CustomerStatus.ACTIVE, customer.getStatus());
+                Customer newCustomer = customer.withStatus(CustomerStatus.ACTIVE);
+                assertEquals(CustomerStatus.ACTIVE, newCustomer.status());
 
-                customer.setStatus(CustomerStatus.INACTIVE);
+                Customer newCustomer2 = newCustomer.withStatus(CustomerStatus.INACTIVE);
 
-                assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
+                assertEquals(CustomerStatus.INACTIVE, newCustomer2.status());
         }
 
         @Test
-        @DisplayName("Boundary: Extremely long name handling")
+        @DisplayName("Boundary: Extremely long firstname and lastname handling")
         void shouldHandleExtremelyLongNames() {
-                String longName = "A".repeat(2000);
-                Customer customer = createDefaultCustomer(
-                                longName,
-                                longName,
-                                LocalDate.of(1990, 1, 1),
-                                mainAddress,
-                                null,
-                                communicationDetails,
-                                Brand.GMX);
-                assertEquals(longName, customer.getFirstName());
-                assertEquals(longName, customer.getLastName());
+                String longName = "A".repeat(201);
+                assertThrows(CustomerValidationException.class,
+                                () -> createDefaultCustomer(longName, longName,
+                                                LocalDate.of(1990, 1, 1),
+                                                mainAddress, null, communicationDetails, Brand.GMX));
         }
 
         @Test
@@ -216,7 +223,7 @@ class CustomerTest {
                                 null,
                                 communicationDetails,
                                 Brand.GMX);
-                assertEquals(today, customer.getBirthDate());
+                assertEquals(today, customer.birthDate());
         }
 
         @Test
@@ -231,7 +238,7 @@ class CustomerTest {
                                 null,
                                 communicationDetails,
                                 Brand.GMX);
-                assertEquals(farPast, customer.getBirthDate());
+                assertEquals(farPast, customer.birthDate());
         }
 
         @Test
@@ -244,9 +251,9 @@ class CustomerTest {
                 Customer customer3 = createDefaultCustomer("John3", "Doe3", LocalDate.of(1993, 1, 3), mainAddress, null,
                                 communicationDetails, Brand.WEB_DE);
 
-                assertNotNull(customer1.getId(), "ID should not be null");
-                assertNotEquals(customer1.getId(), customer2.getId(), "IDs should be unique");
-                assertNotEquals(customer2.getId(), customer3.getId(), "IDs should be unique");
-                assertNotEquals(customer1.getId(), customer3.getId(), "IDs should be unique");
+                assertNotNull(customer1.id(), "ID should not be null");
+                assertNotEquals(customer1.id(), customer2.id(), "IDs should be unique");
+                assertNotEquals(customer2.id(), customer3.id(), "IDs should be unique");
+                assertNotEquals(customer1.id(), customer3.id(), "IDs should be unique");
         }
 }

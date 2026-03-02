@@ -8,6 +8,7 @@ import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +17,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("CustomerService Tests")
 class CustomerServiceTest {
 
     public Customer createDefaultCustomer(
@@ -46,33 +47,39 @@ class CustomerServiceTest {
             final Address invoiceAddress,
             final CommunicationDetails communicationDetails,
             final Brand brand) {
-        return new Customer(
+        return Customer.create(
                 firstName, lastName, birthDate,
                 address, invoiceAddress, communicationDetails, brand);
     }
 
-    @Mock
     private Address address;
 
-    @Mock
     private CommunicationDetails communicationDetails;
 
     @Mock
     private CustomerRepository customerRepository;
 
-    @InjectMocks
     private CustomerServiceImpl customerService;
+
+    @BeforeEach
+    void setUp() {
+        address = new Address("Street", "1", "12345", "City", "Country");
+        communicationDetails = new CommunicationDetails("john.doe@example.com", "123456789");
+        customerService = new CustomerServiceImpl(customerRepository);
+    }
 
     @Test
     @DisplayName("Create customer with valid data should succeed")
     void shouldCreateCustomerWhenDataIsValid() {
-        final Customer customer = customerService.createCustomer(createDefaultCustomer(
+        final Customer customer = createDefaultCustomer(
                 "John", "Doe", LocalDate.of(1990, 1, 1),
-                address, null, communicationDetails, Brand.GMX));
+                address, null, communicationDetails, Brand.GMX);
 
-        assertNotNull(customer.getId());
-        assertEquals("John", customer.getFirstName());
-        assertEquals(CustomerStatus.INACTIVE, customer.getStatus());
+        final Customer created = customerService.createCustomer(customer);
+
+        assertNotNull(created.id());
+        assertEquals("John", created.firstName());
+        assertEquals(CustomerStatus.INACTIVE, created.status());
         verify(customerRepository).save(any(Customer.class));
     }
 
@@ -91,7 +98,7 @@ class CustomerServiceTest {
                 "John", "Doe", LocalDate.of(1990, 1, 1),
                 address, null, communicationDetails, brand));
 
-        assertEquals(brand, customer.getBrand());
+        assertEquals(brand, customer.brand());
         verify(customerRepository).save(any(Customer.class));
     }
 
@@ -133,7 +140,7 @@ class CustomerServiceTest {
                 "John", "Doe", birthDate,
                 address, null, communicationDetails, Brand.GMX));
 
-        assertEquals(birthDate, customer.getBirthDate());
+        assertEquals(birthDate, customer.birthDate());
         verify(customerRepository).save(any(Customer.class));
     }
 
@@ -142,14 +149,16 @@ class CustomerServiceTest {
     void shouldUpdateAddressSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
+        final Customer updatedCustomerMock = mock(Customer.class);
         final Address newAddressMock = mock(Address.class);
 
         when(customerRepository.getById(customerId)).thenReturn(customerMock);
+        when(customerMock.withAddress(newAddressMock)).thenReturn(updatedCustomerMock);
 
         customerService.updateAddress(customerId, newAddressMock);
 
-        verify(customerMock).setAddress(newAddressMock);
-        verify(customerRepository).update(customerMock);
+        verify(customerMock).withAddress(newAddressMock);
+        verify(customerRepository).update(updatedCustomerMock);
     }
 
     @Test
@@ -157,14 +166,16 @@ class CustomerServiceTest {
     void shouldUpdateInvoiceAddressSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
+        final Customer updatedCustomerMock = mock(Customer.class);
         final Address newInvoiceAddressMock = mock(Address.class);
 
         when(customerRepository.getById(customerId)).thenReturn(customerMock);
+        when(customerMock.withInvoiceAddress(newInvoiceAddressMock)).thenReturn(updatedCustomerMock);
 
         customerService.updateInvoiceAddress(customerId, newInvoiceAddressMock);
 
-        verify(customerMock).setInvoiceAddress(newInvoiceAddressMock);
-        verify(customerRepository).update(customerMock);
+        verify(customerMock).withInvoiceAddress(newInvoiceAddressMock);
+        verify(customerRepository).update(updatedCustomerMock);
     }
 
     @Test
@@ -172,14 +183,16 @@ class CustomerServiceTest {
     void shouldUpdateCommunicationDetailsSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
+        final Customer updatedCustomerMock = mock(Customer.class);
         final CommunicationDetails newDetailsMock = mock(CommunicationDetails.class);
 
         when(customerRepository.getById(customerId)).thenReturn(customerMock);
+        when(customerMock.withCommunicationDetails(newDetailsMock)).thenReturn(updatedCustomerMock);
 
         customerService.updateCommunicationDetails(customerId, newDetailsMock);
 
-        verify(customerMock).setCommunicationDetails(newDetailsMock);
-        verify(customerRepository).update(customerMock);
+        verify(customerMock).withCommunicationDetails(newDetailsMock);
+        verify(customerRepository).update(updatedCustomerMock);
     }
 
     @Test
@@ -187,13 +200,15 @@ class CustomerServiceTest {
     void shouldActivateCustomerSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
+        final Customer updatedCustomerMock = mock(Customer.class);
 
         when(customerRepository.getById(customerId)).thenReturn(customerMock);
+        when(customerMock.withStatus(CustomerStatus.ACTIVE)).thenReturn(updatedCustomerMock);
 
         customerService.activateCustomer(customerId);
 
-        verify(customerMock).setStatus(CustomerStatus.ACTIVE);
-        verify(customerRepository).update(customerMock);
+        verify(customerMock).withStatus(CustomerStatus.ACTIVE);
+        verify(customerRepository).update(updatedCustomerMock);
     }
 
     @Test
@@ -201,13 +216,15 @@ class CustomerServiceTest {
     void shouldDeactivateCustomerSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
+        final Customer updatedCustomerMock = mock(Customer.class);
 
         when(customerRepository.getById(customerId)).thenReturn(customerMock);
+        when(customerMock.withStatus(CustomerStatus.INACTIVE)).thenReturn(updatedCustomerMock);
 
         customerService.deactivateCustomer(customerId);
 
-        verify(customerMock).setStatus(CustomerStatus.INACTIVE);
-        verify(customerRepository).update(customerMock);
+        verify(customerMock).withStatus(CustomerStatus.INACTIVE);
+        verify(customerRepository).update(updatedCustomerMock);
     }
 
     @Test

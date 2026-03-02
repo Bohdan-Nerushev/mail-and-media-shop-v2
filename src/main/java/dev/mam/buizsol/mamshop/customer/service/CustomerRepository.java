@@ -4,17 +4,11 @@ import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-interface CustomerRepository {
-
-        @NotNull
-        static CustomerRepository getInstance() {
-                return CustomerRepositoryImpl.getInstance();
-        }
+public interface CustomerRepository {
 
         void save(@Valid @NotNull final Customer customer);
 

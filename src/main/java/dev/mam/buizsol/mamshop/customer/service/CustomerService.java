@@ -11,34 +11,32 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.validation.annotation.Validated;
+
+@Validated
 public interface CustomerService {
 
-    @NotNull
-    static CustomerService getInstance() {
-        return CustomerServiceImpl.getInstance();
-    }
+        @NotNull
+        Customer createCustomer(@Valid @NotNull final Customer customer);
 
-    @NotNull
-    Customer createCustomer(@Valid @NotNull final Customer customer);
+        void updateAddress(@NotNull UUID customerId, @Valid @NotNull Address address) throws CustomerNotFoundException;
 
-    void updateAddress(@NotNull UUID customerId, @Valid @NotNull Address address) throws CustomerNotFoundException;
+        void updateInvoiceAddress(@NotNull UUID customerId, @Valid @NotNull Address address)
+                        throws CustomerNotFoundException;
 
-    void updateInvoiceAddress(@NotNull UUID customerId, @Valid @NotNull Address address)
-            throws CustomerNotFoundException;
+        void updateCommunicationDetails(
+                        @NotNull UUID customerId,
+                        @Valid @NotNull CommunicationDetails communicationDetails) throws CustomerNotFoundException;
 
-    void updateCommunicationDetails(
-            @NotNull UUID customerId,
-            @Valid @NotNull CommunicationDetails communicationDetails) throws CustomerNotFoundException;
+        void activateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-    void activateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
+        void deactivateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-    void deactivateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
+        void deleteCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-    void deleteCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
+        @NotNull
+        Optional<Customer> findCustomerById(@NotNull UUID customerId);
 
-    @NotNull
-    Optional<Customer> findCustomerById(@NotNull UUID customerId);
-
-    @NotNull
-    List<Customer> findAllCustomers();
+        @NotNull
+        List<Customer> findAllCustomers();
 }

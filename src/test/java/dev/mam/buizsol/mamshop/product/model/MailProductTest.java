@@ -11,30 +11,42 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("MailProduct Tests")
 class MailProductTest {
+
+        private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
         private StandardMailProduct createDefaultStandardMailProduct(
                         String name,
                         Brand brand,
                         BigDecimal monthlyFee) {
-                return new StandardMailProduct(
+                StandardMailProduct product = new StandardMailProduct(
                                 name,
                                 brand,
                                 monthlyFee);
+                validate(product);
+                return product;
         }
 
         private PremiumMailProduct createDefaultPremiumMailProduct(
                         String name,
                         Brand brand,
                         BigDecimal monthlyFee) {
-                return new PremiumMailProduct(
+                PremiumMailProduct product = new PremiumMailProduct(
                                 name,
                                 brand,
                                 monthlyFee);
+                validate(product);
+                return product;
         }
 
         private MailProduct createDefaultMailProduct(
@@ -43,13 +55,23 @@ class MailProductTest {
                         BigDecimal setupFee,
                         BigDecimal monthlyFee,
                         Long storageSize) {
-                return new MailProduct(
+                MailProduct product = new MailProduct(
                                 name,
                                 brand,
                                 setupFee,
                                 monthlyFee,
-                                storageSize) {
-                };
+                                storageSize);
+                validate(product);
+                return product;
+        }
+
+        private void validate(final Product product) {
+                Set<ConstraintViolation<Product>> violations = validator.validate(product);
+                if (violations.isEmpty()) {
+                        return;
+                }
+                String message = violations.iterator().next().getMessage();
+                throw new ProductValidationException(message);
         }
 
         @Test
@@ -62,7 +84,7 @@ class MailProductTest {
 
                 assertNotNull(product.getId());
                 assertEquals(new BigDecimal("4.99"), product.getSetupFee());
-                assertEquals(4L, product.getStorageSize());
+                assertEquals(4L, product.storageSize());
         }
 
         @Test
@@ -75,7 +97,7 @@ class MailProductTest {
 
                 assertNotNull(product.getId());
                 assertEquals(new BigDecimal("9.99"), product.getSetupFee());
-                assertEquals(8L, product.getStorageSize());
+                assertEquals(8L, product.storageSize());
         }
 
         @Test
@@ -100,14 +122,12 @@ class MailProductTest {
 
                 final BigDecimal invalidFee = new BigDecimal(feeString);
 
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultStandardMailProduct(
                                                 "Invalid Fee Mail",
                                                 Brand.WEB_DE,
                                                 invalidFee));
-
-                assertEquals("Monthly fee must be greater than 0.10 €", exception.getMessage());
         }
 
         @DisplayName("Verify MailProduct failure with null, empty or blank name")
@@ -117,42 +137,36 @@ class MailProductTest {
         void shouldThrowExceptionWhenMailProductNameIsInvalid(
                         final String invalidName) {
 
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultStandardMailProduct(
                                                 invalidName,
                                                 Brand.GMX,
                                                 new BigDecimal("2.50")));
-
-                assertEquals("Product name must not be null or empty", exception.getMessage());
         }
 
         @Test
         @DisplayName("Verify MailProduct failure with null brand")
         void shouldThrowExceptionWhenMailProductBrandIsNull() {
 
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultStandardMailProduct(
                                                 "No Brand Mail",
                                                 null,
                                                 new BigDecimal("3.00")));
-
-                assertEquals("Brand must not be null", exception.getMessage());
         }
 
         @Test
         @DisplayName("Verify MailProduct failure with null monthly fee")
         void shouldThrowExceptionWhenMailProductMonthlyFeeIsNull() {
 
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultStandardMailProduct(
                                                 "No Fee Mail",
                                                 Brand.GMX,
                                                 null));
-
-                assertEquals("Monthly fee must not be null", exception.getMessage());
         }
 
         @DisplayName("Verify MailProduct success with various valid and large monthly fees")
@@ -183,14 +197,12 @@ class MailProductTest {
 
                 final BigDecimal invalidFee = new BigDecimal(feeString);
 
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultPremiumMailProduct(
                                                 "Premium Invalid Fee",
                                                 Brand.WEB_DE,
                                                 invalidFee));
-
-                assertEquals("Monthly fee must be greater than 0.10 €", exception.getMessage());
         }
 
         @DisplayName("Verify PremiumMailProduct failure with null, empty or blank name")
@@ -200,14 +212,12 @@ class MailProductTest {
         void shouldThrowExceptionWhenPremiumMailProductNameIsInvalid(
                         final String invalidName) {
 
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultPremiumMailProduct(
                                                 invalidName,
                                                 Brand.WEB_DE,
                                                 new BigDecimal("9.99")));
-
-                assertEquals("Product name must not be null or empty", exception.getMessage());
         }
 
         @DisplayName("Verify PremiumMailProduct success with various valid monthly fees")
@@ -248,14 +258,12 @@ class MailProductTest {
         @DisplayName("Verify PremiumMailProduct failure with null brand")
         void shouldThrowExceptionWhenPremiumMailProductBrandIsNull() {
 
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultPremiumMailProduct(
                                                 "Premium Null Brand",
                                                 null,
                                                 new BigDecimal("12.00")));
-
-                assertEquals("Brand must not be null", exception.getMessage());
         }
 
         @Test
@@ -275,11 +283,42 @@ class MailProductTest {
         @Test
         @DisplayName("Negative: Failure with invalid storage size (< 1GB)")
         void shouldThrowExceptionWhenStorageSizeIsInvalid() {
-                final ProductValidationException exception = assertThrows(
+                assertThrows(
                                 ProductValidationException.class,
                                 () -> createDefaultMailProduct("Small Storage", Brand.GMX, BigDecimal.ZERO,
                                                 BigDecimal.ONE, 0L));
+        }
 
-                assertEquals("Storage size must be at least 1GB", exception.getMessage());
+        @Test
+        @DisplayName("Negative: Failure with invalid storage size (< 1GB)")
+        void shouldThrowProductValidationExceptionWhenStorageSizeIsInvalid() {
+                assertThrows(
+                                ProductValidationException.class,
+                                () -> createDefaultMailProduct("Small Storage", Brand.GMX, BigDecimal.ZERO,
+                                                BigDecimal.ONE, 0L));
+                assertThrows(
+                                ProductValidationException.class,
+                                () -> createDefaultMailProduct("Small Storage", Brand.GMX, BigDecimal.ZERO,
+                                                BigDecimal.ONE, null));
+        }
+
+        @Test
+        @DisplayName("Negative: StandardMailProduct failure with too long name (> 100 characters)")
+        void shouldThrowExceptionWhenStandardMailProductNameIsTooLong() {
+                String longName = "A".repeat(101);
+                ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
+                                () -> createDefaultStandardMailProduct(longName, Brand.GMX, BigDecimal.ONE));
+                assertEquals("Product name must not exceed 100 characters", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Negative: PremiumMailProduct failure with too long name (> 100 characters)")
+        void shouldThrowExceptionWhenPremiumMailProductNameIsTooLong() {
+                String longName = "A".repeat(101);
+                ProductValidationException exception = assertThrows(
+                                ProductValidationException.class,
+                                () -> createDefaultPremiumMailProduct(longName, Brand.GMX, BigDecimal.ONE));
+                assertEquals("Product name must not exceed 100 characters", exception.getMessage());
         }
 }

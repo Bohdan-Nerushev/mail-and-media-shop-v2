@@ -4,7 +4,7 @@ import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException
 import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
-import jakarta.annotation.Nullable;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -13,40 +13,27 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public final class Invoice {
+public record Invoice(
+        @NotNull Brand brand,
+        @NotNull LocalDate invoiceDate,
+        @NotNull UUID customerId,
+        @NotNull @Valid Address address,
+        @NotNull @Valid Address invoiceAddress,
+        @NotNull List<@Valid InvoiceItem> items,
+        @NotNull BigDecimal totalSetupFee,
+        @NotNull BigDecimal totalMonthlyFee,
+        @NotNull @PositiveOrZero BigDecimal discount,
+        @NotNull BigDecimal totalAmount) {
 
-    @NotNull
-    private final Brand brand;
-
-    @NotNull
-    private final LocalDate invoiceDate;
-
-    @NotNull
-    private final UUID customerId;
-
-    @NotNull
-    @Valid
-    private final Address address;
-
-    @NotNull
-    @Valid
-    private final Address invoiceAddress;
-
-    @NotNull
-    private final List<@Valid InvoiceItem> items;
-
-    @NotNull
-    private final BigDecimal totalSetupFee;
-
-    @NotNull
-    private final BigDecimal totalMonthlyFee;
-
-    @NotNull
-    @PositiveOrZero
-    private final BigDecimal discount;
-
-    @NotNull
-    private final BigDecimal totalAmount;
+    public Invoice {
+        if (items == null)
+            throw new InvoiceValidationException("Items list must not be null");
+        if (discount == null)
+            throw new InvalidInvoiceDiscountException("Discount must not be null");
+        if (discount.compareTo(BigDecimal.ZERO) < 0)
+            throw new InvalidInvoiceDiscountException("Discount must not be negative");
+        items = List.copyOf(items);
+    }
 
     public Invoice(
             @NotNull Brand brand,
@@ -55,99 +42,42 @@ public final class Invoice {
             @NotNull @Valid Address invoiceAddress,
             @NotNull List<@Valid InvoiceItem> items,
             @NotNull BigDecimal discount) {
-        validateNotNull(items, "Items list");
-        validateDiscount(discount);
-
-        this.brand = brand;
-        this.customerId = customerId;
-        this.address = address;
-        this.invoiceAddress = invoiceAddress;
-        this.items = List.copyOf(items);
-        this.discount = discount;
-        this.invoiceDate = LocalDate.now();
-
-        this.totalSetupFee = calculateTotalSetupFee();
-        this.totalMonthlyFee = calculateTotalMonthlyFee();
-        this.totalAmount = totalSetupFee.add(totalMonthlyFee).subtract(discount);
+        this(
+                brand,
+                LocalDate.now(),
+                customerId,
+                address,
+                invoiceAddress,
+                items,
+                calculateTotalSetupFee(items),
+                calculateTotalMonthlyFee(items),
+                discount,
+                calculateTotalAmount(items, discount));
     }
 
-    private BigDecimal calculateTotalSetupFee() {
+    private static BigDecimal calculateTotalSetupFee(List<InvoiceItem> items) {
+        if (items == null)
+            return BigDecimal.ZERO;
         return items.stream()
                 .map(InvoiceItem::setupFee)
-                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private BigDecimal calculateTotalMonthlyFee() {
+    private static BigDecimal calculateTotalMonthlyFee(List<InvoiceItem> items) {
+        if (items == null)
+            return BigDecimal.ZERO;
         return items.stream()
                 .map(InvoiceItem::monthlyFee)
-                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    @NotNull
-    public Brand getBrand() {
-        return brand;
-    }
-
-    @NotNull
-    public LocalDate getInvoiceDate() {
-        return invoiceDate;
-    }
-
-    @NotNull
-    public UUID getCustomerId() {
-        return customerId;
-    }
-
-    @NotNull
-    public Address getAddress() {
-        return address;
-    }
-
-    @NotNull
-    public Address getInvoiceAddress() {
-        return invoiceAddress;
-    }
-
-    @NotNull
-    public List<InvoiceItem> getItems() {
-        return items;
-    }
-
-    @NotNull
-    public BigDecimal getTotalSetupFee() {
-        return totalSetupFee;
-    }
-
-    @NotNull
-    public BigDecimal getTotalMonthlyFee() {
-        return totalMonthlyFee;
-    }
-
-    @NotNull
-    public BigDecimal getDiscount() {
-        return discount;
-    }
-
-    @NotNull
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
-    }
-
-    protected void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new InvoiceValidationException(fieldName + " must not be null");
-        }
-    }
-
-    protected void validateDiscount(
-            @NotNull final BigDecimal discount) {
-        if (discount == null) {
+    private static BigDecimal calculateTotalAmount(List<InvoiceItem> items, BigDecimal discount) {
+        if (discount == null)
             throw new InvalidInvoiceDiscountException("Discount must not be null");
-        }
-        if (discount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new InvalidInvoiceDiscountException("Discount cannot be negative");
-        }
+        if (items == null)
+            throw new InvoiceValidationException("Items list must not be null");
+        return calculateTotalSetupFee(items)
+                .add(calculateTotalMonthlyFee(items))
+                .subtract(discount);
     }
 }

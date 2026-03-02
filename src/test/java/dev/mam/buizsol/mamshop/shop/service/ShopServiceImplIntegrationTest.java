@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.shop.service;
 
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
+import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
@@ -13,16 +14,16 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
-import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
-import dev.mam.buizsol.mamshop.shop.exception.CustomerAndProductBrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,19 +31,18 @@ import java.util.List;
 import java.util.UUID;
 
 import dev.mam.buizsol.mamshop.product.service.ProductService;
+import dev.mam.buizsol.mamshop.config.AppConfig;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringJUnitConfig(classes = AppConfig.class)
+@DisplayName("ShopServiceImpl Integration Test")
 class ShopServiceImplIntegrationTest {
 
-        private ShopServiceImpl shopService;
+        @Autowired
+        private ShopService shopService;
+        @Autowired
         private ProductService productService;
-
-        @BeforeEach
-        void setUp() {
-                shopService = (ShopServiceImpl) ShopService.getInstance();
-                productService = ProductService.getInstance();
-        }
 
         private Product createDefaultStandardMailProduct(
                         final String name,
@@ -94,7 +94,7 @@ class ShopServiceImplIntegrationTest {
                         final Address address,
                         final Address invoiceAddress,
                         final CommunicationDetails communicationDetails) {
-                return new Customer(
+                return Customer.create(
                                 firstName,
                                 lastName,
                                 birthDate,
@@ -119,9 +119,9 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789"));
                 Customer registered = shopService.registerCustomer(customer);
 
-                assertNotNull(registered.getId());
-                assertEquals(customer.getFirstName(), registered.getFirstName());
-                assertEquals(brand, registered.getBrand());
+                assertNotNull(registered.id());
+                assertEquals(customer.firstName(), registered.firstName());
+                assertEquals(brand, registered.brand());
         }
 
         @Test
@@ -142,10 +142,10 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                Customer loaded = shopService.loadCustomer(customer.getId());
+                Customer loaded = shopService.loadCustomer(customer.id());
 
-                assertEquals(customer.getId(), loaded.getId());
-                assertEquals(brand, loaded.getBrand());
+                assertEquals(customer.id(), loaded.id());
+                assertEquals(brand, loaded.brand());
         }
 
         @Test
@@ -166,10 +166,10 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
-                Customer activated = shopService.loadCustomer(customer.getId());
-                assertEquals(CustomerStatus.ACTIVE, activated.getStatus());
+                Customer activated = shopService.loadCustomer(customer.id());
+                assertEquals(CustomerStatus.ACTIVE, activated.status());
         }
 
         @ParameterizedTest
@@ -184,11 +184,11 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
-                shopService.deactivateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
+                shopService.deactivateCustomer(customer.id());
 
-                Customer deactivated = shopService.loadCustomer(customer.getId());
-                assertEquals(CustomerStatus.INACTIVE, deactivated.getStatus());
+                Customer deactivated = shopService.loadCustomer(customer.id());
+                assertEquals(CustomerStatus.INACTIVE, deactivated.status());
         }
 
         @ParameterizedTest
@@ -204,8 +204,8 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
 
-                assertDoesNotThrow(() -> shopService.deactivateCustomer(customer.getId()));
-                assertEquals(CustomerStatus.INACTIVE, shopService.loadCustomer(customer.getId()).getStatus());
+                assertDoesNotThrow(() -> shopService.deactivateCustomer(customer.id()));
+                assertEquals(CustomerStatus.INACTIVE, shopService.loadCustomer(customer.id()).status());
         }
 
         @ParameterizedTest
@@ -220,9 +220,9 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.removeCustomer(customer.getId());
+                shopService.removeCustomer(customer.id());
 
-                assertThrows(CustomerNotFoundException.class, () -> shopService.loadCustomer(customer.getId()));
+                assertThrows(CustomerNotFoundException.class, () -> shopService.loadCustomer(customer.id()));
         }
 
         @ParameterizedTest
@@ -238,13 +238,13 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
                 Address newAddress = createDefaultAddress("Street_", "2", "12345", "City_", "Country_");
-                Customer updated = shopService.updateAddress(customer.getId(), newAddress);
+                Customer updated = shopService.updateAddress(customer.id(), newAddress);
 
-                assertEquals(newAddress.street(), updated.getAddress().street());
-                assertEquals(newAddress.city(), updated.getAddress().city());
+                assertEquals(newAddress.street(), updated.address().street());
+                assertEquals(newAddress.city(), updated.address().city());
         }
 
         @Test
@@ -261,7 +261,7 @@ class ShopServiceImplIntegrationTest {
 
                 Address newAddress = createDefaultAddress("Street_", "2", "12345", "City_", "Country_");
                 assertThrows(CustomerNotActiveException.class,
-                                () -> shopService.updateAddress(customer.getId(), newAddress));
+                                () -> shopService.updateAddress(customer.id(), newAddress));
         }
 
         @ParameterizedTest
@@ -285,15 +285,15 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
                 Product product = createDefaultStandardMailProduct("Standard Mail", brand, new BigDecimal("2.50"));
                 productService.createProduct(product);
 
-                Contract contract = shopService.purchaseProduct(customer.getId(), product.getId());
+                Contract contract = shopService.purchaseProduct(customer.id(), product.getId());
                 assertNotNull(contract);
-                assertEquals(customer.getId(), contract.getCustomerId());
-                assertEquals(product.getId(), contract.getProductId());
+                assertEquals(customer.id(), contract.customerId());
+                assertEquals(product.getId(), contract.productId());
         }
 
         @ParameterizedTest
@@ -308,15 +308,15 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
                 Product product = createDefaultPremiumMailProduct("Premium Mail", brand, new BigDecimal("2.50"));
                 productService.createProduct(product);
 
-                Contract contract = shopService.purchaseProduct(customer.getId(), product.getId());
+                Contract contract = shopService.purchaseProduct(customer.id(), product.getId());
                 assertNotNull(contract);
-                assertEquals(customer.getId(), contract.getCustomerId());
-                assertEquals(product.getId(), contract.getProductId());
+                assertEquals(customer.id(), contract.customerId());
+                assertEquals(product.getId(), contract.productId());
         }
 
         @ParameterizedTest
@@ -336,14 +336,14 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
                 Product product = createDefaultStandardMailProduct("Mismatched Mail", productBrand,
                                 new BigDecimal("2.50"));
                 productService.createProduct(product);
 
-                assertThrows(CustomerAndProductBrandMismatchException.class,
-                                () -> shopService.purchaseProduct(customer.getId(), product.getId()));
+                assertThrows(BrandMismatchException.class,
+                                () -> shopService.purchaseProduct(customer.id(), product.getId()));
         }
 
         @ParameterizedTest
@@ -358,10 +358,10 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
                 assertThrows(ProductNotFoundException.class,
-                                () -> shopService.purchaseProduct(customer.getId(), UUID.randomUUID()));
+                                () -> shopService.purchaseProduct(customer.id(), UUID.randomUUID()));
         }
 
         @ParameterizedTest
@@ -379,7 +379,7 @@ class ShopServiceImplIntegrationTest {
                 Product product = createDefaultStandardMailProduct("Standard Mail", brand, new BigDecimal("2.50"));
 
                 assertThrows(CustomerNotActiveException.class,
-                                () -> shopService.purchaseProduct(customer.getId(), product.getId()));
+                                () -> shopService.purchaseProduct(customer.id(), product.getId()));
         }
 
         @ParameterizedTest
@@ -397,7 +397,7 @@ class ShopServiceImplIntegrationTest {
                 Product product = createDefaultPremiumMailProduct("Premium Mail", brand, new BigDecimal("2.50"));
 
                 assertThrows(CustomerNotActiveException.class,
-                                () -> shopService.purchaseProduct(customer.getId(), product.getId()));
+                                () -> shopService.purchaseProduct(customer.id(), product.getId()));
         }
 
         @ParameterizedTest
@@ -412,17 +412,17 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
                 Product product = createDefaultStandardMailProduct("Mail", brand, new BigDecimal("2.50"));
                 productService.createProduct(product);
-                Contract contract = shopService.purchaseProduct(customer.getId(), product.getId());
-                shopService.activateContract(contract.getId());
+                Contract contract = shopService.purchaseProduct(customer.id(), product.getId());
+                shopService.activateContract(contract.id());
 
-                Invoice invoice = shopService.generateInvoice(customer.getId());
+                Invoice invoice = shopService.generateInvoice(customer.id());
                 assertNotNull(invoice);
-                assertEquals(customer.getId(), invoice.getCustomerId());
-                assertFalse(invoice.getItems().isEmpty());
+                assertEquals(customer.id(), invoice.customerId());
+                assertFalse(invoice.items().isEmpty());
         }
 
         @ParameterizedTest
@@ -437,14 +437,14 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
                 Product product = createDefaultStandardMailProduct("Mail", brand, new BigDecimal("2.50"));
                 productService.createProduct(product);
-                shopService.purchaseProduct(customer.getId(), product.getId());
-                List<Contract> contracts = shopService.loadAllContracts(customer.getId());
+                shopService.purchaseProduct(customer.id(), product.getId());
+                List<Contract> contracts = shopService.loadAllContracts(customer.id());
                 assertFalse(contracts.isEmpty());
-                assertEquals(customer.getId(), contracts.get(0).getCustomerId());
+                assertEquals(customer.id(), contracts.get(0).customerId());
         }
 
         @Test
@@ -458,21 +458,21 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
                 Product product = createDefaultPremiumMailProduct("Premium Mail", Brand.GMX, new BigDecimal("2.50"));
                 productService.createProduct(product);
-                Contract contract = shopService.purchaseProduct(customer.getId(), product.getId());
+                Contract contract = shopService.purchaseProduct(customer.id(), product.getId());
 
-                shopService.activateContract(contract.getId());
+                shopService.activateContract(contract.id());
 
-                List<Contract> contracts = shopService.loadAllContracts(customer.getId());
+                List<Contract> contracts = shopService.loadAllContracts(customer.id());
                 Contract updatedContract = contracts.stream()
-                                .filter(c -> c.getId().equals(contract.getId()))
+                                .filter(c -> c.id().equals(contract.id()))
                                 .findFirst()
                                 .orElseThrow();
 
-                assertEquals(ContractStatus.ACTIVE, updatedContract.getStatus());
+                assertEquals(ContractStatus.ACTIVE, updatedContract.status());
         }
 
         @Test
@@ -486,12 +486,12 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
                 Address newInv = createDefaultAddress("Street_", "1", "12345", "City_", "Country_");
-                Customer updated = shopService.updateInvoiceAddress(customer.getId(), newInv);
+                Customer updated = shopService.updateInvoiceAddress(customer.id(), newInv);
 
-                assertEquals(newInv.street(), updated.getInvoiceAddress().street());
+                assertEquals(newInv.street(), updated.invoiceAddress().street());
         }
 
         @Test
@@ -505,13 +505,13 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                shopService.activateCustomer(customer.getId());
+                shopService.activateCustomer(customer.id());
 
                 CommunicationDetails newDetails = createDefaultCommunicationDetails("user_@test-domain.com",
                                 "+49-123-456789");
-                Customer updated = shopService.updateCommunicationDetails(customer.getId(), newDetails);
+                Customer updated = shopService.updateCommunicationDetails(customer.id(), newDetails);
 
-                assertEquals(newDetails.email(), updated.getCommunicationDetails().email());
+                assertEquals(newDetails.email(), updated.communicationDetails().email());
         }
 
         @Test
@@ -532,7 +532,7 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                assertThrows(CustomerNotActiveException.class, () -> shopService.loadAllContracts(customer.getId()));
+                assertThrows(CustomerNotActiveException.class, () -> shopService.loadAllContracts(customer.id()));
         }
 
         @Test
@@ -548,7 +548,7 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
                 Address newInv = createDefaultAddress("Street_", "1", "12345", "City_", "Country_");
                 assertThrows(CustomerNotActiveException.class,
-                                () -> shopService.updateInvoiceAddress(customer.getId(), newInv));
+                                () -> shopService.updateInvoiceAddress(customer.id(), newInv));
         }
 
         @Test
@@ -565,7 +565,7 @@ class ShopServiceImplIntegrationTest {
                 CommunicationDetails newComms = createDefaultCommunicationDetails("user_@test-domain.com",
                                 "+49-123-456789");
                 assertThrows(CustomerNotActiveException.class,
-                                () -> shopService.updateCommunicationDetails(customer.getId(), newComms));
+                                () -> shopService.updateCommunicationDetails(customer.id(), newComms));
         }
 
         @Test
@@ -579,7 +579,7 @@ class ShopServiceImplIntegrationTest {
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-                assertThrows(CustomerNotActiveException.class, () -> shopService.generateInvoice(customer.getId()));
+                assertThrows(CustomerNotActiveException.class, () -> shopService.generateInvoice(customer.id()));
         }
 
         @Test
@@ -595,36 +595,14 @@ class ShopServiceImplIntegrationTest {
         }
 
         @Test
-        @DisplayName("Register Product: Successfully registers and returns the product")
-        void shouldRegisterProductWhenValidProductProvided() {
-                Product product = createDefaultStandardMailProduct("Shop Product", Brand.GMX, new BigDecimal("4.99"));
+        @DisplayName("Positive - Load All Products for Brand: Returns non-empty list")
+        void shouldHaveProductsInCatalogAfterInitialization() {
+                List<Product> gmxProducts = shopService.loadAllProductsForBrand(Brand.GMX);
+                List<Product> mailComProducts = shopService.loadAllProductsForBrand(Brand.MAIL_COM);
+                List<Product> webDeProducts = shopService.loadAllProductsForBrand(Brand.WEB_DE);
 
-                Product registered = shopService.registerProduct(product);
-
-                assertNotNull(registered);
-                assertEquals(product.getId(), registered.getId());
-
-                java.util.Optional<Product> found = productService.findById(product.getId());
-                assertTrue(found.isPresent());
-                assertEquals(product.getName(), found.get().getName());
-        }
-
-        @Test
-        @DisplayName("Register Product: Throws exception when product is null (Negative)")
-        void shouldThrowExceptionWhenRegisteringNullProduct() {
-                assertThrows(ProductValidationException.class, () -> shopService.registerProduct(null));
-        }
-
-        @Test
-        @DisplayName("Register Product: Successfully registers different product types")
-        void shouldRegisterVariousProductTypesSuccessfully() {
-                Product standard = createDefaultStandardMailProduct("Std", Brand.WEB_DE, new BigDecimal("5.00"));
-                Product premium = createDefaultPremiumMailProduct("Prem", Brand.WEB_DE, new BigDecimal("10.00"));
-
-                shopService.registerProduct(standard);
-                shopService.registerProduct(premium);
-
-                assertTrue(productService.findById(standard.getId()).isPresent());
-                assertTrue(productService.findById(premium.getId()).isPresent());
+                assertFalse(gmxProducts.isEmpty());
+                assertFalse(mailComProducts.isEmpty());
+                assertFalse(webDeProducts.isEmpty());
         }
 }

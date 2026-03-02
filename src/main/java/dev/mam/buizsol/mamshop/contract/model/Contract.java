@@ -6,102 +6,54 @@ import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class Contract {
+public record Contract(
+        @NotNull UUID id,
+        @NotNull UUID customerId,
+        @NotNull UUID productId,
+        @NotNull LocalDate creationDate,
+        @NotNull ContractStatus status) {
 
-    @NotNull
-    private final UUID id;
+    public Contract {
+        if (id == null || customerId == null || productId == null || creationDate == null || status == null) {
+            throw new ContractValidationException("All contract fields must not be null");
+        }
+    }
 
-    @NotNull
-    private final UUID customerId;
-
-    @NotNull
-    private final UUID productId;
-
-    @NotNull
-    private final LocalDate creationDate;
-
-    @NotNull
-    private ContractStatus status;
-
-    public Contract(
+    public static Contract create(
             @NotNull @Valid final Customer customer,
-            @NotNull @Valid final Product product) throws BrandMismatchException {
+            @NotNull @Valid final Product product) {
 
-        validateNotNull(customer, "Customer");
-        validateNotNull(product, "Product");
-        validateBrandMatch(customer, product);
-        validateCustomerActive(customer);
-
-        this.id = UUID.randomUUID();
-        this.customerId = customer.getId();
-        this.productId = product.getId();
-        this.creationDate = LocalDate.now();
-        this.status = ContractStatus.INACTIVE;
-    }
-
-    @NotNull
-    public UUID getId() {
-        return id;
-    }
-
-    @NotNull
-    public UUID getCustomerId() {
-        return customerId;
-    }
-
-    @NotNull
-    public UUID getProductId() {
-        return productId;
-    }
-
-    @NotNull
-    public LocalDate getCreationDate() {
-        return creationDate;
-    }
-
-    @NotNull
-    public ContractStatus getStatus() {
-        return status;
-    }
-
-    public void updateStatus(
-            @NotNull final ContractStatus status) {
-        validateNotNull(status, "Status");
-        this.status = status;
-    }
-
-    private void validateBrandMatch(
-            @NotNull final Customer customer,
-            @NotNull final Product product) throws BrandMismatchException {
-        if (!customer.getBrand().equals(product.getBrand())) {
+        if (customer == null || product == null) {
+            throw new ContractValidationException("Customer and Product must not be null");
+        }
+        if (!customer.brand().equals(product.getBrand())) {
             throw new BrandMismatchException(String.format(
                     "Customer brand %s does not match product brand %s",
-                    customer.getBrand(),
-                    product.getBrand()));
+                    customer.brand(), product.getBrand()));
         }
+        if (customer.status() != CustomerStatus.ACTIVE) {
+            throw new CustomerNotActiveException("Customer is not active");
+        }
+
+        return new Contract(
+                UUID.randomUUID(),
+                customer.id(),
+                product.getId(),
+                LocalDate.now(),
+                ContractStatus.INACTIVE);
     }
 
-    private void validateCustomerActive(
-            @NotNull final Customer customer) {
-        if (customer.getStatus() != CustomerStatus.ACTIVE) {
-            throw new CustomerNotActiveException(String.format(
-                    "Customer %s is not active",
-                    customer.getId()));
+    @NotNull
+    public Contract withStatus(@NotNull final ContractStatus newStatus) {
+        if (newStatus == null) {
+            throw new ContractValidationException("Status must not be null");
         }
-    }
-
-    private void validateNotNull(
-            @Nullable final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new ContractValidationException(fieldName + " must not be null");
-        }
+        return new Contract(id, customerId, productId, creationDate, newStatus);
     }
 }

@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -38,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("BillingService Tests")
 class BillingServiceTest {
 
     @Mock
@@ -62,8 +62,9 @@ class BillingServiceTest {
         Address address = new Address("Street", "1", "12345", "City", "Country");
         CommunicationDetails communication = new CommunicationDetails("test@test.com", "123456789");
 
-        testCustomer = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), address, null, communication, Brand.GMX);
-        customerId = testCustomer.getId();
+        testCustomer = Customer.create("John", "Doe", LocalDate.of(1990, 1, 1), address, null, communication,
+                Brand.GMX);
+        customerId = testCustomer.id();
 
         testProduct = new StandardMailProduct("Standard Mail", Brand.GMX, new BigDecimal("5.00"));
     }
@@ -74,10 +75,10 @@ class BillingServiceTest {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         Contract contract = mock(Contract.class);
-        when(contract.getStatus()).thenReturn(ContractStatus.ACTIVE);
-        when(contract.getProductId()).thenReturn(testProduct.getId());
-        when(contract.getId()).thenReturn(UUID.randomUUID());
-        when(contract.getCreationDate()).thenReturn(LocalDate.now());
+        when(contract.status()).thenReturn(ContractStatus.ACTIVE);
+        when(contract.productId()).thenReturn(testProduct.getId());
+        when(contract.id()).thenReturn(UUID.randomUUID());
+        when(contract.creationDate()).thenReturn(LocalDate.now());
 
         when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of(contract));
         when(productService.findById(testProduct.getId())).thenReturn(Optional.of(testProduct));
@@ -85,9 +86,9 @@ class BillingServiceTest {
         Invoice invoice = billingService.generateInvoice(customerId);
 
         assertNotNull(invoice);
-        assertEquals(customerId, invoice.getCustomerId());
-        assertEquals(BigDecimal.ZERO, invoice.getDiscount());
-        assertEquals(1, invoice.getItems().size());
+        assertEquals(customerId, invoice.customerId());
+        assertEquals(BigDecimal.ZERO, invoice.discount());
+        assertEquals(1, invoice.items().size());
     }
 
     @Test
@@ -100,7 +101,7 @@ class BillingServiceTest {
         Invoice invoice = billingService.generateInvoice(customerId, discount);
 
         assertNotNull(invoice);
-        assertEquals(discount, invoice.getDiscount());
+        assertEquals(discount, invoice.discount());
     }
 
     @Test
@@ -112,16 +113,16 @@ class BillingServiceTest {
         Product p2 = new StandardMailProduct("P2", Brand.GMX, new BigDecimal("15.00"));
 
         Contract c1 = mock(Contract.class);
-        when(c1.getStatus()).thenReturn(ContractStatus.ACTIVE);
-        when(c1.getProductId()).thenReturn(p1.getId());
-        when(c1.getId()).thenReturn(UUID.randomUUID());
-        when(c1.getCreationDate()).thenReturn(LocalDate.now());
+        when(c1.status()).thenReturn(ContractStatus.ACTIVE);
+        when(c1.productId()).thenReturn(p1.getId());
+        when(c1.id()).thenReturn(UUID.randomUUID());
+        when(c1.creationDate()).thenReturn(LocalDate.now());
 
         Contract c2 = mock(Contract.class);
-        when(c2.getStatus()).thenReturn(ContractStatus.ACTIVE);
-        when(c2.getProductId()).thenReturn(p2.getId());
-        when(c2.getId()).thenReturn(UUID.randomUUID());
-        when(c2.getCreationDate()).thenReturn(LocalDate.now());
+        when(c2.status()).thenReturn(ContractStatus.ACTIVE);
+        when(c2.productId()).thenReturn(p2.getId());
+        when(c2.id()).thenReturn(UUID.randomUUID());
+        when(c2.creationDate()).thenReturn(LocalDate.now());
 
         when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of(c1, c2));
         when(productService.findById(p1.getId())).thenReturn(Optional.of(p1));
@@ -131,9 +132,9 @@ class BillingServiceTest {
 
         Invoice invoice = billingService.generateInvoice(customerId, discount);
 
-        assertEquals(new BigDecimal("9.98"), invoice.getTotalSetupFee());
-        assertEquals(new BigDecimal("20.00"), invoice.getTotalMonthlyFee());
-        assertEquals(new BigDecimal("24.98"), invoice.getTotalAmount());
+        assertEquals(new BigDecimal("9.98"), invoice.totalSetupFee());
+        assertEquals(new BigDecimal("20.00"), invoice.totalMonthlyFee());
+        assertEquals(new BigDecimal("24.98"), invoice.totalAmount());
     }
 
     @Test
@@ -142,31 +143,39 @@ class BillingServiceTest {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
         LocalDate creationDate = LocalDate.now().minusDays(10);
         Contract contract = mock(Contract.class);
-        when(contract.getStatus()).thenReturn(ContractStatus.ACTIVE);
-        when(contract.getProductId()).thenReturn(testProduct.getId());
-        when(contract.getId()).thenReturn(UUID.randomUUID());
-        when(contract.getCreationDate()).thenReturn(creationDate);
+        when(contract.status()).thenReturn(ContractStatus.ACTIVE);
+        when(contract.productId()).thenReturn(testProduct.getId());
+        when(contract.id()).thenReturn(UUID.randomUUID());
+        when(contract.creationDate()).thenReturn(creationDate);
 
         when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of(contract));
         when(productService.findById(testProduct.getId())).thenReturn(Optional.of(testProduct));
 
         Invoice invoice = billingService.generateInvoice(customerId);
-        InvoiceItem item = invoice.getItems().get(0);
+        InvoiceItem item = invoice.items().get(0);
 
         assertEquals(testProduct.getId(), item.productId());
         assertEquals(testProduct.getName(), item.productName());
-        assertEquals(contract.getId(), item.contractId());
+        assertEquals(contract.id(), item.contractId());
         assertEquals(creationDate, item.contractCreationDate());
         assertEquals(testProduct.getSetupFee(), item.setupFee());
         assertEquals(testProduct.getMonthlyFee(), item.monthlyFee());
     }
 
-    @DisplayName("Invalid discount validation checks")
-    @ParameterizedTest(name = "Invalid discount validation - value: {0}")
-    @ValueSource(strings = { "0.01", "0.05", "0.10", "-0.01", "-1.00" })
-    void shouldThrowExceptionWhenDiscountIsInvalid(BigDecimal invalidDiscount) {
-        lenient().when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
+    @DisplayName("Invalid small positive discount validation checks")
+    @ParameterizedTest(name = "Invalid small positive discount validation - value: {0}")
+    @ValueSource(strings = { "0.01", "0.05", "0.10" })
+    void shouldThrowExceptionWhenDiscountIsSmallPositive(String invalidDiscountStr) {
+        BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
+        assertThrows(InvalidInvoiceDiscountException.class,
+                () -> billingService.generateInvoice(customerId, invalidDiscount));
+    }
 
+    @DisplayName("Invalid negative discount validation checks")
+    @ParameterizedTest(name = "Invalid negative discount validation - value: {0}")
+    @ValueSource(strings = { "-0.01", "-1.00" })
+    void shouldThrowExceptionWhenDiscountIsNegative(String invalidDiscountStr) {
+        BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
         assertThrows(InvalidInvoiceDiscountException.class,
                 () -> billingService.generateInvoice(customerId, invalidDiscount));
     }
@@ -185,15 +194,15 @@ class BillingServiceTest {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         Contract contract = mock(Contract.class);
-        when(contract.getStatus()).thenReturn(ContractStatus.INACTIVE);
+        when(contract.status()).thenReturn(ContractStatus.INACTIVE);
         when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of(contract));
 
         Invoice invoice = billingService.generateInvoice(customerId);
 
-        assertTrue(invoice.getItems().isEmpty());
-        assertEquals(BigDecimal.ZERO, invoice.getTotalSetupFee());
-        assertEquals(BigDecimal.ZERO, invoice.getTotalMonthlyFee());
-        assertEquals(BigDecimal.ZERO, invoice.getTotalAmount());
+        assertTrue(invoice.items().isEmpty());
+        assertEquals(BigDecimal.ZERO, invoice.totalSetupFee());
+        assertEquals(BigDecimal.ZERO, invoice.totalMonthlyFee());
+        assertEquals(BigDecimal.ZERO, invoice.totalAmount());
     }
 
     @DisplayName("Null arguments validation for generateInvoice")
@@ -204,7 +213,11 @@ class BillingServiceTest {
             "null, null"
     }, nullValues = { "null" })
     void shouldThrowExceptionWhenArgumentsAreNull(UUID cid, BigDecimal disc) {
-        assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(cid, disc));
+        if (cid == null) {
+            assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(cid, disc));
+        } else {
+            assertThrows(InvalidInvoiceDiscountException.class, () -> billingService.generateInvoice(cid, disc));
+        }
     }
 
     @Test
@@ -212,8 +225,8 @@ class BillingServiceTest {
     void shouldThrowExceptionWhenProductInContractDoesNotExist() throws Exception {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
         Contract contract = mock(Contract.class);
-        when(contract.getStatus()).thenReturn(ContractStatus.ACTIVE);
-        when(contract.getProductId()).thenReturn(UUID.randomUUID());
+        when(contract.status()).thenReturn(ContractStatus.ACTIVE);
+        when(contract.productId()).thenReturn(UUID.randomUUID());
         when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of(contract));
         when(productService.findById(any())).thenReturn(Optional.empty());
 
@@ -230,7 +243,7 @@ class BillingServiceTest {
         Invoice invoice = billingService.generateInvoice(customerId, validDiscount);
 
         assertNotNull(invoice);
-        assertEquals(validDiscount, invoice.getDiscount());
+        assertEquals(validDiscount, invoice.discount());
     }
 
     @Test
@@ -239,13 +252,13 @@ class BillingServiceTest {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
 
         Contract activeContract = mock(Contract.class);
-        when(activeContract.getStatus()).thenReturn(ContractStatus.ACTIVE);
-        when(activeContract.getProductId()).thenReturn(testProduct.getId());
-        when(activeContract.getId()).thenReturn(UUID.randomUUID());
-        when(activeContract.getCreationDate()).thenReturn(LocalDate.now());
+        when(activeContract.status()).thenReturn(ContractStatus.ACTIVE);
+        when(activeContract.productId()).thenReturn(testProduct.getId());
+        when(activeContract.id()).thenReturn(UUID.randomUUID());
+        when(activeContract.creationDate()).thenReturn(LocalDate.now());
 
         Contract inactiveContract = mock(Contract.class);
-        when(inactiveContract.getStatus()).thenReturn(ContractStatus.INACTIVE);
+        when(inactiveContract.status()).thenReturn(ContractStatus.INACTIVE);
 
         when(contractService.findContractsByCustomerId(customerId))
                 .thenReturn(List.of(activeContract, inactiveContract));
@@ -253,8 +266,8 @@ class BillingServiceTest {
 
         Invoice invoice = billingService.generateInvoice(customerId);
 
-        assertEquals(1, invoice.getItems().size());
-        assertEquals(testProduct.getId(), invoice.getItems().get(0).productId());
+        assertEquals(1, invoice.items().size());
+        assertEquals(testProduct.getId(), invoice.items().get(0).productId());
     }
 
     @Test
@@ -266,25 +279,25 @@ class BillingServiceTest {
         UUID c2Id = UUID.randomUUID();
 
         Contract c1 = mock(Contract.class);
-        when(c1.getStatus()).thenReturn(ContractStatus.ACTIVE);
-        when(c1.getProductId()).thenReturn(testProduct.getId());
-        when(c1.getId()).thenReturn(c1Id);
-        when(c1.getCreationDate()).thenReturn(LocalDate.now());
+        when(c1.status()).thenReturn(ContractStatus.ACTIVE);
+        when(c1.productId()).thenReturn(testProduct.getId());
+        when(c1.id()).thenReturn(c1Id);
+        when(c1.creationDate()).thenReturn(LocalDate.now());
 
         Contract c2 = mock(Contract.class);
-        when(c2.getStatus()).thenReturn(ContractStatus.ACTIVE);
-        when(c2.getProductId()).thenReturn(testProduct.getId());
-        when(c2.getId()).thenReturn(c2Id);
-        when(c2.getCreationDate()).thenReturn(LocalDate.now());
+        when(c2.status()).thenReturn(ContractStatus.ACTIVE);
+        when(c2.productId()).thenReturn(testProduct.getId());
+        when(c2.id()).thenReturn(c2Id);
+        when(c2.creationDate()).thenReturn(LocalDate.now());
 
         when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of(c1, c2));
         when(productService.findById(testProduct.getId())).thenReturn(Optional.of(testProduct));
 
         Invoice invoice = billingService.generateInvoice(customerId);
 
-        assertEquals(2, invoice.getItems().size());
-        assertEquals(c1Id, invoice.getItems().get(0).contractId());
-        assertEquals(c2Id, invoice.getItems().get(1).contractId());
+        assertEquals(2, invoice.items().size());
+        assertEquals(c1Id, invoice.items().get(0).contractId());
+        assertEquals(c2Id, invoice.items().get(1).contractId());
     }
 
     @Test
@@ -296,10 +309,10 @@ class BillingServiceTest {
         List<Contract> contracts = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             Contract c = mock(Contract.class);
-            when(c.getStatus()).thenReturn(ContractStatus.ACTIVE);
-            when(c.getProductId()).thenReturn(testProduct.getId());
-            when(c.getId()).thenReturn(UUID.randomUUID());
-            when(c.getCreationDate()).thenReturn(LocalDate.now());
+            when(c.status()).thenReturn(ContractStatus.ACTIVE);
+            when(c.productId()).thenReturn(testProduct.getId());
+            when(c.id()).thenReturn(UUID.randomUUID());
+            when(c.creationDate()).thenReturn(LocalDate.now());
             contracts.add(c);
         }
 
@@ -308,9 +321,9 @@ class BillingServiceTest {
 
         Invoice invoice = billingService.generateInvoice(customerId);
 
-        assertEquals(count, invoice.getItems().size());
+        assertEquals(count, invoice.items().size());
         BigDecimal expectedTotal = testProduct.getSetupFee().add(testProduct.getMonthlyFee())
                 .multiply(new BigDecimal(count));
-        assertEquals(expectedTotal, invoice.getTotalAmount());
+        assertEquals(expectedTotal, invoice.totalAmount());
     }
 }

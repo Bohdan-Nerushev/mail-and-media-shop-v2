@@ -7,18 +7,16 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import dev.mam.buizsol.mamshop.billing.validation.InvoiceDiscount;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 public interface BillingService {
-
-    @NotNull
-    static BillingService getInstance() {
-        return BillingServiceImpl.getInstance();
-    }
 
     @NotNull
     Invoice generateInvoice(@NotNull UUID customerId) throws CustomerNotFoundException, ProductNotFoundException;
 
     @NotNull
-    Invoice generateInvoice(@NotNull UUID customerId, @NotNull BigDecimal discount)
+    Invoice generateInvoice(@NotNull UUID customerId, @NotNull @InvoiceDiscount BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException;
 }

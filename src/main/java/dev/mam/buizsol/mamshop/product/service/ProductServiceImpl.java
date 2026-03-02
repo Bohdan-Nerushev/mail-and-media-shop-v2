@@ -4,80 +4,71 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import jakarta.annotation.Nullable;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-
+import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Service
 final class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repository;
 
-    private ProductServiceImpl(
-            @NotNull final ProductRepository repository) {
+    private final BigDecimal DISCOUNT = new BigDecimal("0.10");
+
+    ProductServiceImpl(
+            final ProductRepository repository) {
         this.repository = repository;
     }
 
-    private static final class Holder {
-        private static final ProductServiceImpl INSTANCE = new ProductServiceImpl(ProductRepositoryImpl.getInstance());
-    }
-
-    @NotNull
-    static ProductService getInstance() {
-        return Holder.INSTANCE;
-    }
-
     @Override
-    public void createProduct(@NotNull @Valid final Product product) {
-        validateNotNull(product, "Product");
+    public void createProduct(
+            final Product product) {
+        if (product == null) {
+            throw new ProductValidationException("Product must not be null");
+        }
         repository.save(product);
     }
 
     @Override
-    @NotNull
-    public Optional<Product> findById(@NotNull final UUID productId) {
-        validateNotNull(productId, "ID");
-        return repository.findById(productId);
+    public Optional<Product> findById(
+            final UUID id) {
+        if (id == null) {
+            throw new ProductValidationException("Product ID must not be null");
+        }
+        return repository.findById(id);
     }
 
     @Override
-    @NotNull
-    public List<Product> findByBrand(@NotNull final Brand brand) {
-        validateNotNull(brand, "Brand");
+    public List<Product> findByBrand(
+            final Brand brand) {
+        if (brand == null) {
+            throw new ProductValidationException("Brand must not be null");
+        }
         return List.copyOf(repository.findByBrand(brand));
     }
 
     @Override
     public void updateMonthlyFee(
-            @NotNull final UUID id,
-            @NotNull final BigDecimal monthlyFee) throws ProductNotFoundException {
-        validateNotNull(id, "ID");
-        notZeroOrNegative(monthlyFee, "Monthly fee");
+            final UUID id,
+            final BigDecimal monthlyFee)
+            throws ProductNotFoundException {
+        if (id == null) {
+            throw new ProductValidationException("Product ID must not be null");
+        }
+        if (monthlyFee == null) {
+            throw new ProductValidationException("Monthly fee must not be null");
+        }
+        if (monthlyFee.compareTo(DISCOUNT) <= 0) {
+            throw new ProductValidationException("Monthly fee must be greater than 0.10");
+        }
 
         Product product = repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with ID " + id + " not found"));
 
-        product.setMonthlyFee(monthlyFee);
-        repository.save(product);
+        product = product.withMonthlyFee(monthlyFee);
+        repository.update(product);
     }
 
-    private void validateNotNull(
-            @NotNull final Object value,
-            @NotNull final String fieldName) {
-        if (value == null) {
-            throw new ProductValidationException(fieldName + " must not be null");
-        }
-    }
-
-    private void notZeroOrNegative(
-            @Nullable final BigDecimal value,
-            @NotNull final String fieldName) {
-        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ProductValidationException(fieldName + " must be greater than 0.10 €");
-        }
-    }
 }

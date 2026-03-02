@@ -8,12 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-interface ContractRepository {
-
-        @NotNull
-        static ContractRepository getInstance() {
-                return ContractRepositoryImpl.getInstance();
-        }
+public interface ContractRepository {
 
         @NotNull
         Contract save(@NotNull @Valid final Contract contract);

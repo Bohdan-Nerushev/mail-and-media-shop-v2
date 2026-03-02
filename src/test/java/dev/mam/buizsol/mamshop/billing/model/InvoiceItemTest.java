@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("InvoiceItem Tests")
 class InvoiceItemTest {
 
     @DisplayName("Successful creation of InvoiceItem with valid data")
