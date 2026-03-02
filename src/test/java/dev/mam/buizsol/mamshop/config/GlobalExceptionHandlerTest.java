@@ -17,7 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -149,6 +155,33 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = handler.handleMethodArgumentNotValidException(ex);
         assertEquals(400, response.getStatusCode().value());
         assertEquals("REQUEST_VALIDATION_ERROR", response.getBody().errorCode());
+    }
+
+    @Test
+    @DisplayName("Should handle MissingServletRequestParameterException (400)")
+    void shouldHandleMissingServletRequestParameterException() {
+        MissingServletRequestParameterException ex = mock(MissingServletRequestParameterException.class);
+        ResponseEntity<ErrorResponse> response = handler.handleMissingServletRequestParameterException(ex);
+        assertEquals(400, response.getStatusCode().value());
+        assertEquals("MISSING_PARAMETER", response.getBody().errorCode());
+    }
+
+    @Test
+    @DisplayName("Should handle MethodArgumentTypeMismatchException (400)")
+    void shouldHandleMethodArgumentTypeMismatchException() {
+        MethodArgumentTypeMismatchException ex = mock(MethodArgumentTypeMismatchException.class);
+        ResponseEntity<ErrorResponse> response = handler.handleMethodArgumentTypeMismatchException(ex);
+        assertEquals(400, response.getStatusCode().value());
+        assertEquals("TYPE_MISMATCH", response.getBody().errorCode());
+    }
+
+    @Test
+    @DisplayName("Should handle NoResourceFoundException (404)")
+    void shouldHandleNoResourceFoundException() {
+        NoResourceFoundException ex = new NoResourceFoundException(HttpMethod.GET, "/api/resource", "Not found");
+        ResponseEntity<ErrorResponse> response = handler.handleNoResource(ex);
+        assertEquals(404, response.getStatusCode().value());
+        assertEquals("RESOURCE_NOT_FOUND", response.getBody().errorCode());
     }
 
     @Test
