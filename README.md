@@ -8,6 +8,7 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 ## Table of Contents
 
 - [Swagger UI](#swagger-ui)
+- [Testing](#testing)
 - [API Overview](#api-overview)
   - [Customer API](#customer-api)
   - [Contract API](#contract-api)
@@ -17,6 +18,28 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 - [Error Handling](#error-handling)
 
 ---
+
+## Testing
+
+### Unit Tests (Java/JUnit)
+To run unit tests, do:
+```bash
+mvn clean test
+```
+
+### End-to-End (E2E) Tests (Python)
+To run the full test cycle (build, start server, run tests, stop) use:
+```bash
+chmod +x e2e_tests/run_e2e.sh
+./e2e_tests/run_e2e.sh
+```
+
+ ---
+
+For a local CI pipeline, do:
+```bash
+gitlab-ci-local
+```
 
 ## Swagger UI
 

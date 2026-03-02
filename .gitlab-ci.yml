@@ -1,9 +1,28 @@
 stages:
+  - build
   - test
+  - e2e-test
 
-test_job:
+# Unit tests
+unit_test_job:
   stage: test
   script:
     - mvn clean test
   tags:
     - maven
+
+# E2E tests
+e2e_test_job:
+  stage: e2e-test
+  variables:
+    APP_HOST: "http://localhost"
+    APP_PORT: "8080"
+  script:
+    - chmod +x e2e_tests/run_e2e.sh
+    - ./e2e_tests/run_e2e.sh
+  artifacts:
+    when: always
+    paths:
+      - app.log  
+  tags:
+    - maven  

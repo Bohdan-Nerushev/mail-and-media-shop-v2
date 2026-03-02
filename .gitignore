@@ -204,3 +204,16 @@ target/
 
 # OS
 .DS_Store
+
+# Local environment variables
+.env
+
+# Python specific
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+.gitlab-ci-local/
+e2e_tests/controller/__pycache__/
+venv/
