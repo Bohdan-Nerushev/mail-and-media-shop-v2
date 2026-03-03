@@ -256,7 +256,7 @@ fi
 log_info "Executing: java -jar target/$JAR_NAME on port $APP_PORT"
 
 # Start application as background process.
-java -Dserver.port=$APP_PORT -jar "$PROJECT_ROOT/target/$JAR_NAME" > "$APP_LOG" 2>&1 &
+java -Dserver.port=$APP_PORT -Dspring.profiles.active=e2e -jar "$PROJECT_ROOT/target/$JAR_NAME" > "$APP_LOG" 2>&1 &
 APP_PID=$!
 
 log_info "Application background process ID: $APP_PID"

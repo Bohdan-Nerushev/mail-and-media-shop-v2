@@ -9,6 +9,7 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 
 - [Swagger UI](#swagger-ui)
 - [Testing](#testing)
+- [Dockerization](#dockerization)
 - [API Overview](#api-overview)
   - [Customer API](#customer-api)
   - [Contract API](#contract-api)
@@ -39,6 +40,39 @@ chmod +x e2e_tests/run_e2e.sh
 For a local CI pipeline, do:
 ```bash
 gitlab-ci-local
+```
+
+## Dockerization
+
+The project uses **PostgreSQL 16** as the database.
+
+### Exposed Ports
+- **Application**: `8091` (maps to internal `8080`) can be changed in the .env file.
+- **PostgreSQL**: `5430` (maps to internal `5432`) can be changed in the .env file.
+
+### Running the entire project
+```bash
+docker compose up -d --build
+```
+
+### Stopping the project
+```bash
+docker compose down
+```
+
+### Viewing application logs
+```bash
+docker compose logs -f app
+```
+
+### Access the application container shell:
+```bash
+docker compose exec app bash
+```
+
+### Restarting only the application (after code changes - rebuilds the app image)
+```bash
+docker compose up -d --build app
 ```
 
 ## Swagger UI

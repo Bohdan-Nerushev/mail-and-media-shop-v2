@@ -171,7 +171,7 @@ if __name__ == "__main__":
     test_should_return_404_when_generating_invoice_for_non_existent_customer(BASE_URL_BILLING, INVALID_CUSTOMER_ID, HEADERS)
     test_should_handle_invoice_generation_idempotently_when_called_multiple_times(customer_id, BASE_URL_BILLING, HEADERS)
     
-    # Simulate a 500 error
+    # Simulate a 404 error
     SIMULATED_ERROR_ID = "00000000-0000-0000-0000-000000000500"
     try:
         test_should_return_404_when_server_error_occurs_during_invoice_generation(BASE_URL_BILLING, HEADERS, SIMULATED_ERROR_ID)
