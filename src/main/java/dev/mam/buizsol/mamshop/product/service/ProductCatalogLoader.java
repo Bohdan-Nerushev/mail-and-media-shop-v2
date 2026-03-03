@@ -22,13 +22,8 @@ public class ProductCatalogLoader {
 
     private final ProductService productService;
 
-    private final int MAX_CSV_PATH_LENGTH = 100;
-    private static final int MAX_CSV_PATH_STATIC = 100;
-
-    private final int MIN_COLUMNS_VALUE = 4;
+    private static final int MAX_CSV_PATH_LENGTH = 100;
     private static final int MIN_COLUMNS_VALUE_STATIC = 4;
-
-    private final int MAX_COLUMNS_VALUE = 5;
     private static final int MAX_COLUMNS_VALUE_STATIC = 5;
 
     public ProductCatalogLoader(
@@ -64,10 +59,10 @@ public class ProductCatalogLoader {
     }
 
     @NotNull
-    private static Product parseProductFromCsvLine(@NotNull @Size(max = MAX_CSV_PATH_STATIC) final String line) {
-        if (line == null || line.length() > MAX_CSV_PATH_STATIC) {
+    private static Product parseProductFromCsvLine(@NotNull @Size(max = MAX_CSV_PATH_LENGTH) final String line) {
+        if (line == null || line.length() > MAX_CSV_PATH_LENGTH) {
             throw new IllegalArgumentException(
-                    String.format("CSV line must not be null and must not exceed %d characters", MAX_CSV_PATH_STATIC));
+                    String.format("CSV line must not be null and must not exceed %d characters", MAX_CSV_PATH_LENGTH));
         }
         final String[] parts = line.split(",");
         if (parts.length < MIN_COLUMNS_VALUE_STATIC) {
