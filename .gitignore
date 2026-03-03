@@ -3,8 +3,8 @@
 src/main/resources/application.yml
 
 ### Java template
-# Log file
-*.log
+# Log files
+*.log*
 
 # Package Files #
 *.jar
