@@ -207,6 +207,20 @@ curl -X GET http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963
   "status": "ACTIVE"
 }
 ```
+#### Status Examples
+
+In responses, the `status` field indicates the current lifecycle state:
+
+**Active Customer:**
+```json
+{ "id": "...", "status": "ACTIVE", ... }
+```
+
+**Inactive Customer (after deactivation):**
+```json
+{ "id": "...", "status": "INACTIVE", ... }
+```
+
 
 #### Response Status Codes
 
@@ -220,7 +234,7 @@ curl -X GET http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963
 
 ### DELETE `/api/v1/customers/{customerId}` — Remove a Customer
 
-Changes the status of the specified customer to `REMOVED`.
+Deletes the customer by their `customerId`.
 
 **HTTP Method:** `DELETE`
 
@@ -641,7 +655,7 @@ Generates an invoice for the specified customer based on their current active co
   "invoiceAddress": "AddressRequestDTO | null",
   "communicationDetails": "CommunicationDetailsRequestDTO",
   "brand": "GMX | WEB_DE | MAIL_COM",
-  "status": "ACTIVE | INACTIVE | REMOVED"
+  "status": "ACTIVE | INACTIVE"
 }
 ```
 

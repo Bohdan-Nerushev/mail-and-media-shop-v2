@@ -65,13 +65,14 @@ public class ContractController {
                         @PathVariable(value = "customerId") @NotNull final UUID customerId) {
                 log.debug("Loading all contracts for customer: {}", customerId);
 
-                List<Contract> contractList = shopService.loadAllContracts(customerId);
+                final List<Contract> contractList = shopService.loadAllContracts(customerId);
                 log.debug("Contract list: {}", contractList);
 
-                List<ContractResponseDTO> contractResponseDTOList = contractList.stream()
+                final List<ContractResponseDTO> contractResponseDTOList = contractList.stream()
                                 .map(contractMapper::toContractResponseDTO)
                                 .toList();
                 log.debug("Contract response DTO list: {}", contractResponseDTOList);
+
                 log.info("Contracts loaded successfully: {}", contractResponseDTOList);
                 return contractResponseDTOList;
         }
@@ -96,6 +97,7 @@ public class ContractController {
                         @PathVariable(value = "customerId") @NotNull final UUID customerId,
                         @PathVariable(value = "contractId") @NotNull final UUID contractId) {
                 log.debug("Activating contract: {} for customer: {}", contractId, customerId);
+
                 shopService.activateContract(customerId, contractId);
                 log.info("Contract activated successfully: {}", contractId);
         }

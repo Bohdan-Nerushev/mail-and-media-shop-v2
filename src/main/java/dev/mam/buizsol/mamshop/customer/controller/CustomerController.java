@@ -80,14 +80,15 @@ public class CustomerController {
             @RequestBody @Valid final CustomerRequestDTO customerRequestDTO) {
         log.debug("Registering customer: {}", customerRequestDTO);
 
-        Customer customer = customerMapper.toCustomer(customerRequestDTO);
+        final Customer customer = customerMapper.toCustomer(customerRequestDTO);
         log.debug("Customer: {}", customer);
 
-        Customer registeredCustomer = shopService.registerCustomer(customer);
+        final Customer registeredCustomer = shopService.registerCustomer(customer);
         log.debug("Registered customer: {}", registeredCustomer);
 
-        CustomerResponseDTO customerResponseDTO = customerMapper.toResponseDTO(registeredCustomer);
+        final CustomerResponseDTO customerResponseDTO = customerMapper.toResponseDTO(registeredCustomer);
         log.debug("Customer response DTO: {}", customerResponseDTO);
+
         log.info("Customer registered successfully: {}", customerResponseDTO);
         return customerResponseDTO;
     }
@@ -114,16 +115,17 @@ public class CustomerController {
             @PathVariable(value = "customerId") @NotNull final UUID customerId) {
         log.debug("Loading customer: {}", customerId);
 
-        Customer customer = shopService.loadCustomer(customerId);
+        final Customer customer = shopService.loadCustomer(customerId);
         log.debug("Customer: {}", customer);
 
-        CustomerResponseDTO customerResponseDTO = customerMapper.toResponseDTO(customer);
+        final CustomerResponseDTO customerResponseDTO = customerMapper.toResponseDTO(customer);
         log.debug("Customer response DTO: {}", customerResponseDTO);
+
         log.info("Customer loaded successfully: {}", customerResponseDTO);
         return customerResponseDTO;
     }
 
-    @Operation(summary = "Remove a customer by ID", description = "Changes the status of the specified customer to REMOVED.")
+    @Operation(summary = "Remove a customer by ID", description = "Customer is deleted by their ID.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "204",
@@ -139,6 +141,7 @@ public class CustomerController {
     public void removeCustomer(
             @PathVariable(value = "customerId") @NotNull final UUID customerId) {
         log.debug("Removing customer: {}", customerId);
+
         shopService.removeCustomer(customerId);
         log.info("Customer removed successfully: {}", customerId);
     }
@@ -186,6 +189,7 @@ public class CustomerController {
     public void deactivateCustomer(
             @PathVariable(value = "customerId") @NotNull final UUID customerId) {
         log.debug("Deactivating customer: {}", customerId);
+
         shopService.deactivateCustomer(customerId);
         log.info("Customer deactivated successfully: {}", customerId);
     }
@@ -211,8 +215,10 @@ public class CustomerController {
             @PathVariable(value = "customerId") @NotNull final UUID customerId,
             @RequestBody @Valid final AddressRequestDTO addressRequestDTO) {
         log.debug("Updating address for customer: {}", customerId);
-        Address address = customerMapper.toAddress(addressRequestDTO);
+
+        final Address address = customerMapper.toAddress(addressRequestDTO);
         log.debug("New Address: {}", address);
+
         shopService.updateAddress(customerId, address);
         log.info("Address updated successfully: {}", customerId);
     }
@@ -236,8 +242,10 @@ public class CustomerController {
             @PathVariable(value = "customerId") @NotNull final UUID customerId,
             @RequestBody @Valid final AddressRequestDTO addressRequestDTO) {
         log.debug("Updating invoice address for customer: {}", customerId);
-        Address address = customerMapper.toAddress(addressRequestDTO);
+
+        final Address address = customerMapper.toAddress(addressRequestDTO);
         log.debug("New Invoice Address: {}", address);
+
         shopService.updateInvoiceAddress(customerId, address);
         log.info("Invoice address updated successfully: {}", customerId);
     }
@@ -262,9 +270,11 @@ public class CustomerController {
             @PathVariable(value = "customerId") @NotNull final UUID customerId,
             @RequestBody @Valid final CommunicationDetailsRequestDTO communicationDetailsRequestDTO) {
         log.debug("Updating communication details for customer: {}", customerId);
-        CommunicationDetails communicationDetails = customerMapper
+
+        final CommunicationDetails communicationDetails = customerMapper
                 .toCommunicationDetails(communicationDetailsRequestDTO);
         log.debug("New Communication Details: {}", communicationDetails);
+
         shopService.updateCommunicationDetails(customerId, communicationDetails);
         log.info("Communication details updated successfully: {}", customerId);
     }
@@ -298,11 +308,12 @@ public class CustomerController {
             @RequestBody @Valid final PurchaseRequestDTO request) {
         log.debug("Purchasing product for customer: {}", customerId);
 
-        Contract contract = shopService.purchaseProduct(customerId, request.productId());
+        final Contract contract = shopService.purchaseProduct(customerId, request.productId());
         log.debug("Contract: {}", contract);
 
-        ContractResponseDTO contractResponseDTO = contractMapper.toContractResponseDTO(contract);
+        final ContractResponseDTO contractResponseDTO = contractMapper.toContractResponseDTO(contract);
         log.debug("Contract response DTO: {}", contractResponseDTO);
+
         log.info("Product purchased successfully: {}", contractResponseDTO);
         return contractResponseDTO;
     }

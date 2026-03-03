@@ -63,13 +63,14 @@ public class ProductController {
             @RequestParam(value = "brand") @NotNull final Brand brand) {
         log.debug("Loading all products for brand: {}", brand);
 
-        List<Product> productList = shopService.loadAllProductsForBrand(brand);
+        final List<Product> productList = shopService.loadAllProductsForBrand(brand);
         log.debug("Product list: {}", productList);
 
-        List<ProductResponseDTO> productResponseDTOList = productList.stream()
+        final List<ProductResponseDTO> productResponseDTOList = productList.stream()
                 .map(productMapper::toProductResponseDTO)
                 .toList();
         log.debug("Product response DTO list: {}", productResponseDTOList);
+
         log.info("Products loaded successfully: {}", productResponseDTOList);
         return productResponseDTOList;
     }

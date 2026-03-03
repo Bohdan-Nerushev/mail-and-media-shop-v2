@@ -61,10 +61,12 @@ public class BillingController {
     public @NotNull InvoiceResponseDTO generateInvoice(
             @PathVariable(value = "customerId") @NotNull final UUID customerId) {
         log.debug("Generating invoice for customer: {}", customerId);
+
         Invoice invoice = shopService.generateInvoice(customerId);
-        log.debug("Invoice generated successfully: {}", invoice);
         log.info("Invoice generated successfully: {}", invoice);
+
         InvoiceResponseDTO invoiceResponseDTO = invoiceMapper.toInvoiceResponseDTO(invoice);
+        log.debug("Invoice response DTO: {}", invoiceResponseDTO);
         return invoiceResponseDTO;
     }
 }

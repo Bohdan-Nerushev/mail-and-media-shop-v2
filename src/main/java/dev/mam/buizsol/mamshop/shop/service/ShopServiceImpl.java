@@ -190,7 +190,8 @@ class ShopServiceImpl implements ShopService {
             return contractService.findContractsByCustomerId(customerId).stream()
                     .filter(c -> c.productId().equals(productId))
                     .findFirst()
-                    .orElseThrow();
+                    .orElseThrow(() -> new ContractNotFoundException(
+                            "Contract not found for product: " + productId + " for customer " + customerId));
         }
 
         return contractService.createContract(customer, product);
