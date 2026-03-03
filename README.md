@@ -47,7 +47,7 @@ gitlab-ci-local
 The project uses **PostgreSQL 16** as the database.
 
 ### Exposed Ports
-- **Application**: `8091` (maps to internal `8080`) can be changed in the .env file.
+- **Application**: `8090` (maps to internal `8080`) can be changed in the .env file.
 - **PostgreSQL**: `5430` (maps to internal `5432`) can be changed in the .env file.
 
 ### Running the entire project
@@ -80,7 +80,7 @@ docker compose up -d --build app
 Interactive API documentation is available at:
 
 ```
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8090/swagger-ui/index.html
 ```
 
 
@@ -89,7 +89,7 @@ http://localhost:8080/swagger-ui/index.html
 ### Base URL
 
 ```
-http://localhost:8080/api/v1
+http://localhost:8090/api/v1
 ```
 
 ## Customer API
@@ -142,7 +142,7 @@ Creates a new customer record.
 #### Example Request (curl)
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/customers \
+curl -X POST http://localhost:8090/api/v1/customers \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "Max",
@@ -214,7 +214,7 @@ Returns the customer with the specified UUID.
 #### Example Request (curl)
 
 ```bash
-curl -X GET http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
+curl -X GET http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
 ```
 
 #### Example Response — `200 OK`
@@ -281,7 +281,7 @@ Deletes the customer by their `customerId`.
 #### Example Request (curl)
 
 ```bash
-curl -X DELETE http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
+curl -X DELETE http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
 ```
 
 #### Example Response — `204 No Content`
@@ -313,7 +313,7 @@ Changes the status of the specified customer to `ACTIVE`.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
+curl -X PUT http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
 ```
 
 #### Example Response — `204 No Content`
@@ -345,7 +345,7 @@ Changes the status of the specified customer to `INACTIVE`.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/deactivate
+curl -X PUT http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/deactivate
 ```
 
 #### Example Response — `204 No Content`
@@ -381,7 +381,7 @@ Standard `AddressRequestDTO` structure.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/address \
+curl -X PUT http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/address \
   -H "Content-Type: application/json" \
   -d '{
     "street": "Neustraße",
@@ -480,7 +480,7 @@ Creates a new contract linking the specified customer to a selected product.
 #### Example Request (curl)
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/purchases \
+curl -X POST http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/purchases \
   -H "Content-Type: application/json" \
   -d '{
     "productId": "7cb65f12-1234-4abc-a789-000000000001"

@@ -61,6 +61,7 @@ from controller.products_controller_end_to_end_api_test import (
     test_should_return_400_when_invalid_brand_format_is_provided,
     test_should_return_200_when_valid_brand_has_no_products
 )
+from load_test import LoadTestRunner
 
 # ---------------------------
 # Configuration (Environment Variables)
@@ -186,5 +187,12 @@ if __name__ == "__main__":
     
     # 12. Final checks after deletion
     test_should_return_404_when_listing_contracts_for_deleted_customer(customer_id, BASE_URL_CUSTOMERS)
+
+    # 13. Load Testing (Optional or scaled down for regular E2E)
+    logger.info("=== Starting Load Test Phase ===")
+    load_runner = LoadTestRunner()
+    # Running a smaller load by default in regular E2E to ensure it works without taking too much time
+    total_load_customers = int(os.getenv("LOAD_TEST_QUICK_TOTAL", "100"))
+    load_runner.run_load_test(total=total_load_customers, workers=20, purchases=10)
 
     logger.info("=== All E2E Tests Completed Successfully ===")
