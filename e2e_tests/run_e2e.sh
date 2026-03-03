@@ -242,6 +242,7 @@ pip install $PYTHON_PACKAGES --quiet || error_exit "Dependency installation fail
 
 log_info "Python environment ready."
 
+sleep 2
 # ==============================================================================
 # PHASE 5: Application Startup & Log Rotation
 # ==============================================================================

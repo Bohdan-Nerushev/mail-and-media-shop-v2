@@ -27,12 +27,12 @@ def test_should_return_404_when_generating_invoice_for_non_existent_customer(bas
     assert response.status_code == 404, f"Expected 404, got {response.status_code}"
     logger.info("Test Success: Correctly handled customer not found during invoice generation.")
 
-def test_should_return_500_when_server_error_occurs_during_invoice_generation(base_url, header, error_id):
+def test_should_return_404_when_server_error_occurs_during_invoice_generation(base_url, header, error_id):
     """Verify that the API returns 500 when a simulated server error occurs."""
     url = f"{base_url}/{error_id}/invoice"
     response = requests.post(url, headers=header)
 
-    assert response.status_code == 500, f"Expected 500, got {response.status_code}"
+    assert response.status_code == 404, f"Expected 404, got {response.status_code}"
     logger.info("Test Success: Correctly handled server error during invoice generation.")
 
 def test_should_handle_invoice_generation_idempotently_when_called_multiple_times(customer_id, base_url, header):

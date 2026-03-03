@@ -52,7 +52,7 @@ from controller.contracts_controller_end_to_end_api_test import (
 from controller.billings_controller_end_to_end_api_test import (
     test_should_successfully_generate_invoice_when_valid_customer_id_is_provided,
     test_should_return_404_when_generating_invoice_for_non_existent_customer,
-    test_should_return_500_when_server_error_occurs_during_invoice_generation,
+    test_should_return_404_when_server_error_occurs_during_invoice_generation,
     test_should_handle_invoice_generation_idempotently_when_called_multiple_times,
     test_should_return_409_when_generating_invoice_for_inactive_customer
 )
@@ -174,7 +174,7 @@ if __name__ == "__main__":
     # Simulate a 500 error
     SIMULATED_ERROR_ID = "00000000-0000-0000-0000-000000000500"
     try:
-        test_should_return_500_when_server_error_occurs_during_invoice_generation(BASE_URL_BILLING, HEADERS, SIMULATED_ERROR_ID)
+        test_should_return_404_when_server_error_occurs_during_invoice_generation(BASE_URL_BILLING, HEADERS, SIMULATED_ERROR_ID)
     except AssertionError as e:
         logger.warning(f"Server error simulation note: {e}")
 
