@@ -24,7 +24,8 @@ WORKDIR /app
 
 
 # Copy the built jar from the build stage
-COPY --from=build /app/target/*.jar app.jar
+# Copy the built jar from the build stage
+COPY --from=build /app/target/mail-and-media-shop-*.jar app.jar
 
 
 # Expose port 8080

@@ -67,7 +67,7 @@ from load_test import LoadTestRunner
 # Configuration (Environment Variables)
 # ---------------------------
 HOST = os.getenv("APP_HOST", "http://localhost").rstrip("/")
-PORT = os.getenv("APP_PORT", "8080")
+PORT = os.getenv("APP_PORT", "8090")
 APP_URL = f"{HOST}:{PORT}"
 
 BASE_URL_CUSTOMERS = f"{APP_URL}/api/v1/customers"

@@ -19,6 +19,13 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 - [Error Handling](#error-handling)
 
 ---
+## Swagger UI
+
+Interactive API documentation is available at:
+
+```
+http://localhost:8090/swagger-ui/index.html
+```
 
 ## Testing
 
@@ -70,19 +77,15 @@ docker compose logs -f app
 docker compose exec app bash
 ```
 
+### Access the PostgreSQL container shell:
+```bash
+docker compose exec shop_db psql -U dev_user -d shop_db
+```
+
 ### Restarting only the application (after code changes - rebuilds the app image)
 ```bash
 docker compose up -d --build app
 ```
-
-## Swagger UI
-
-Interactive API documentation is available at:
-
-```
-http://localhost:8090/swagger-ui/index.html
-```
-
 
 ## API Overview
 
