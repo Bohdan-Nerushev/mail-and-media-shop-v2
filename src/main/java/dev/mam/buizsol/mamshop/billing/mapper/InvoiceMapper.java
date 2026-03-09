@@ -19,7 +19,7 @@ public class InvoiceMapper {
                 invoice.totalSetupFee(),
                 invoice.totalMonthlyFee(),
                 invoice.discount(),
-                invoice.discount()
+                invoice.totalAmount()
         );
     }
 }
