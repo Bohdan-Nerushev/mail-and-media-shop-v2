@@ -28,8 +28,8 @@ WORKDIR /app
 COPY --from=build /app/target/mail-and-media-shop-*.jar app.jar
 
 
-# Expose port 8080
-EXPOSE 8080
+# Expose port 8090
+EXPOSE 8090
 
 
 # Command to run the application

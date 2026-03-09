@@ -5,11 +5,13 @@ import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 
 @Service
 class ContractServiceImpl implements ContractService {
@@ -50,7 +52,7 @@ class ContractServiceImpl implements ContractService {
             final UUID contractId,
             final ContractStatus changeStatus) throws ContractNotFoundException {
         return repository.findById(contractId)
-                .map(contract -> repository.update(contract.withStatus(changeStatus)))
+                .map(contract -> repository.save(contract.withStatus(changeStatus)))
                 .orElseThrow(() -> new ContractNotFoundException("Contract with ID " + contractId + " not found"));
     }
 

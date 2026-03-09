@@ -13,6 +13,7 @@ import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ class BillingServiceImpl implements BillingService {
     private final CustomerService customerService;
     private final ProductService productService;
     private final ContractService contractService;
+
 
     private final BigDecimal ZERO;
     private final BigDecimal DISCOUNT;
@@ -44,7 +46,6 @@ class BillingServiceImpl implements BillingService {
         this.DISCOUNT = discount;
     }
 
-    @Override
     public Invoice generateInvoice(
             final UUID customerId)
             throws CustomerNotFoundException, ProductNotFoundException {
@@ -54,7 +55,6 @@ class BillingServiceImpl implements BillingService {
         return generateInvoice(customerId, ZERO);
     }
 
-    @Override
     public Invoice generateInvoice(
             final UUID customerId,
             final BigDecimal discount)
@@ -80,26 +80,26 @@ class BillingServiceImpl implements BillingService {
         final List<InvoiceItem> items = new ArrayList<>();
 
         for (final Contract contract : contracts) {
-            if (contract.status() == ContractStatus.ACTIVE) {
-                final Product product = productService.findById(contract.productId())
-                        .orElseThrow(() -> new ProductNotFoundException("Product with ID " + contract.productId()
-                                + " not found for contract " + contract.id()));
+            if (contract.getStatus() == ContractStatus.ACTIVE) {
+                final Product product = productService.findById(contract.getProductId())
+                        .orElseThrow(() -> new ProductNotFoundException("Product with ID " + contract.getProductId()
+                                + " not found for contract " + contract.getId()));
 
                 items.add(new InvoiceItem(
                         product.getId(),
                         product.getName(),
-                        contract.id(),
-                        contract.creationDate(),
+                        contract,
+                        contract.getCreationDate(),
                         product.getSetupFee(),
                         product.getMonthlyFee()));
             }
         }
 
         return new Invoice(
-                customer.brand(),
-                customer.id(),
-                customer.address(),
-                customer.invoiceAddress(),
+                customer.getBrand(),
+                customer,
+                customer.getAddress(),
+                customer.getInvoiceAddress(),
                 items,
                 discount);
     }

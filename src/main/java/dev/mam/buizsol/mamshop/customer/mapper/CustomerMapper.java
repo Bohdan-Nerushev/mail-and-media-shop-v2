@@ -26,44 +26,49 @@ public class CustomerMapper {
 
     public CustomerResponseDTO toResponseDTO(@NotNull final Customer customer) {
         return new CustomerResponseDTO(
-                customer.id(),
-                customer.firstName(),
-                customer.lastName(),
-                customer.birthDate(),
-                toAddressDTO(customer.address()),
-                toAddressDTO(customer.invoiceAddress()),
-                toCommunicationDetailsDTO(customer.communicationDetails()),
-                customer.brand(),
-                customer.status());
+                customer.getId(),
+                customer.getFirstName(),
+                customer.getLastName(),
+                customer.getBirthDate(),
+                toAddressDTO(customer.getAddress()),
+                customer.getInvoiceAddress() != null ? toAddressDTO(customer.getInvoiceAddress()) : null,
+                customer.getCommunicationDetails() != null
+                        ? toCommunicationDetailsDTO(customer.getCommunicationDetails())
+                        : null,
+                customer.getBrand(),
+                customer.getStatus());
     }
 
-    public  Address toAddress(@NotNull final AddressRequestDTO dto) {
-        return new Address(
-                dto.street(),
-                dto.number(),
-                dto.postcode(),
-                dto.city(),
-                dto.country());
+    public Address toAddress(@NotNull final AddressRequestDTO dto) {
+        return Address.builder()
+                .street(dto.street())
+                .number(dto.number())
+                .postcode(dto.postcode())
+                .city(dto.city())
+                .country(dto.country())
+                .build();
     }
 
     public AddressRequestDTO toAddressDTO(@NotNull final Address address) {
         return new AddressRequestDTO(
-                address.street(),
-                address.number(),
-                address.postcode(),
-                address.city(),
-                address.country());
+                address.getStreet(),
+                address.getNumber(),
+                address.getPostcode(),
+                address.getCity(),
+                address.getCountry());
     }
 
-    public CommunicationDetails toCommunicationDetails(@NotNull  final CommunicationDetailsRequestDTO dto) {
-        return new CommunicationDetails(
-                dto.email(),
-                dto.telephone());
+    public CommunicationDetails toCommunicationDetails(@NotNull final CommunicationDetailsRequestDTO dto) {
+        return CommunicationDetails.builder()
+                .email(dto.email())
+                .telephone(dto.telephone())
+                .build();
     }
 
-    public CommunicationDetailsRequestDTO toCommunicationDetailsDTO(@NotNull  final CommunicationDetails communicationDetails) {
+    public CommunicationDetailsRequestDTO toCommunicationDetailsDTO(
+            @NotNull final CommunicationDetails communicationDetails) {
         return new CommunicationDetailsRequestDTO(
-                communicationDetails.email(),
-                communicationDetails.telephone());
+                communicationDetails.getEmail(),
+                communicationDetails.getTelephone());
     }
 }

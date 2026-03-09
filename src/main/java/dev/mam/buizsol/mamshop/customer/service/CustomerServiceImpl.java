@@ -7,6 +7,7 @@ import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +32,7 @@ class CustomerServiceImpl implements CustomerService {
         if (customer == null) {
             throw new CustomerValidationException("Customer must not be null");
         }
-        customerRepository.save(customer);
-        return customer;
+        return customerRepository.save(customer);
     }
 
     @Override
@@ -43,7 +43,8 @@ class CustomerServiceImpl implements CustomerService {
             throw new CustomerValidationException("Parameters must not be null");
         }
         final Customer customer = customerRepository.getById(customerId);
-        customerRepository.update(customer.withAddress(address));
+        customer.setAddress(address);
+        customerRepository.save(customer);
     }
 
     @Override
@@ -54,7 +55,8 @@ class CustomerServiceImpl implements CustomerService {
             throw new CustomerValidationException("Parameters must not be null");
         }
         final Customer customer = customerRepository.getById(customerId);
-        customerRepository.update(customer.withInvoiceAddress(address));
+        customer.setInvoiceAddress(address);
+        customerRepository.save(customer);
     }
 
     @Override
@@ -65,7 +67,8 @@ class CustomerServiceImpl implements CustomerService {
             throw new CustomerValidationException("Parameters must not be null");
         }
         final Customer customer = customerRepository.getById(customerId);
-        customerRepository.update(customer.withCommunicationDetails(communicationDetails));
+        customer.setCommunicationDetails(communicationDetails);
+        customerRepository.save(customer);
     }
 
     @Override
@@ -75,7 +78,8 @@ class CustomerServiceImpl implements CustomerService {
             throw new CustomerValidationException("Customer ID must not be null");
         }
         final Customer customer = customerRepository.getById(customerId);
-        customerRepository.update(customer.withStatus(CustomerStatus.ACTIVE));
+        customer.setStatus(CustomerStatus.ACTIVE);
+        customerRepository.save(customer);
     }
 
     @Override
@@ -85,7 +89,8 @@ class CustomerServiceImpl implements CustomerService {
             throw new CustomerValidationException("Customer ID must not be null");
         }
         final Customer customer = customerRepository.getById(customerId);
-        customerRepository.update(customer.withStatus(CustomerStatus.INACTIVE));
+        customer.setStatus(CustomerStatus.INACTIVE);
+        customerRepository.save(customer);
     }
 
     @Override
@@ -94,12 +99,18 @@ class CustomerServiceImpl implements CustomerService {
         if (customerId == null) {
             throw new CustomerValidationException("Customer ID must not be null");
         }
-        customerRepository.delete(customerId);
+        if (!customerRepository.existsById(customerId)) {
+            throw new CustomerNotFoundException("Customer with ID " + customerId + " not found");
+        }
+        customerRepository.deleteById(customerId);
     }
 
     @Override
     public Optional<Customer> findCustomerById(
             final UUID customerId) {
+        if (customerId == null) {
+            return Optional.empty();
+        }
         return customerRepository.findById(customerId);
     }
 

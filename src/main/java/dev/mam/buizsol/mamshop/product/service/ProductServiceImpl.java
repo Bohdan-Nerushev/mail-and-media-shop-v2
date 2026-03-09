@@ -4,6 +4,8 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
@@ -67,8 +69,8 @@ class ProductServiceImpl implements ProductService {
         Product product = repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with ID " + id + " not found"));
 
-        product = product.withMonthlyFee(monthlyFee);
-        repository.update(product);
+        product.setMonthlyFee(monthlyFee);
+        repository.save(product);
     }
 
 }

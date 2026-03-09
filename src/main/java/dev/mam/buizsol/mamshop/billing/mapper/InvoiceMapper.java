@@ -8,18 +8,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class InvoiceMapper {
 
-    public InvoiceResponseDTO toInvoiceResponseDTO (@NotNull Invoice invoice) {
+    public InvoiceResponseDTO toInvoiceResponseDTO(@NotNull Invoice invoice) {
         return new InvoiceResponseDTO(
-                invoice.brand(),
-                invoice.invoiceDate(),
-                invoice.customerId(),
-                invoice.address(),
-                invoice.invoiceAddress(),
-                invoice.items(),
-                invoice.totalSetupFee(),
-                invoice.totalMonthlyFee(),
-                invoice.discount(),
-                invoice.discount()
-        );
+                invoice.getBrand(),
+                invoice.getInvoiceDate(),
+                invoice.getCustomer().getId(),
+                invoice.getAddress(),
+                invoice.getInvoiceAddress(),
+                invoice.getItems(),
+                invoice.getTotalSetupFee(),
+                invoice.getTotalMonthlyFee(),
+                invoice.getDiscount(),
+                invoice.getDiscount());
     }
 }
