@@ -2,60 +2,55 @@ package dev.mam.buizsol.mamshop.product.model;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public record BundleProduct(
-        @NotNull UUID id,
-        @NotBlank @Size(max = 100, message = "Product name must not exceed 100 characters") String name,
-        @NotNull Brand brand,
-        @NotNull @DecimalMin(value = "0.00") BigDecimal setupFee,
-        @NotNull @DecimalMin(value = "0.11") BigDecimal monthlyFee,
-        @NotNull @Valid Product mailProduct,
-        @NotNull @Valid Product partnerProduct) implements Product {
+@Entity
+@Table(name = "bundle_products")
+@DiscriminatorValue("BundleProduct")
+@Getter
+@Setter
+@SuperBuilder(toBuilder = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class BundleProduct extends Product {
+
+    @NotNull
+    @Valid
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mail_product_id", nullable = false)
+    private MailProduct mailProduct;
+
+    @NotNull
+    @Valid
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "partner_product_id", nullable = false)
+    private PartnerProduct partnerProduct;
 
     public BundleProduct(
-            @NotNull @Valid final Product mailProduct,
-            @NotNull @Valid final Product partnerProduct) {
-        this(
+            @NotNull @Valid final MailProduct mailProduct,
+            @NotNull @Valid final PartnerProduct partnerProduct) {
+        super(
                 UUID.randomUUID(),
                 generateBundleName(mailProduct, partnerProduct),
                 validateBrands(mailProduct, partnerProduct),
                 calculateTotalSetupFee(mailProduct, partnerProduct),
-                calculateTotalMonthlyFee(mailProduct, partnerProduct),
-                mailProduct,
-                partnerProduct);
-    }
-
-    @Override
-    public UUID getId() {
-        return id;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Brand getBrand() {
-        return brand;
-    }
-
-    @Override
-    public BigDecimal getSetupFee() {
-        return setupFee;
-    }
-
-    @Override
-    public BigDecimal getMonthlyFee() {
-        return monthlyFee;
+                calculateTotalMonthlyFee(mailProduct, partnerProduct));
+        this.mailProduct = mailProduct;
+        this.partnerProduct = partnerProduct;
     }
 
     @Override
