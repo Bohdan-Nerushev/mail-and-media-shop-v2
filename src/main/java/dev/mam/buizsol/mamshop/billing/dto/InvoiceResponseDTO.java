@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public record  InvoiceResponseDTO(
+public record InvoiceResponseDTO(
         Brand brand,
         LocalDate invoiceDate,
         UUID customerId,
