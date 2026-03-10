@@ -33,8 +33,8 @@ public class CustomerMapper {
                 customer.firstName(),
                 customer.lastName(),
                 customer.birthDate(),
-                toAdressResponseDTO(customer.address()),
-                toAdressResponseDTO(customer.invoiceAddress()),
+                toAddressResponseDTO(customer.address()),
+                toAddressResponseDTO(customer.invoiceAddress()),
                 toCommunicationResponseDTO(customer.communicationDetails()),
                 customer.brand(),
                 customer.status());
@@ -72,7 +72,7 @@ public class CustomerMapper {
                 communicationDetails.telephone());
     }
 
-    public AddressResponseDTO toAdressResponseDTO(
+    public AddressResponseDTO toAddressResponseDTO(
             @NotNull final String street,
             @NotNull final String number,
             @NotNull final String postcode,
@@ -86,7 +86,7 @@ public class CustomerMapper {
                 country);
     }
 
-    public AddressResponseDTO toAdressResponseDTO(@NotNull final Address address) {
+    public AddressResponseDTO toAddressResponseDTO(@NotNull final Address address) {
         return new AddressResponseDTO(
                 address.street(),
                 address.number(),

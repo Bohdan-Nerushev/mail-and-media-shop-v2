@@ -2,7 +2,9 @@ package dev.mam.buizsol.mamshop.customer.controller;
 
 import dev.mam.buizsol.mamshop.contract.mapper.ContractMapper;
 import dev.mam.buizsol.mamshop.customer.dto.AddressRequestDTO;
+import dev.mam.buizsol.mamshop.customer.dto.AddressResponseDTO;
 import dev.mam.buizsol.mamshop.customer.dto.CommunicationDetailsRequestDTO;
+import dev.mam.buizsol.mamshop.customer.dto.CommunicationDetailsResponseDTO;
 import dev.mam.buizsol.mamshop.customer.dto.CustomerRequestDTO;
 import dev.mam.buizsol.mamshop.customer.dto.CustomerResponseDTO;
 import dev.mam.buizsol.mamshop.customer.mapper.CustomerMapper;
@@ -86,8 +88,13 @@ public class CustomerControllerTest {
                                 customerId, "John", "Doe", LocalDate.of(1990, 1, 1), address, address, comm, Brand.GMX,
                                 CustomerStatus.INACTIVE);
 
+                AddressResponseDTO addressResponseDto = CustomerTestFactory.createAddressResponseDTO(
+                                "Main St", "10", "12345", "Berlin", "Germany");
+                CommunicationDetailsResponseDTO commResponseDto = CustomerTestFactory.createCommunicationDetailsResponseDTO(
+                                "john.doe@example.com", "+49123456789");
+
                 CustomerResponseDTO responseDto = CustomerTestFactory.createCustomerResponseDTO(
-                                customerId, "John", "Doe", LocalDate.of(1990, 1, 1), addressDto, addressDto, commDto,
+                                customerId, "John", "Doe", LocalDate.of(1990, 1, 1), addressResponseDto, addressResponseDto, commResponseDto,
                                 Brand.GMX,
                                 CustomerStatus.INACTIVE);
 
@@ -148,14 +155,18 @@ public class CustomerControllerTest {
                                 "Main St", "10", "12345", "Berlin", "Germany");
                 CommunicationDetailsRequestDTO commDto = CustomerTestFactory.createCommunicationDetailsRequestDTO(
                                 "john.doe@example.com", "+49123456789");
+                AddressResponseDTO addressResponseDto = CustomerTestFactory.createAddressResponseDTO(
+                                "Main St", "10", "12345", "Berlin", "Germany");
+                CommunicationDetailsResponseDTO commResponseDto = CustomerTestFactory.createCommunicationDetailsResponseDTO(
+                                "john.doe@example.com", "+49123456789");
                 CustomerResponseDTO customerResponseDTO = CustomerTestFactory.createCustomerResponseDTO(
                                 customerId,
                                 "John",
                                 "Doe",
                                 LocalDate.of(1990, 1, 1),
-                                addressDto,
+                                addressResponseDto,
                                 null,
-                                commDto,
+                                commResponseDto,
                                 Brand.GMX,
                                 CustomerStatus.INACTIVE);
 

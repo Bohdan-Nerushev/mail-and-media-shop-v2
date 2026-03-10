@@ -58,6 +58,7 @@ class BillingServiceTest {
     @BeforeEach
     void setUp() {
         final BigDecimal zero = BigDecimal.ZERO;
+
         final BigDecimal minimalDiscount = new BigDecimal("0.10");
         billingService = new BillingServiceImpl(
                 customerService,

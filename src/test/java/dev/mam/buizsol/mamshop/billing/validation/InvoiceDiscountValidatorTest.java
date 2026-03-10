@@ -5,11 +5,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,6 +23,8 @@ class InvoiceDiscountValidatorTest {
 
     private InvoiceDiscountValidator validator;
 
+    private static final BigDecimal DISCOUNT_LIMIT = new BigDecimal("0.10");
+
     @Mock
     private ConstraintValidatorContext context;
 
@@ -31,6 +35,7 @@ class InvoiceDiscountValidatorTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         validator = new InvoiceDiscountValidator();
+        ReflectionTestUtils.setField(validator, "DISCOUNT", DISCOUNT_LIMIT);
 
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         when(violationBuilder.addConstraintViolation()).thenReturn(context);
@@ -49,23 +54,26 @@ class InvoiceDiscountValidatorTest {
     }
 
     @Test
-    @DisplayName("Should return true when discount is greater than 0.10")
+    @DisplayName("Should return true when discount is greater than limit")
     void shouldReturnTrueWhenValueIsGreaterThanThreshold() {
-        assertTrue(validator.isValid(new BigDecimal("0.11"), context));
-        assertTrue(validator.isValid(new BigDecimal("5.00"), context));
+        assertTrue(validator.isValid(DISCOUNT_LIMIT.add(new BigDecimal("0.01")), context));
+        assertTrue(validator.isValid(DISCOUNT_LIMIT.add(new BigDecimal("5.00")), context));
+    }
+
+    static Stream<BigDecimal> invalidDiscounts() {
+        return Stream.of(
+                new BigDecimal("0.01"),
+                DISCOUNT_LIMIT.divide(new BigDecimal("2")),
+                DISCOUNT_LIMIT);
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "0.01",
-            "0.05",
-            "0.10"
-    })
-    @DisplayName("Should return false when discount is between 0 (exclusive) and 0.10 (inclusive)")
-    void shouldReturnFalseWhenValueIsBelowThreshold(String value) {
-        assertFalse(validator.isValid(new BigDecimal(value), context));
+    @MethodSource("invalidDiscounts")
+    @DisplayName("Should return false when discount is between 0 (exclusive) and limit (inclusive)")
+    void shouldReturnFalseWhenValueIsBelowThreshold(BigDecimal value) {
+        assertFalse(validator.isValid(value, context));
         verify(context).disableDefaultConstraintViolation();
-        verify(context).buildConstraintViolationWithTemplate("Discount must be greater than 0.10 €");
+        verify(context).buildConstraintViolationWithTemplate("Discount must be greater than " + DISCOUNT_LIMIT + " €");
     }
 
     @Test

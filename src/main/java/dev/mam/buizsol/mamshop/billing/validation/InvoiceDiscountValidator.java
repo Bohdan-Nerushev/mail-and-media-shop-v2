@@ -3,12 +3,13 @@ package dev.mam.buizsol.mamshop.billing.validation;
 import jakarta.annotation.Nullable;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
+import org.springframework.beans.factory.annotation.Value;
 import java.math.BigDecimal;
 
 public class InvoiceDiscountValidator implements ConstraintValidator<InvoiceDiscount, BigDecimal> {
 
-    private final BigDecimal DISCOUNT = new BigDecimal("0.10");
+    @Value("${billing.minimal-discount-amount}")
+    private BigDecimal DISCOUNT;
     private final BigDecimal ZERO = BigDecimal.ZERO;
 
     @Override
@@ -26,7 +27,7 @@ public class InvoiceDiscountValidator implements ConstraintValidator<InvoiceDisc
         }
         if (value.compareTo(ZERO) > 0 && value.compareTo(DISCOUNT) <= 0) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Discount must be greater than 0.10 €")
+            context.buildConstraintViolationWithTemplate("Discount must be greater than " + DISCOUNT + " €")
                     .addConstraintViolation();
             return false;
         }

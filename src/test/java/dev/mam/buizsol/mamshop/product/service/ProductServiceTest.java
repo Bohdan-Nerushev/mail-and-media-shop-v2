@@ -5,6 +5,7 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.MailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -34,6 +36,11 @@ class ProductServiceTest {
 
         @InjectMocks
         private ProductServiceImpl productService;
+
+        @BeforeEach
+        void setUp() {
+                ReflectionTestUtils.setField(productService, "DISCOUNT", new BigDecimal("0.10"));
+        }
 
         private Product createDefaultProduct(
                         final String name,

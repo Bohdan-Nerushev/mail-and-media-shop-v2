@@ -70,7 +70,7 @@ class BillingServiceImpl implements BillingService {
             throw new InvalidInvoiceDiscountException("Discount cannot be negative");
         }
         if (discount.compareTo(ZERO) > 0 && discount.compareTo(DISCOUNT) <= 0) {
-            throw new InvalidInvoiceDiscountException("Discount must be greater than 0.10 €");
+            throw new InvalidInvoiceDiscountException("Discount must be greater than " + DISCOUNT + " €");
         }
 
         final Customer customer = customerService.findCustomerById(customerId)

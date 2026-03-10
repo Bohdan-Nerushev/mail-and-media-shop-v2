@@ -4,6 +4,7 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,7 +16,8 @@ class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repository;
 
-    private final BigDecimal DISCOUNT = new BigDecimal("0.10");
+    @Value("${billing.minimal-discount-amount}")
+    private BigDecimal DISCOUNT;
 
     ProductServiceImpl(
             final ProductRepository repository) {
@@ -61,7 +63,7 @@ class ProductServiceImpl implements ProductService {
             throw new ProductValidationException("Monthly fee must not be null");
         }
         if (monthlyFee.compareTo(DISCOUNT) <= 0) {
-            throw new ProductValidationException("Monthly fee must be greater than 0.10");
+            throw new ProductValidationException("Monthly fee must be greater than " + DISCOUNT);
         }
 
         Product product = repository.findById(id)

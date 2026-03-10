@@ -1,7 +1,9 @@
 package dev.mam.buizsol.mamshop.customer.controller;
 
 import dev.mam.buizsol.mamshop.customer.dto.AddressRequestDTO;
+import dev.mam.buizsol.mamshop.customer.dto.AddressResponseDTO;
 import dev.mam.buizsol.mamshop.customer.dto.CommunicationDetailsRequestDTO;
+import dev.mam.buizsol.mamshop.customer.dto.CommunicationDetailsResponseDTO;
 import dev.mam.buizsol.mamshop.customer.dto.CustomerRequestDTO;
 import dev.mam.buizsol.mamshop.customer.dto.CustomerResponseDTO;
 import dev.mam.buizsol.mamshop.customer.model.Address;
@@ -55,6 +57,21 @@ public final class CustomerTestFactory {
         return new CommunicationDetailsRequestDTO(email, telephone);
     }
 
+    public static AddressResponseDTO createAddressResponseDTO(
+            String street,
+            String number,
+            String postcode,
+            String city,
+            String country) {
+        return new AddressResponseDTO(street, number, postcode, city, country);
+    }
+
+    public static CommunicationDetailsResponseDTO createCommunicationDetailsResponseDTO(
+            String email,
+            String telephone) {
+        return new CommunicationDetailsResponseDTO(email, telephone);
+    }
+
     public static Customer createCustomer(
             UUID id,
             String firstName,
@@ -97,9 +114,9 @@ public final class CustomerTestFactory {
             String firstName,
             String lastName,
             LocalDate birthDate,
-            AddressRequestDTO address,
-            AddressRequestDTO invoiceAddress,
-            CommunicationDetailsRequestDTO communicationDetails,
+            AddressResponseDTO address,
+            AddressResponseDTO invoiceAddress,
+            CommunicationDetailsResponseDTO communicationDetails,
             Brand brand,
             CustomerStatus status) {
         return new CustomerResponseDTO(
