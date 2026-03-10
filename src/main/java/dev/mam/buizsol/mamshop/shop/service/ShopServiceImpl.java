@@ -22,6 +22,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import dev.mam.buizsol.mamshop.product.service.ProductCatalogLoader;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +37,8 @@ class ShopServiceImpl implements ShopService {
     private final BillingService billingService;
     private final ProductCatalogLoader productCatalogLoader;
 
-    private static final String CSV_PATH = "/products.csv";
+    @Value("${product.catalog.csv-path}")
+    private String CSV_PATH;
 
     ShopServiceImpl(
             final CustomerService customerService,
@@ -52,7 +54,7 @@ class ShopServiceImpl implements ShopService {
     }
 
     @PostConstruct
-    private void init() {
+    void init() {
         productCatalogLoader.load(CSV_PATH);
     }
 

@@ -16,6 +16,8 @@ import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
+import dev.mam.buizsol.mamshop.product.service.ProductCatalogLoader;
+import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +25,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
@@ -43,6 +46,17 @@ class ShopServiceImplIntegrationTest {
 
         @Autowired
         private ProductService productService;
+
+        @Autowired
+        private ProductCatalogLoader productCatalogLoader;
+
+        @Value("${product.catalog.csv-path}")
+        private String CSV_PATH;
+
+        @PostConstruct
+        void init() {
+                productCatalogLoader.load(CSV_PATH);
+        }
 
         private Product createDefaultStandardMailProduct(
                         final String name,
