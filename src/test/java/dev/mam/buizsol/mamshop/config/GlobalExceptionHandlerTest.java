@@ -1,5 +1,8 @@
 package dev.mam.buizsol.mamshop.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+
 import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
 import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
@@ -11,22 +14,18 @@ import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import jakarta.validation.ConstraintViolationException;
+import java.util.Collections;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
-import java.util.Collections;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 @DisplayName("GlobalExceptionHandler Tests")
 class GlobalExceptionHandlerTest {
@@ -59,8 +58,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle CustomerNotFoundException (404)")
     void shouldHandleCustomerNotFoundException() {
-        ResponseEntity<ErrorResponse> response = handler
-                .handleCustomerNotFoundException(new CustomerNotFoundException("Not found"));
+        ResponseEntity<ErrorResponse> response =
+                handler.handleCustomerNotFoundException(new CustomerNotFoundException("Not found"));
         assertEquals(404, response.getStatusCode().value());
         assertEquals("CUSTOMER_NOT_FOUND", response.getBody().errorCode());
     }
@@ -68,8 +67,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle CustomerNotActiveException (409)")
     void shouldHandleCustomerNotActiveException() {
-        ResponseEntity<ErrorResponse> response = handler
-                .handleCustomerNotActiveException(new CustomerNotActiveException("Inactive"));
+        ResponseEntity<ErrorResponse> response =
+                handler.handleCustomerNotActiveException(new CustomerNotActiveException("Inactive"));
         assertEquals(409, response.getStatusCode().value());
         assertEquals("CUSTOMER_NOT_ACTIVE", response.getBody().errorCode());
     }
@@ -77,8 +76,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle CustomerValidationException (400)")
     void shouldHandleCustomerValidationException() {
-        ResponseEntity<ErrorResponse> response = handler
-                .handleCustomerValidationException(new CustomerValidationException("Invalid"));
+        ResponseEntity<ErrorResponse> response =
+                handler.handleCustomerValidationException(new CustomerValidationException("Invalid"));
         assertEquals(400, response.getStatusCode().value());
         assertEquals("CUSTOMER_VALIDATION_ERROR", response.getBody().errorCode());
     }
@@ -86,8 +85,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle ProductNotFoundException (404)")
     void shouldHandleProductNotFoundException() {
-        ResponseEntity<ErrorResponse> response = handler
-                .handleProductNotFoundException(new ProductNotFoundException("Not found"));
+        ResponseEntity<ErrorResponse> response =
+                handler.handleProductNotFoundException(new ProductNotFoundException("Not found"));
         assertEquals(404, response.getStatusCode().value());
         assertEquals("PRODUCT_NOT_FOUND", response.getBody().errorCode());
     }
@@ -95,8 +94,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle ProductValidationException (400)")
     void shouldHandleProductValidationException() {
-        ResponseEntity<ErrorResponse> response = handler
-                .handleProductValidationException(new ProductValidationException("Invalid"));
+        ResponseEntity<ErrorResponse> response =
+                handler.handleProductValidationException(new ProductValidationException("Invalid"));
         assertEquals(400, response.getStatusCode().value());
         assertEquals("PRODUCT_VALIDATION_ERROR", response.getBody().errorCode());
     }
@@ -104,8 +103,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle ContractNotFoundException (404)")
     void shouldHandleContractNotFoundException() {
-        ResponseEntity<ErrorResponse> response = handler
-                .handleContractNotFoundException(new ContractNotFoundException("Not found"));
+        ResponseEntity<ErrorResponse> response =
+                handler.handleContractNotFoundException(new ContractNotFoundException("Not found"));
         assertEquals(404, response.getStatusCode().value());
         assertEquals("CONTRACT_NOT_FOUND", response.getBody().errorCode());
     }
@@ -113,8 +112,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle ContractValidationException (400)")
     void shouldHandleContractValidationException() {
-        ResponseEntity<ErrorResponse> response = handler
-                .handleContractValidationException(new ContractValidationException("Invalid"));
+        ResponseEntity<ErrorResponse> response =
+                handler.handleContractValidationException(new ContractValidationException("Invalid"));
         assertEquals(400, response.getStatusCode().value());
         assertEquals("CONTRACT_VALIDATION_ERROR", response.getBody().errorCode());
     }
@@ -122,8 +121,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle BrandMismatchException (422)")
     void shouldHandleBrandMismatchException() {
-        ResponseEntity<ErrorResponse> response = handler
-                .handleBrandMismatchException(new BrandMismatchException("Mismatch"));
+        ResponseEntity<ErrorResponse> response =
+                handler.handleBrandMismatchException(new BrandMismatchException("Mismatch"));
         assertEquals(422, response.getStatusCode().value());
         assertEquals("BRAND_MISMATCH", response.getBody().errorCode());
     }
@@ -131,8 +130,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle InvalidInvoiceDiscountException (400)")
     void shouldHandleInvalidInvoiceDiscountException() {
-        ResponseEntity<ErrorResponse> response = handler
-                .handleInvalidInvoiceDiscountException(new InvalidInvoiceDiscountException("Invalid"));
+        ResponseEntity<ErrorResponse> response =
+                handler.handleInvalidInvoiceDiscountException(new InvalidInvoiceDiscountException("Invalid"));
         assertEquals(400, response.getStatusCode().value());
         assertEquals("INVALID_DISCOUNT", response.getBody().errorCode());
     }
@@ -140,8 +139,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle InvoiceValidationException (400)")
     void shouldHandleInvoiceValidationException() {
-        ResponseEntity<ErrorResponse> response = handler
-                .handleInvoiceValidationException(new InvoiceValidationException("Invalid"));
+        ResponseEntity<ErrorResponse> response =
+                handler.handleInvoiceValidationException(new InvoiceValidationException("Invalid"));
         assertEquals(400, response.getStatusCode().value());
         assertEquals("INVOICE_VALIDATION_ERROR", response.getBody().errorCode());
     }

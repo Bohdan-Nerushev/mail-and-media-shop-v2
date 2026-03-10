@@ -1,5 +1,9 @@
 package dev.mam.buizsol.mamshop.product.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
+
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.BundleProduct;
@@ -9,42 +13,29 @@ import dev.mam.buizsol.mamshop.product.model.Product;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.CsvSource;
-
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
 @DisplayName("ProductRepository Tests")
 class ProductRepositoryTest {
 
     private ProductRepository repository;
 
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final Validator validator =
+            Validation.buildDefaultValidatorFactory().getValidator();
 
-    private Product createMailProduct(
-            String name,
-            Brand brand,
-            String setupFee,
-            String monthlyFee,
-            Long storageSize) {
-        MailProduct product = new MailProduct(
-                name,
-                brand,
-                new BigDecimal(setupFee),
-                new BigDecimal(monthlyFee),
-                storageSize);
+    private Product createMailProduct(String name, Brand brand, String setupFee, String monthlyFee, Long storageSize) {
+        MailProduct product =
+                new MailProduct(name, brand, new BigDecimal(setupFee), new BigDecimal(monthlyFee), storageSize);
         Set<ConstraintViolation<MailProduct>> violations = validator.validate(product);
         if (!violations.isEmpty()) {
             throw new ProductValidationException("Validation failed");
@@ -52,21 +43,11 @@ class ProductRepositoryTest {
         return product;
     }
 
-    private Product createPartnerProduct(
-            String name,
-            Brand brand,
-            String setupFee,
-            String monthlyFee) {
-        return new PartnerProduct(
-                name,
-                brand,
-                new BigDecimal(setupFee),
-                new BigDecimal(monthlyFee));
+    private Product createPartnerProduct(String name, Brand brand, String setupFee, String monthlyFee) {
+        return new PartnerProduct(name, brand, new BigDecimal(setupFee), new BigDecimal(monthlyFee));
     }
 
-    private Product createBundleProduct(
-            MailProduct mail,
-            PartnerProduct partner) {
+    private Product createBundleProduct(MailProduct mail, PartnerProduct partner) {
         return new BundleProduct(mail, partner);
     }
 
@@ -78,11 +59,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("Should save and retrieve product by ID")
     void shouldSaveAndRetrieveProductById() {
-        Product product = createMailProduct("Mail1",
-                Brand.GMX,
-                "1.00",
-                "0.50",
-                2L);
+        Product product = createMailProduct("Mail1", Brand.GMX, "1.00", "0.50", 2L);
         repository.save(product);
 
         Optional<Product> retrieved = repository.findById(product.getId());
@@ -107,16 +84,8 @@ class ProductRepositoryTest {
     @EnumSource(Brand.class)
     @DisplayName("Should find products by brand")
     void shouldFindProductsByBrand(Brand brand) {
-        Product product1 = createMailProduct(
-                brand + " Mail1",
-                brand, "1.00",
-                "0.50",
-                2L);
-        Product product2 = createPartnerProduct(
-                brand + " Partner1",
-                brand,
-                "2.00",
-                "1.00");
+        Product product1 = createMailProduct(brand + " Mail1", brand, "1.00", "0.50", 2L);
+        Product product2 = createPartnerProduct(brand + " Partner1", brand, "2.00", "1.00");
         repository.save(product1);
         repository.save(product2);
 
@@ -137,15 +106,8 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("Should retrieve all products")
     void shouldRetrieveAllProducts() {
-        Product p1 = createMailProduct("Mail1",
-                Brand.GMX, "1.00",
-                "0.50",
-                2L);
-        Product p2 = createPartnerProduct(
-                "Partner1",
-                Brand.WEB_DE,
-                "2.00",
-                "1.00");
+        Product p1 = createMailProduct("Mail1", Brand.GMX, "1.00", "0.50", 2L);
+        Product p2 = createPartnerProduct("Partner1", Brand.WEB_DE, "2.00", "1.00");
         repository.save(p1);
         repository.save(p2);
 
@@ -158,12 +120,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("Should clear storage")
     void shouldClearStorage() {
-        Product product = createMailProduct(
-                "Mail1",
-                Brand.GMX,
-                "1.00",
-                "0.50",
-                2L);
+        Product product = createMailProduct("Mail1", Brand.GMX, "1.00", "0.50", 2L);
         repository.save(product);
 
         repository.clearStorage();
@@ -171,10 +128,7 @@ class ProductRepositoryTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "0.11",
-            "1000000.00"
-    })
+    @CsvSource({"0.11", "1000000.00"})
     @DisplayName("Should handle valid monthly fees at boundaries")
     void shouldHandleValidMonthlyFees(String monthlyFee) {
         Product product = createMailProduct("MailBoundary", Brand.MAIL_COM, "1.00", monthlyFee, 2L);
@@ -186,14 +140,11 @@ class ProductRepositoryTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "0.10",
-            "0.00",
-            "-1.00"
-    })
+    @CsvSource({"0.10", "0.00", "-1.00"})
     @DisplayName("Should reject invalid monthly fees")
     void shouldRejectInvalidMonthlyFees(String monthlyFee) {
-        assertThrows(ProductValidationException.class,
+        assertThrows(
+                ProductValidationException.class,
                 () -> createMailProduct("MailInvalid", Brand.GMX, "1.00", monthlyFee, 2L));
     }
 
@@ -245,18 +196,15 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("Should reject MailProduct with invalid storage size")
     void shouldRejectMailProductWithInvalidStorageSize() {
-        assertThrows(ProductValidationException.class,
+        assertThrows(
+                ProductValidationException.class,
                 () -> createMailProduct("MailInvalid", Brand.GMX, "1.00", "0.50", 0L));
     }
 
     @Test
     @DisplayName("Should update existing product in storage")
     void shouldUpdateExistingProduct() {
-        final MailProduct product = (MailProduct) createMailProduct("Initial Mail",
-                Brand.GMX,
-                "1.00",
-                "0.50",
-                2L);
+        final MailProduct product = (MailProduct) createMailProduct("Initial Mail", Brand.GMX, "1.00", "0.50", 2L);
         repository.save(product);
 
         final BigDecimal newMonthlyFee = new BigDecimal("0.75");
@@ -265,33 +213,22 @@ class ProductRepositoryTest {
         repository.update(updatedProduct);
 
         final Optional<Product> retrieved = repository.findById(product.getId());
-        assertThat(retrieved)
-                .isPresent()
-                .hasValueSatisfying(updated -> {
-                    assertThat(updated.getMonthlyFee())
-                            .isEqualByComparingTo(newMonthlyFee);
-                    assertThat(updated.getName())
-                            .isEqualTo("Initial Mail");
-                    assertThat(updated.getId())
-                            .isEqualTo(product.getId());
-                });
+        assertThat(retrieved).isPresent().hasValueSatisfying(updated -> {
+            assertThat(updated.getMonthlyFee()).isEqualByComparingTo(newMonthlyFee);
+            assertThat(updated.getName()).isEqualTo("Initial Mail");
+            assertThat(updated.getId()).isEqualTo(product.getId());
+        });
     }
 
     @Test
     @DisplayName("Should save product when updating non-existent product")
     void shouldSaveProductWhenUpdatingNonExistentProduct() {
-        final Product product = createMailProduct("New Product",
-                Brand.WEB_DE,
-                "1.00",
-                "0.60",
-                3L);
+        final Product product = createMailProduct("New Product", Brand.WEB_DE, "1.00", "0.60", 3L);
 
         repository.update(product);
 
         final Optional<Product> retrieved = repository.findById(product.getId());
-        assertThat(retrieved)
-                .isPresent()
-                .contains(product);
+        assertThat(retrieved).isPresent().contains(product);
     }
 
     @Test

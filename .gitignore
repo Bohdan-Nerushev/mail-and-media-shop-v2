@@ -217,3 +217,4 @@ __pycache__/
 .gitlab-ci-local/
 e2e_tests/controller/__pycache__/
 venv/
+e2e_tests/controller/__init__.py

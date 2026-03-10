@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class InvoiceMapper {
 
-    public InvoiceResponseDTO toInvoiceResponseDTO (@NotNull Invoice invoice) {
+    public InvoiceResponseDTO toInvoiceResponseDTO(@NotNull Invoice invoice) {
         return new InvoiceResponseDTO(
                 invoice.brand(),
                 invoice.invoiceDate(),
@@ -19,7 +19,6 @@ public class InvoiceMapper {
                 invoice.totalSetupFee(),
                 invoice.totalMonthlyFee(),
                 invoice.discount(),
-                invoice.totalAmount()
-        );
+                invoice.totalAmount());
     }
 }

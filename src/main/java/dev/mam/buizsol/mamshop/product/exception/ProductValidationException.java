@@ -4,8 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 public class ProductValidationException extends RuntimeException {
 
-    public ProductValidationException(
-            @NotNull final String message) {
+    public ProductValidationException(@NotNull final String message) {
         super(message);
     }
 }

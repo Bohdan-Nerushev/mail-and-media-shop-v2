@@ -8,13 +8,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ContractMapper {
 
-    public ContractResponseDTO toContractResponseDTO (@NotNull Contract contract ) {
+    public ContractResponseDTO toContractResponseDTO(@NotNull Contract contract) {
         return new ContractResponseDTO(
-                contract.id(),
-                contract.customerId(),
-                contract.productId(),
-                contract.creationDate(),
-                contract.status()
-        );
+                contract.id(), contract.customerId(), contract.productId(), contract.creationDate(), contract.status());
     }
 }

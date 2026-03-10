@@ -1,23 +1,5 @@
 package dev.mam.buizsol.mamshop.product.service;
 
-import dev.mam.buizsol.mamshop.customer.model.Brand;
-import dev.mam.buizsol.mamshop.product.model.PartnerProduct;
-import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
-import dev.mam.buizsol.mamshop.product.model.Product;
-import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +7,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.product.model.PartnerProduct;
+import dev.mam.buizsol.mamshop.product.model.PremiumMailProduct;
+import dev.mam.buizsol.mamshop.product.model.Product;
+import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProductCatalogLoader Tests")
@@ -114,8 +113,11 @@ class ProductCatalogLoaderTest {
     void shouldThrowUncheckedIOExceptionOnCloseError() throws java.io.IOException {
         final InputStream mockInputStream = mock(InputStream.class);
 
-        when(mockInputStream.read(any(byte[].class), any(int.class), any(int.class))).thenReturn(-1);
-        org.mockito.Mockito.doThrow(new java.io.IOException("Close error")).when(mockInputStream).close();
+        when(mockInputStream.read(any(byte[].class), any(int.class), any(int.class)))
+                .thenReturn(-1);
+        org.mockito.Mockito.doThrow(new java.io.IOException("Close error"))
+                .when(mockInputStream)
+                .close();
 
         assertThatThrownBy(() -> ProductCatalogLoader.load(productService, mockInputStream))
                 .isInstanceOf(java.io.UncheckedIOException.class)
@@ -135,8 +137,7 @@ class ProductCatalogLoaderTest {
     @DisplayName("Should throw IllegalArgumentException when CSV line exceeds 100 characters")
     void shouldThrowExceptionWhenCsvLineIsTooLong() throws IOException {
         String longLine = "PARTNER," + "A".repeat(100) + ",GMX,1.99,0.00";
-        byte[] csvContent = ("Type,Name,Brand,MonthlyFee,SetupFee\n" + longLine)
-                .getBytes(StandardCharsets.UTF_8);
+        byte[] csvContent = ("Type,Name,Brand,MonthlyFee,SetupFee\n" + longLine).getBytes(StandardCharsets.UTF_8);
 
         try (InputStream is = new java.io.ByteArrayInputStream(csvContent)) {
             assertThatThrownBy(() -> ProductCatalogLoader.load(productService, is))

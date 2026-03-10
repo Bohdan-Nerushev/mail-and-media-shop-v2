@@ -1,7 +1,16 @@
 package dev.mam.buizsol.mamshop.product.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.math.BigDecimal;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,27 +18,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.math.BigDecimal;
-
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @DisplayName("PartnerProduct Tests")
 class PartnerProductTest {
 
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final Validator validator =
+            Validation.buildDefaultValidatorFactory().getValidator();
 
     private PartnerProduct createPartnerProduct(
-            final String name,
-            final Brand brand,
-            final BigDecimal setupFee,
-            final BigDecimal monthlyFee) {
+            final String name, final Brand brand, final BigDecimal setupFee, final BigDecimal monthlyFee) {
         PartnerProduct product = new PartnerProduct(name, brand, setupFee, monthlyFee);
         Set<ConstraintViolation<PartnerProduct>> violations = validator.validate(product);
         if (violations.isEmpty()) {
@@ -41,11 +37,7 @@ class PartnerProductTest {
 
     @DisplayName("Success: Create PartnerProduct with valid diverse data")
     @ParameterizedTest(name = "[{index}] Name: {0}, Brand: {1}")
-    @CsvSource({
-            "Cloud Storage, GMX",
-            "Video Streaming, WEB_DE",
-            "Security Pack, GMX"
-    })
+    @CsvSource({"Cloud Storage, GMX", "Video Streaming, WEB_DE", "Security Pack, GMX"})
     void shouldCreatePartnerProductWhenValidDataProvided(String name, String brandName) {
         Brand brand = Brand.valueOf(brandName);
         BigDecimal setupFee = new BigDecimal("9.99");
@@ -64,18 +56,14 @@ class PartnerProductTest {
     @DisplayName("Boundary: Success with minimum allowed monthly fee (0.11 €)")
     void shouldCreatePartnerProductWhenMonthlyFeeIsAtMinimumAllowed() {
         BigDecimal minFee = new BigDecimal("0.11");
-        PartnerProduct product = createPartnerProduct(
-                "Budget Cloud",
-                Brand.GMX,
-                BigDecimal.ZERO,
-                minFee);
+        PartnerProduct product = createPartnerProduct("Budget Cloud", Brand.GMX, BigDecimal.ZERO, minFee);
 
         assertEquals(minFee, product.getMonthlyFee());
     }
 
     @DisplayName("Boundary/Negative: Failure with monthly fee 0.10 € or less")
     @ParameterizedTest(name = "[{index}] Monthly fee {0} €")
-    @ValueSource(strings = { "0.10", "0.09", "0.00", "-0.01", "-10.00" })
+    @ValueSource(strings = {"0.10", "0.09", "0.00", "-0.01", "-10.00"})
     void shouldThrowExceptionWhenMonthlyFeeIsInvalid(String fee) {
         BigDecimal invalidFee = new BigDecimal(fee);
 
@@ -87,7 +75,7 @@ class PartnerProductTest {
     @DisplayName("Negative: Failure with null, empty or blank name")
     @ParameterizedTest(name = "[{index}] Invalid Name: \"{0}\"")
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "   ", "\t", "\n" })
+    @ValueSource(strings = {" ", "   ", "\t", "\n"})
     void shouldThrowExceptionWhenNameIsInvalid(String name) {
         assertThrows(
                 ProductValidationException.class,
@@ -143,11 +131,8 @@ class PartnerProductTest {
     @Test
     @DisplayName("Success: Verify withMonthlyFee returns new instance with updated fee")
     void shouldReturnNewInstanceWithUpdatedMonthlyFee() {
-        final PartnerProduct initial = createPartnerProduct(
-                "Cloud",
-                Brand.GMX,
-                new BigDecimal("5.00"),
-                new BigDecimal("10.00"));
+        final PartnerProduct initial =
+                createPartnerProduct("Cloud", Brand.GMX, new BigDecimal("5.00"), new BigDecimal("10.00"));
 
         final BigDecimal newFee = new BigDecimal("12.00");
         final PartnerProduct updated = initial.withMonthlyFee(newFee);

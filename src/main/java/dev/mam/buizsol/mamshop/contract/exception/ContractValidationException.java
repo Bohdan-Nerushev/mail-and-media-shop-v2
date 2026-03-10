@@ -4,8 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 public final class ContractValidationException extends RuntimeException {
 
-    public ContractValidationException(
-            @NotNull final String message) {
+    public ContractValidationException(@NotNull final String message) {
         super(message);
     }
 }

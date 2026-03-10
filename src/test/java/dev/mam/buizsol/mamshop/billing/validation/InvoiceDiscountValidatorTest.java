@@ -1,6 +1,13 @@
 package dev.mam.buizsol.mamshop.billing.validation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
 import jakarta.validation.ConstraintValidatorContext;
+import java.math.BigDecimal;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,14 +16,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.math.BigDecimal;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 
 @DisplayName("InvoiceDiscountValidator Tests")
 class InvoiceDiscountValidatorTest {
@@ -61,10 +60,7 @@ class InvoiceDiscountValidatorTest {
     }
 
     static Stream<BigDecimal> invalidDiscounts() {
-        return Stream.of(
-                new BigDecimal("0.01"),
-                DISCOUNT_LIMIT.divide(new BigDecimal("2")),
-                DISCOUNT_LIMIT);
+        return Stream.of(new BigDecimal("0.01"), DISCOUNT_LIMIT.divide(new BigDecimal("2")), DISCOUNT_LIMIT);
     }
 
     @ParameterizedTest

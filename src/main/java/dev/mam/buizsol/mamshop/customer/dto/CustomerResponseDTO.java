@@ -14,5 +14,4 @@ public record CustomerResponseDTO(
         AddressResponseDTO invoiceAddress,
         CommunicationDetailsResponseDTO communicationDetails,
         Brand brand,
-        CustomerStatus status) {
-}
+        CustomerStatus status) {}

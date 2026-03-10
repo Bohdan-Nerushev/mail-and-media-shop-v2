@@ -5,14 +5,11 @@ import jakarta.validation.constraints.NotNull;
 
 public class ContractNotFoundException extends RuntimeException {
 
-    public ContractNotFoundException(
-            @NotNull final String message) {
+    public ContractNotFoundException(@NotNull final String message) {
         super(message);
     }
 
-    public ContractNotFoundException(
-            @NotNull final String message,
-            @Nullable final Throwable cause) {
+    public ContractNotFoundException(@NotNull final String message, @Nullable final Throwable cause) {
         super(message, cause);
     }
 }

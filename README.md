@@ -69,7 +69,7 @@ Also exposes the product purchase operation that creates a contract.
 
 ---
 
-### POST `/api/v1/customers` — Register a New Customer
+### POST `/api/v1/shop/customers` — Register a New Customer
 
 Creates a new customer record.
 
@@ -109,7 +109,7 @@ Creates a new customer record.
 #### Example Request (curl)
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/customers \
+curl -X POST http://localhost:8080/api/v1/shop/customers \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "Max",
@@ -166,7 +166,7 @@ curl -X POST http://localhost:8080/api/v1/customers \
 
 ---
 
-### GET `/api/v1/customers/{customerId}` — Load a Customer by ID
+### GET `/api/v1/shop/customers/{customerId}` — Load a Customer by ID
 
 Returns the customer with the specified UUID.
 
@@ -181,7 +181,7 @@ Returns the customer with the specified UUID.
 #### Example Request (curl)
 
 ```bash
-curl -X GET http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
+curl -X GET http://localhost:8080/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
 ```
 
 #### Example Response — `200 OK`
@@ -233,7 +233,7 @@ In responses, the `status` field indicates the current lifecycle state:
 
 ---
 
-### DELETE `/api/v1/customers/{customerId}` — Remove a Customer
+### DELETE `/api/v1/shop/customers/{customerId}` — Remove a Customer
 
 Deletes the customer by their `customerId`.
 
@@ -248,7 +248,7 @@ Deletes the customer by their `customerId`.
 #### Example Request (curl)
 
 ```bash
-curl -X DELETE http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
+curl -X DELETE http://localhost:8080/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
 ```
 
 #### Example Response — `204 No Content`
@@ -265,7 +265,7 @@ No response body is returned.
 
 ---
 
-### PUT `/api/v1/customers/{customerId}/activate` — Activate a Customer
+### PUT `/api/v1/shop/customers/{customerId}/activate` — Activate a Customer
 
 Changes the status of the specified customer to `ACTIVE`.
 
@@ -280,7 +280,7 @@ Changes the status of the specified customer to `ACTIVE`.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
+curl -X PUT http://localhost:8080/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
 ```
 
 #### Example Response — `204 No Content`
@@ -386,6 +386,20 @@ Updates the invoice address of the customer.
 #### Request Body
 Standard `AddressRequestDTO` structure.
 
+#### Example Request (curl)
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/invoice-address \
+  -H "Content-Type: application/json" \
+  -d '{
+    "street": "Neustraße",
+    "number": "5",
+    "postcode": "10115",
+    "city": "Berlin",
+    "country": "Germany"
+  }'
+```
+
 #### Response Status Codes
 
 | Status | Description                      |
@@ -413,6 +427,17 @@ Updates the email and telephone for a customer.
 #### Request Body
 Standard `CommunicationDetailsRequestDTO` structure.
 
+#### Example Request (curl)
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/communication-details \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "new.email@gmx.de",
+    "telephone": "+49 123 456789"
+  }'
+```
+
 #### Response Status Codes
 
 | Status | Description                                  |
@@ -424,7 +449,7 @@ Standard `CommunicationDetailsRequestDTO` structure.
 
 ---
 
-### POST `/api/v1/customers/{customerId}/purchases` — Purchase a Product
+### POST `/api/v1/shop/customers/{customerId}/purchases` — Purchase a Product
 
 Creates a new contract linking the specified customer to a selected product.
 
@@ -447,7 +472,7 @@ Creates a new contract linking the specified customer to a selected product.
 #### Example Request (curl)
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/purchases \
+curl -X POST http://localhost:8080/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/purchases \
   -H "Content-Type: application/json" \
   -d '{
     "productId": "7cb65f12-1234-4abc-a789-000000000001"
@@ -480,13 +505,13 @@ curl -X POST http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c96
 ## Contract API
 
 **Tag:** `Contract`  
-**Base path:** `/api/v1/contracts`
+**Base path:** `/api/v1/shop/contracts`
 
 Provides management and read access to contracts associated with a specific customer.
 
 ---
 
-### GET `/api/v1/contracts/{customerId}` — Load All Contracts for a Customer
+### GET `/api/v1/shop/contracts/{customerId}` — Load All Contracts for a Customer
 
 Returns all contracts associated with the specified customer UUID.
 
@@ -498,6 +523,12 @@ Returns all contracts associated with the specified customer UUID.
 | Parameter    | Type   | Required | Description                       |
 |--------------|--------|----------|-----------------------------------|
 | `customerId` | `UUID` | Yes      | Unique identifier of the customer |
+
+#### Example Request (curl)
+
+```bash
+curl -X GET http://localhost:8080/api/v1/shop/contracts/3fa85f64-5717-4562-b3fc-2c963f66afa6
+```
 
 #### Example Response — `200 OK`
 
@@ -536,6 +567,12 @@ Changes the status of a specific contract to `ACTIVE`.
 | `customerId` | `UUID` | Yes      | Unique identifier of the customer  |
 | `contractId` | `UUID` | Yes      | Unique identifier of the contract  |
 
+#### Example Request (curl)
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/contracts/a1b2c3d4-e5f6-7890-abcd-ef1234567890/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
+```
+
 #### Response Status Codes
 
 | Status | Description                      |
@@ -549,13 +586,13 @@ Changes the status of a specific contract to `ACTIVE`.
 ## Product API
 
 **Tag:** `Product`  
-**Base path:** `/api/v1/products`
+**Base path:** `/api/v1/shop/products`
 
 Provides read access to the product catalog, filtered by brand.
 
 ---
 
-### GET `/api/v1/products` — Load All Products for a Brand
+### GET `/api/v1/shop/products` — Load All Products for a Brand
 
 Returns all products available for the specified brand.
 

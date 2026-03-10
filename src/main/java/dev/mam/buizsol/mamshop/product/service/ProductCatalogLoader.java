@@ -7,8 +7,6 @@ import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.springframework.stereotype.Component;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ProductCatalogLoader {
@@ -26,13 +25,11 @@ public class ProductCatalogLoader {
     private static final int MIN_COLUMNS_VALUE_STATIC = 4;
     private static final int MAX_COLUMNS_VALUE_STATIC = 5;
 
-    public ProductCatalogLoader(
-            final ProductService productService) {
+    public ProductCatalogLoader(final ProductService productService) {
         this.productService = productService;
     }
 
-    public void load(
-            @NotNull @Size(max = MAX_CSV_PATH_LENGTH) final String csvPath) {
+    public void load(@NotNull @Size(max = MAX_CSV_PATH_LENGTH) final String csvPath) {
         if (csvPath == null || csvPath.length() > MAX_CSV_PATH_LENGTH) {
             throw new IllegalArgumentException(
                     String.format("CSV path must not be null and must not exceed %d characters", MAX_CSV_PATH_LENGTH));
@@ -44,11 +41,9 @@ public class ProductCatalogLoader {
         load(productService, inputStream);
     }
 
-    static void load(
-            @NotNull final ProductService productService,
-            @NotNull final InputStream inputStream) {
-        try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+    static void load(@NotNull final ProductService productService, @NotNull final InputStream inputStream) {
+        try (final BufferedReader reader =
+                new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             reader.lines()
                     .skip(1)
                     .filter(line -> !line.isBlank())

@@ -16,5 +16,4 @@ public record CustomerRequestDTO(
         @NotNull @Valid AddressRequestDTO address,
         @Nullable @Valid AddressRequestDTO invoiceAddress,
         @NotNull @Valid CommunicationDetailsRequestDTO communicationDetails,
-        @NotNull Brand brand) {
-}
+        @NotNull Brand brand) {}

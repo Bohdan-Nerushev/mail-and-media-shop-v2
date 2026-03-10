@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
-
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -60,8 +59,8 @@ public record Customer(
         if (newStatus == null) {
             throw new CustomerValidationException("Status must not be null");
         }
-        return new Customer(id, firstName, lastName, birthDate, address, invoiceAddress, communicationDetails, brand,
-                newStatus);
+        return new Customer(
+                id, firstName, lastName, birthDate, address, invoiceAddress, communicationDetails, brand, newStatus);
     }
 
     @NotNull
@@ -69,8 +68,8 @@ public record Customer(
         if (newAddress == null) {
             throw new CustomerValidationException("Address must not be null");
         }
-        return new Customer(id, firstName, lastName, birthDate, newAddress, invoiceAddress, communicationDetails, brand,
-                status);
+        return new Customer(
+                id, firstName, lastName, birthDate, newAddress, invoiceAddress, communicationDetails, brand, status);
     }
 
     @NotNull
@@ -78,8 +77,8 @@ public record Customer(
         if (newInvoiceAddress == null) {
             throw new CustomerValidationException("Invoice address must not be null");
         }
-        return new Customer(id, firstName, lastName, birthDate, address, newInvoiceAddress, communicationDetails, brand,
-                status);
+        return new Customer(
+                id, firstName, lastName, birthDate, address, newInvoiceAddress, communicationDetails, brand, status);
     }
 
     @NotNull
