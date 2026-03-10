@@ -10,9 +10,9 @@ public record CustomerResponseDTO(
         String firstName,
         String lastName,
         LocalDate birthDate,
-        AddressRequestDTO address,
-        AddressRequestDTO invoiceAddress,
-        CommunicationDetailsRequestDTO communicationDetails,
+        AddressResponseDTO address,
+        AddressResponseDTO invoiceAddress,
+        CommunicationDetailsResponseDTO communicationDetails,
         Brand brand,
         CustomerStatus status) {
 }
