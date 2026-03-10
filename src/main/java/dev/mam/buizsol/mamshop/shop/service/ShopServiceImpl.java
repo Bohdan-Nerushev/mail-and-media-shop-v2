@@ -38,7 +38,7 @@ class ShopServiceImpl implements ShopService {
     private final ProductCatalogLoader productCatalogLoader;
 
     @Value("${product.catalog.csv-path}")
-    private String CSV_PATH;
+    private String csvPath;
 
     ShopServiceImpl(
             final CustomerService customerService,
@@ -55,7 +55,7 @@ class ShopServiceImpl implements ShopService {
 
     @PostConstruct
     void init() {
-        productCatalogLoader.load(CSV_PATH);
+        productCatalogLoader.load(csvPath);
     }
 
     @Override

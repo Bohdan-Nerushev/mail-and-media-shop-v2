@@ -11,15 +11,15 @@ import java.util.UUID;
 
 public interface ProductRepository {
 
-        void save(@NotNull @Valid final Product product);
+        void save(@NotNull @Valid Product product);
 
-        void update(@NotNull @Valid final Product product);
-
-        @NotNull
-        Optional<Product> findById(@NotNull final UUID id);
+        void update(@NotNull @Valid Product product);
 
         @NotNull
-        Collection<Product> findByBrand(@NotNull final Brand brand);
+        Optional<Product> findById(@NotNull UUID id);
+
+        @NotNull
+        Collection<Product> findByBrand(@NotNull Brand brand);
 
         @NotNull
         Collection<Product> findAll();

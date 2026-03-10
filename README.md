@@ -16,6 +16,7 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
   - [Billing API](#billing-api)
 - [Common Response Schemas](#common-response-schemas)
 - [Error Handling](#error-handling)
+- [Maintain Code Cleanliness](#maintain-code-cleanliness)
 
 ---
 
@@ -80,8 +81,8 @@ Creates a new customer record.
 
 | Field                  | Type                         | Required | Constraints                              |
 |------------------------|------------------------------|----------|------------------------------------------|
-| `firstName`            | `string`                     | Yes      | Not blank                                |
-| `lastName`             | `string`                     | Yes      | Not blank                                |
+| `firstName`            | `string`                     | Yes      | Not blank, max 100                       |
+| `lastName`             | `string`                     | Yes      | Not blank, max 100                       |
 | `birthDate`            | `string (LocalDate)`         | Yes      | Not null, format: `YYYY-MM-DD`           |
 | `address`              | `AddressRequestDTO`          | Yes      | Not null, see sub-fields below           |
 | `invoiceAddress`       | `AddressRequestDTO` / `null` | No       | Nullable, same structure as `address`    |
@@ -479,13 +480,13 @@ curl -X POST http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c96
 ## Contract API
 
 **Tag:** `Contract`  
-**Base path:** `/api/v1/customers/{customerId}/contracts`
+**Base path:** `/api/v1/contracts`
 
 Provides management and read access to contracts associated with a specific customer.
 
 ---
 
-### GET `/api/v1/customers/{customerId}/contracts` — Load All Contracts for a Customer
+### GET `/api/v1/contracts/{customerId}` — Load All Contracts for a Customer
 
 Returns all contracts associated with the specified customer UUID.
 
@@ -522,7 +523,7 @@ Returns all contracts associated with the specified customer UUID.
 
 ---
 
-### PUT `/api/v1/customers/{customerId}/contracts/{contractId}/activate` — Activate a Contract
+### PUT `/api/v1/contracts/{contractId}/{customerId}/activate` — Activate a Contract
 
 Changes the status of a specific contract to `ACTIVE`.
 
@@ -602,32 +603,55 @@ Handles invoice generation for customers.
 
 ---
 
-### POST `/api/v1/billing/{customerId}/invoice` — Generate Invoice for a Customer
+### POST `/api/v1/billing/invoices` — Generate Invoice for a Customer
 
 Generates an invoice for the specified customer based on their current active contracts.
 
 **HTTP Method:** `POST`  
+**Request Content-Type:** `application/json`  
 **Response Content-Type:** `application/json`
 
-#### Path Parameters
+#### Request Body
 
-| Parameter    | Type   | Required | Description                       |
+| Field        | Type   | Required | Description                       |
 |--------------|--------|----------|-----------------------------------|
 | `customerId` | `UUID` | Yes      | Unique identifier of the customer |
+
+#### Example Request (curl)
+
+```bash
+curl -X POST http://localhost:8080/api/v1/billing/invoices \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  }'
+```
 
 #### Example Response — `200 OK`
 
 ```json
 {
-  "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "brand": "GMX",
   "invoiceDate": "2026-02-26",
-  "totalAmount": 14.98,
+  "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "address": {
+    "street": "Musterstraße",
+    "number": "12A",
+    "postcode": "68161",
+    "city": "Mannheim",
+    "country": "Germany"
+  },
+  "invoiceAddress": null,
   "items": [
     {
       "description": "GMX ProMail",
       "amount": 4.99
     }
-  ]
+  ],
+  "totalSetupFee": 0.00,
+  "totalMonthlyFee": 4.99,
+  "discount": 0.00,
+  "totalAmount": 4.99
 }
 ```
 
@@ -716,3 +740,86 @@ All error responses share a unified structure defined by `ErrorResponse`:
 | `400`  | Bad Request — validation failed or malformed input              |
 | `404`  | Not Found — the requested resource does not exist               |
 | `500`  | Internal Server Error — unexpected server-side failure          |
+
+
+---
+
+## Maintain Code Cleanliness
+
+### 1. Spotless – Automatic Code Formatting
+
+Formats all `.java` files in `src`, fixes indentation, line breaks, annotations, and Builder pattern.
+
+```bash
+mvn spotless:apply -P dev
+```
+
+Checks formatting without modifying files; returns an error if violations are found.
+
+```bash
+mvn spotless:check -P dev
+```
+
+---
+
+### 2. PMD – Anti-pattern and Code Duplication Detection
+
+Analyzes code according to `pmd-rules.xml`, fails the build if violations are found.
+
+```bash
+mvn pmd:check -P dev
+```
+
+Generates a Copy/Paste Detection (CPD) report for duplicated code.
+
+```bash
+mvn pmd:cpd -P dev
+```
+
+---
+
+### 3. SpotBugs + FindSecBugs – Bytecode Analysis and Security
+
+Analyzes `.class` files for `NullPointerException`, race conditions, resource leaks; FindSecBugs adds security checks (SQLi, XSS).
+
+```bash
+mvn spotbugs:check -P dev
+```
+
+Opens the HTML report showing defect and risk categories.
+
+```bash
+open target/spotbugs.html
+```
+
+---
+
+### 4. OWASP Dependency-Check / Snyk – Dependency Security
+
+Scans Maven dependencies for known CVEs, generates an HTML report; fails the build on critical vulnerabilities (CVSS ≥ 7).
+
+```bash
+mvn org.owasp:dependency-check-maven:check -P dev
+```
+
+Scans all projects for vulnerabilities and provides update recommendations.
+
+```bash
+snyk test --all-projects
+```
+
+---
+
+### 5. Git Pre-commit Hook – Automatic Checks Before Commit
+
+Runs Spotless, PMD, and SpotBugs using the `dev` profile; blocks commit if violations are found.
+
+```bash
+.git/hooks/pre-commit
+```
+
+Simulates hook execution for testing purposes.
+
+```bash
+./.git/hooks/pre-commit
+```

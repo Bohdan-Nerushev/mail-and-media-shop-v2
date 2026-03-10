@@ -17,16 +17,16 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public interface ProductService {
 
-        void createProduct(@NotNull @Valid final Product product);
+        void createProduct(@NotNull @Valid Product product);
 
         @NotNull
-        Optional<Product> findById(@NotNull final UUID id);
+        Optional<Product> findById(@NotNull UUID id);
 
         @NotNull
-        List<Product> findByBrand(@NotNull final Brand brand);
+        List<Product> findByBrand(@NotNull Brand brand);
 
         void updateMonthlyFee(
-                        @NotNull final UUID id,
-                        @NotNull @DecimalMin(value = "0.10", inclusive = false) final BigDecimal monthlyFee)
+                        @NotNull UUID id,
+                        @NotNull @DecimalMin(value = "0.10", inclusive = false) BigDecimal monthlyFee)
                         throws ProductNotFoundException;
 }

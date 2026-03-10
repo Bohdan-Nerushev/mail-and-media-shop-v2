@@ -20,25 +20,25 @@ public interface ContractService {
         @NotNull
         @BrandMatch
         Contract createContract(
-                        @NotNull @Valid final Customer customer,
-                        @NotNull @Valid final Product product);
+                        @NotNull @Valid Customer customer,
+                        @NotNull @Valid Product product);
 
         @NotNull
         Optional<Contract> findContractById(
-                        @NotNull final UUID id);
+                        @NotNull UUID id);
 
         @NotNull
         List<Contract> findContractsByCustomerId(
-                        @NotNull final UUID customerId);
+                        @NotNull UUID customerId);
 
         @NotNull
         List<Contract> findContractsByProductId(
-                        @NotNull final UUID productId);
+                        @NotNull UUID productId);
 
         @NotNull
         Contract updateContractStatus(
-                        @NotNull final UUID contractId,
-                        @NotNull final ContractStatus status) throws ContractNotFoundException;
+                        @NotNull UUID contractId,
+                        @NotNull ContractStatus status) throws ContractNotFoundException;
 
         @NotNull
         List<Contract> findAllContracts();

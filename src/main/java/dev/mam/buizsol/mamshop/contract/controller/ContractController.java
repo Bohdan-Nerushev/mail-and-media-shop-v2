@@ -44,10 +44,21 @@ public class ContractController {
                 this.contractMapper = contractMapper;
         }
 
-        @Operation(summary = "Load all contracts for a customer", description = "Returns all contracts associated with the specified customer ID.")
+        @Operation(
+                summary = "Load all contracts for a customer",
+                description = "Returns all contracts associated with the specified customer ID.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Contracts loaded successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ContractResponseDTO.class))),
-                        @ApiResponse(responseCode = "404", description = "Customer not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Contracts loaded successfully",
+                        content = @Content(mediaType = "application/json",
+                                schema = @Schema(implementation = ContractResponseDTO.class))),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Customer not found",
+                        content = @Content(
+                                mediaType = "application/json",
+                                schema = @Schema(implementation = ErrorResponse.class)))
         })
         @GetMapping(value = "/{customerId}")
         public @NotNull List<ContractResponseDTO> loadAllContractsByCustomerId(
@@ -66,17 +77,31 @@ public class ContractController {
                 return contractResponseDTOList;
         }
 
-        @Operation(summary = "Activate a contract by ID", description = "Changes the status of the specified contract to ACTIVE.")
+        @Operation(
+                summary = "Activate a contract by ID",
+                description = "Changes the status of the specified contract to ACTIVE.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "204", description = "Contract activated successfully"),
-                        @ApiResponse(responseCode = "404", description = "Contract or customer not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
-                        @ApiResponse(responseCode = "422", description = "Brand mismatch: contract does not belong to the specified customer", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+                @ApiResponse(
+                        responseCode = "204",
+                        description = "Contract activated successfully"),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Contract or customer not found",
+                        content = @Content(
+                                mediaType = "application/json",
+                                schema = @Schema(implementation = ErrorResponse.class))),
+                @ApiResponse(
+                        responseCode = "422",
+                        description = "Brand mismatch: contract does not belong to the specified customer",
+                        content = @Content(
+                                mediaType = "application/json",
+                                schema = @Schema(implementation = ErrorResponse.class)))
         })
         @PutMapping(value = "/{contractId}/{customerId}/activate")
         @ResponseStatus(value = HttpStatus.NO_CONTENT)
         public void activateContract(
-                        @PathVariable(value = "customerId") @NotNull final UUID customerId,
-                        @PathVariable(value = "contractId") @NotNull final UUID contractId) {
+                @PathVariable(value = "customerId") @NotNull final UUID customerId,
+                @PathVariable(value = "contractId") @NotNull final UUID contractId) {
                 log.debug("Activating contract: {} for customer: {}", contractId, customerId);
 
                 shopService.activateContract(customerId, contractId);

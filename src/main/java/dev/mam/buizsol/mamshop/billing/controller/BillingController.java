@@ -40,10 +40,22 @@ public class BillingController {
                 this.invoiceMapper = invoiceMapper;
         }
 
-        @Operation(summary = "Generate Invoice for a customer", description = "Generates an invoice for the specified customer.")
+        @Operation(
+                summary = "Generate Invoice for a customer",
+                description = "Generates an invoice for the specified customer.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Invoice generated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InvoiceResponseDTO.class))),
-                        @ApiResponse(responseCode = "404", description = "Customer not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+                        @ApiResponse(
+                                responseCode = "200",
+                                description = "Invoice generated successfully",
+                                content = @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = InvoiceResponseDTO.class))),
+                        @ApiResponse(
+                                responseCode = "404",
+                                description = "Customer not found",
+                                content = @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = ErrorResponse.class)))
         })
         @PostMapping(value = "/invoices")
         public @NotNull InvoiceResponseDTO generateInvoice(

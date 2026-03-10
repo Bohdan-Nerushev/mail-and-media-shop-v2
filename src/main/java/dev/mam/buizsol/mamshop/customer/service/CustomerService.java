@@ -17,7 +17,7 @@ import org.springframework.validation.annotation.Validated;
 public interface CustomerService {
 
         @NotNull
-        Customer createCustomer(@Valid @NotNull final Customer customer);
+        Customer createCustomer(@Valid @NotNull Customer customer);
 
         void updateAddress(@NotNull UUID customerId, @Valid @NotNull Address address) throws CustomerNotFoundException;
 
