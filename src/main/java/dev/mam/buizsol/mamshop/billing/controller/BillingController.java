@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.billing.controller;
 
 import dev.mam.buizsol.mamshop.billing.mapper.InvoiceMapper;
+import dev.mam.buizsol.mamshop.billing.dto.InvoiceRequestDTO;
 import dev.mam.buizsol.mamshop.billing.dto.InvoiceResponseDTO;
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.config.ErrorResponse;
@@ -9,20 +10,19 @@ import dev.mam.buizsol.mamshop.shop.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 @Slf4j
 @Tag(name = "Billing", description = "Billing API")
@@ -30,43 +30,31 @@ import java.util.UUID;
 @RequestMapping(value = "/api/v1/billing")
 public class BillingController {
 
-    private final ShopService shopService;
-    private final InvoiceMapper invoiceMapper;
+        private final ShopService shopService;
+        private final InvoiceMapper invoiceMapper;
 
-    public BillingController(
-            final ShopService shopService,
-            final InvoiceMapper invoiceMapper) {
-        this.shopService = shopService;
-        this.invoiceMapper = invoiceMapper;
-    }
+        public BillingController(
+                        final ShopService shopService,
+                        final InvoiceMapper invoiceMapper) {
+                this.shopService = shopService;
+                this.invoiceMapper = invoiceMapper;
+        }
 
-    @Operation(
-            summary = "Generate Invoice for a customer",
-            description = "Generates an invoice for the specified customer.")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Invoice generated successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = InvoiceResponseDTO.class))),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Customer not found",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    @PostMapping(value = "/{customerId}/invoice")
-    public @NotNull InvoiceResponseDTO generateInvoice(
-            @PathVariable(value = "customerId") @NotNull final UUID customerId) {
-        log.debug("Generating invoice for customer: {}", customerId);
+        @Operation(summary = "Generate Invoice for a customer", description = "Generates an invoice for the specified customer.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Invoice generated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = InvoiceResponseDTO.class))),
+                        @ApiResponse(responseCode = "404", description = "Customer not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+        })
+        @PostMapping(value = "/invoices")
+        public @NotNull InvoiceResponseDTO generateInvoice(
+                        @RequestBody @Valid final InvoiceRequestDTO invoiceRequestDTO) {
+                log.debug("Generating invoice for customer: {}", invoiceRequestDTO.customerId());
 
-        Invoice invoice = shopService.generateInvoice(customerId);
-        log.info("Invoice generated successfully: {}", invoice);
+                Invoice invoice = shopService.generateInvoice(invoiceRequestDTO.customerId());
+                log.info("Invoice generated successfully: {}", invoice);
 
-        InvoiceResponseDTO invoiceResponseDTO = invoiceMapper.toInvoiceResponseDTO(invoice);
-        log.debug("Invoice response DTO: {}", invoiceResponseDTO);
-        return invoiceResponseDTO;
-    }
+                InvoiceResponseDTO invoiceResponseDTO = invoiceMapper.toInvoiceResponseDTO(invoice);
+                log.debug("Invoice response DTO: {}", invoiceResponseDTO);
+                return invoiceResponseDTO;
+        }
 }

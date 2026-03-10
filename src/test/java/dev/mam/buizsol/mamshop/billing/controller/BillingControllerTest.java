@@ -5,6 +5,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.mam.buizsol.mamshop.billing.dto.InvoiceRequestDTO;
 import dev.mam.buizsol.mamshop.billing.dto.InvoiceResponseDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.http.MediaType;
@@ -35,96 +39,104 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(BillingController.class)
 public class BillingControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockitoBean
-    private ShopService shopService;
+        private final ObjectMapper objectMapper = new ObjectMapper()
+                        .registerModule(new JavaTimeModule())
+                        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    @MockitoBean
-    private InvoiceMapper invoiceMapper;
+        @MockitoBean
+        private ShopService shopService;
 
-    @Test
-    @DisplayName("Positive: Should generate invoice successfully for valid customer")
-    void shouldGenerateInvoiceSuccessfully() throws Exception {
+        @MockitoBean
+        private InvoiceMapper invoiceMapper;
 
-        UUID customerId = UUID.randomUUID();
-        Brand brand = Brand.GMX;
-        Address address = BillingTestFactory.createAddress(
-                "Main St",
-                "10",
-                "12345",
-                "Berlin",
-                "Germany");
-        InvoiceItem item = BillingTestFactory.createInvoiceItem(
-                UUID.randomUUID(),
-                "Premium Mail",
-                UUID.randomUUID(),
-                LocalDate.now(),
-                new BigDecimal("5.00"),
-                new BigDecimal("10.00"));
+        @Test
+        @DisplayName("Positive: Should generate invoice successfully for valid customer")
+        void shouldGenerateInvoiceSuccessfully() throws Exception {
 
-        Invoice invoice = BillingTestFactory.createInvoice(
-                brand,
-                customerId,
-                address,
-                address,
-                List.of(item),
-                BigDecimal.ZERO);
+                UUID customerId = UUID.randomUUID();
+                Brand brand = Brand.GMX;
+                Address address = BillingTestFactory.createAddress(
+                                "Main St",
+                                "10",
+                                "12345",
+                                "Berlin",
+                                "Germany");
+                InvoiceItem item = BillingTestFactory.createInvoiceItem(
+                                UUID.randomUUID(),
+                                "Premium Mail",
+                                UUID.randomUUID(),
+                                LocalDate.now(),
+                                new BigDecimal("5.00"),
+                                new BigDecimal("10.00"));
 
-        InvoiceResponseDTO responseDto = BillingTestFactory.createInvoiceResponseDTO(
-                brand,
-                LocalDate.now(),
-                customerId,
-                address,
-                address,
-                List.of(item),
-                new BigDecimal("5.00"),
-                new BigDecimal("10.00"),
-                BigDecimal.ZERO,
-                new BigDecimal("15.00"));
+                Invoice invoice = BillingTestFactory.createInvoice(
+                                brand,
+                                customerId,
+                                address,
+                                address,
+                                List.of(item),
+                                BigDecimal.ZERO);
 
-        when(shopService.generateInvoice(customerId))
-                .thenReturn(invoice);
-        when(invoiceMapper.toInvoiceResponseDTO(invoice))
-                .thenReturn(responseDto);
+                InvoiceResponseDTO responseDto = BillingTestFactory.createInvoiceResponseDTO(
+                                brand,
+                                LocalDate.now(),
+                                customerId,
+                                address,
+                                address,
+                                List.of(item),
+                                new BigDecimal("5.00"),
+                                new BigDecimal("10.00"),
+                                BigDecimal.ZERO,
+                                new BigDecimal("15.00"));
 
-        mockMvc.perform(post("/api/v1/billing/{customerId}/invoice", customerId)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.customerId").value(customerId.toString()))
-                .andExpect(jsonPath("$.brand").value(brand.name()))
-                .andExpect(jsonPath("$.totalAmount").value(15.00));
+                when(shopService.generateInvoice(customerId))
+                                .thenReturn(invoice);
+                when(invoiceMapper.toInvoiceResponseDTO(invoice))
+                                .thenReturn(responseDto);
 
-        verify(shopService).generateInvoice(customerId);
-        verify(invoiceMapper).toInvoiceResponseDTO(invoice);
-    }
+                InvoiceRequestDTO requestDTO = new InvoiceRequestDTO(customerId);
 
-    @Test
-    @DisplayName("Negative: Should return 404 when customer not found")
-    void shouldReturn404WhenCustomerNotFound() throws Exception {
-        UUID customerId = UUID.randomUUID();
-        when(shopService.generateInvoice(customerId))
-                .thenThrow(new CustomerNotFoundException("Customer not found"));
+                mockMvc.perform(post("/api/v1/billing/invoices")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(requestDTO)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.customerId").value(customerId.toString()))
+                                .andExpect(jsonPath("$.brand").value(brand.name()))
+                                .andExpect(jsonPath("$.totalAmount").value(15.00));
 
-        mockMvc.perform(post("/api/v1/billing/{customerId}/invoice", customerId)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("Customer not found"));
+                verify(shopService).generateInvoice(customerId);
+                verify(invoiceMapper).toInvoiceResponseDTO(invoice);
+        }
 
-        verify(shopService).generateInvoice(customerId);
-    }
+        @Test
+        @DisplayName("Negative: Should return 404 when customer not found")
+        void shouldReturn404WhenCustomerNotFound() throws Exception {
+                UUID customerId = UUID.randomUUID();
+                when(shopService.generateInvoice(customerId))
+                                .thenThrow(new CustomerNotFoundException("Customer not found"));
 
-    @Test
-    @DisplayName("Negative: Should return 400 when customer ID format is invalid")
-    void shouldReturn400WhenCustomerIdIsInvalid() throws Exception {
+                InvoiceRequestDTO requestDTO = new InvoiceRequestDTO(customerId);
 
-        String invalidCustomerId = "not-a-uuid";
+                mockMvc.perform(post("/api/v1/billing/invoices")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(requestDTO)))
+                                .andExpect(status().isNotFound())
+                                .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
+                                .andExpect(jsonPath("$.message").value("Customer not found"));
 
-        mockMvc.perform(post("/api/v1/billing/{customerId}/invoice", invalidCustomerId)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode").value("TYPE_MISMATCH"));
-    }
+                verify(shopService).generateInvoice(customerId);
+        }
+
+        @Test
+        @DisplayName("Negative: Should return 400 when customerId is null in request body")
+        void shouldReturn400WhenCustomerIdIsNull() throws Exception {
+                mockMvc.perform(post("/api/v1/billing/invoices")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"customerId\": null}"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.errorCode").value("REQUEST_VALIDATION_ERROR"));
+        }
 }
