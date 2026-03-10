@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 public class InvoiceDiscountValidator implements ConstraintValidator<InvoiceDiscount, BigDecimal> {
 
     @Value("${billing.minimal-discount-amount}")
-    private BigDecimal DISCOUNT;
-    private final BigDecimal ZERO = BigDecimal.ZERO;
+    private BigDecimal minimalDiscountAmount;
+    private final BigDecimal zeroAmount = BigDecimal.ZERO;
 
     @Override
     public boolean isValid(
@@ -19,15 +19,15 @@ public class InvoiceDiscountValidator implements ConstraintValidator<InvoiceDisc
         if (value == null) {
             return true;
         }
-        if (value.compareTo(ZERO) < 0) {
+        if (value.compareTo(zeroAmount) < 0) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Discount cannot be negative")
                     .addConstraintViolation();
             return false;
         }
-        if (value.compareTo(ZERO) > 0 && value.compareTo(DISCOUNT) <= 0) {
+        if (value.compareTo(zeroAmount) > 0 && value.compareTo(minimalDiscountAmount) <= 0) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Discount must be greater than " + DISCOUNT + " €")
+            context.buildConstraintViolationWithTemplate("Discount must be greater than " + minimalDiscountAmount + " €")
                     .addConstraintViolation();
             return false;
         }

@@ -39,7 +39,7 @@ class ProductServiceTest {
 
         @BeforeEach
         void setUp() {
-                ReflectionTestUtils.setField(productService, "DISCOUNT", new BigDecimal("0.10"));
+                ReflectionTestUtils.setField(productService, "minimalDiscountAmount", new BigDecimal("0.10"));
         }
 
         private Product createDefaultProduct(

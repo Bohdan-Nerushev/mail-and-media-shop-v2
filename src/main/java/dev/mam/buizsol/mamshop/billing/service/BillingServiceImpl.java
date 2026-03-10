@@ -28,8 +28,8 @@ class BillingServiceImpl implements BillingService {
     private final ProductService productService;
     private final ContractService contractService;
 
-    private final BigDecimal ZERO;
-    private final BigDecimal DISCOUNT;
+    private final BigDecimal zeroAmount;
+    private final BigDecimal minimalDiscountAmount;
 
     BillingServiceImpl(
             final CustomerService customerService,
@@ -40,8 +40,8 @@ class BillingServiceImpl implements BillingService {
         this.customerService = customerService;
         this.productService = productService;
         this.contractService = contractService;
-        this.ZERO = zero;
-        this.DISCOUNT = discount;
+        this.zeroAmount = zero;
+        this.minimalDiscountAmount = discount;
     }
 
     @Override
@@ -51,7 +51,7 @@ class BillingServiceImpl implements BillingService {
         if (customerId == null) {
             throw new InvoiceValidationException("Customer ID must not be null");
         }
-        return generateInvoice(customerId, ZERO);
+        return generateInvoice(customerId, zeroAmount);
     }
 
     @Override
@@ -66,11 +66,11 @@ class BillingServiceImpl implements BillingService {
         if (discount == null) {
             throw new InvalidInvoiceDiscountException("Discount must not be null");
         }
-        if (discount.compareTo(ZERO) < 0) {
+        if (discount.compareTo(zeroAmount) < 0) {
             throw new InvalidInvoiceDiscountException("Discount cannot be negative");
         }
-        if (discount.compareTo(ZERO) > 0 && discount.compareTo(DISCOUNT) <= 0) {
-            throw new InvalidInvoiceDiscountException("Discount must be greater than " + DISCOUNT + " €");
+        if (discount.compareTo(zeroAmount) > 0 && discount.compareTo(minimalDiscountAmount) <= 0) {
+            throw new InvalidInvoiceDiscountException("Discount must be greater than " + minimalDiscountAmount + " €");
         }
 
         final Customer customer = customerService.findCustomerById(customerId)

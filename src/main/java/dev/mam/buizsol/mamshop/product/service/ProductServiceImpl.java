@@ -17,7 +17,7 @@ class ProductServiceImpl implements ProductService {
     private final ProductRepository repository;
 
     @Value("${billing.minimal-discount-amount}")
-    private BigDecimal DISCOUNT;
+    private BigDecimal minimalDiscountAmount;
 
     ProductServiceImpl(
             final ProductRepository repository) {
@@ -62,8 +62,8 @@ class ProductServiceImpl implements ProductService {
         if (monthlyFee == null) {
             throw new ProductValidationException("Monthly fee must not be null");
         }
-        if (monthlyFee.compareTo(DISCOUNT) <= 0) {
-            throw new ProductValidationException("Monthly fee must be greater than " + DISCOUNT);
+        if (monthlyFee.compareTo(minimalDiscountAmount) <= 0) {
+            throw new ProductValidationException("Monthly fee must be greater than " + minimalDiscountAmount);
         }
 
         Product product = repository.findById(id)
