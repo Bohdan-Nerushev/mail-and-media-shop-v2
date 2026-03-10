@@ -14,6 +14,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 @Order(value = 1)
@@ -28,18 +29,26 @@ public class CorrelationIdFilter implements Filter {
             final ServletRequest request,
             final ServletResponse response,
             final FilterChain chain) throws IOException, ServletException {
-        if (request instanceof final HttpServletRequest httpServletRequest) {
-            final String correlationId = Optional.ofNullable(httpServletRequest.getHeader(CORRELATION_ID_HEADER))
-                    .orElse(UUID.randomUUID().toString());
 
-            MDC.put(MDC_KEY, correlationId);
-            try {
-                chain.doFilter(request, response);
-            } finally {
-                MDC.remove(MDC_KEY);
-            }
-        } else {
+        if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
             chain.doFilter(request, response);
+            return;
+        }
+
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+        String correlationId = Optional.ofNullable(httpRequest.getHeader(CORRELATION_ID_HEADER))
+                .orElse(UUID.randomUUID().toString());
+
+        MDC.put(MDC_KEY, correlationId);
+
+        httpResponse.setHeader(CORRELATION_ID_HEADER, correlationId);
+
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            MDC.remove(MDC_KEY);
         }
     }
 }
