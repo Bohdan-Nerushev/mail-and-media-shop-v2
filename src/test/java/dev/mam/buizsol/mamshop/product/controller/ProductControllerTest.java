@@ -102,7 +102,7 @@ public class ProductControllerTest {
                                 .andExpect(MockMvcResultMatchers.status()
                                                 .isNotFound())
                                 .andExpect(MockMvcResultMatchers.jsonPath("$.message")
-                                                .value(errorMessage));
+                                                .value("Product not found"));
 
                 verify(shopService, times(1)).loadAllProductsForBrand(brand);
                 verifyNoInteractions(productMapper);

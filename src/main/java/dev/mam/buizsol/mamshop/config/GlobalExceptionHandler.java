@@ -26,7 +26,9 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -37,158 +39,175 @@ public class GlobalExceptionHandler {
 
         @ExceptionHandler(CustomerNotFoundException.class)
         public ResponseEntity<ErrorResponse> handleCustomerNotFoundException(CustomerNotFoundException ex) {
+                log.error("Customer not found for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(404).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "CUSTOMER_NOT_FOUND",
-                                ex.getMessage(),
+                                "Customer not found",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(CustomerNotActiveException.class)
         public ResponseEntity<ErrorResponse> handleCustomerNotActiveException(CustomerNotActiveException ex) {
+                log.error("Customer is not active for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(409).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "CUSTOMER_NOT_ACTIVE",
-                                ex.getMessage(),
+                                "Customer is not active",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(CustomerValidationException.class)
         public ResponseEntity<ErrorResponse> handleCustomerValidationException(CustomerValidationException ex) {
+                log.error("Customer validation failed for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(400).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "CUSTOMER_VALIDATION_ERROR",
-                                ex.getMessage(),
+                                "Customer validation failed",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(ProductNotFoundException.class)
         public ResponseEntity<ErrorResponse> handleProductNotFoundException(ProductNotFoundException ex) {
+                log.error("Product not found for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(404).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "PRODUCT_NOT_FOUND",
-                                ex.getMessage(),
+                                "Product not found",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(ProductValidationException.class)
         public ResponseEntity<ErrorResponse> handleProductValidationException(ProductValidationException ex) {
+                log.error("Product validation failed for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(400).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "PRODUCT_VALIDATION_ERROR",
-                                ex.getMessage(),
+                                "Product validation failed",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(ContractNotFoundException.class)
         public ResponseEntity<ErrorResponse> handleContractNotFoundException(ContractNotFoundException ex) {
+                log.error("Contract not found for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(404).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "CONTRACT_NOT_FOUND",
-                                ex.getMessage(),
+                                "Contract not found",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(ContractValidationException.class)
         public ResponseEntity<ErrorResponse> handleContractValidationException(ContractValidationException ex) {
+                log.error("Contract validation failed for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(400).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "CONTRACT_VALIDATION_ERROR",
-                                ex.getMessage(),
+                                "Contract validation failed",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(BrandMismatchException.class)
         public ResponseEntity<ErrorResponse> handleBrandMismatchException(BrandMismatchException ex) {
+                log.error("Brand mismatch for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(422).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "BRAND_MISMATCH",
-                                ex.getMessage(),
+                                "Brand mismatch",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(InvalidInvoiceDiscountException.class)
         public ResponseEntity<ErrorResponse> handleInvalidInvoiceDiscountException(InvalidInvoiceDiscountException ex) {
+                log.error("Invalid invoice discount for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(400).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "INVALID_DISCOUNT",
-                                ex.getMessage(),
+                                "Invalid invoice discount",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(InvoiceValidationException.class)
         public ResponseEntity<ErrorResponse> handleInvoiceValidationException(InvoiceValidationException ex) {
+                log.error("Invoice validation failed for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(400).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "INVOICE_VALIDATION_ERROR",
-                                ex.getMessage(),
+                                "Invoice validation failed",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)
         public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+                log.error("Request validation failed for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(400).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "REQUEST_VALIDATION_ERROR",
-                                ex.getMessage(),
+                                "Request validation failed",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(HandlerMethodValidationException.class)
         public ResponseEntity<ErrorResponse> handleHandlerMethodValidationException(
                         HandlerMethodValidationException ex) {
+                log.error("Request validation failed for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(400).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "REQUEST_VALIDATION_ERROR",
-                                ex.getMessage(),
+                                "Request validation failed",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(ConstraintViolationException.class)
         public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
+                log.error("Constraint violation for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(400).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "CONSTRAINT_VIOLATION",
-                                ex.getMessage(),
+                                "Constraint violation",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(MissingServletRequestParameterException.class)
         public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
                         MissingServletRequestParameterException ex) {
+                log.error("Missing servlet request parameter for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(400).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "MISSING_PARAMETER",
-                                ex.getMessage(),
+                                "Missing servlet request parameter",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(MethodArgumentTypeMismatchException.class)
         public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
                         MethodArgumentTypeMismatchException ex) {
+                log.error("Type mismatch for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(400).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "TYPE_MISMATCH",
-                                ex.getMessage(),
+                                "Type mismatch",
                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(NoResourceFoundException.class)
         public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex) {
+                log.error("Resource not found for correlationId: {}", getCorrelationId(), ex);
                 return ResponseEntity.status(404).body(
                                 new ErrorResponse(
                                                 getCorrelationId(),
                                                 "RESOURCE_NOT_FOUND",
-                                                ex.getMessage(),
+                                                "Resource not found",
                                                 LocalDateTime.now()));
         }
 
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+                log.error("Unhandled exception occurred", ex);
                 return ResponseEntity.status(500).body(new ErrorResponse(
                                 getCorrelationId(),
                                 "INTERNAL_ERROR",
-                                ex.getMessage(),
+                                "An unexpected error occurred",
                                 LocalDateTime.now()));
         }
 }

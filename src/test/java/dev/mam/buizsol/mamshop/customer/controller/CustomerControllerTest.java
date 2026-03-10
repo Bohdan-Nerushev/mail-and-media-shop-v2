@@ -90,11 +90,13 @@ public class CustomerControllerTest {
 
                 AddressResponseDTO addressResponseDto = CustomerTestFactory.createAddressResponseDTO(
                                 "Main St", "10", "12345", "Berlin", "Germany");
-                CommunicationDetailsResponseDTO commResponseDto = CustomerTestFactory.createCommunicationDetailsResponseDTO(
-                                "john.doe@example.com", "+49123456789");
+                CommunicationDetailsResponseDTO commResponseDto = CustomerTestFactory
+                                .createCommunicationDetailsResponseDTO(
+                                                "john.doe@example.com", "+49123456789");
 
                 CustomerResponseDTO responseDto = CustomerTestFactory.createCustomerResponseDTO(
-                                customerId, "John", "Doe", LocalDate.of(1990, 1, 1), addressResponseDto, addressResponseDto, commResponseDto,
+                                customerId, "John", "Doe", LocalDate.of(1990, 1, 1), addressResponseDto,
+                                addressResponseDto, commResponseDto,
                                 Brand.GMX,
                                 CustomerStatus.INACTIVE);
 
@@ -157,8 +159,9 @@ public class CustomerControllerTest {
                                 "john.doe@example.com", "+49123456789");
                 AddressResponseDTO addressResponseDto = CustomerTestFactory.createAddressResponseDTO(
                                 "Main St", "10", "12345", "Berlin", "Germany");
-                CommunicationDetailsResponseDTO commResponseDto = CustomerTestFactory.createCommunicationDetailsResponseDTO(
-                                "john.doe@example.com", "+49123456789");
+                CommunicationDetailsResponseDTO commResponseDto = CustomerTestFactory
+                                .createCommunicationDetailsResponseDTO(
+                                                "john.doe@example.com", "+49123456789");
                 CustomerResponseDTO customerResponseDTO = CustomerTestFactory.createCustomerResponseDTO(
                                 customerId,
                                 "John",
@@ -201,8 +204,7 @@ public class CustomerControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
-                                .andExpect(jsonPath("$.message").value(
-                                                "Customer not found with ID: " + unknownCustomerId));
+                                .andExpect(jsonPath("$.message").value("Customer not found"));
 
                 verify(shopService).loadCustomer(any(UUID.class));
                 verifyNoInteractions(customerMapper);
@@ -237,7 +239,7 @@ public class CustomerControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
-                                .andExpect(jsonPath("$.message").value("Customer not found with ID: " + unknownId));
+                                .andExpect(jsonPath("$.message").value("Customer not found"));
 
                 verify(shopService).removeCustomer(unknownId);
                 verifyNoInteractions(customerMapper);
@@ -272,7 +274,7 @@ public class CustomerControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
-                                .andExpect(jsonPath("$.message").value("Customer not found with ID: " + unknownId));
+                                .andExpect(jsonPath("$.message").value("Customer not found"));
 
                 verify(shopService).activateCustomer(unknownId);
                 verifyNoInteractions(customerMapper);
@@ -307,7 +309,7 @@ public class CustomerControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
-                                .andExpect(jsonPath("$.message").value("Customer not found with ID: " + unknownId));
+                                .andExpect(jsonPath("$.message").value("Customer not found"));
 
                 verify(shopService).deactivateCustomer(unknownId);
                 verifyNoInteractions(customerMapper);
@@ -353,7 +355,7 @@ public class CustomerControllerTest {
                                 .content(objectMapper.writeValueAsString(addressRequestDTO)))
                                 .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
-                                .andExpect(jsonPath("$.message").value("Customer not found with ID: " + unknownId));
+                                .andExpect(jsonPath("$.message").value("Customer not found"));
 
                 verify(customerMapper).toAddress(addressRequestDTO);
                 verify(shopService).updateAddress(unknownId, address);
@@ -398,7 +400,7 @@ public class CustomerControllerTest {
                                 .content(objectMapper.writeValueAsString(addressRequestDTO)))
                                 .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
-                                .andExpect(jsonPath("$.message").value("Customer not found with ID: " + unknownId));
+                                .andExpect(jsonPath("$.message").value("Customer not found"));
 
                 verify(customerMapper).toAddress(addressRequestDTO);
                 verify(shopService).updateInvoiceAddress(unknownId, address);
@@ -446,7 +448,7 @@ public class CustomerControllerTest {
                                 .content(objectMapper.writeValueAsString(communicationDetailsRequestDTO)))
                                 .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
-                                .andExpect(jsonPath("$.message").value("Customer not found with ID: " + unknownId));
+                                .andExpect(jsonPath("$.message").value("Customer not found"));
 
                 verify(customerMapper).toCommunicationDetails(communicationDetailsRequestDTO);
                 verify(shopService).updateCommunicationDetails(unknownId, communicationDetails);
@@ -494,8 +496,7 @@ public class CustomerControllerTest {
                                 .content(objectMapper.writeValueAsString(purchaseRequestDTO)))
                                 .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
-                                .andExpect(jsonPath("$.message")
-                                                .value("Customer not found with ID: " + unknownCustomerId));
+                                .andExpect(jsonPath("$.message").value("Customer not found"));
 
                 verify(shopService).purchaseProduct(unknownCustomerId, productId);
                 verifyNoInteractions(contractMapper);
@@ -517,8 +518,7 @@ public class CustomerControllerTest {
                                 .content(objectMapper.writeValueAsString(purchaseRequestDTO)))
                                 .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
-                                .andExpect(jsonPath("$.message")
-                                                .value("Product not found with ID: " + unknownProductId));
+                                .andExpect(jsonPath("$.message").value("Customer not found"));
 
                 verify(shopService).purchaseProduct(customerId, unknownProductId);
                 verifyNoInteractions(contractMapper);
