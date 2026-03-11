@@ -42,7 +42,6 @@ public class Contract {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
-    @NotNull
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -81,13 +80,13 @@ public class Contract {
             throw new CustomerNotActiveException("Customer is not active");
         }
 
-        return new Contract(
-                UUID.randomUUID(),
-                customer,
-                product.getName(),
-                product.getId(),
-                LocalDate.now(),
-                ContractStatus.INACTIVE);
+        return Contract.builder()
+                .customer(customer)
+                .productType(product.getName())
+                .productId(product.getId())
+                .creationDate(LocalDate.now())
+                .status(ContractStatus.INACTIVE)
+                .build();
     }
 
     @NotNull

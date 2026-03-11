@@ -47,7 +47,6 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
-    @NotNull
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -67,13 +66,13 @@ public class Invoice {
 
     @NotNull
     @Valid
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 
     @NotNull
     @Valid
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "invoice_address_id", nullable = false)
     private Address invoiceAddress;
 
@@ -110,7 +109,6 @@ public class Invoice {
         validateDiscount(discount);
         validateItems(items);
 
-        this.id = UUID.randomUUID();
         this.brand = brand;
         this.invoiceDate = LocalDate.now();
         this.customer = customer;

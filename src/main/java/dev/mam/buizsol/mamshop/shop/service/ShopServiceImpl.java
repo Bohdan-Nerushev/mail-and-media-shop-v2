@@ -22,9 +22,11 @@ import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 class ShopServiceImpl implements ShopService {
 
     private final CustomerService customerService;
@@ -44,6 +46,7 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Transactional
     public Customer registerCustomer(final Customer customer) {
         return customerService.createCustomer(customer);
     }
@@ -56,6 +59,7 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Transactional
     public void removeCustomer(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
         final List<Contract> contracts = contractService.findContractsByCustomerId(customerId);
@@ -69,6 +73,7 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Transactional
     public void activateCustomer(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
         if (customer.getStatus() == CustomerStatus.ACTIVE) {
@@ -79,11 +84,13 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Transactional
     public void deactivateCustomer(final UUID customerId) throws CustomerNotFoundException {
         customerService.deactivateCustomer(customerId);
     }
 
     @Override
+    @Transactional
     public Customer updateAddress(final UUID customerId, final Address address) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateAddress(customerId, address);
@@ -91,6 +98,7 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Transactional
     public Customer updateInvoiceAddress(final UUID customerId, final Address invoiceAddress)
             throws CustomerNotFoundException {
         checkCustomerActive(customerId);
@@ -99,6 +107,7 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Transactional
     public Customer updateCommunicationDetails(final UUID customerId, final CommunicationDetails details)
             throws CustomerNotFoundException {
         checkCustomerActive(customerId);
@@ -113,12 +122,14 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Transactional
     public Invoice generateInvoice(final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
         checkCustomerActive(customerId);
         return billingService.generateInvoice(customerId);
     }
 
     @Override
+    @Transactional
     public void activateContract(final UUID customerId, final UUID contractId)
             throws CustomerNotFoundException, ContractNotFoundException {
         final Contract contract = contractService
@@ -143,6 +154,7 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Transactional
     public Contract purchaseProduct(final UUID customerId, final UUID productId)
             throws CustomerNotFoundException, ProductNotFoundException {
 

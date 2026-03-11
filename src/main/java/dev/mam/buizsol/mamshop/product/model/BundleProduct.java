@@ -27,13 +27,11 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BundleProduct extends Product {
 
-    @NotNull
     @Valid
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mail_product_id", nullable = false)
     private MailProduct mailProduct;
 
-    @NotNull
     @Valid
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "partner_product_id", nullable = false)

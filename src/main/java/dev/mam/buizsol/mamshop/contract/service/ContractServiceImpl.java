@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 class ContractServiceImpl implements ContractService {
 
     private final ContractRepository repository;
@@ -20,6 +22,7 @@ class ContractServiceImpl implements ContractService {
     }
 
     @Override
+    @Transactional
     public Contract createContract(final Customer customer, final Product product) {
         return repository.save(Contract.create(customer, product));
     }
@@ -40,6 +43,7 @@ class ContractServiceImpl implements ContractService {
     }
 
     @Override
+    @Transactional
     public Contract updateContractStatus(final UUID contractId, final ContractStatus changeStatus)
             throws ContractNotFoundException {
         return repository

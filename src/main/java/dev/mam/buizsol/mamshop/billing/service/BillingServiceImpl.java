@@ -19,8 +19,10 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 class BillingServiceImpl implements BillingService {
 
     private final CustomerService customerService;
@@ -43,6 +45,8 @@ class BillingServiceImpl implements BillingService {
         this.minimalDiscountAmount = discount;
     }
 
+    @Override
+    @Transactional
     public Invoice generateInvoice(final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
         if (customerId == null) {
             throw new InvoiceValidationException("Customer ID must not be null");
@@ -50,6 +54,8 @@ class BillingServiceImpl implements BillingService {
         return generateInvoice(customerId, zeroAmount);
     }
 
+    @Override
+    @Transactional
     public Invoice generateInvoice(final UUID customerId, final BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException {
 

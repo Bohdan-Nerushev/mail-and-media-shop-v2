@@ -37,7 +37,6 @@ public class InvoiceItem {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
-    @NotNull
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -79,7 +78,6 @@ public class InvoiceItem {
             final LocalDate contractCreationDate,
             final BigDecimal setupFee,
             final BigDecimal monthlyFee) {
-        this.id = UUID.randomUUID();
         this.productId = productId;
         this.productName = productName;
         this.contract = contract;
