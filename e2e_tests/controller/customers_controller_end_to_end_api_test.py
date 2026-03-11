@@ -239,12 +239,12 @@ def test_should_handle_product_purchase_idempotently_when_called_multiple_times(
     url = f"{base_url}/{customer_id}/purchases"
     payload = {"productId": product_id}
     
-    contracts_url = f"{base_url}/{customer_id}/contracts"
+    contracts_url = base_url.replace("/customers", "/contracts") + f"/{customer_id}"
     c1 = requests.get(contracts_url).json()
-    
+
     response = requests.post(url, headers=header, json=payload)
     assert response.status_code in [201, 409, 204], f"Purchase idempotency failed, got {response.status_code}"
-    
+
     c2 = requests.get(contracts_url).json()
     assert len(c1) == len(c2), f"Duplicate contract created! Count increased from {len(c1)} to {len(c2)}"
     logger.info("Test Success: Product purchase idempotency check passed.")

@@ -4,8 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 
 public final class CustomerNotFoundException extends RuntimeException {
 
-    public CustomerNotFoundException(
-            @NotBlank final String message) {
+    public CustomerNotFoundException(@NotBlank final String message) {
         super(message);
     }
 }

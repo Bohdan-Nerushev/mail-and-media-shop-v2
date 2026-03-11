@@ -19,6 +19,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,9 +28,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Table(name = "contracts")
@@ -69,30 +68,26 @@ public class Contract {
     @Column(name = "status", nullable = false)
     private ContractStatus status;
 
-    public static Contract create(
-            @NotNull @Valid final Customer customer,
-            @NotNull @Valid final Product product) {
+    public static Contract create(@NotNull @Valid final Customer customer, @NotNull @Valid final Product product) {
 
         if (customer == null || product == null) {
             throw new ContractValidationException("Customer and Product must not be null");
         }
         if (!customer.getBrand().equals(product.getBrand())) {
             throw new BrandMismatchException(String.format(
-                    "Customer brand %s does not match product brand %s",
-                    customer.getBrand(), product.getBrand()));
+                    "Customer brand %s does not match product brand %s", customer.getBrand(), product.getBrand()));
         }
         if (customer.getStatus() != CustomerStatus.ACTIVE) {
             throw new CustomerNotActiveException("Customer is not active");
         }
 
-        return Contract.builder()
-                .id(UUID.randomUUID())
-                .customer(customer)
-                .productType(product.getClass().getSimpleName())
-                .productId(product.getId())
-                .creationDate(LocalDate.now())
-                .status(ContractStatus.INACTIVE)
-                .build();
+        return new Contract(
+                UUID.randomUUID(),
+                customer,
+                product.getName(),
+                product.getId(),
+                LocalDate.now(),
+                ContractStatus.INACTIVE);
     }
 
     @NotNull

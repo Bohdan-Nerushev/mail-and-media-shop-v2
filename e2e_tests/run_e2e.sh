@@ -42,8 +42,17 @@ log_info "Project Root detected: $PROJECT_ROOT"
 # This allows configuration override without modifying the script.
 # WARNING: export with xargs assumes simple KEY=VALUE format.
 if [ -f "$PROJECT_ROOT/.env" ]; then
-    log_info "Loading environment variables from .env"
-    export $(grep -v '^#' "$PROJECT_ROOT/.env" | xargs)
+    log_info "Loading environment variables from .env (APP_PORT and APP_HOST will not be overwritten if already set)"
+    # Load env vars but don't overwrite if already exported
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ ! "$line" =~ ^# && "$line" =~ = ]]; then
+            key=$(echo "$line" | cut -d= -f1)
+            value=$(echo "$line" | cut -d= -f2-)
+            if [[ -z "${!key}" ]]; then
+                export "$key"="$value"
+            fi
+        fi
+    done < "$PROJECT_ROOT/.env"
 fi
 
 # ------------------------------------------------------------------------------
@@ -262,13 +271,16 @@ APP_PID=$!
 log_info "Application background process ID: $APP_PID"
 
 # Perform basic process-level validation after short delay.
-sleep 1
+sleep 3
 if ! ps -p "$APP_PID" > /dev/null; then
     log_error "Application process died immediately after startup!"
     log_error "Last 20 lines of $APP_LOG:"
-    tail -n 20 "$APP_LOG"
+    cat "$APP_LOG"
     error_exit "Check application startup configuration."
 fi
+
+log_info "Application process is alive. Startup log snippet:"
+head -n 20 "$APP_LOG"
 
 # ==============================================================================
 # PHASE 6: Health Check Verification
@@ -338,6 +350,15 @@ if [ $TEST_EXIT_CODE -eq 0 ]; then
     log_info "Result: PASSED"
 else
     log_error "Result: FAILED (Exit Code: $TEST_EXIT_CODE)"
+    log_info "Checking why it failed..."
+    if [ -f "$APP_LOG" ]; then
+        log_info "Last 100 lines of application log ($APP_LOG):"
+        tail -n 100 "$APP_LOG"
+    else
+        log_error "Application log file $APP_LOG missing!"
+    fi
+    log_info "Health endpoint status ($HEALTH_ENDPOINT):"
+    curl -v --silent "$HEALTH_ENDPOINT" 2>&1 | head -n 20
 fi
 
 exit $TEST_EXIT_CODE

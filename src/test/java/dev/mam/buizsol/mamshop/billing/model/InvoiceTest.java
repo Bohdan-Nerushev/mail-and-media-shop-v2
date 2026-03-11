@@ -1,26 +1,25 @@
-//package dev.mam.buizsol.mamshop.billing.model;
+// package dev.mam.buizsol.mamshop.billing.model;
 //
-//import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
-//import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
-//import dev.mam.buizsol.mamshop.customer.model.Address;
-//import dev.mam.buizsol.mamshop.customer.model.Brand;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.params.ParameterizedTest;
-//import org.junit.jupiter.params.provider.CsvSource;
-//import org.junit.jupiter.params.provider.ValueSource;
+// import static org.junit.jupiter.api.Assertions.*;
 //
-//import java.math.BigDecimal;
-//import java.time.LocalDate;
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.UUID;
+// import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
+// import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
+// import dev.mam.buizsol.mamshop.customer.model.Address;
+// import dev.mam.buizsol.mamshop.customer.model.Brand;
+// import java.math.BigDecimal;
+// import java.time.LocalDate;
+// import java.util.Collections;
+// import java.util.List;
+// import java.util.UUID;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.params.ParameterizedTest;
+// import org.junit.jupiter.params.provider.CsvSource;
+// import org.junit.jupiter.params.provider.ValueSource;
 //
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//@DisplayName("Invoice Record Tests")
-//class InvoiceTest {
+// @DisplayName("Invoice Record Tests")
+// class InvoiceTest {
 //
 //    private Address testAddress;
 //    private final UUID customerId = UUID.randomUUID();
@@ -33,14 +32,25 @@
 //    @Test
 //    @DisplayName("Successful calculation of totals for multiple items")
 //    void shouldCalculateTotalsCorrectlyWhenMultipleItemsExist() {
-//        InvoiceItem item1 = new InvoiceItem(UUID.randomUUID(), "P1", UUID.randomUUID(), LocalDate.now(),
-//                new BigDecimal("10.00"), new BigDecimal("5.00"));
-//        InvoiceItem item2 = new InvoiceItem(UUID.randomUUID(), "P2", UUID.randomUUID(), LocalDate.now(),
-//                new BigDecimal("20.00"), new BigDecimal("15.00"));
+//        InvoiceItem item1 = new InvoiceItem(
+//                UUID.randomUUID(),
+//                "P1",
+//                UUID.randomUUID(),
+//                LocalDate.now(),
+//                new BigDecimal("10.00"),
+//                new BigDecimal("5.00"));
+//        InvoiceItem item2 = new InvoiceItem(
+//                UUID.randomUUID(),
+//                "P2",
+//                UUID.randomUUID(),
+//                LocalDate.now(),
+//                new BigDecimal("20.00"),
+//                new BigDecimal("15.00"));
 //
 //        BigDecimal discount = new BigDecimal("7.00");
 //
-//        Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, testAddress, List.of(item1, item2), discount);
+//        Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, testAddress, List.of(item1, item2),
+// discount);
 //
 //        assertEquals(new BigDecimal("30.00"), invoice.totalSetupFee());
 //        assertEquals(new BigDecimal("20.00"), invoice.totalMonthlyFee());
@@ -63,24 +73,23 @@
 //    @ParameterizedTest(name = "Invalid discount validation - value: {0}")
 //    @ValueSource(strings = { "-0.01", "-10.00" })
 //    void shouldThrowExceptionWhenDiscountIsNegative(BigDecimal negativeDiscount) {
-//        assertThrows(InvalidInvoiceDiscountException.class, () -> new Invoice(Brand.GMX, customerId, testAddress,
-//                testAddress, Collections.emptyList(), negativeDiscount));
+//        assertThrows(
+//                InvalidInvoiceDiscountException.class,
+//                () -> new Invoice(
+//                        Brand.GMX, customerId, testAddress, testAddress, Collections.emptyList(), negativeDiscount));
 //    }
 //
 //    @Test
 //    @DisplayName("Null discount validation (negative scenario)")
 //    void shouldThrowExceptionWhenDiscountIsNull() {
-//        assertThrows(InvalidInvoiceDiscountException.class,
+//        assertThrows(
+//                InvalidInvoiceDiscountException.class,
 //                () -> new Invoice(Brand.GMX, customerId, testAddress, testAddress, Collections.emptyList(), null));
 //    }
 //
 //    @DisplayName("Verification of totals calculation using parameterized discounts")
 //    @ParameterizedTest(name = "Calculation logic with various item counts and discount: {0}")
-//    @CsvSource({
-//            "0.00, 0.00",
-//            "10.50, -10.50",
-//            "100.00, -100.00"
-//    })
+//    @CsvSource({ "0.00, 0.00", "10.50, -10.50", "100.00, -100.00" })
 //    void shouldCalculateAmountCorrectlyWhenDiscountsAreProvided(BigDecimal discount, BigDecimal expectedTotal) {
 //
 //        Invoice invoice = new Invoice(Brand.MAIL_COM, customerId, testAddress, testAddress, Collections.emptyList(),
@@ -93,8 +102,8 @@
 //    @DisplayName("Verification of items list immutability")
 //    void shouldReturnImmutableItemsList() {
 //
-//        InvoiceItem item = new InvoiceItem(UUID.randomUUID(), "P1", UUID.randomUUID(), LocalDate.now(),
-//                BigDecimal.ZERO, BigDecimal.TEN);
+//        InvoiceItem item = new InvoiceItem(
+//                UUID.randomUUID(), "P1", UUID.randomUUID(), LocalDate.now(), BigDecimal.ZERO, BigDecimal.TEN);
 //        List<InvoiceItem> items = new java.util.ArrayList<>();
 //        items.add(item);
 //
@@ -108,8 +117,8 @@
 //    void shouldStoreDifferentMailingAndInvoiceAddresses() {
 //        Address invoiceAddress = new Address("Invoice St", "2", "54321", "City2", "Country");
 //
-//        Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, invoiceAddress, Collections.emptyList(),
-//                BigDecimal.ZERO);
+//        Invoice invoice = new Invoice(
+//                Brand.GMX, customerId, testAddress, invoiceAddress, Collections.emptyList(), BigDecimal.ZERO);
 //
 //        assertEquals(testAddress, invoice.address());
 //        assertEquals(invoiceAddress, invoice.invoiceAddress());
@@ -118,7 +127,8 @@
 //    @Test
 //    @DisplayName("Null items list validation (negative scenario)")
 //    void shouldThrowExceptionWhenItemsListIsNull() {
-//        assertThrows(InvoiceValidationException.class,
+//        assertThrows(
+//                InvoiceValidationException.class,
 //                () -> new Invoice(Brand.GMX, customerId, testAddress, testAddress, null, BigDecimal.ZERO));
 //    }
 //
@@ -142,8 +152,13 @@
 //    @Test
 //    @DisplayName("Discount exceeding total fees (Negative total amount scenario)")
 //    void shouldAllowNegativeTotalAmountWhenDiscountExceedsFees() {
-//        InvoiceItem item = new InvoiceItem(UUID.randomUUID(), "P1", UUID.randomUUID(), LocalDate.now(),
-//                new BigDecimal("10.00"), new BigDecimal("10.00"));
+//        InvoiceItem item = new InvoiceItem(
+//                UUID.randomUUID(),
+//                "P1",
+//                UUID.randomUUID(),
+//                LocalDate.now(),
+//                new BigDecimal("10.00"),
+//                new BigDecimal("10.00"));
 //        BigDecimal highDiscount = new BigDecimal("25.00");
 //
 //        Invoice invoice = new Invoice(Brand.GMX, customerId, testAddress, testAddress, List.of(item), highDiscount);
@@ -155,8 +170,12 @@
 //    @DisplayName("Stress test with a large number of items (performance check)")
 //    void shouldCalculateTotalsCorrectlyWhenLargeNumberOfItemsProvided() {
 //        final InvoiceItem prototype = new InvoiceItem(
-//                UUID.randomUUID(), "Product", UUID.randomUUID(), LocalDate.now(),
-//                new BigDecimal("1.00"), new BigDecimal("2.00"));
+//                UUID.randomUUID(),
+//                "Product",
+//                UUID.randomUUID(),
+//                LocalDate.now(),
+//                new BigDecimal("1.00"),
+//                new BigDecimal("2.00"));
 //
 //        final List<InvoiceItem> items = Collections.nCopies(1000, prototype);
 //
@@ -166,4 +185,4 @@
 //        assertEquals(new BigDecimal("2000.00"), invoice.totalMonthlyFee());
 //        assertEquals(new BigDecimal("3000.00"), invoice.totalAmount());
 //    }
-//}
+// }

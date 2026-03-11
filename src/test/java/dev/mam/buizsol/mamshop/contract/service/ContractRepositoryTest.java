@@ -1,34 +1,33 @@
-//package dev.mam.buizsol.mamshop.contract.service;
+// package dev.mam.buizsol.mamshop.contract.service;
 //
-//import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
-//import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
-//import dev.mam.buizsol.mamshop.contract.model.Contract;
-//import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
-//import dev.mam.buizsol.mamshop.customer.model.Brand;
-//import dev.mam.buizsol.mamshop.customer.model.Customer;
-//import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
-//import dev.mam.buizsol.mamshop.product.model.Product;
-//import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.params.ParameterizedTest;
-//import org.junit.jupiter.params.provider.NullSource;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.junit.jupiter.api.Assertions.assertNotNull;
+// import static org.junit.jupiter.api.Assertions.assertThrows;
+// import static org.junit.jupiter.api.Assertions.assertTrue;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.when;
 //
-//import java.math.BigDecimal;
-//import java.util.List;
-//import java.util.Optional;
-//import java.util.UUID;
+// import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
+// import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
+// import dev.mam.buizsol.mamshop.contract.model.Contract;
+// import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
+// import dev.mam.buizsol.mamshop.customer.model.Brand;
+// import dev.mam.buizsol.mamshop.customer.model.Customer;
+// import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
+// import dev.mam.buizsol.mamshop.product.model.Product;
+// import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
+// import java.math.BigDecimal;
+// import java.util.List;
+// import java.util.Optional;
+// import java.util.UUID;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.params.ParameterizedTest;
+// import org.junit.jupiter.params.provider.NullSource;
 //
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
-//import static org.junit.jupiter.api.Assertions.assertThrows;
-//import static org.junit.jupiter.api.Assertions.assertTrue;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.when;
-//
-//@DisplayName("ContractRepository Tests")
-//class ContractRepositoryTest {
+// @DisplayName("ContractRepository Tests")
+// class ContractRepositoryTest {
 //
 //    private ContractRepository contractRepository;
 //
@@ -45,10 +44,7 @@
 //        when(testCustomer.brand()).thenReturn(Brand.WEB_DE);
 //        when(testCustomer.id()).thenReturn(UUID.randomUUID());
 //
-//        testProduct = new StandardMailProduct(
-//                "Test Product",
-//                Brand.WEB_DE,
-//                new BigDecimal("10.00"));
+//        testProduct = new StandardMailProduct("Test Product", Brand.WEB_DE, new BigDecimal("10.00"));
 //    }
 //
 //    @Test
@@ -76,7 +72,9 @@
 //        Contract updated = contractRepository.update(updatedInstance);
 //
 //        assertEquals(ContractStatus.ACTIVE, updated.status());
-//        assertEquals(ContractStatus.ACTIVE, contractRepository.findById(contract.id()).get().status());
+//        assertEquals(
+//                ContractStatus.ACTIVE,
+//                contractRepository.findById(contract.id()).get().status());
 //    }
 //
 //    @Test
@@ -179,4 +177,5 @@
 //        assertTrue(results.contains(target2));
 //        assertTrue(results.stream().noneMatch(c -> c.customerId().equals(anotherCustomer.id())));
 //    }
-//}
+// }
+// >>>>>>> feat/BUIZSOL-70822-spring-boot-integration

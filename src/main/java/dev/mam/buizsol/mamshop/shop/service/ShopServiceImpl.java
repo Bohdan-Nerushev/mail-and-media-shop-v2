@@ -18,12 +18,10 @@ import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -33,8 +31,6 @@ class ShopServiceImpl implements ShopService {
     private final ProductService productService;
     private final ContractService contractService;
     private final BillingService billingService;
-
-    /* private static final String CSV_PATH = "/products.csv"; */
 
     ShopServiceImpl(
             final CustomerService customerService,
@@ -47,33 +43,24 @@ class ShopServiceImpl implements ShopService {
         this.billingService = billingService;
     }
 
-    /*
-     * @PostConstruct
-     * private void init() {
-     * productCatalogLoader.load(CSV_PATH);
-     * }
-     */
-
     @Override
-    public Customer registerCustomer(
-            final Customer customer) {
+    public Customer registerCustomer(final Customer customer) {
         return customerService.createCustomer(customer);
     }
 
     @Override
-    public Customer loadCustomer(
-            final UUID customerId) throws CustomerNotFoundException {
-        return customerService.findCustomerById(customerId)
+    public Customer loadCustomer(final UUID customerId) throws CustomerNotFoundException {
+        return customerService
+                .findCustomerById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + customerId));
     }
 
     @Override
-    public void removeCustomer(
-            final UUID customerId) throws CustomerNotFoundException {
+    public void removeCustomer(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
         final List<Contract> contracts = contractService.findContractsByCustomerId(customerId);
-        final boolean hasActiveContracts = contracts.stream()
-                .anyMatch(c -> c.getStatus() == ContractStatus.ACTIVE);
+
+        final boolean hasActiveContracts = contracts.stream().anyMatch(c -> c.getStatus() == ContractStatus.ACTIVE);
 
         if (customer.getStatus() == CustomerStatus.ACTIVE && hasActiveContracts) {
             throw new CustomerValidationException("Cannot remove active customer with active contracts");
@@ -82,8 +69,7 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public void activateCustomer(
-            final UUID customerId) throws CustomerNotFoundException {
+    public void activateCustomer(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
         if (customer.getStatus() == CustomerStatus.ACTIVE) {
             log.info("Customer {} is already active, skipping", customerId);
@@ -93,57 +79,50 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public void deactivateCustomer(
-            final UUID customerId) throws CustomerNotFoundException {
+    public void deactivateCustomer(final UUID customerId) throws CustomerNotFoundException {
         customerService.deactivateCustomer(customerId);
     }
 
     @Override
-    public Customer updateAddress(
-            final UUID customerId,
-            final Address address) throws CustomerNotFoundException {
+    public Customer updateAddress(final UUID customerId, final Address address) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateAddress(customerId, address);
         return loadCustomer(customerId);
     }
 
     @Override
-    public Customer updateInvoiceAddress(
-            final UUID customerId,
-            final Address invoiceAddress) throws CustomerNotFoundException {
+    public Customer updateInvoiceAddress(final UUID customerId, final Address invoiceAddress)
+            throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateInvoiceAddress(customerId, invoiceAddress);
         return loadCustomer(customerId);
     }
 
     @Override
-    public Customer updateCommunicationDetails(
-            final UUID customerId,
-            final CommunicationDetails details) throws CustomerNotFoundException {
+    public Customer updateCommunicationDetails(final UUID customerId, final CommunicationDetails details)
+            throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateCommunicationDetails(customerId, details);
         return loadCustomer(customerId);
     }
 
     @Override
-    public List<Contract> loadAllContracts(
-            final UUID customerId) throws CustomerNotFoundException {
+    public List<Contract> loadAllContracts(final UUID customerId) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         return List.copyOf(contractService.findContractsByCustomerId(customerId));
     }
 
     @Override
-    public Invoice generateInvoice(
-            final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
+    public Invoice generateInvoice(final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
         checkCustomerActive(customerId);
         return billingService.generateInvoice(customerId);
     }
 
     @Override
-    public void activateContract(
-            final UUID customerId,
-            final UUID contractId) throws CustomerNotFoundException, ContractNotFoundException {
-        final Contract contract = contractService.findContractById(contractId)
+    public void activateContract(final UUID customerId, final UUID contractId)
+            throws CustomerNotFoundException, ContractNotFoundException {
+        final Contract contract = contractService
+                .findContractById(contractId)
                 .orElseThrow(() -> new ContractNotFoundException("Contract not found: " + contractId));
 
         if (!contract.getCustomer().getId().equals(customerId)) {
@@ -159,24 +138,21 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public List<Product> loadAllProductsForBrand(
-            final Brand brand) {
+    public List<Product> loadAllProductsForBrand(final Brand brand) {
         return List.copyOf(productService.findByBrand(brand));
     }
 
     @Override
-    public Contract purchaseProduct(
-            final UUID customerId,
-            final UUID productId)
+    public Contract purchaseProduct(final UUID customerId, final UUID productId)
             throws CustomerNotFoundException, ProductNotFoundException {
 
         final Customer customer = loadCustomer(customerId);
         if (customer.getStatus() != CustomerStatus.ACTIVE) {
-            throw new CustomerNotActiveException(
-                    "Customer " + customerId + " is not active");
+            throw new CustomerNotActiveException("Customer " + customerId + " is not active");
         }
 
-        final Product product = productService.findById(productId)
+        final Product product = productService
+                .findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
 
         final boolean alreadyHasProduct = contractService.findContractsByCustomerId(customerId).stream()
@@ -197,10 +173,9 @@ class ShopServiceImpl implements ShopService {
 
     private void checkCustomerActive(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
+
         if (customer.getStatus() != CustomerStatus.ACTIVE) {
-            throw new CustomerNotActiveException(
-                    "Customer " + customerId + " is not active");
+            throw new CustomerNotActiveException("Customer " + customerId + " is not active");
         }
     }
-
 }

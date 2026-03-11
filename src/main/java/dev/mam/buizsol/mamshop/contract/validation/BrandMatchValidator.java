@@ -11,9 +11,7 @@ import jakarta.validation.constraintvalidation.ValidationTarget;
 public class BrandMatchValidator implements ConstraintValidator<BrandMatch, Object[]> {
 
     @Override
-    public boolean isValid(
-            final Object[] values,
-            final ConstraintValidatorContext context) {
+    public boolean isValid(final Object[] values, final ConstraintValidatorContext context) {
         if (values == null || values.length < 2) {
             return true;
         }

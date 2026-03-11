@@ -1,43 +1,41 @@
-//package dev.mam.buizsol.mamshop.customer.service;
+// package dev.mam.buizsol.mamshop.customer.service;
 //
-//import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
-//import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
-//import dev.mam.buizsol.mamshop.customer.model.Address;
-//import dev.mam.buizsol.mamshop.customer.model.Brand;
-//import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
-//import dev.mam.buizsol.mamshop.customer.model.Customer;
-//import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.junit.jupiter.api.Assertions.assertNotNull;
+// import static org.junit.jupiter.api.Assertions.assertThrows;
+// import static org.junit.jupiter.api.Assertions.assertTrue;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.Mockito.doThrow;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
 //
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.junit.jupiter.params.ParameterizedTest;
-//import org.junit.jupiter.params.provider.CsvSource;
-//import org.junit.jupiter.params.provider.EnumSource;
-//import org.junit.jupiter.params.provider.NullAndEmptySource;
-//import org.junit.jupiter.params.provider.ValueSource;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
+// import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+// import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
+// import dev.mam.buizsol.mamshop.customer.model.Address;
+// import dev.mam.buizsol.mamshop.customer.model.Brand;
+// import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
+// import dev.mam.buizsol.mamshop.customer.model.Customer;
+// import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
+// import java.time.LocalDate;
+// import java.util.List;
+// import java.util.Optional;
+// import java.util.UUID;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.api.extension.ExtendWith;
+// import org.junit.jupiter.params.ParameterizedTest;
+// import org.junit.jupiter.params.provider.CsvSource;
+// import org.junit.jupiter.params.provider.EnumSource;
+// import org.junit.jupiter.params.provider.NullAndEmptySource;
+// import org.junit.jupiter.params.provider.ValueSource;
+// import org.mockito.Mock;
+// import org.mockito.junit.jupiter.MockitoExtension;
 //
-//import java.time.LocalDate;
-//import java.util.UUID;
-//import java.util.List;
-//import java.util.Optional;
-//
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
-//import static org.junit.jupiter.api.Assertions.assertThrows;
-//import static org.junit.jupiter.api.Assertions.assertTrue;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.doThrow;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//
-//@ExtendWith(MockitoExtension.class)
-//@DisplayName("CustomerService Tests")
-//class CustomerServiceTest {
+// @ExtendWith(MockitoExtension.class)
+// @DisplayName("CustomerService Tests")
+// class CustomerServiceTest {
 //
 //    public Customer createDefaultCustomer(
 //            final String firstName,
@@ -47,9 +45,7 @@
 //            final Address invoiceAddress,
 //            final CommunicationDetails communicationDetails,
 //            final Brand brand) {
-//        return Customer.create(
-//                firstName, lastName, birthDate,
-//                address, invoiceAddress, communicationDetails, brand);
+//        return Customer.create(firstName, lastName, birthDate, address, invoiceAddress, communicationDetails, brand);
 //    }
 //
 //    private Address address;
@@ -72,22 +68,20 @@
 //    @DisplayName("Create customer with valid data should succeed")
 //    void shouldCreateCustomerWhenDataIsValid() {
 //        final Customer customer = createDefaultCustomer(
-//                "John", "Doe", LocalDate.of(1990, 1, 1),
-//                address, null, communicationDetails, Brand.GMX);
+//                "John", "Doe", LocalDate.of(1990, 1, 1), address, null, communicationDetails, Brand.GMX);
 //
 //        final Customer created = customerService.createCustomer(customer);
 //
-//        assertNotNull(created.getId());
-//        assertEquals("John", created.getFirstName());
-//        assertEquals(CustomerStatus.INACTIVE, created.getStatus());
+//        assertNotNull(created.id());
+//        assertEquals("John", created.firstName());
+//        assertEquals(CustomerStatus.INACTIVE, created.status());
 //        verify(customerRepository).save(any(Customer.class));
 //    }
 //
 //    @Test
 //    @DisplayName("Create customer with repository = null should throw exception")
 //    void shouldThrowExceptionWhenRepositoryIsNull() {
-//        assertThrows(CustomerValidationException.class,
-//                () -> new CustomerServiceImpl(null));
+//        assertThrows(CustomerValidationException.class, () -> new CustomerServiceImpl(null));
 //    }
 //
 //    @ParameterizedTest
@@ -95,52 +89,64 @@
 //    @DisplayName("Create customer with different brands should succeed")
 //    void shouldCreateCustomerWithDifferentBrands(final Brand brand) {
 //        final Customer customer = customerService.createCustomer(createDefaultCustomer(
-//                "John", "Doe", LocalDate.of(1990, 1, 1),
-//                address, null, communicationDetails, brand));
+//                "John", "Doe", LocalDate.of(1990, 1, 1), address, null, communicationDetails, brand));
 //
-//        assertEquals(brand, customer.getBrand());
+//        assertEquals(brand, customer.brand());
 //        verify(customerRepository).save(any(Customer.class));
 //    }
 //
 //    @ParameterizedTest
 //    @NullAndEmptySource
-//    @ValueSource(strings = { " ", "\t", "\n" })
+//    @ValueSource(strings = {" ", "\t", "\n"})
 //    @DisplayName("Create customer with invalid first name should throw exception")
 //    void shouldThrowExceptionWhenFirstNameIsInvalid(final String firstName) {
-//        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(createDefaultCustomer(
-//                firstName, "Doe", LocalDate.of(1990, 1, 1),
-//                address, null, communicationDetails, Brand.WEB_DE)));
+//        assertThrows(
+//                CustomerValidationException.class,
+//                () -> customerService.createCustomer(createDefaultCustomer(
+//                        firstName,
+//                        "Doe",
+//                        LocalDate.of(1990, 1, 1),
+//                        address,
+//                        null,
+//                        communicationDetails,
+//                        Brand.WEB_DE)));
 //    }
 //
 //    @ParameterizedTest
 //    @NullAndEmptySource
-//    @ValueSource(strings = { " ", "\t", "\n" })
+//    @ValueSource(strings = {" ", "\t", "\n"})
 //    @DisplayName("Create customer with invalid last name should throw exception")
 //    void shouldThrowExceptionWhenLastNameIsInvalid(final String lastName) {
-//        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(createDefaultCustomer(
-//                "John", lastName, LocalDate.of(1990, 1, 1),
-//                address, null, communicationDetails, Brand.WEB_DE)));
+//        assertThrows(
+//                CustomerValidationException.class,
+//                () -> customerService.createCustomer(createDefaultCustomer(
+//                        "John",
+//                        lastName,
+//                        LocalDate.of(1990, 1, 1),
+//                        address,
+//                        null,
+//                        communicationDetails,
+//                        Brand.WEB_DE)));
 //    }
 //
 //    @ParameterizedTest
 //    @CsvSource({
-//            "1900-01-01, Boundary: very old birth date",
-//            "2026-01-14, Boundary: today birth date",
-//            "2024-05-14, Boundary: future birth date",
-//            "2010-04-14, Boundary: future birth1 date",
-//            "2010-04-14, Boundary: future birth1 date",
-//            "1000-01-01, Boundary: future birth2 date",
-//            "1500-01-01, Boundary: future birth3 date"
+//        "1900-01-01, Boundary: very old birth date",
+//        "2026-01-14, Boundary: today birth date",
+//        "2024-05-14, Boundary: future birth date",
+//        "2010-04-14, Boundary: future birth1 date",
+//        "2010-04-14, Boundary: future birth1 date",
+//        "1000-01-01, Boundary: future birth2 date",
+//        "1500-01-01, Boundary: future birth3 date"
 //    })
 //    @DisplayName("Create customer with boundary birth dates should succeed")
 //    void shouldCreateCustomerWithBoundaryBirthDates(final String dateStr) {
 //        final LocalDate birthDate = LocalDate.parse(dateStr);
 //
-//        final Customer customer = customerService.createCustomer(createDefaultCustomer(
-//                "John", "Doe", birthDate,
-//                address, null, communicationDetails, Brand.GMX));
+//        final Customer customer = customerService.createCustomer(
+//                createDefaultCustomer("John", "Doe", birthDate, address, null, communicationDetails, Brand.GMX));
 //
-//        assertEquals(birthDate, customer.getBirthDate());
+//        assertEquals(birthDate, customer.birthDate());
 //        verify(customerRepository).save(any(Customer.class));
 //    }
 //
@@ -243,13 +249,14 @@
 //        final UUID randomId = UUID.randomUUID();
 //
 //        when(customerRepository.getById(randomId)).thenThrow(new CustomerNotFoundException("Not found"));
-//        doThrow(new CustomerNotFoundException("Not found")).when(customerRepository).delete(randomId);
+//        doThrow(new CustomerNotFoundException("Not found"))
+//                .when(customerRepository)
+//                .delete(randomId);
 //
 //        assertThrows(CustomerNotFoundException.class, () -> customerService.activateCustomer(randomId));
 //        assertThrows(CustomerNotFoundException.class, () -> customerService.deactivateCustomer(randomId));
 //        assertThrows(CustomerNotFoundException.class, () -> customerService.deleteCustomer(randomId));
-//        assertThrows(CustomerNotFoundException.class,
-//                () -> customerService.updateAddress(randomId, address));
+//        assertThrows(CustomerNotFoundException.class, () -> customerService.updateAddress(randomId, address));
 //    }
 //
 //    @Test
@@ -258,13 +265,7 @@
 //        assertThrows(
 //                CustomerValidationException.class,
 //                () -> customerService.createCustomer(createDefaultCustomer(
-//                        null,
-//                        "Doe",
-//                        LocalDate.now(),
-//                        address,
-//                        null,
-//                        communicationDetails,
-//                        Brand.GMX)));
+//                        null, "Doe", LocalDate.now(), address, null, communicationDetails, Brand.GMX)));
 //    }
 //
 //    @Test
@@ -273,13 +274,7 @@
 //        assertThrows(
 //                CustomerValidationException.class,
 //                () -> customerService.createCustomer(createDefaultCustomer(
-//                        "John",
-//                        null,
-//                        LocalDate.now(),
-//                        address,
-//                        null,
-//                        communicationDetails,
-//                        Brand.GMX)));
+//                        "John", null, LocalDate.now(), address, null, communicationDetails, Brand.GMX)));
 //    }
 //
 //    @Test
@@ -287,14 +282,8 @@
 //    void shouldThrowExceptionWhenCreatingCustomerWithNullBirthDate() {
 //        assertThrows(
 //                CustomerValidationException.class,
-//                () -> customerService.createCustomer(createDefaultCustomer(
-//                        "John",
-//                        "Doe",
-//                        null,
-//                        address,
-//                        null,
-//                        communicationDetails,
-//                        Brand.GMX)));
+//                () -> customerService.createCustomer(
+//                        createDefaultCustomer("John", "Doe", null, address, null, communicationDetails, Brand.GMX)));
 //    }
 //
 //    @Test
@@ -303,13 +292,7 @@
 //        assertThrows(
 //                CustomerValidationException.class,
 //                () -> customerService.createCustomer(createDefaultCustomer(
-//                        "John",
-//                        "Doe",
-//                        LocalDate.now(),
-//                        null,
-//                        null,
-//                        communicationDetails,
-//                        Brand.GMX)));
+//                        "John", "Doe", LocalDate.now(), null, null, communicationDetails, Brand.GMX)));
 //    }
 //
 //    @Test
@@ -317,14 +300,8 @@
 //    void shouldThrowExceptionWhenCreatingCustomerWithNullCommunicationDetails() {
 //        assertThrows(
 //                CustomerValidationException.class,
-//                () -> customerService.createCustomer(createDefaultCustomer(
-//                        "John",
-//                        "Doe",
-//                        LocalDate.now(),
-//                        address,
-//                        null,
-//                        null,
-//                        Brand.GMX)));
+//                () -> customerService.createCustomer(
+//                        createDefaultCustomer("John", "Doe", LocalDate.now(), address, null, null, Brand.GMX)));
 //    }
 //
 //    @Test
@@ -333,13 +310,7 @@
 //        assertThrows(
 //                CustomerValidationException.class,
 //                () -> customerService.createCustomer(createDefaultCustomer(
-//                        "John",
-//                        "Doe",
-//                        LocalDate.now(),
-//                        address,
-//                        null,
-//                        communicationDetails,
-//                        null)));
+//                        "John", "Doe", LocalDate.now(), address, null, communicationDetails, null)));
 //    }
 //
 //    @Test
@@ -375,7 +346,8 @@
 //    @Test
 //    @DisplayName("Update communication details with null ID should throw exception")
 //    void shouldThrowExceptionWhenUpdatingCommunicationDetailsWithNullId() {
-//        assertThrows(CustomerValidationException.class,
+//        assertThrows(
+//                CustomerValidationException.class,
 //                () -> customerService.updateCommunicationDetails(null, communicationDetails));
 //    }
 //
@@ -411,4 +383,4 @@
 //    void shouldThrowExceptionWhenCreatingNullCustomer() {
 //        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(null));
 //    }
-//}
+// }

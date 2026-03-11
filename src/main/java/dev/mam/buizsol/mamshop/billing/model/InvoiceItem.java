@@ -13,6 +13,9 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,10 +23,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Table(name = "invoice_items")
@@ -35,57 +34,57 @@ import java.util.UUID;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class InvoiceItem {
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.UUID)
-        @Column(name = "id", nullable = false)
-        @NotNull
-        @EqualsAndHashCode.Include
-        private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false)
+    @NotNull
+    @EqualsAndHashCode.Include
+    private UUID id;
 
-        @NotNull
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "invoice_id", nullable = false)
-        private Invoice invoice;
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id", nullable = false)
+    private Invoice invoice;
 
-        @NotNull
-        @Column(name = "product_id", nullable = false)
-        private UUID productId;
+    @NotNull
+    @Column(name = "product_id", nullable = false)
+    private UUID productId;
 
-        @NotNull
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "contract_id", nullable = false)
-        private Contract contract;
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_id", nullable = false)
+    private Contract contract;
 
-        @NotBlank
-        @Size(min = 1, max = 150)
-        @Column(name = "product_name", nullable = false)
-        private String productName;
+    @NotBlank
+    @Size(min = 1, max = 150)
+    @Column(name = "product_name", nullable = false)
+    private String productName;
 
-        @NotNull
-        @Column(name = "contract_creation_date", nullable = false)
-        private LocalDate contractCreationDate;
+    @NotNull
+    @Column(name = "contract_creation_date", nullable = false)
+    private LocalDate contractCreationDate;
 
-        @NotNull
-        @Column(name = "setup_fee", nullable = false)
-        private BigDecimal setupFee;
+    @NotNull
+    @Column(name = "setup_fee", nullable = false)
+    private BigDecimal setupFee;
 
-        @NotNull
-        @Column(name = "monthly_fee", nullable = false)
-        private BigDecimal monthlyFee;
+    @NotNull
+    @Column(name = "monthly_fee", nullable = false)
+    private BigDecimal monthlyFee;
 
-        public InvoiceItem(
-                        final UUID productId,
-                        final String productName,
-                        final Contract contract,
-                        final LocalDate contractCreationDate,
-                        final BigDecimal setupFee,
-                        final BigDecimal monthlyFee) {
-                this.id = UUID.randomUUID();
-                this.productId = productId;
-                this.productName = productName;
-                this.contract = contract;
-                this.contractCreationDate = contractCreationDate;
-                this.setupFee = setupFee;
-                this.monthlyFee = monthlyFee;
-        }
+    public InvoiceItem(
+            final UUID productId,
+            final String productName,
+            final Contract contract,
+            final LocalDate contractCreationDate,
+            final BigDecimal setupFee,
+            final BigDecimal monthlyFee) {
+        this.id = UUID.randomUUID();
+        this.productId = productId;
+        this.productName = productName;
+        this.contract = contract;
+        this.contractCreationDate = contractCreationDate;
+        this.setupFee = setupFee;
+        this.monthlyFee = monthlyFee;
+    }
 }

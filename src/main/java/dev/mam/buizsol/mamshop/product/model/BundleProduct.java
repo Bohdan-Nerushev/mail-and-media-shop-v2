@@ -10,14 +10,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Entity
 @Table(name = "bundle_products")
@@ -41,8 +40,7 @@ public class BundleProduct extends Product {
     private PartnerProduct partnerProduct;
 
     public BundleProduct(
-            @NotNull @Valid final MailProduct mailProduct,
-            @NotNull @Valid final PartnerProduct partnerProduct) {
+            @NotNull @Valid final MailProduct mailProduct, @NotNull @Valid final PartnerProduct partnerProduct) {
         super(
                 UUID.randomUUID(),
                 generateBundleName(mailProduct, partnerProduct),
@@ -55,41 +53,32 @@ public class BundleProduct extends Product {
 
     @Override
     @NotNull
-    public BundleProduct withMonthlyFee(
-            @NotNull final BigDecimal monthlyFee) {
+    public BundleProduct withMonthlyFee(@NotNull final BigDecimal monthlyFee) {
         throw new UnsupportedOperationException("Monthly fee is calculated from components and cannot be set manually");
     }
 
-    private static String generateBundleName(
-            final Product mail,
-            final Product partner) {
+    private static String generateBundleName(final Product mail, final Product partner) {
         if (mail == null || partner == null) {
             throw new ProductValidationException("Mail and Partner products must not be null");
         }
         return "Bundle: " + mail.getName() + " " + partner.getName();
     }
 
-    private static BigDecimal calculateTotalSetupFee(
-            final Product mail,
-            final Product partner) {
+    private static BigDecimal calculateTotalSetupFee(final Product mail, final Product partner) {
         if (mail == null || partner == null) {
             return BigDecimal.ZERO;
         }
         return mail.getSetupFee().add(partner.getSetupFee());
     }
 
-    private static BigDecimal calculateTotalMonthlyFee(
-            final Product mail,
-            final Product partner) {
+    private static BigDecimal calculateTotalMonthlyFee(final Product mail, final Product partner) {
         if (mail == null || partner == null) {
             return BigDecimal.ZERO;
         }
         return mail.getMonthlyFee().add(partner.getMonthlyFee());
     }
 
-    private static Brand validateBrands(
-            final Product mail,
-            final Product partner) {
+    private static Brand validateBrands(final Product mail, final Product partner) {
         if (mail == null || partner == null) {
             throw new ProductValidationException("Mail and Partner products must not be null");
         }

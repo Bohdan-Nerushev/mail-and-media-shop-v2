@@ -1,7 +1,9 @@
 package dev.mam.buizsol.mamshop.customer.mapper;
 
 import dev.mam.buizsol.mamshop.customer.dto.AddressRequestDTO;
+import dev.mam.buizsol.mamshop.customer.dto.AddressResponseDTO;
 import dev.mam.buizsol.mamshop.customer.dto.CommunicationDetailsRequestDTO;
+import dev.mam.buizsol.mamshop.customer.dto.CommunicationDetailsResponseDTO;
 import dev.mam.buizsol.mamshop.customer.dto.CustomerRequestDTO;
 import dev.mam.buizsol.mamshop.customer.dto.CustomerResponseDTO;
 import dev.mam.buizsol.mamshop.customer.model.Address;
@@ -30,23 +32,15 @@ public class CustomerMapper {
                 customer.getFirstName(),
                 customer.getLastName(),
                 customer.getBirthDate(),
-                toAddressDTO(customer.getAddress()),
-                customer.getInvoiceAddress() != null ? toAddressDTO(customer.getInvoiceAddress()) : null,
-                customer.getCommunicationDetails() != null
-                        ? toCommunicationDetailsDTO(customer.getCommunicationDetails())
-                        : null,
+                toAddressResponseDTO(customer.getAddress()),
+                toAddressResponseDTO(customer.getInvoiceAddress()),
+                toCommunicationResponseDTO(customer.getCommunicationDetails()),
                 customer.getBrand(),
                 customer.getStatus());
     }
 
     public Address toAddress(@NotNull final AddressRequestDTO dto) {
-        return Address.builder()
-                .street(dto.street())
-                .number(dto.number())
-                .postcode(dto.postcode())
-                .city(dto.city())
-                .country(dto.country())
-                .build();
+        return new Address(dto.street(), dto.number(), dto.postcode(), dto.city(), dto.country());
     }
 
     public AddressRequestDTO toAddressDTO(@NotNull final Address address) {
@@ -59,16 +53,40 @@ public class CustomerMapper {
     }
 
     public CommunicationDetails toCommunicationDetails(@NotNull final CommunicationDetailsRequestDTO dto) {
-        return CommunicationDetails.builder()
-                .email(dto.email())
-                .telephone(dto.telephone())
-                .build();
+        return new CommunicationDetails(dto.email(), dto.telephone());
     }
 
     public CommunicationDetailsRequestDTO toCommunicationDetailsDTO(
             @NotNull final CommunicationDetails communicationDetails) {
-        return new CommunicationDetailsRequestDTO(
-                communicationDetails.getEmail(),
-                communicationDetails.getTelephone());
+        return new CommunicationDetailsRequestDTO(communicationDetails.getEmail(), communicationDetails.getTelephone());
+    }
+
+    public AddressResponseDTO toAddressResponseDTO(
+            @NotNull final String street,
+            @NotNull final String number,
+            @NotNull final String postcode,
+            @NotNull final String city,
+            @NotNull final String country) {
+        return new AddressResponseDTO(street, number, postcode, city, country);
+    }
+
+    public AddressResponseDTO toAddressResponseDTO(@NotNull final Address address) {
+        return new AddressResponseDTO(
+                address.getStreet(),
+                address.getNumber(),
+                address.getPostcode(),
+                address.getCity(),
+                address.getCountry());
+    }
+
+    public CommunicationDetailsResponseDTO toCommunicationResponseDTO(
+            @NotNull final String email, @NotNull final String telephone) {
+        return new CommunicationDetailsResponseDTO(email, telephone);
+    }
+
+    public CommunicationDetailsResponseDTO toCommunicationResponseDTO(
+            @NotNull final CommunicationDetails communicationDetails) {
+        return new CommunicationDetailsResponseDTO(
+                communicationDetails.getEmail(), communicationDetails.getTelephone());
     }
 }

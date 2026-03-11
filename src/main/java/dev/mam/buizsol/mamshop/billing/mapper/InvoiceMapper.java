@@ -19,6 +19,6 @@ public class InvoiceMapper {
                 invoice.getTotalSetupFee(),
                 invoice.getTotalMonthlyFee(),
                 invoice.getDiscount(),
-                invoice.getDiscount());
+                invoice.getTotalAmount());
     }
 }

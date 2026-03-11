@@ -5,14 +5,13 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Entity
 @Table(name = "partner_products")
@@ -31,11 +30,17 @@ public class PartnerProduct extends Product {
         super(UUID.randomUUID(), name, brand, setupFee, monthlyFee);
     }
 
-    @Override
-    public PartnerProduct withMonthlyFee(
+    public PartnerProduct(
+            final UUID id,
+            @NotNull final String name,
+            @NotNull final Brand brand,
+            @NotNull final BigDecimal setupFee,
             @NotNull final BigDecimal monthlyFee) {
-        return this.toBuilder()
-                .monthlyFee(monthlyFee)
-                .build();
+        super(id, name, brand, setupFee, monthlyFee);
+    }
+
+    @Override
+    public PartnerProduct withMonthlyFee(@NotNull final BigDecimal monthlyFee) {
+        return this.toBuilder().monthlyFee(monthlyFee).build();
     }
 }

@@ -2,19 +2,13 @@ package dev.mam.buizsol.mamshop.product.service;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Collection;
-import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
-//        @NotNull
-//        Optional<Product> findById(@NotNull final UUID id);
-
-        @NotNull
-        Collection<Product> findByBrand(@NotNull final Brand brand);
+    @NotNull
+    Collection<Product> findByBrand(@NotNull Brand brand);
 }

@@ -1,46 +1,44 @@
-//package dev.mam.buizsol.mamshop.contract.service;
+// package dev.mam.buizsol.mamshop.contract.service;
 //
-//import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
-//import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
-//import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
-//import dev.mam.buizsol.mamshop.contract.model.Contract;
-//import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
-//import dev.mam.buizsol.mamshop.customer.model.Brand;
-//import dev.mam.buizsol.mamshop.customer.model.Customer;
-//import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
-//import dev.mam.buizsol.mamshop.product.model.Product;
-//import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.junit.jupiter.params.ParameterizedTest;
-//import org.junit.jupiter.params.provider.CsvSource;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.junit.jupiter.api.Assertions.assertNotNull;
+// import static org.junit.jupiter.api.Assertions.assertThrows;
+// import static org.junit.jupiter.api.Assertions.assertTrue;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.times;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
 //
-//import java.math.BigDecimal;
-//import java.time.LocalDate;
-//import java.util.List;
-//import java.util.Optional;
-//import java.util.UUID;
+// import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
+// import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
+// import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
+// import dev.mam.buizsol.mamshop.contract.model.Contract;
+// import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
+// import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
+// import dev.mam.buizsol.mamshop.customer.model.Brand;
+// import dev.mam.buizsol.mamshop.customer.model.Customer;
+// import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
+// import dev.mam.buizsol.mamshop.product.model.Product;
+// import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
+// import java.math.BigDecimal;
+// import java.time.LocalDate;
+// import java.util.List;
+// import java.util.Optional;
+// import java.util.UUID;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.api.extension.ExtendWith;
+// import org.junit.jupiter.params.ParameterizedTest;
+// import org.junit.jupiter.params.provider.CsvSource;
+// import org.mockito.InjectMocks;
+// import org.mockito.Mock;
+// import org.mockito.junit.jupiter.MockitoExtension;
 //
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
-//import static org.junit.jupiter.api.Assertions.assertThrows;
-//import static org.junit.jupiter.api.Assertions.assertTrue;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//
-//import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
-//
-//@ExtendWith(MockitoExtension.class)
-//@DisplayName("ContractService Tests")
-//class ContractServiceTest {
+// @ExtendWith(MockitoExtension.class)
+// @DisplayName("ContractService Tests")
+// class ContractServiceTest {
 //
 //    @Mock
 //    private ContractRepository contractRepository;
@@ -55,10 +53,7 @@
 //    void setUp() {
 //        activeCustomer = mock(Customer.class);
 //
-//        matchingProduct = new StandardMailProduct(
-//                "Test Product",
-//                Brand.WEB_DE,
-//                new BigDecimal("10.00"));
+//        matchingProduct = new StandardMailProduct("Test Product", Brand.WEB_DE, new BigDecimal("10.00"));
 //    }
 //
 //    @Test
@@ -123,17 +118,14 @@
 //        UUID contractId = UUID.randomUUID();
 //        when(contractRepository.findById(contractId)).thenReturn(Optional.empty());
 //
-//        assertThrows(ContractNotFoundException.class,
+//        assertThrows(
+//                ContractNotFoundException.class,
 //                () -> contractService.updateContractStatus(contractId, ContractStatus.INACTIVE));
 //    }
 //
 //    @DisplayName("Boundary/Negative: createContract throws exception on null parameters")
 //    @ParameterizedTest
-//    @CsvSource({
-//            "true, false",
-//            "false, true",
-//            "true, true"
-//    })
+//    @CsvSource({"true, false", "false, true", "true, true"})
 //    void shouldThrowExceptionWhenCreatingContractWithNullParameters(boolean customerIsNull, boolean productIsNull) {
 //        Customer customer = customerIsNull ? null : activeCustomer;
 //        Product product = productIsNull ? null : matchingProduct;
@@ -144,13 +136,10 @@
 //    @DisplayName("Negative: createContract throws exception on brand mismatch")
 //    void shouldThrowExceptionWhenCreatingContractWithBrandMismatch() {
 //        when(activeCustomer.brand()).thenReturn(Brand.WEB_DE);
-//        Product mismatchProduct = new StandardMailProduct(
-//                "Mismatch Brand",
-//                Brand.GMX,
-//                new BigDecimal("10.00"));
+//        Product mismatchProduct = new StandardMailProduct("Mismatch Brand", Brand.GMX, new BigDecimal("10.00"));
 //
-//        assertThrows(BrandMismatchException.class,
-//                () -> contractService.createContract(activeCustomer, mismatchProduct));
+//        assertThrows(
+//                BrandMismatchException.class, () -> contractService.createContract(activeCustomer, mismatchProduct));
 //    }
 //
 //    @Test
@@ -160,7 +149,8 @@
 //        when(inactiveCustomer.status()).thenReturn(CustomerStatus.INACTIVE);
 //        when(inactiveCustomer.brand()).thenReturn(Brand.WEB_DE);
 //
-//        assertThrows(CustomerNotActiveException.class,
+//        assertThrows(
+//                CustomerNotActiveException.class,
 //                () -> contractService.createContract(inactiveCustomer, matchingProduct));
 //    }
 //
@@ -275,4 +265,5 @@
 //
 //        assertTrue(result.isEmpty());
 //    }
-//}
+// }
+// >>>>>>> feat/BUIZSOL-70822-spring-boot-integration

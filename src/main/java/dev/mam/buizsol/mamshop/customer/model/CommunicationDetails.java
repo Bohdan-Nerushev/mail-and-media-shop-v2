@@ -27,26 +27,24 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class CommunicationDetails {
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        @Column(name = "id", nullable = false)
-        private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
 
-        @Email
-        @NotBlank
-        @Size(max = 255)
-        @Column(name = "email", nullable = false)
-        private String email;
+    @Email
+    @NotBlank
+    @Size(max = 255)
+    @Column(name = "email", nullable = false)
+    private String email;
 
-        @NotBlank
-        @Size(min = 5, max = 30)
-        @Column(name = "telephone", nullable = false)
-        private String telephone;
+    @NotBlank
+    @Size(min = 5, max = 30)
+    @Column(name = "telephone", nullable = false)
+    private String telephone;
 
-        public CommunicationDetails(
-                        final String email,
-                        final String telephone) {
-                this.email = email;
-                this.telephone = telephone;
-        }
+    public CommunicationDetails(final String email, final String telephone) {
+        this.email = email;
+        this.telephone = telephone;
+    }
 }

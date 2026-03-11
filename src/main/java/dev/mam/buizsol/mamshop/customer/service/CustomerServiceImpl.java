@@ -6,20 +6,17 @@ import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
 
 @Service
 class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    CustomerServiceImpl(
-            final CustomerRepository customerRepository) {
+    CustomerServiceImpl(final CustomerRepository customerRepository) {
         if (customerRepository == null) {
             throw new CustomerValidationException("Customer repository must not be null");
         }
@@ -27,8 +24,7 @@ class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer createCustomer(
-            final Customer customer) {
+    public Customer createCustomer(final Customer customer) {
         if (customer == null) {
             throw new CustomerValidationException("Customer must not be null");
         }
@@ -36,9 +32,7 @@ class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateAddress(
-            final UUID customerId,
-            final Address address) throws CustomerNotFoundException {
+    public void updateAddress(final UUID customerId, final Address address) throws CustomerNotFoundException {
         if (customerId == null || address == null) {
             throw new CustomerValidationException("Parameters must not be null");
         }
@@ -48,9 +42,7 @@ class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateInvoiceAddress(
-            final UUID customerId,
-            final Address address) throws CustomerNotFoundException {
+    public void updateInvoiceAddress(final UUID customerId, final Address address) throws CustomerNotFoundException {
         if (customerId == null || address == null) {
             throw new CustomerValidationException("Parameters must not be null");
         }
@@ -60,9 +52,8 @@ class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateCommunicationDetails(
-            final UUID customerId,
-            final CommunicationDetails communicationDetails) throws CustomerNotFoundException {
+    public void updateCommunicationDetails(final UUID customerId, final CommunicationDetails communicationDetails)
+            throws CustomerNotFoundException {
         if (customerId == null || communicationDetails == null) {
             throw new CustomerValidationException("Parameters must not be null");
         }
@@ -72,8 +63,7 @@ class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void activateCustomer(
-            final UUID customerId) throws CustomerNotFoundException {
+    public void activateCustomer(final UUID customerId) throws CustomerNotFoundException {
         if (customerId == null) {
             throw new CustomerValidationException("Customer ID must not be null");
         }
@@ -83,8 +73,7 @@ class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void deactivateCustomer(
-            final UUID customerId) throws CustomerNotFoundException {
+    public void deactivateCustomer(final UUID customerId) throws CustomerNotFoundException {
         if (customerId == null) {
             throw new CustomerValidationException("Customer ID must not be null");
         }
@@ -94,8 +83,7 @@ class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void deleteCustomer(
-            final UUID customerId) throws CustomerNotFoundException {
+    public void deleteCustomer(final UUID customerId) throws CustomerNotFoundException {
         if (customerId == null) {
             throw new CustomerValidationException("Customer ID must not be null");
         }
@@ -106,8 +94,7 @@ class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Optional<Customer> findCustomerById(
-            final UUID customerId) {
+    public Optional<Customer> findCustomerById(final UUID customerId) {
         if (customerId == null) {
             return Optional.empty();
         }

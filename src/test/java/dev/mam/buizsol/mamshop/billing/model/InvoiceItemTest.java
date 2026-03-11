@@ -1,18 +1,18 @@
-//package dev.mam.buizsol.mamshop.billing.model;
 //
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.params.ParameterizedTest;
-//import org.junit.jupiter.params.provider.CsvSource;
+// package dev.mam.buizsol.mamshop.billing.model;
 //
-//import java.math.BigDecimal;
-//import java.time.LocalDate;
-//import java.util.UUID;
+// import static org.junit.jupiter.api.Assertions.*;
 //
-//import static org.junit.jupiter.api.Assertions.*;
+// import java.math.BigDecimal;
+// import java.time.LocalDate;
+// import java.util.UUID;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.params.ParameterizedTest;
+// import org.junit.jupiter.params.provider.CsvSource;
 //
-//@DisplayName("InvoiceItem Tests")
-//class InvoiceItemTest {
+// @DisplayName("InvoiceItem Tests")
+// class InvoiceItemTest {
 //
 //    @DisplayName("Successful creation of InvoiceItem with valid data")
 //    @Test
@@ -36,19 +36,9 @@
 //
 //    @ParameterizedTest(name = "Check of fees - setup: {0}, monthly: {1}")
 //    @DisplayName("Verification of setup and monthly fees using various values")
-//    @CsvSource({
-//            "0.00, 0.11",
-//            "4.99, 9.99",
-//            "99.99, 149.50",
-//            "0.01, 0.11"
-//    })
+//    @CsvSource({ "0.00, 0.11", "4.99, 9.99", "99.99, 149.50", "0.01, 0.11" })
 //    void shouldSetCorrectFeesWhenValuesAreProvided(BigDecimal setupFee, BigDecimal monthlyFee) {
-//        InvoiceItem item = new InvoiceItem(
-//                UUID.randomUUID(),
-//                "Product",
-//                UUID.randomUUID(),
-//                LocalDate.now(),
-//                setupFee,
+//        InvoiceItem item = new InvoiceItem(UUID.randomUUID(), "Product", UUID.randomUUID(), LocalDate.now(), setupFee,
 //                monthlyFee);
 //
 //        assertEquals(setupFee, item.setupFee());
@@ -70,4 +60,4 @@
 //
 //        assertEquals(pastDate, item.contractCreationDate());
 //    }
-//}
+// }

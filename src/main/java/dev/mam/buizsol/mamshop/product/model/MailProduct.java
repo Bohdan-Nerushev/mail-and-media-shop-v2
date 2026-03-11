@@ -7,15 +7,14 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
-
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "mail_products")
@@ -66,10 +65,7 @@ public class MailProduct extends Product {
     }
 
     @Override
-    public MailProduct withMonthlyFee(
-            @NotNull final BigDecimal monthlyFee) {
-        return this.toBuilder()
-                .monthlyFee(monthlyFee)
-                .build();
+    public MailProduct withMonthlyFee(@NotNull final BigDecimal monthlyFee) {
+        return this.toBuilder().monthlyFee(monthlyFee).build();
     }
 }

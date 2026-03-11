@@ -1,44 +1,44 @@
-//package dev.mam.buizsol.mamshop.billing.service;
+// package dev.mam.buizsol.mamshop.billing.service;
 //
-//import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
-//import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
-//import dev.mam.buizsol.mamshop.billing.model.Invoice;
-//import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
-//import dev.mam.buizsol.mamshop.contract.model.Contract;
-//import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
-//import dev.mam.buizsol.mamshop.contract.service.ContractService;
-//import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
-//import dev.mam.buizsol.mamshop.customer.model.Address;
-//import dev.mam.buizsol.mamshop.customer.model.Brand;
-//import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
-//import dev.mam.buizsol.mamshop.customer.model.Customer;
-//import dev.mam.buizsol.mamshop.customer.service.CustomerService;
-//import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
-//import dev.mam.buizsol.mamshop.product.model.Product;
-//import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
-//import dev.mam.buizsol.mamshop.product.service.ProductService;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.junit.jupiter.params.ParameterizedTest;
-//import org.junit.jupiter.params.provider.CsvSource;
-//import org.junit.jupiter.params.provider.ValueSource;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import java.math.BigDecimal;
-//import java.time.LocalDate;
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.Optional;
-//import java.util.UUID;
+// import static org.junit.jupiter.api.Assertions.*;
+// import static org.mockito.Mockito.*;
 //
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.Mockito.*;
+// import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
+// import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
+// import dev.mam.buizsol.mamshop.billing.model.Invoice;
+// import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
+// import dev.mam.buizsol.mamshop.contract.model.Contract;
+// import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
+// import dev.mam.buizsol.mamshop.contract.service.ContractService;
+// import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+// import dev.mam.buizsol.mamshop.customer.model.Address;
+// import dev.mam.buizsol.mamshop.customer.model.Brand;
+// import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
+// import dev.mam.buizsol.mamshop.customer.model.Customer;
+// import dev.mam.buizsol.mamshop.customer.service.CustomerService;
+// import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
+// import dev.mam.buizsol.mamshop.product.model.Product;
+// import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
+// import dev.mam.buizsol.mamshop.product.service.ProductService;
+// import java.math.BigDecimal;
+// import java.time.LocalDate;
+// import java.util.ArrayList;
+// import java.util.List;
+// import java.util.Optional;
+// import java.util.UUID;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.api.extension.ExtendWith;
+// import org.junit.jupiter.params.ParameterizedTest;
+// import org.junit.jupiter.params.provider.CsvSource;
+// import org.junit.jupiter.params.provider.ValueSource;
+// import org.mockito.Mock;
+// import org.mockito.junit.jupiter.MockitoExtension;
 //
-//@ExtendWith(MockitoExtension.class)
-//@DisplayName("BillingService Tests")
-//class BillingServiceTest {
+// @ExtendWith(MockitoExtension.class)
+// @DisplayName("BillingService Tests")
+// class BillingServiceTest {
 //
 //    @Mock
 //    private CustomerService customerService;
@@ -58,12 +58,9 @@
 //    @BeforeEach
 //    void setUp() {
 //        final BigDecimal zero = BigDecimal.ZERO;
+//
 //        final BigDecimal minimalDiscount = new BigDecimal("0.10");
-//        billingService = new BillingServiceImpl(
-//                customerService,
-//                productService,
-//                contractService,
-//                zero,
+//        billingService = new BillingServiceImpl(customerService, productService, contractService, zero,
 //                minimalDiscount);
 //
 //        Address address = new Address("Street", "1", "12345", "City", "Country");
@@ -174,7 +171,8 @@
 //    @ValueSource(strings = { "0.01", "0.05", "0.10" })
 //    void shouldThrowExceptionWhenDiscountIsSmallPositive(String invalidDiscountStr) {
 //        BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
-//        assertThrows(InvalidInvoiceDiscountException.class,
+//        assertThrows(
+//                InvalidInvoiceDiscountException.class,
 //                () -> billingService.generateInvoice(customerId, invalidDiscount));
 //    }
 //
@@ -183,7 +181,8 @@
 //    @ValueSource(strings = { "-0.01", "-1.00" })
 //    void shouldThrowExceptionWhenDiscountIsNegative(String invalidDiscountStr) {
 //        BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
-//        assertThrows(InvalidInvoiceDiscountException.class,
+//        assertThrows(
+//                InvalidInvoiceDiscountException.class,
 //                () -> billingService.generateInvoice(customerId, invalidDiscount));
 //    }
 //
@@ -214,11 +213,8 @@
 //
 //    @DisplayName("Null arguments validation for generateInvoice")
 //    @ParameterizedTest(name = "Null arguments validation - customerId={0}, discount={1}")
-//    @CsvSource(value = {
-//            "null, 10.00",
-//            "550e8400-e29b-41d4-a716-446655440000, null",
-//            "null, null"
-//    }, nullValues = { "null" })
+//    @CsvSource(value = { "null, 10.00", "550e8400-e29b-41d4-a716-446655440000, null", "null, null" }, nullValues = {
+//            "null" })
 //    void shouldThrowExceptionWhenArgumentsAreNull(UUID cid, BigDecimal disc) {
 //        if (cid == null) {
 //            assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(cid, disc));
@@ -340,4 +336,4 @@
 //                .multiply(new BigDecimal(count));
 //        assertEquals(expectedTotal, invoice.totalAmount());
 //    }
-//}
+// }

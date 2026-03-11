@@ -1,29 +1,29 @@
-//package dev.mam.buizsol.mamshop.product.controller;
+// package dev.mam.buizsol.mamshop.product.controller;
 //
-//import dev.mam.buizsol.mamshop.customer.model.Brand;
-//import dev.mam.buizsol.mamshop.product.dto.ProductResponseDTO;
-//import dev.mam.buizsol.mamshop.product.model.Product;
+// import dev.mam.buizsol.mamshop.customer.model.Brand;
+// import dev.mam.buizsol.mamshop.product.dto.ProductResponseDTO;
+// import dev.mam.buizsol.mamshop.product.model.Product;
 //
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-//import org.springframework.test.context.bean.override.mockito.MockitoBean;
-//import org.springframework.test.web.servlet.MockMvc;
-//import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-//import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+// import org.springframework.test.context.bean.override.mockito.MockitoBean;
+// import org.springframework.test.web.servlet.MockMvc;
+// import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+// import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 //
-//import static org.mockito.Mockito.*;
+// import static org.mockito.Mockito.*;
 //
-//import java.math.BigDecimal;
-//import java.util.List;
-//import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
-//import dev.mam.buizsol.mamshop.product.mapper.ProductMapper;
-//import dev.mam.buizsol.mamshop.shop.service.ShopService;
+// import java.math.BigDecimal;
+// import java.util.List;
+// import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
+// import dev.mam.buizsol.mamshop.product.mapper.ProductMapper;
+// import dev.mam.buizsol.mamshop.shop.service.ShopService;
 //
-//@DisplayName(value = "ProductController Tests")
-//@WebMvcTest(controllers = ProductController.class)
-//public class ProductControllerTest {
+// @DisplayName(value = "ProductController Tests")
+// @WebMvcTest(controllers = ProductController.class)
+// public class ProductControllerTest {
 //
 //        @Autowired
 //        private MockMvc mockMvc;
@@ -34,7 +34,8 @@
 //        @MockitoBean
 //        private ProductMapper productMapper;
 //
-//        @DisplayName(value = "Positve: Given a valid brand, when the client requests products, then all products for that brand are returned successfully")
+//        @DisplayName(value = "Positve: Given a valid brand, when the client requests products, then all products for
+// that brand are returned successfully")
 //        @Test
 //        void testLoadAllProductsForBrand_Success() throws Exception {
 //                final Brand brand = Brand.MAIL_COM;
@@ -89,7 +90,8 @@
 //        }
 //
 //        @Test
-//        @DisplayName(value = "Negative: Given a non-existing brand, when the client requests products, then a 404 error is returned")
+//        @DisplayName(value = "Negative: Given a non-existing brand, when the client requests products, then a 404
+// error is returned")
 //        void testLoadAllProductsForBrand_BrandNotFound() throws Exception {
 //                final Brand brand = Brand.MAIL_COM;
 //                final String errorMessage = "Brand not found";
@@ -109,7 +111,8 @@
 //        }
 //
 //        @Test
-//        @DisplayName(value = "Negative: Given a null brand, when the client requests products, then a 400 Bad Request error is returned")
+//        @DisplayName(value = "Negative: Given a null brand, when the client requests products, then a 400 Bad Request
+// error is returned")
 //        void testLoadAllProductsForBrand_NullBrand() throws Exception {
 //                mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/products"))
 //                                .andExpect(MockMvcResultMatchers.status()
@@ -121,4 +124,4 @@
 //                verifyNoInteractions(productMapper);
 //        }
 //
-//}
+// }

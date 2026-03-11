@@ -13,58 +13,49 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.validation.annotation.Validated;
-
 import java.util.List;
 import java.util.UUID;
+import org.springframework.validation.annotation.Validated;
 
 @Validated
 public interface ShopService {
 
-        @NotNull
-        Customer registerCustomer(@NotNull @Valid final Customer customer);
+    @NotNull
+    Customer registerCustomer(@NotNull @Valid Customer customer);
 
-        @NotNull
-        Customer loadCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
+    @NotNull
+    Customer loadCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-        void removeCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
+    void removeCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-        void activateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
+    void activateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-        void deactivateCustomer(@NotNull final UUID customerId) throws CustomerNotFoundException;
+    void deactivateCustomer(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-        @NotNull
-        Customer updateAddress(
-                        @NotNull final UUID customerId,
-                        @NotNull @Valid final Address address) throws CustomerNotFoundException;
+    @NotNull
+    Customer updateAddress(@NotNull UUID customerId, @NotNull @Valid Address address) throws CustomerNotFoundException;
 
-        @NotNull
-        Customer updateInvoiceAddress(
-                        @NotNull final UUID customerId,
-                        @NotNull @Valid final Address invoiceAddress) throws CustomerNotFoundException;
+    @NotNull
+    Customer updateInvoiceAddress(@NotNull UUID customerId, @NotNull @Valid Address invoiceAddress)
+            throws CustomerNotFoundException;
 
-        @NotNull
-        Customer updateCommunicationDetails(
-                        @NotNull final UUID customerId,
-                        @NotNull @Valid final CommunicationDetails details) throws CustomerNotFoundException;
+    @NotNull
+    Customer updateCommunicationDetails(@NotNull UUID customerId, @NotNull @Valid CommunicationDetails details)
+            throws CustomerNotFoundException;
 
-        @NotNull
-        List<Contract> loadAllContracts(@NotNull final UUID customerId)
-                        throws CustomerNotFoundException;
+    @NotNull
+    List<Contract> loadAllContracts(@NotNull UUID customerId) throws CustomerNotFoundException;
 
-        @NotNull
-        Invoice generateInvoice(@NotNull final UUID customerId)
-                        throws CustomerNotFoundException, ProductNotFoundException;
+    @NotNull
+    Invoice generateInvoice(@NotNull UUID customerId) throws CustomerNotFoundException, ProductNotFoundException;
 
-        void activateContract(@NotNull final UUID customerId, @NotNull final UUID contractId)
-                        throws CustomerNotFoundException, ContractNotFoundException;
+    void activateContract(@NotNull UUID customerId, @NotNull UUID contractId)
+            throws CustomerNotFoundException, ContractNotFoundException;
 
-        @NotNull
-        List<Product> loadAllProductsForBrand(@NotNull final Brand brand);
+    @NotNull
+    List<Product> loadAllProductsForBrand(@NotNull Brand brand);
 
-        @NotNull
-        Contract purchaseProduct(
-                        @NotNull final UUID customerId,
-                        @NotNull final UUID productId)
-                        throws CustomerNotFoundException, ProductNotFoundException, BrandMismatchException;
+    @NotNull
+    Contract purchaseProduct(@NotNull UUID customerId, @NotNull UUID productId)
+            throws CustomerNotFoundException, ProductNotFoundException, BrandMismatchException;
 }
