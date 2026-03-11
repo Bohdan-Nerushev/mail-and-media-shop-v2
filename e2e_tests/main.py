@@ -2,6 +2,8 @@ import copy
 import uuid
 import logging
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 
 # Configure logging
 logging.basicConfig(
@@ -66,6 +68,10 @@ from load_test import LoadTestRunner
 # ---------------------------
 # Configuration (Environment Variables)
 # ---------------------------
+
+env_path = Path(__file__).resolve().parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
 HOST = os.getenv("APP_HOST", "http://localhost").rstrip("/")
 PORT = os.getenv("APP_PORT", "8090")
 APP_URL = f"{HOST}:{PORT}"

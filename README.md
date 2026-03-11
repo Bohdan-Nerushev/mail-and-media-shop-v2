@@ -426,7 +426,7 @@ Standard `AddressRequestDTO` structure.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/invoice-address \
+curl -X PUT http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/invoice-address \
   -H "Content-Type: application/json" \
   -d '{
     "street": "Neustraße",

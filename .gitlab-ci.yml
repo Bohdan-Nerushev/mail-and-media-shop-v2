@@ -1,7 +1,7 @@
-#stages:
-#  - build
-#  - test
- # - e2e-test
+stages:
+  - build
+  - test
+  - e2e-test
 
 # Unit tests
 #unit_test_job:
@@ -12,17 +12,17 @@
 #    - maven
 
 # E2E tests
-#e2e_test_job:
-#  stage: e2e-test
-#  variables:
-#    APP_HOST: "http://localhost"
-#    APP_PORT: "8080"
-#  script:
-#    - chmod +x e2e_tests/run_e2e.sh
-#    - ./e2e_tests/run_e2e.sh
-#  artifacts:
-#    when: always
-#    paths:
-#      - app.log
-#  tags:
-#    - maven
+e2e_test_job:
+  stage: e2e-test
+  variables:
+    APP_HOST: "http://localhost"
+    APP_PORT: "8090"
+  script:
+    - chmod +x e2e_tests/run_e2e.sh
+    - ./e2e_tests/run_e2e.sh
+  artifacts:
+    when: always
+    paths:
+      - app.log
+  tags:
+    - maven

@@ -1,5 +1,5 @@
 # Stage 1: Build the application using Maven
-FROM maven:3.9.9-eclipse-temurin-25 AS build
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
 
@@ -14,7 +14,7 @@ RUN mvn clean package -DskipTests
 
 
 # Stage 2: Runtime
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:21-jre-alpine
 
 # Set non-root user for security
 RUN addgroup -S spring && adduser -S spring -G spring
