@@ -4,12 +4,12 @@ stages:
   - e2e-test
 
 # Unit tests
-#unit_test_job:
-#  stage: test
-#  script:
-#    - mvn clean test
-#  tags:
-#    - maven
+unit_test_job:
+  stage: test
+  script:
+    - mvn clean test
+  tags:
+    - maven
 
 # E2E tests
 e2e_test_job:
