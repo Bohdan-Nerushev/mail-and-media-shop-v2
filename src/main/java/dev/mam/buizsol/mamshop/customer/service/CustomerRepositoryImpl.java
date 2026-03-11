@@ -3,15 +3,15 @@ package dev.mam.buizsol.mamshop.customer.service;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
-import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Repository;
 
 @Repository
-final class CustomerRepositoryImpl implements CustomerRepository {
+class CustomerRepositoryImpl implements CustomerRepository {
 
     private final Map<UUID, Customer> storage;
 
@@ -20,8 +20,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public void save(
-            final Customer customer) {
+    public void save(final Customer customer) {
         if (customer == null) {
             throw new CustomerValidationException("Customer must not be null");
         }
@@ -29,8 +28,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public Optional<Customer> findById(
-            final UUID id) {
+    public Optional<Customer> findById(final UUID id) {
         if (id == null) {
             throw new CustomerValidationException("ID must not be null");
         }
@@ -43,8 +41,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public void delete(
-            final UUID id) throws CustomerNotFoundException {
+    public void delete(final UUID id) throws CustomerNotFoundException {
         if (id == null) {
             throw new CustomerValidationException("ID must not be null");
         }
@@ -55,8 +52,7 @@ final class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public void update(
-            final Customer customer) throws CustomerNotFoundException {
+    public void update(final Customer customer) throws CustomerNotFoundException {
         if (customer == null) {
             throw new CustomerValidationException("Customer must not be null");
         }

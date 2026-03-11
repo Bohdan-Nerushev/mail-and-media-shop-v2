@@ -1,39 +1,28 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
-import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @DisplayName("Address Tests")
 class AddressTest {
 
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final Validator validator =
+            Validation.buildDefaultValidatorFactory().getValidator();
 
-    private Address createDefaultAddress(
-            String street,
-            String number,
-            String postcode,
-            String city,
-            String country) {
-        Address address = new Address(
-                street,
-                number,
-                postcode,
-                city,
-                country);
+    private Address createDefaultAddress(String street, String number, String postcode, String city, String country) {
+        Address address = new Address(street, number, postcode, city, country);
         Set<ConstraintViolation<Address>> violations = validator.validate(address);
         if (!violations.isEmpty()) {
             throw new CustomerValidationException("Validation failed");
@@ -54,46 +43,51 @@ class AddressTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n" })
+    @ValueSource(strings = {" ", "\t", "\n"})
     @DisplayName("Negative: Validation of 'street' field")
     void shouldThrowExceptionWhenStreetIsInvalid(String invalidStreet) {
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress(invalidStreet, "10", "12345", "Berlin", "Germany"));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n" })
+    @ValueSource(strings = {" ", "\t", "\n"})
     @DisplayName("Negative: Validation of 'number' field")
     void shouldThrowExceptionWhenNumberIsInvalid(String invalidNumber) {
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", invalidNumber, "12345", "Berlin", "Germany"));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n" })
+    @ValueSource(strings = {" ", "\t", "\n"})
     @DisplayName("Negative: Validation of 'postcode' field")
     void shouldThrowExceptionWhenPostcodeIsInvalid(String invalidPostcode) {
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", invalidPostcode, "Berlin", "Germany"));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n" })
+    @ValueSource(strings = {" ", "\t", "\n"})
     @DisplayName("Negative: Validation of 'city' field")
     void shouldThrowExceptionWhenCityIsInvalid(String invalidCity) {
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", "12345", invalidCity, "Germany"));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n" })
+    @ValueSource(strings = {" ", "\t", "\n"})
     @DisplayName("Negative: Validation of 'country' field")
     void shouldThrowExceptionWhenCountryIsInvalid(String invalidCountry) {
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", "12345", "Berlin", invalidCountry));
     }
 
@@ -109,7 +103,8 @@ class AddressTest {
     @DisplayName("Negative: Validation of 'street' field")
     void shouldThrowExceptionWhenStreetIsTooLong() {
         String longStreet = "A".repeat(251);
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress(longStreet, "1", "12345", "Berlin", "Germany"));
     }
 
@@ -117,7 +112,8 @@ class AddressTest {
     @DisplayName("Negative: Validation of 'number' field")
     void shouldThrowExceptionWhenNumberIsTooLong() {
         String longNumber = "A".repeat(101);
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", longNumber, "12345", "Berlin", "Germany"));
     }
 
@@ -125,7 +121,8 @@ class AddressTest {
     @DisplayName("Negative: Validation of 'postcode' field")
     void shouldThrowExceptionWhenPostcodeIsTooLong() {
         String longPostcode = "A".repeat(101);
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", longPostcode, "Berlin", "Germany"));
     }
 
@@ -133,7 +130,8 @@ class AddressTest {
     @DisplayName("Negative: Validation of 'city' field")
     void shouldThrowExceptionWhenCityIsTooLong() {
         String longCity = "A".repeat(101);
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", "12345", longCity, "Germany"));
     }
 
@@ -141,7 +139,8 @@ class AddressTest {
     @DisplayName("Negative: Validation of 'country' field")
     void shouldThrowExceptionWhenCountryIsTooLong() {
         String longCountry = "A".repeat(101);
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", "12345", "Berlin", longCountry));
     }
 
@@ -149,7 +148,8 @@ class AddressTest {
     @DisplayName("Negative: Validation of 'street' field")
     void shouldThrowExceptionWhenStreetIsTooShort() {
         String shortStreet = "A".repeat(0);
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress(shortStreet, "1", "12345", "Berlin", "Germany"));
     }
 
@@ -157,7 +157,8 @@ class AddressTest {
     @DisplayName("Negative: Validation of 'number' field")
     void shouldThrowExceptionWhenNumberIsTooShort() {
         String shortNumber = "A".repeat(0);
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", shortNumber, "12345", "Berlin", "Germany"));
     }
 
@@ -165,7 +166,8 @@ class AddressTest {
     @DisplayName("Negative: Validation of 'postcode' field")
     void shouldThrowExceptionWhenPostcodeIsTooShort() {
         String shortPostcode = "A".repeat(0);
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", shortPostcode, "Berlin", "Germany"));
     }
 
@@ -173,7 +175,8 @@ class AddressTest {
     @DisplayName("Negative: Validation of 'city' field")
     void shouldThrowExceptionWhenCityIsTooShort() {
         String shortCity = "A".repeat(0);
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", "12345", shortCity, "Germany"));
     }
 
@@ -181,19 +184,20 @@ class AddressTest {
     @DisplayName("Negative: Validation of 'country' field")
     void shouldThrowExceptionWhenCountryIsTooShort() {
         String shortCountry = "A".repeat(0);
-        assertThrows(CustomerValidationException.class,
+        assertThrows(
+                CustomerValidationException.class,
                 () -> createDefaultAddress("Main St", "10", "12345", "Berlin", shortCountry));
     }
 
     @Test
     @DisplayName("Boundary: Minimal valid input (single characters)")
     void shouldHandleSingleCharacterInputs() {
-        Address address = createDefaultAddress("S", "1", "1", "B", "G");
+        Address address = createDefaultAddress("S", "1", "1", "B", "Gt");
         assertEquals("S", address.street());
         assertEquals("1", address.number());
         assertEquals("1", address.postcode());
         assertEquals("B", address.city());
-        assertEquals("G", address.country());
+        assertEquals("Gt", address.country());
     }
 
     @Test

@@ -1,5 +1,11 @@
 package dev.mam.buizsol.mamshop.contract.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
@@ -7,19 +13,12 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import java.time.LocalDate;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-
-import java.time.LocalDate;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("Contract Tests")
 class ContractTest {
@@ -182,5 +181,26 @@ class ContractTest {
         Contract contract = Contract.create(customer, product);
 
         assertThrows(ContractValidationException.class, () -> contract.withStatus(null));
+    }
+
+    @Test
+    @DisplayName("Negative: Failure when creating Contract with null fields")
+    void shouldThrowExceptionWhenContractConstructorHasNullFields() {
+        assertThrows(
+                ContractValidationException.class,
+                () -> new Contract(null, UUID.randomUUID(), UUID.randomUUID(), LocalDate.now(), ContractStatus.ACTIVE));
+        assertThrows(
+                ContractValidationException.class,
+                () -> new Contract(UUID.randomUUID(), null, UUID.randomUUID(), LocalDate.now(), ContractStatus.ACTIVE));
+        assertThrows(
+                ContractValidationException.class,
+                () -> new Contract(UUID.randomUUID(), UUID.randomUUID(), null, LocalDate.now(), ContractStatus.ACTIVE));
+        assertThrows(
+                ContractValidationException.class,
+                () -> new Contract(
+                        UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), null, ContractStatus.ACTIVE));
+        assertThrows(
+                ContractValidationException.class,
+                () -> new Contract(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), LocalDate.now(), null));
     }
 }

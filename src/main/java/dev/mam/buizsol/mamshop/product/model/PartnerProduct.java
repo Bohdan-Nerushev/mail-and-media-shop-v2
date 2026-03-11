@@ -5,16 +5,19 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
 public record PartnerProduct(
         @NotNull UUID id,
-        @NotBlank @Size(max = 100, message = "Product name must not exceed 100 characters") String name,
+
+        @NotBlank @Size(max = 100, message = "Product name must not exceed 100 characters")
+        String name,
+
         @NotNull Brand brand,
         @NotNull @DecimalMin(value = "0.00") BigDecimal setupFee,
-        @NotNull @DecimalMin(value = "0.11") BigDecimal monthlyFee) implements Product {
+        @NotNull @DecimalMin(value = "0.11") BigDecimal monthlyFee)
+        implements Product {
 
     public PartnerProduct(
             @NotBlank @Size(max = 100) final String name,
@@ -50,8 +53,7 @@ public record PartnerProduct(
     }
 
     @Override
-    public PartnerProduct withMonthlyFee(
-            @NotNull final BigDecimal monthlyFee) {
+    public PartnerProduct withMonthlyFee(@NotNull final BigDecimal monthlyFee) {
         return new PartnerProduct(id, name, brand, setupFee, monthlyFee);
     }
 }

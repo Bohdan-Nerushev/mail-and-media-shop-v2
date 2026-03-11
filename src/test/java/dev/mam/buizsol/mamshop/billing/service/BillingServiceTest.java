@@ -1,5 +1,8 @@
 package dev.mam.buizsol.mamshop.billing.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
 import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
@@ -17,6 +20,12 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,15 +35,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("BillingService Tests")
@@ -57,13 +57,17 @@ class BillingServiceTest {
 
     @BeforeEach
     void setUp() {
-        billingService = new BillingServiceImpl(customerService, productService, contractService);
+        final BigDecimal zero = BigDecimal.ZERO;
+
+        final BigDecimal minimalDiscount = new BigDecimal("0.10");
+        billingService =
+                new BillingServiceImpl(customerService, productService, contractService, zero, minimalDiscount);
 
         Address address = new Address("Street", "1", "12345", "City", "Country");
         CommunicationDetails communication = new CommunicationDetails("test@test.com", "123456789");
 
-        testCustomer = Customer.create("John", "Doe", LocalDate.of(1990, 1, 1), address, null, communication,
-                Brand.GMX);
+        testCustomer =
+                Customer.create("John", "Doe", LocalDate.of(1990, 1, 1), address, null, communication, Brand.GMX);
         customerId = testCustomer.id();
 
         testProduct = new StandardMailProduct("Standard Mail", Brand.GMX, new BigDecimal("5.00"));
@@ -164,19 +168,21 @@ class BillingServiceTest {
 
     @DisplayName("Invalid small positive discount validation checks")
     @ParameterizedTest(name = "Invalid small positive discount validation - value: {0}")
-    @ValueSource(strings = { "0.01", "0.05", "0.10" })
+    @ValueSource(strings = {"0.01", "0.05", "0.10"})
     void shouldThrowExceptionWhenDiscountIsSmallPositive(String invalidDiscountStr) {
         BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
-        assertThrows(InvalidInvoiceDiscountException.class,
+        assertThrows(
+                InvalidInvoiceDiscountException.class,
                 () -> billingService.generateInvoice(customerId, invalidDiscount));
     }
 
     @DisplayName("Invalid negative discount validation checks")
     @ParameterizedTest(name = "Invalid negative discount validation - value: {0}")
-    @ValueSource(strings = { "-0.01", "-1.00" })
+    @ValueSource(strings = {"-0.01", "-1.00"})
     void shouldThrowExceptionWhenDiscountIsNegative(String invalidDiscountStr) {
         BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
-        assertThrows(InvalidInvoiceDiscountException.class,
+        assertThrows(
+                InvalidInvoiceDiscountException.class,
                 () -> billingService.generateInvoice(customerId, invalidDiscount));
     }
 
@@ -207,17 +213,21 @@ class BillingServiceTest {
 
     @DisplayName("Null arguments validation for generateInvoice")
     @ParameterizedTest(name = "Null arguments validation - customerId={0}, discount={1}")
-    @CsvSource(value = {
-            "null, 10.00",
-            "550e8400-e29b-41d4-a716-446655440000, null",
-            "null, null"
-    }, nullValues = { "null" })
+    @CsvSource(
+            value = {"null, 10.00", "550e8400-e29b-41d4-a716-446655440000, null", "null, null"},
+            nullValues = {"null"})
     void shouldThrowExceptionWhenArgumentsAreNull(UUID cid, BigDecimal disc) {
         if (cid == null) {
             assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(cid, disc));
         } else {
             assertThrows(InvalidInvoiceDiscountException.class, () -> billingService.generateInvoice(cid, disc));
         }
+    }
+
+    @Test
+    @DisplayName("Negative: generateInvoice with null customerId")
+    void shouldThrowExceptionWhenGeneratingInvoiceByNullCustomerId() {
+        assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(null));
     }
 
     @Test
@@ -235,8 +245,9 @@ class BillingServiceTest {
 
     @DisplayName("Verification of valid boundary discount values")
     @ParameterizedTest(name = "Boundary discount values - value: {0}")
-    @ValueSource(strings = { "0.00", "0.11", "0.10001", "1.00", "5.00", "100.00" })
-    void shouldGenerateInvoiceWhenValidBoundaryDiscountsProvided(BigDecimal validDiscount) throws Exception {
+    @ValueSource(strings = {"0.00", "0.11", "0.10001", "1.00", "5.00", "100.00"})
+    void shouldGenerateInvoiceWhenValidBoundaryDiscountsProvided(final String validDiscountStr) throws Exception {
+        final BigDecimal validDiscount = new BigDecimal(validDiscountStr);
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
         when(contractService.findContractsByCustomerId(customerId)).thenReturn(List.of());
 
@@ -322,8 +333,8 @@ class BillingServiceTest {
         Invoice invoice = billingService.generateInvoice(customerId);
 
         assertEquals(count, invoice.items().size());
-        BigDecimal expectedTotal = testProduct.getSetupFee().add(testProduct.getMonthlyFee())
-                .multiply(new BigDecimal(count));
+        BigDecimal expectedTotal =
+                testProduct.getSetupFee().add(testProduct.getMonthlyFee()).multiply(new BigDecimal(count));
         assertEquals(expectedTotal, invoice.totalAmount());
     }
 }

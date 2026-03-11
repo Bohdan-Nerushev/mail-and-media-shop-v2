@@ -13,44 +13,46 @@ import dev.mam.buizsol.mamshop.customer.service.CustomerService;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-final class BillingServiceImpl implements BillingService {
+@Service
+class BillingServiceImpl implements BillingService {
 
     private final CustomerService customerService;
     private final ProductService productService;
     private final ContractService contractService;
 
-    private final BigDecimal ZERO = BigDecimal.ZERO;
-    private final BigDecimal DISCOUNT = new BigDecimal("0.10");
+    private final BigDecimal zeroAmount;
+    private final BigDecimal minimalDiscountAmount;
 
     BillingServiceImpl(
             final CustomerService customerService,
             final ProductService productService,
-            final ContractService contractService) {
+            final ContractService contractService,
+            @Value("${billing.zero-amount}") final BigDecimal zero,
+            @Value("${billing.minimal-discount-amount}") final BigDecimal discount) {
         this.customerService = customerService;
         this.productService = productService;
         this.contractService = contractService;
+        this.zeroAmount = zero;
+        this.minimalDiscountAmount = discount;
     }
 
     @Override
-    public Invoice generateInvoice(
-            final UUID customerId)
-            throws CustomerNotFoundException, ProductNotFoundException {
+    public Invoice generateInvoice(final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
         if (customerId == null) {
             throw new InvoiceValidationException("Customer ID must not be null");
         }
-        return generateInvoice(customerId, ZERO);
+        return generateInvoice(customerId, zeroAmount);
     }
 
     @Override
-    public Invoice generateInvoice(
-            final UUID customerId,
-            final BigDecimal discount)
+    public Invoice generateInvoice(final UUID customerId, final BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException {
 
         if (customerId == null) {
@@ -59,14 +61,15 @@ final class BillingServiceImpl implements BillingService {
         if (discount == null) {
             throw new InvalidInvoiceDiscountException("Discount must not be null");
         }
-        if (discount.compareTo(ZERO) < 0) {
+        if (discount.compareTo(zeroAmount) < 0) {
             throw new InvalidInvoiceDiscountException("Discount cannot be negative");
         }
-        if (discount.compareTo(ZERO) > 0 && discount.compareTo(DISCOUNT) <= 0) {
-            throw new InvalidInvoiceDiscountException("Discount must be greater than 0.10 €");
+        if (discount.compareTo(zeroAmount) > 0 && discount.compareTo(minimalDiscountAmount) <= 0) {
+            throw new InvalidInvoiceDiscountException("Discount must be greater than " + minimalDiscountAmount + " €");
         }
 
-        final Customer customer = customerService.findCustomerById(customerId)
+        final Customer customer = customerService
+                .findCustomerById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + customerId + " not found"));
 
         final List<Contract> contracts = contractService.findContractsByCustomerId(customerId);
@@ -74,9 +77,12 @@ final class BillingServiceImpl implements BillingService {
 
         for (final Contract contract : contracts) {
             if (contract.status() == ContractStatus.ACTIVE) {
-                final Product product = productService.findById(contract.productId())
-                        .orElseThrow(() -> new ProductNotFoundException("Product with ID " + contract.productId()
-                                + " not found for contract " + contract.id()));
+                final Product product = productService
+                        .findById(contract.productId())
+                        .orElseThrow(() -> new ProductNotFoundException("Product with ID "
+                                + contract.productId()
+                                + " not found for contract "
+                                + contract.id()));
 
                 items.add(new InvoiceItem(
                         product.getId(),
@@ -89,11 +95,6 @@ final class BillingServiceImpl implements BillingService {
         }
 
         return new Invoice(
-                customer.brand(),
-                customer.id(),
-                customer.address(),
-                customer.invoiceAddress(),
-                items,
-                discount);
+                customer.brand(), customer.id(), customer.address(), customer.invoiceAddress(), items, discount);
     }
 }

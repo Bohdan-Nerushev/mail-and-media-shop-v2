@@ -8,7 +8,6 @@ import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -25,28 +24,21 @@ public record Contract(
         }
     }
 
-    public static Contract create(
-            @NotNull @Valid final Customer customer,
-            @NotNull @Valid final Product product) {
+    public static Contract create(@NotNull @Valid final Customer customer, @NotNull @Valid final Product product) {
 
         if (customer == null || product == null) {
             throw new ContractValidationException("Customer and Product must not be null");
         }
         if (!customer.brand().equals(product.getBrand())) {
             throw new BrandMismatchException(String.format(
-                    "Customer brand %s does not match product brand %s",
-                    customer.brand(), product.getBrand()));
+                    "Customer brand %s does not match product brand %s", customer.brand(), product.getBrand()));
         }
         if (customer.status() != CustomerStatus.ACTIVE) {
             throw new CustomerNotActiveException("Customer is not active");
         }
 
         return new Contract(
-                UUID.randomUUID(),
-                customer.id(),
-                product.getId(),
-                LocalDate.now(),
-                ContractStatus.INACTIVE);
+                UUID.randomUUID(), customer.id(), product.getId(), LocalDate.now(), ContractStatus.INACTIVE);
     }
 
     @NotNull

@@ -2,8 +2,6 @@ package dev.mam.buizsol.mamshop.contract.service;
 
 import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
-import org.springframework.stereotype.Repository;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,9 +10,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Repository;
 
 @Repository
-final class ContractRepositoryImpl implements ContractRepository {
+class ContractRepositoryImpl implements ContractRepository {
 
     private final Map<UUID, Contract> storage;
 
@@ -23,8 +22,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     }
 
     @Override
-    public Contract save(
-            final Contract contract) {
+    public Contract save(final Contract contract) {
         if (contract == null) {
             throw new ContractValidationException("Contract must not be null");
         }
@@ -33,8 +31,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     }
 
     @Override
-    public Contract update(
-            final Contract contract) {
+    public Contract update(final Contract contract) {
         if (contract == null) {
             throw new ContractValidationException("Contract must not be null");
         }
@@ -43,8 +40,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     }
 
     @Override
-    public Optional<Contract> findById(
-            final UUID id) {
+    public Optional<Contract> findById(final UUID id) {
         if (id == null) {
             throw new ContractValidationException("ID must not be null");
         }
@@ -52,8 +48,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     }
 
     @Override
-    public List<Contract> findByCustomerId(
-            final UUID customerId) {
+    public List<Contract> findByCustomerId(final UUID customerId) {
         if (customerId == null) {
             throw new ContractValidationException("Customer ID must not be null");
         }
@@ -63,8 +58,7 @@ final class ContractRepositoryImpl implements ContractRepository {
     }
 
     @Override
-    public List<Contract> findByProductId(
-            final UUID productId) {
+    public List<Contract> findByProductId(final UUID productId) {
         if (productId == null) {
             throw new ContractValidationException("Product ID must not be null");
         }

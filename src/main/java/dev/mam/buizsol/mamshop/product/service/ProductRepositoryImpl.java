@@ -3,17 +3,16 @@ package dev.mam.buizsol.mamshop.product.service;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.Product;
-import org.springframework.stereotype.Repository;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Repository;
 
 @Repository
-final class ProductRepositoryImpl implements ProductRepository {
+class ProductRepositoryImpl implements ProductRepository {
 
     private final Map<UUID, Product> storage;
 
