@@ -1,35 +1,35 @@
 // package dev.mam.buizsol.mamshop.billing.controller;
 //
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
+// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+//
+// import dev.mam.buizsol.mamshop.customer.dto.AddressResponseDTO;
+// import dev.mam.buizsol.mamshop.billing.dto.InvoiceItemResponseDTO;
+// import dev.mam.buizsol.mamshop.billing.dto.InvoiceResponseDTO;
+// import dev.mam.buizsol.mamshop.billing.mapper.InvoiceMapper;
+// import dev.mam.buizsol.mamshop.billing.model.Invoice;
+// import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
+// import dev.mam.buizsol.mamshop.contract.model.Contract;
+// import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
+// import dev.mam.buizsol.mamshop.customer.model.Address;
+// import dev.mam.buizsol.mamshop.customer.model.Brand;
+// import dev.mam.buizsol.mamshop.customer.model.Customer;
+// import dev.mam.buizsol.mamshop.shop.service.ShopService;
 // import java.math.BigDecimal;
 // import java.time.LocalDate;
 // import java.util.List;
 // import java.util.UUID;
-//
-// import dev.mam.buizsol.mamshop.billing.dto.InvoiceResponseDTO;
 // import org.junit.jupiter.api.DisplayName;
-// import org.springframework.http.MediaType;
 // import org.junit.jupiter.api.Test;
-//
 // import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-//
+// import org.springframework.http.MediaType;
 // import org.springframework.test.context.bean.override.mockito.MockitoBean;
 // import org.springframework.test.web.servlet.MockMvc;
-//
-// import dev.mam.buizsol.mamshop.billing.mapper.InvoiceMapper;
-// import dev.mam.buizsol.mamshop.billing.model.Invoice;
-// import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
-// import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
-// import dev.mam.buizsol.mamshop.customer.model.Address;
-// import dev.mam.buizsol.mamshop.customer.model.Brand;
-// import dev.mam.buizsol.mamshop.shop.service.ShopService;
-//
-// import static org.mockito.Mockito.verify;
-// import static org.mockito.Mockito.when;
-//
-// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 //
 // @DisplayName("BillingController Tests")
 // @WebMvcTest(BillingController.class)
@@ -50,35 +50,43 @@
 //
 //        UUID customerId = UUID.randomUUID();
 //        Brand brand = Brand.GMX;
+//        Customer customer = mock(Customer.class);
 //        Address address = BillingTestFactory.createAddress(
 //                "Main St",
 //                "10",
 //                "12345",
 //                "Berlin",
 //                "Germany");
+//        Contract contract = mock(Contract.class);
 //        InvoiceItem item = BillingTestFactory.createInvoiceItem(
 //                UUID.randomUUID(),
 //                "Premium Mail",
-//                UUID.randomUUID(),
+//                contract,
 //                LocalDate.now(),
 //                new BigDecimal("5.00"),
 //                new BigDecimal("10.00"));
 //
 //        Invoice invoice = BillingTestFactory.createInvoice(
 //                brand,
-//                customerId,
+//                customer,
 //                address,
 //                address,
 //                List.of(item),
 //                BigDecimal.ZERO);
 //
+//        AddressResponseDTO addressResponseDTO = BillingTestFactory.createAddressResponseDTO(
+//                "Main St", "10", "12345", "Berlin", "Germany");
+//        InvoiceItemResponseDTO itemResponseDTO = BillingTestFactory.createInvoiceItemResponseDTO(
+//                UUID.randomUUID(), "Premium Mail", UUID.randomUUID(), LocalDate.now(),
+//                new BigDecimal("5.00"), new BigDecimal("10.00"));
+//
 //        InvoiceResponseDTO responseDto = BillingTestFactory.createInvoiceResponseDTO(
 //                brand,
 //                LocalDate.now(),
 //                customerId,
-//                address,
-//                address,
-//                List.of(item),
+//                addressResponseDTO,
+//                addressResponseDTO,
+//                List.of(itemResponseDTO),
 //                new BigDecimal("5.00"),
 //                new BigDecimal("10.00"),
 //                BigDecimal.ZERO,
@@ -90,7 +98,7 @@
 //                .thenReturn(responseDto);
 //
 //        mockMvc.perform(post("/api/v1/billing/{customerId}/invoice", customerId)
-//                .contentType(MediaType.APPLICATION_JSON))
+//                        .contentType(MediaType.APPLICATION_JSON))
 //                .andExpect(status().isOk())
 //                .andExpect(jsonPath("$.customerId").value(customerId.toString()))
 //                .andExpect(jsonPath("$.brand").value(brand.name()))
@@ -108,7 +116,7 @@
 //                .thenThrow(new CustomerNotFoundException("Customer not found"));
 //
 //        mockMvc.perform(post("/api/v1/billing/{customerId}/invoice", customerId)
-//                .contentType(MediaType.APPLICATION_JSON))
+//                        .contentType(MediaType.APPLICATION_JSON))
 //                .andExpect(status().isNotFound())
 //                .andExpect(jsonPath("$.errorCode").value("CUSTOMER_NOT_FOUND"))
 //                .andExpect(jsonPath("$.message").value("Customer not found"));
@@ -123,7 +131,7 @@
 //        String invalidCustomerId = "not-a-uuid";
 //
 //        mockMvc.perform(post("/api/v1/billing/{customerId}/invoice", invalidCustomerId)
-//                .contentType(MediaType.APPLICATION_JSON))
+//                        .contentType(MediaType.APPLICATION_JSON))
 //                .andExpect(status().isBadRequest())
 //                .andExpect(jsonPath("$.errorCode").value("TYPE_MISMATCH"));
 //    }
