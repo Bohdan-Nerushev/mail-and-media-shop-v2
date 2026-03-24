@@ -66,8 +66,6 @@ class CustomerTest {
         Customer customer = createDefaultCustomer(
                 "John", "Doe", LocalDate.of(1990, 1, 1), mainAddress, null, communicationDetails, Brand.GMX);
 
-        // JPA entity generates ID on save
-        // JPA entity generates ID on save
         assertEquals("John", customer.getFirstName());
         assertEquals("Doe", customer.getLastName());
         assertEquals(LocalDate.of(1990, 1, 1), customer.getBirthDate());

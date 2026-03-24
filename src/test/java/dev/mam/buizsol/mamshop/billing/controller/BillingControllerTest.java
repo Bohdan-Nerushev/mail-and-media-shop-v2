@@ -124,9 +124,6 @@ public class BillingControllerTest {
     @Test
     @DisplayName("Negative: Should return 400 when customer ID format is invalid")
     void shouldReturn400WhenCustomerIdIsInvalid() throws Exception {
-
-        String invalidCustomerId = "not-a-uuid";
-
         mockMvc.perform(post("/api/v1/billing/invoices")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
