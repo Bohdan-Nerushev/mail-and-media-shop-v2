@@ -13,11 +13,11 @@ class LoadTestConfig:
     """Configuration class for load test parameters."""
     def __init__(self):
         host = os.getenv("APP_HOST", "http://localhost").rstrip("/")
-        port = os.getenv("APP_PORT", "8080")
+        port = os.getenv("APP_PORT", "8090")
         app_url = f"{host}:{port}"
         
-        self.customers_url = f"{app_url}/api/v1/customers"
-        self.products_url = f"{app_url}/api/v1/products"
+        self.customers_url = f"{app_url}/api/v1/shop/customers"
+        self.products_url = f"{app_url}/api/v1/shop/products"
         self.headers = {"Content-Type": "application/json"}
         
         # Default load parameters

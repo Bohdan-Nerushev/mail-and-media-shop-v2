@@ -23,6 +23,6 @@ e2e_test_job:
   artifacts:
     when: always
     paths:
-      - app.log
+      - app_container.log
   tags:
     - maven

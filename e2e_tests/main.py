@@ -202,6 +202,10 @@ if __name__ == "__main__":
     load_runner = LoadTestRunner()
     # Running a smaller load by default in regular E2E to ensure it works without taking too much time
     total_load_customers = int(os.getenv("LOAD_TEST_QUICK_TOTAL", "100"))
-    load_runner.run_load_test(total=total_load_customers, workers=20, purchases=10)
+    success_purchases, failure_purchases = load_runner.run_load_test(total=total_load_customers, workers=20, purchases=10)
+    
+    if total_load_customers > 0 and success_purchases == 0:
+        logger.error("Load Test failed: 0 successful operations. Check logs for details.")
+        exit(1)
 
     logger.info("=== All E2E Tests Completed Successfully ===")
