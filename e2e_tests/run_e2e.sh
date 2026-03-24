@@ -137,16 +137,18 @@ python3 "$PROJECT_ROOT/e2e_tests/main.py"
 TEST_EXIT_CODE=$?
 
 # ==============================================================================
-# PHASE 5: Reporting
+# PHASE 5: Reporting & Log Capture
 # ==============================================================================
+
+# Capture container logs for analysis (essential for GitLab CI artifacts)
+log_info "Capturing container logs for 'app'..."
+docker compose logs app > "$PROJECT_ROOT/app_container.log"
+log_info "App logs saved to app_container.log"
 
 if [ $TEST_EXIT_CODE -eq 0 ]; then
     log_info "RESULT: E2E Tests PASSED"
 else
     log_error "RESULT: E2E Tests FAILED (Exit Code: $TEST_EXIT_CODE)"
-    log_info "Capturing container logs for analysis..."
-    docker compose logs app > "$PROJECT_ROOT/app_container.log"
-    log_info "App logs saved to app_container.log"
 fi
 
 exit $TEST_EXIT_CODE
