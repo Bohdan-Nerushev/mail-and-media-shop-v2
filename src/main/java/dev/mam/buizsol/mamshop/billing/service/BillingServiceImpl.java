@@ -51,7 +51,7 @@ class BillingServiceImpl implements BillingService {
         if (customerId == null) {
             throw new InvoiceValidationException("Customer ID must not be null");
         }
-        return generateInvoice(customerId, zeroAmount);
+        return createInvoice(customerId, zeroAmount);
     }
 
     @Override
@@ -71,6 +71,11 @@ class BillingServiceImpl implements BillingService {
         if (discount.compareTo(zeroAmount) > 0 && discount.compareTo(minimalDiscountAmount) <= 0) {
             throw new InvalidInvoiceDiscountException("Discount must be greater than " + minimalDiscountAmount + " €");
         }
+        return createInvoice(customerId, discount);
+    }
+
+    private Invoice createInvoice(UUID customerId, BigDecimal discount)
+            throws CustomerNotFoundException, ProductNotFoundException {
 
         final Customer customer = customerService
                 .findCustomerById(customerId)
@@ -97,6 +102,11 @@ class BillingServiceImpl implements BillingService {
         }
 
         return new Invoice(
-                customer.getBrand(), customer, customer.getAddress(), customer.getInvoiceAddress(), items, discount);
+                customer.getBrand(),
+                customer,
+                customer.getAddress(),
+                customer.getInvoiceAddress(),
+                items,
+                discount);
     }
 }
