@@ -1,7 +1,6 @@
 package dev.mam.buizsol.mamshop.billing.service;
 
 import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
-import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
@@ -48,9 +47,6 @@ class BillingServiceImpl implements BillingService {
     @Override
     @Transactional
     public Invoice generateInvoice(final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
-        if (customerId == null) {
-            throw new InvoiceValidationException("Customer ID must not be null");
-        }
         return createInvoice(customerId, zeroAmount);
     }
 
@@ -59,12 +55,6 @@ class BillingServiceImpl implements BillingService {
     public Invoice generateInvoice(final UUID customerId, final BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException {
 
-        if (customerId == null) {
-            throw new InvoiceValidationException("Customer ID must not be null");
-        }
-        if (discount == null) {
-            throw new InvalidInvoiceDiscountException("Discount must not be null");
-        }
         if (discount.compareTo(zeroAmount) < 0) {
             throw new InvalidInvoiceDiscountException("Discount cannot be negative");
         }

@@ -8,8 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
-import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
@@ -25,6 +23,7 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
+import jakarta.validation.ConstraintViolationException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -35,9 +34,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import dev.mam.buizsol.mamshop.billing.validation.InvoiceDiscountValidator;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -68,8 +74,35 @@ class BillingServiceTest {
         final BigDecimal zero = BigDecimal.ZERO;
         final BigDecimal minimalDiscount = new BigDecimal("0.10");
 
-        billingService =
+        final BillingServiceImpl target =
                 new BillingServiceImpl(customerService, productService, contractService, zero, minimalDiscount);
+
+        final LocalValidatorFactoryBean validatorFactory = new LocalValidatorFactoryBean();
+        validatorFactory.setConstraintValidatorFactory(new ConstraintValidatorFactory() {
+            @Override
+            public <T extends ConstraintValidator<?, ?>> T getInstance(Class<T> key) {
+                try {
+                    T instance = key.getDeclaredConstructor().newInstance();
+                    if (instance instanceof InvoiceDiscountValidator) {
+                        ReflectionTestUtils.setField(instance, "zeroAmount", BigDecimal.ZERO);
+                        ReflectionTestUtils.setField(instance, "minimalDiscountAmount", new BigDecimal("0.10"));
+                    }
+                    return instance;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            @Override
+            public void releaseInstance(ConstraintValidator<?, ?> instance) {}
+        });
+        validatorFactory.afterPropertiesSet();
+
+        final ProxyFactory factory = new ProxyFactory();
+        factory.setTarget(target);
+        factory.addInterface(BillingService.class);
+        factory.addAdvice(new MethodValidationInterceptor(validatorFactory.getValidator()));
+
+        billingService = (BillingService) factory.getProxy();
 
         final Address address = new Address("Street", "1", "12345", "City", "Country");
         final CommunicationDetails communication = new CommunicationDetails("test@test.com", "123456789");
@@ -180,7 +213,7 @@ class BillingServiceTest {
     void shouldThrowExceptionWhenDiscountIsSmallPositive(final String invalidDiscountStr) {
         final BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
         assertThrows(
-                InvalidInvoiceDiscountException.class,
+                ConstraintViolationException.class,
                 () -> billingService.generateInvoice(customerId, invalidDiscount));
     }
 
@@ -215,17 +248,13 @@ class BillingServiceTest {
             value = {"null, 10.00", "550e8400-e29b-41d4-a716-446655440000, null", "null, null"},
             nullValues = {"null"})
     void shouldThrowExceptionWhenArgumentsAreNull(final UUID cid, final BigDecimal disc) {
-        if (cid == null) {
-            assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(cid, disc));
-        } else {
-            assertThrows(InvalidInvoiceDiscountException.class, () -> billingService.generateInvoice(cid, disc));
-        }
+        assertThrows(ConstraintViolationException.class, () -> billingService.generateInvoice(cid, disc));
     }
 
     @Test
     @DisplayName("Negative: generateInvoice with null customerId")
     void shouldThrowExceptionWhenGeneratingInvoiceByNullCustomerId() {
-        assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(null));
+        assertThrows(ConstraintViolationException.class, () -> billingService.generateInvoice(null));
     }
 
     @Test

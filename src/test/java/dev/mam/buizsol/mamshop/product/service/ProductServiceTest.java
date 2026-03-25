@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
-import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.MailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import java.math.BigDecimal;
@@ -21,10 +20,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
+import jakarta.validation.ConstraintViolationException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProductService Tests")
@@ -33,12 +35,22 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
 
-    @InjectMocks
-    private ProductServiceImpl productService;
+    private ProductService productService;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(productService, "minimalDiscountAmount", new BigDecimal("0.10"));
+        final ProductServiceImpl target = new ProductServiceImpl(productRepository);
+        ReflectionTestUtils.setField(target, "minimalDiscountAmount", new BigDecimal("0.10"));
+
+        final LocalValidatorFactoryBean validatorFactory = new LocalValidatorFactoryBean();
+        validatorFactory.afterPropertiesSet();
+
+        final ProxyFactory factory = new ProxyFactory();
+        factory.setTarget(target);
+        factory.addInterface(ProductService.class);
+        factory.addAdvice(new MethodValidationInterceptor(validatorFactory.getValidator()));
+
+        productService = (ProductService) factory.getProxy();
     }
 
     private Product createDefaultProduct(
@@ -76,13 +88,13 @@ class ProductServiceTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when creating product with null value")
     void shouldThrowIllegalArgumentExceptionWhenCreatingProductWithNullValue() {
-        assertThrows(ProductValidationException.class, () -> productService.createProduct(null));
+        assertThrows(ConstraintViolationException.class, () -> productService.createProduct(null));
     }
 
     @Test
     @DisplayName("Should throw IllegalArgumentException when finding product by null ID")
     void shouldThrowIllegalArgumentExceptionWhenFindingProductByNullId() {
-        assertThrows(ProductValidationException.class, () -> productService.findById(null));
+        assertThrows(ConstraintViolationException.class, () -> productService.findById(null));
     }
 
     @Test
@@ -130,7 +142,7 @@ class ProductServiceTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when searching by null brand")
     void shouldThrowIllegalArgumentExceptionWhenSearchingByNullBrand() {
-        assertThrows(ProductValidationException.class, () -> productService.findByBrand(null));
+        assertThrows(ConstraintViolationException.class, () -> productService.findByBrand(null));
     }
 
     @Test
@@ -195,7 +207,7 @@ class ProductServiceTest {
 
         final BigDecimal invalidFee = new BigDecimal(feeValue);
         UUID productId = product.getId();
-        assertThrows(ProductValidationException.class, () -> productService.updateMonthlyFee(productId, invalidFee));
+        assertThrows(ConstraintViolationException.class, () -> productService.updateMonthlyFee(productId, invalidFee));
     }
 
     @ParameterizedTest
@@ -206,7 +218,7 @@ class ProductServiceTest {
 
         final BigDecimal negativeFee = new BigDecimal(feeValue);
         UUID productId = product.getId();
-        assertThrows(ProductValidationException.class, () -> productService.updateMonthlyFee(productId, negativeFee));
+        assertThrows(ConstraintViolationException.class, () -> productService.updateMonthlyFee(productId, negativeFee));
     }
 
     @Test
@@ -229,7 +241,7 @@ class ProductServiceTest {
     void shouldThrowIllegalArgumentExceptionWhenProductIdIsNull() {
         final BigDecimal validFee = new BigDecimal("1.00");
 
-        assertThrows(ProductValidationException.class, () -> productService.updateMonthlyFee(null, validFee));
+        assertThrows(ConstraintViolationException.class, () -> productService.updateMonthlyFee(null, validFee));
     }
 
     @Test
@@ -237,13 +249,13 @@ class ProductServiceTest {
     void shouldThrowIllegalArgumentExceptionWhenMonthlyFeeIsNull() {
         final Product product = createDefaultProduct("Null Fee Test", Brand.MAIL_COM, "1.00", "0.50");
         UUID productId = product.getId();
-        assertThrows(ProductValidationException.class, () -> productService.updateMonthlyFee(productId, null));
+        assertThrows(ConstraintViolationException.class, () -> productService.updateMonthlyFee(productId, null));
     }
 
     @Test
     @DisplayName("Should throw IllegalArgumentException when both ID and fee are null")
     void shouldThrowIllegalArgumentExceptionWhenBothIdAndFeeAreNull() {
-        assertThrows(ProductValidationException.class, () -> productService.updateMonthlyFee(null, null));
+        assertThrows(ConstraintViolationException.class, () -> productService.updateMonthlyFee(null, null));
     }
 
     @Test
@@ -271,7 +283,7 @@ class ProductServiceTest {
         final BigDecimal boundaryInvalidFee = new BigDecimal("0.10");
         UUID productId = product.getId();
         assertThrows(
-                ProductValidationException.class, () -> productService.updateMonthlyFee(productId, boundaryInvalidFee));
+                ConstraintViolationException.class, () -> productService.updateMonthlyFee(productId, boundaryInvalidFee));
     }
 
     @Test

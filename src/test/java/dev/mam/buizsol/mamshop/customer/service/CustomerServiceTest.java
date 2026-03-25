@@ -1,6 +1,5 @@
 package dev.mam.buizsol.mamshop.customer.service;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,12 +11,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotFoundException;
-import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
+import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +32,9 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CustomerService Tests")
@@ -56,13 +58,25 @@ class CustomerServiceTest {
     @Mock
     private CustomerRepository customerRepository;
 
-    private CustomerServiceImpl customerService;
+    private CustomerService customerService;
 
     @BeforeEach
     void setUp() {
         address = new Address("Street", "1", "12345", "City", "Country");
         communicationDetails = new CommunicationDetails("john.doe@example.com", "123456789");
-        customerService = new CustomerServiceImpl(customerRepository);
+
+        final CustomerServiceImpl target = new CustomerServiceImpl(customerRepository);
+
+        final LocalValidatorFactoryBean validatorFactory = new LocalValidatorFactoryBean();
+        validatorFactory.afterPropertiesSet();
+
+        final ProxyFactory factory = new ProxyFactory();
+        factory.setTarget(target);
+        factory.addInterface(CustomerService.class);
+        factory.addAdvice(new MethodValidationInterceptor(validatorFactory.getValidator()));
+
+        customerService = (CustomerService) factory.getProxy();
+
         lenient().when(customerRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
@@ -80,12 +94,6 @@ class CustomerServiceTest {
         verify(customerRepository).save(any(Customer.class));
     }
 
-    @Test
-    @DisplayName("Create customer with repository = null should throw exception")
-    void shouldThrowExceptionWhenRepositoryIsNull() {
-        assertThrows(CustomerValidationException.class, () -> new CustomerServiceImpl(null));
-    }
-
     @ParameterizedTest
     @EnumSource(Brand.class)
     @DisplayName("Create customer with different brands should succeed")
@@ -99,41 +107,41 @@ class CustomerServiceTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = {" ", "\t", "\n"})
-    @DisplayName("Create customer with invalid first name: service delegates to repo without field-level checking")
+    @ValueSource(strings = { " ", "\t", "\n" })
+    @DisplayName("Create customer with invalid first name: validated by service layer")
     void shouldThrowExceptionWhenFirstNameIsInvalid(final String firstName) {
         if (firstName == null) {
-            assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(null));
+            assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(null));
         } else {
             final Customer customer = createDefaultCustomer(
                     firstName, "Doe", LocalDate.of(1990, 1, 1), address, null, communicationDetails, Brand.WEB_DE);
-            assertDoesNotThrow(() -> customerService.createCustomer(customer));
+            assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
         }
     }
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = {" ", "\t", "\n"})
-    @DisplayName("Create customer with invalid last name: service delegates to repo without field-level checking")
+    @ValueSource(strings = { " ", "\t", "\n" })
+    @DisplayName("Create customer with invalid last name: validated by service layer")
     void shouldThrowExceptionWhenLastNameIsInvalid(final String lastName) {
         if (lastName == null) {
-            assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(null));
+            assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(null));
         } else {
             final Customer customer = createDefaultCustomer(
                     "John", lastName, LocalDate.of(1990, 1, 1), address, null, communicationDetails, Brand.WEB_DE);
-            assertDoesNotThrow(() -> customerService.createCustomer(customer));
+            assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
         }
     }
 
     @ParameterizedTest
     @CsvSource({
-        "1900-01-01, Boundary: very old birth date",
-        "2026-01-14, Boundary: today birth date",
-        "2024-05-14, Boundary: future birth date",
-        "2010-04-14, Boundary: future birth1 date",
-        "2010-04-14, Boundary: future birth1 date",
-        "1000-01-01, Boundary: future birth2 date",
-        "1500-01-01, Boundary: future birth3 date"
+            "1900-01-01, Boundary: very old birth date",
+            "2026-01-14, Boundary: today birth date",
+            "2024-05-14, Boundary: future birth date",
+            "2010-04-14, Boundary: future birth1 date",
+            "2010-04-14, Boundary: future birth1 date",
+            "1000-01-01, Boundary: future birth2 date",
+            "1500-01-01, Boundary: future birth3 date"
     })
     @DisplayName("Create customer with boundary birth dates should succeed")
     void shouldCreateCustomerWithBoundaryBirthDates(final String dateStr) {
@@ -151,13 +159,13 @@ class CustomerServiceTest {
     void shouldUpdateAddressSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
-        final Address newAddressMock = mock(Address.class);
+        final Address newAddress = new Address("New Street", "2", "67890", "Other City", "Other Country");
 
         when(customerRepository.getById(customerId)).thenReturn(customerMock);
 
-        customerService.updateAddress(customerId, newAddressMock);
+        customerService.updateAddress(customerId, newAddress);
 
-        verify(customerMock).setAddress(newAddressMock);
+        verify(customerMock).setAddress(newAddress);
         verify(customerRepository).save(customerMock);
     }
 
@@ -166,13 +174,13 @@ class CustomerServiceTest {
     void shouldUpdateInvoiceAddressSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
-        final Address newInvoiceAddressMock = mock(Address.class);
+        final Address newInvoiceAddress = new Address("Invoice St", "3", "54321", "Invoice City", "Invoicing");
 
         when(customerRepository.getById(customerId)).thenReturn(customerMock);
 
-        customerService.updateInvoiceAddress(customerId, newInvoiceAddressMock);
+        customerService.updateInvoiceAddress(customerId, newInvoiceAddress);
 
-        verify(customerMock).setInvoiceAddress(newInvoiceAddressMock);
+        verify(customerMock).setInvoiceAddress(newInvoiceAddress);
         verify(customerRepository).save(customerMock);
     }
 
@@ -181,13 +189,13 @@ class CustomerServiceTest {
     void shouldUpdateCommunicationDetailsSuccessfully() throws CustomerNotFoundException {
         final UUID customerId = UUID.randomUUID();
         final Customer customerMock = mock(Customer.class);
-        final CommunicationDetails newDetailsMock = mock(CommunicationDetails.class);
+        final CommunicationDetails newDetails = new CommunicationDetails("new@example.com", "987654321");
 
         when(customerRepository.getById(customerId)).thenReturn(customerMock);
 
-        customerService.updateCommunicationDetails(customerId, newDetailsMock);
+        customerService.updateCommunicationDetails(customerId, newDetails);
 
-        verify(customerMock).setCommunicationDetails(newDetailsMock);
+        verify(customerMock).setCommunicationDetails(newDetails);
         verify(customerRepository).save(customerMock);
     }
 
@@ -242,82 +250,82 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("Create customer with null first name: delegates to repository without field validation")
+    @DisplayName("Create customer with null first name: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullFirstName() {
-        assertDoesNotThrow(() -> customerService.createCustomer(
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
                 createDefaultCustomer(null, "Doe", LocalDate.now(), address, null, communicationDetails, Brand.GMX)));
     }
 
     @Test
-    @DisplayName("Create customer with null last name: delegates to repository without field validation")
+    @DisplayName("Create customer with null last name: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullLastName() {
-        assertDoesNotThrow(() -> customerService.createCustomer(
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
                 createDefaultCustomer("John", null, LocalDate.now(), address, null, communicationDetails, Brand.GMX)));
     }
 
     @Test
-    @DisplayName("Create customer with null birth date: delegates to repository without field validation")
+    @DisplayName("Create customer with null birth date: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullBirthDate() {
-        assertDoesNotThrow(() -> customerService.createCustomer(
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
                 createDefaultCustomer("John", "Doe", null, address, null, communicationDetails, Brand.GMX)));
     }
 
     @Test
-    @DisplayName("Create customer with null address: delegates to repository without field validation")
+    @DisplayName("Create customer with null address: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullAddress() {
-        assertDoesNotThrow(() -> customerService.createCustomer(
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
                 createDefaultCustomer("John", "Doe", LocalDate.now(), null, null, communicationDetails, Brand.GMX)));
     }
 
     @Test
-    @DisplayName("Create customer with null communication details: delegates to repository without field validation")
+    @DisplayName("Create customer with null communication details: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullCommunicationDetails() {
-        assertDoesNotThrow(() -> customerService.createCustomer(
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
                 createDefaultCustomer("John", "Doe", LocalDate.now(), address, null, null, Brand.GMX)));
     }
 
     @Test
-    @DisplayName("Create customer with null brand: delegates to repository without field validation")
+    @DisplayName("Create customer with null brand: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullBrand() {
-        assertDoesNotThrow(() -> customerService.createCustomer(
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
                 createDefaultCustomer("John", "Doe", LocalDate.now(), address, null, communicationDetails, null)));
     }
 
     @Test
     @DisplayName("Activate customer with null ID should throw exception")
     void shouldThrowExceptionWhenActivatingCustomerWithNullId() {
-        assertThrows(CustomerValidationException.class, () -> customerService.activateCustomer(null));
+        assertThrows(ConstraintViolationException.class, () -> customerService.activateCustomer(null));
     }
 
     @Test
     @DisplayName("Deactivate customer with null ID should throw exception")
     void shouldThrowExceptionWhenDeactivatingCustomerWithNullId() {
-        assertThrows(CustomerValidationException.class, () -> customerService.deactivateCustomer(null));
+        assertThrows(ConstraintViolationException.class, () -> customerService.deactivateCustomer(null));
     }
 
     @Test
     @DisplayName("Delete customer with null ID should throw exception")
     void shouldThrowExceptionWhenDeletingCustomerWithNullId() {
-        assertThrows(CustomerValidationException.class, () -> customerService.deleteCustomer(null));
+        assertThrows(ConstraintViolationException.class, () -> customerService.deleteCustomer(null));
     }
 
     @Test
     @DisplayName("Update address with null ID should throw exception")
     void shouldThrowExceptionWhenUpdatingAddressWithNullId() {
-        assertThrows(CustomerValidationException.class, () -> customerService.updateAddress(null, address));
+        assertThrows(ConstraintViolationException.class, () -> customerService.updateAddress(null, address));
     }
 
     @Test
     @DisplayName("Update invoice address with null ID should throw exception")
     void shouldThrowExceptionWhenUpdatingInvoiceAddressWithNullId() {
-        assertThrows(CustomerValidationException.class, () -> customerService.updateInvoiceAddress(null, address));
+        assertThrows(ConstraintViolationException.class, () -> customerService.updateInvoiceAddress(null, address));
     }
 
     @Test
     @DisplayName("Update communication details with null ID should throw exception")
     void shouldThrowExceptionWhenUpdatingCommunicationDetailsWithNullId() {
         assertThrows(
-                CustomerValidationException.class,
+                ConstraintViolationException.class,
                 () -> customerService.updateCommunicationDetails(null, communicationDetails));
     }
 
@@ -351,6 +359,6 @@ class CustomerServiceTest {
     @Test
     @DisplayName("Negative: createCustomer with null customer")
     void shouldThrowExceptionWhenCreatingNullCustomer() {
-        assertThrows(CustomerValidationException.class, () -> customerService.createCustomer(null));
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(null));
     }
 }
