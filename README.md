@@ -18,6 +18,14 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 - [Common Response Schemas](#common-response-schemas)
 - [Error Handling](#error-handling)
 - [Maintain Code Cleanliness](#maintain-code-cleanliness)
+  - [Spotless](#1-spotless--automatic-code-formatting)
+  - [PMD](#2-pmd--anti-pattern-and-code-duplication-detection)
+  - [SpotBugs](#3-spotbugs--findsecbugs--bytecode-analysis-and-security)
+  - [OWASP](#4-owasp-dependency-check--snyk--dependency-security)
+  - [Git Pre-commit Hook](#5-git-pre-commit-hook--automatic-checks-before-commit)
+  - [SonarQube](#6-sonarqube--static-analysis-and-quality-gate)
+- [Dependency Management & Build](#dependency-management--build)
+- [Troubleshooting](#troubleshooting)
 
 ---
 ## Swagger UI
@@ -34,6 +42,27 @@ http://localhost:8090/swagger-ui/index.html
 To run unit tests, do:
 ```bash
 mvn clean test
+```
+
+To run a specific test class:
+```bash
+mvn test -Dtest=BillingServiceTest
+```
+
+### Code Coverage (JaCoCo)
+To generate the coverage report, run tests with the `dev` profile:
+```bash
+mvn test -P dev
+```
+Then open the HTML report:
+```bash
+open target/site/jacoco/index.html
+```
+
+### Full Validation
+Runs tests and all quality checks (Spotless, PMD, SpotBugs):
+```bash
+mvn verify -P dev
 ```
 
 ### End-to-End (E2E) Tests (Python)
@@ -55,7 +84,7 @@ gitlab-ci-local
 The project uses **PostgreSQL 16** as the database.
 
 ### Exposed Ports
-- **Application**: `8090` (maps to internal `8080`) can be changed in the .env file.
+- **Application**: `8090` (maps to internal `8090`) can be changed in the .env file.
 - **PostgreSQL**: `5430` (maps to internal `5432`) can be changed in the .env file.
 
 ### Running the entire project
@@ -68,9 +97,19 @@ docker compose up -d --build
 docker compose down
 ```
 
+### Wiping Database Data (useful for clean Flyway migrations)
+```bash
+docker compose down -v
+```
+
 ### Viewing application logs
 ```bash
 docker compose logs -f app
+```
+
+### Monitoring Container Resources
+```bash
+docker stats
 ```
 
 ### Access the application container shell:
@@ -467,7 +506,7 @@ Standard `CommunicationDetailsRequestDTO` structure.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/communication-details \
+curl -X PUT http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/communication-details \
   -H "Content-Type: application/json" \
   -d '{
     "email": "new.email@gmx.de",
@@ -564,7 +603,7 @@ Returns all contracts associated with the specified customer UUID.
 #### Example Request (curl)
 
 ```bash
-curl -X GET http://localhost:8080/api/v1/shop/contracts/3fa85f64-5717-4562-b3fc-2c963f66afa6
+curl -X GET http://localhost:8090/api/v1/shop/contracts/3fa85f64-5717-4562-b3fc-2c963f66afa6
 ```
 
 #### Example Response — `200 OK`
@@ -607,7 +646,7 @@ Changes the status of a specific contract to `ACTIVE`.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/contracts/a1b2c3d4-e5f6-7890-abcd-ef1234567890/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
+curl -X PUT http://localhost:8090/api/v1/contracts/a1b2c3d4-e5f6-7890-abcd-ef1234567890/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
 ```
 
 #### Response Status Codes
@@ -694,7 +733,7 @@ Generates an invoice for the specified customer based on their current active co
 #### Example Request (curl)
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/billing/invoices \
+curl -X POST http://localhost:8090/api/v1/billing/invoices \
   -H "Content-Type: application/json" \
   -d '{
     "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
@@ -886,7 +925,7 @@ snyk test --all-projects
 
 ### 5. Git Pre-commit Hook – Automatic Checks Before Commit
 
-Runs Spotless, PMD, and SpotBugs using the `dev` profile; blocks commit if violations are found.
+Runs Spotless and PMD using the `dev` profile; blocks commit if violations are found.
 
 ```bash
 .git/hooks/pre-commit
@@ -896,4 +935,60 @@ Simulates hook execution for testing purposes.
 
 ```bash
 ./.git/hooks/pre-commit
+```
+
+---
+
+### 6. SonarQube – Static Analysis and Quality Gate
+
+Provides comprehensive reports on bugs, vulnerabilities, code smells, and test coverage.
+
+```bash
+mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+  -Pdev -B \
+  -Dsonar.projectKey=mail-and-media-shop-v2 \
+  -Dsonar.projectName='mail-and-media-shop-v2' \
+  -Dsonar.host.url=http://localhost:9000 \
+  -Dsonar.token=[YOUR_SONAR_TOKEN] \
+  -Dspotbugs.skip=true \
+  -Dpmd.skip=true \
+  -Ddependency-check.skip=true
+```
+
+---
+
+## Dependency Management & Build
+
+### 1. View Dependency Tree
+Use this to identify version conflicts or redundant libraries.
+```bash
+mvn dependency:tree
+```
+
+### 2. Fast Build (Skip Tests)
+Use this when you only need common artifacts without running the full test suite.
+```bash
+mvn clean install -DskipTests
+```
+
+### 3. Check Active Profiles
+Verify if the `dev` profile is active.
+```bash
+mvn help:active-profiles
+```
+
+---
+
+## Troubleshooting
+
+### 1. Check Port Availability
+If the application fails to start with "Address already in use", check what process is using the port.
+```bash
+lsof -i :8090
+```
+
+### 2. Clean Docker System
+Remove unused images, networks, and containers.
+```bash
+docker system prune -f
 ```
