@@ -132,10 +132,10 @@ class ContractTest {
         java.lang.reflect.Method createMethod = Contract.class.getMethod("create", Customer.class, Product.class);
 
         java.lang.reflect.Parameter[] parameters = createMethod.getParameters();
-        jakarta.validation.constraints.NotNull notNullCustomer = parameters[0]
-                .getAnnotation(jakarta.validation.constraints.NotNull.class);
-        jakarta.validation.constraints.NotNull notNullProduct = parameters[1]
-                .getAnnotation(jakarta.validation.constraints.NotNull.class);
+        jakarta.validation.constraints.NotNull notNullCustomer =
+                parameters[0].getAnnotation(jakarta.validation.constraints.NotNull.class);
+        jakarta.validation.constraints.NotNull notNullProduct =
+                parameters[1].getAnnotation(jakarta.validation.constraints.NotNull.class);
 
         assertNotNull(notNullCustomer, "@NotNull missing on customer parameter");
         assertNotNull(notNullProduct, "@NotNull missing on product parameter");

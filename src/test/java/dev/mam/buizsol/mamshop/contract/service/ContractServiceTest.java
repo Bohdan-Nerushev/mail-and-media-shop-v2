@@ -14,10 +14,6 @@ import static org.mockito.Mockito.when;
 import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
-import jakarta.validation.ConstraintViolationException;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
@@ -25,6 +21,7 @@ import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
+import jakarta.validation.ConstraintViolationException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -37,6 +34,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ContractService Tests")
@@ -160,7 +160,8 @@ class ContractServiceTest {
         Product mismatchProduct = new StandardMailProduct("Mismatch Brand", Brand.GMX, new BigDecimal("10.00"));
 
         assertThrows(
-                BrandMismatchException.class, () -> contractServiceImpl.createContract(activeCustomer, mismatchProduct));
+                BrandMismatchException.class,
+                () -> contractServiceImpl.createContract(activeCustomer, mismatchProduct));
     }
 
     @Test

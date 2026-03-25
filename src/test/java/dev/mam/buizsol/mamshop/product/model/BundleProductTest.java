@@ -131,11 +131,10 @@ class BundleProductTest {
     @DisplayName("Verify @NotNull constructor annotations via ExecutableValidator")
     void shouldValidateConstructorAnnotationsWithExecutableValidator() throws NoSuchMethodException {
         ExecutableValidator executableValidator = validator.forExecutables();
-        java.lang.reflect.Constructor<BundleProduct> constructor = BundleProduct.class.getConstructor(
-                MailProduct.class, PartnerProduct.class);
+        java.lang.reflect.Constructor<BundleProduct> constructor =
+                BundleProduct.class.getConstructor(MailProduct.class, PartnerProduct.class);
 
-        var violations = executableValidator.validateConstructorParameters(
-                constructor, new Object[] {null, null});
+        var violations = executableValidator.validateConstructorParameters(constructor, new Object[] {null, null});
 
         org.junit.jupiter.api.Assertions.assertFalse(violations.isEmpty());
         org.junit.jupiter.api.Assertions.assertEquals(2, violations.size());
