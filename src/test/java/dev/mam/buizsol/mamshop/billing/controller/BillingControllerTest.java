@@ -35,7 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @DisplayName("BillingController Tests")
 @WebMvcTest(BillingController.class)
-public class BillingControllerTest {
+class BillingControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

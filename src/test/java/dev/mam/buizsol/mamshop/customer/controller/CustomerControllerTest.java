@@ -1,7 +1,7 @@
 package dev.mam.buizsol.mamshop.customer.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @DisplayName(value = "CustomerController Tests")
 @WebMvcTest(controllers = CustomerController.class)
-public class CustomerControllerTest {
+class CustomerControllerTest {
 
     @Autowired
     @NotNull
@@ -95,7 +95,7 @@ public class CustomerControllerTest {
         final Address address = CustomerTestFactory.createAddress("Main St", "10", "12345", "Berlin", "Germany");
 
         when(customerMapper.toAddress(addressRequestDTO)).thenReturn(address);
-        when(shopService.updateAddress(eq(customerId), eq(address))).thenReturn(mock(Customer.class));
+        when(shopService.updateAddress(customerId, address)).thenReturn(mock(Customer.class));
 
         mockMvc.perform(put("/api/v1/customers/{customerId}/address", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -116,7 +116,7 @@ public class CustomerControllerTest {
         final Address address = CustomerTestFactory.createAddress("Main St", "10", "12345", "Berlin", "Germany");
 
         when(customerMapper.toAddress(addressRequestDTO)).thenReturn(address);
-        when(shopService.updateAddress(eq(unknownId), eq(address)))
+        when(shopService.updateAddress(unknownId, address))
                 .thenThrow(new CustomerNotFoundException("Customer not found with ID: " + unknownId));
 
         mockMvc.perform(put("/api/v1/customers/{customerId}/address", unknownId)
@@ -140,7 +140,7 @@ public class CustomerControllerTest {
         final Address address = CustomerTestFactory.createAddress("Invoice St", "100", "54321", "Munich", "Germany");
 
         when(customerMapper.toAddress(addressRequestDTO)).thenReturn(address);
-        when(shopService.updateInvoiceAddress(eq(customerId), eq(address))).thenReturn(mock(Customer.class));
+        when(shopService.updateInvoiceAddress(customerId, address)).thenReturn(mock(Customer.class));
 
         mockMvc.perform(put("/api/v1/customers/{customerId}/invoice-address", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +161,7 @@ public class CustomerControllerTest {
         final Address address = CustomerTestFactory.createAddress("Invoice St", "100", "54321", "Munich", "Germany");
 
         when(customerMapper.toAddress(addressRequestDTO)).thenReturn(address);
-        when(shopService.updateInvoiceAddress(eq(unknownId), eq(address)))
+        when(shopService.updateInvoiceAddress(unknownId, address))
                 .thenThrow(new CustomerNotFoundException("Customer not found with ID: " + unknownId));
 
         mockMvc.perform(put("/api/v1/customers/{customerId}/invoice-address", unknownId)
@@ -187,7 +187,7 @@ public class CustomerControllerTest {
 
         when(customerMapper.toCommunicationDetails(communicationDetailsRequestDTO))
                 .thenReturn(communicationDetails);
-        when(shopService.updateCommunicationDetails(eq(customerId), eq(communicationDetails)))
+        when(shopService.updateCommunicationDetails(customerId, communicationDetails))
                 .thenReturn(mock(Customer.class));
 
         mockMvc.perform(put("/api/v1/customers/{customerId}/communication-details", customerId)
@@ -211,7 +211,7 @@ public class CustomerControllerTest {
 
         when(customerMapper.toCommunicationDetails(communicationDetailsRequestDTO))
                 .thenReturn(communicationDetails);
-        when(shopService.updateCommunicationDetails(eq(unknownId), eq(communicationDetails)))
+        when(shopService.updateCommunicationDetails(unknownId, communicationDetails))
                 .thenThrow(new CustomerNotFoundException("Customer not found with ID: " + unknownId));
 
         mockMvc.perform(put("/api/v1/customers/{customerId}/communication-details", unknownId)

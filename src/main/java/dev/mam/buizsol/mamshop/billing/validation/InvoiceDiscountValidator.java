@@ -11,7 +11,8 @@ public class InvoiceDiscountValidator implements ConstraintValidator<InvoiceDisc
     @Value("${billing.minimal-discount-amount}")
     private BigDecimal minimalDiscountAmount;
 
-    private final BigDecimal zeroAmount = BigDecimal.ZERO;
+    @Value("${billing.zero-amount}")
+    private BigDecimal zeroAmount;
 
     @Override
     public boolean isValid(@Nullable final BigDecimal value, final ConstraintValidatorContext context) {

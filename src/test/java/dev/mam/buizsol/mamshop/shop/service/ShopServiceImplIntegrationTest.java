@@ -146,7 +146,8 @@ class ShopServiceImplIntegrationTest {
     @Test
     @DisplayName("Load Customer: Throws exception for non-existent ID (Negative)")
     void shouldThrowExceptionWhenLoadingNonExistentCustomer() {
-        assertThrows(CustomerNotFoundException.class, () -> shopService.loadCustomer(UUID.randomUUID()));
+        UUID nonExistentId = UUID.randomUUID();
+        assertThrows(CustomerNotFoundException.class, () -> shopService.loadCustomer(nonExistentId));
     }
 
     @ParameterizedTest
@@ -181,8 +182,8 @@ class ShopServiceImplIntegrationTest {
                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
         shopService.activateCustomer(customer.getId());
         shopService.deactivateCustomer(customer.getId());
-
-        Customer deactivated = shopService.loadCustomer(customer.getId());
+        UUID customerId = customer.getId();
+        Customer deactivated = shopService.loadCustomer(customerId);
         assertEquals(CustomerStatus.INACTIVE, deactivated.getStatus());
     }
 
@@ -199,10 +200,11 @@ class ShopServiceImplIntegrationTest {
                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
 
-        assertDoesNotThrow(() -> shopService.deactivateCustomer(customer.getId()));
-        assertEquals(
-                CustomerStatus.INACTIVE,
-                shopService.loadCustomer(customer.getId()).getStatus());
+        UUID customerId = customer.getId();
+
+        assertDoesNotThrow(() -> shopService.deactivateCustomer(customerId));
+        Customer deactivated = shopService.loadCustomer(customerId);
+        assertEquals(CustomerStatus.INACTIVE, deactivated.getStatus());
     }
 
     @ParameterizedTest
@@ -217,9 +219,10 @@ class ShopServiceImplIntegrationTest {
                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-        shopService.removeCustomer(customer.getId());
+        UUID customerId = customer.getId();
+        shopService.removeCustomer(customerId);
 
-        assertThrows(CustomerNotFoundException.class, () -> shopService.loadCustomer(customer.getId()));
+        assertThrows(CustomerNotFoundException.class, () -> shopService.loadCustomer(customerId));
     }
 
     @Test
@@ -240,7 +243,8 @@ class ShopServiceImplIntegrationTest {
         Contract contract = shopService.purchaseProduct(customer.getId(), product.getId());
         shopService.activateContract(customer.getId(), contract.getId());
 
-        assertThrows(CustomerValidationException.class, () -> shopService.removeCustomer(customer.getId()));
+        UUID customerId = customer.getId();
+        assertThrows(CustomerValidationException.class, () -> shopService.removeCustomer(customerId));
     }
 
     @ParameterizedTest
@@ -278,7 +282,10 @@ class ShopServiceImplIntegrationTest {
                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
 
         Address newAddress = createDefaultAddress("Street_", "2", "12345", "City_", "Country_");
-        assertThrows(CustomerNotActiveException.class, () -> shopService.updateAddress(customer.getId(), newAddress));
+
+        UUID customerId = customer.getId();
+
+        assertThrows(CustomerNotActiveException.class, () -> shopService.updateAddress(customerId, newAddress));
     }
 
     @ParameterizedTest
@@ -362,7 +369,7 @@ class ShopServiceImplIntegrationTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"GMX, WEB_DE", "WEB_DE, MAIL_COM", "MAIL_COM, GMX"})
+    @CsvSource({ "GMX, WEB_DE", "WEB_DE, MAIL_COM", "MAIL_COM, GMX" })
     @DisplayName("Purchase Product: Throws exception when brands do not match (Negative)")
     void shouldThrowExceptionWhenPurchaseBrandsDoNotMatch(Brand customerBrand, Brand productBrand) throws Exception {
         Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
@@ -378,8 +385,11 @@ class ShopServiceImplIntegrationTest {
         Product product = createDefaultStandardMailProduct("Mismatched Mail", productBrand, new BigDecimal("2.50"));
         productService.createProduct(product);
 
+        UUID customerId = customer.getId();
+        UUID productId = product.getId();
+
         assertThrows(
-                BrandMismatchException.class, () -> shopService.purchaseProduct(customer.getId(), product.getId()));
+                BrandMismatchException.class, () -> shopService.purchaseProduct(customerId, productId));
     }
 
     @ParameterizedTest
@@ -395,8 +405,12 @@ class ShopServiceImplIntegrationTest {
                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
         shopService.activateCustomer(customer.getId());
+
+        UUID randomUUIDid = UUID.randomUUID();
+        UUID customerId = customer.getId();
+
         assertThrows(
-                ProductNotFoundException.class, () -> shopService.purchaseProduct(customer.getId(), UUID.randomUUID()));
+                ProductNotFoundException.class, () -> shopService.purchaseProduct(customerId, randomUUIDid));
     }
 
     @ParameterizedTest
@@ -414,8 +428,10 @@ class ShopServiceImplIntegrationTest {
         Product product = createDefaultStandardMailProduct("Standard Mail", brand, new BigDecimal("2.50"));
         productService.createProduct(product);
 
+        UUID customerId = customer.getId();
+        UUID productId = product.getId();
         assertThrows(
-                CustomerNotActiveException.class, () -> shopService.purchaseProduct(customer.getId(), product.getId()));
+                CustomerNotActiveException.class, () -> shopService.purchaseProduct(customerId, productId));
     }
 
     @ParameterizedTest
@@ -433,8 +449,11 @@ class ShopServiceImplIntegrationTest {
         Product product = createDefaultPremiumMailProduct("Premium Mail", brand, new BigDecimal("2.50"));
         productService.createProduct(product);
 
+        UUID customerId = customer.getId();
+        UUID productId = product.getId();
+
         assertThrows(
-                CustomerNotActiveException.class, () -> shopService.purchaseProduct(customer.getId(), product.getId()));
+                CustomerNotActiveException.class, () -> shopService.purchaseProduct(customerId, productId));
     }
 
     @ParameterizedTest
@@ -567,7 +586,10 @@ class ShopServiceImplIntegrationTest {
                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-        assertThrows(CustomerNotActiveException.class, () -> shopService.loadAllContracts(customer.getId()));
+
+        UUID customerId = customer.getId();
+
+        assertThrows(CustomerNotActiveException.class, () -> shopService.loadAllContracts(customerId));
     }
 
     @Test
@@ -582,8 +604,11 @@ class ShopServiceImplIntegrationTest {
                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
         Address newInv = createDefaultAddress("Street_", "1", "12345", "City_", "Country_");
+
+        UUID customerId = customer.getId();
+
         assertThrows(
-                CustomerNotActiveException.class, () -> shopService.updateInvoiceAddress(customer.getId(), newInv));
+                CustomerNotActiveException.class, () -> shopService.updateInvoiceAddress(customerId, newInv));
     }
 
     @Test
@@ -598,9 +623,12 @@ class ShopServiceImplIntegrationTest {
                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
         CommunicationDetails newComms = createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789");
+
+        UUID customerId = customer.getId();
+
         assertThrows(
                 CustomerNotActiveException.class,
-                () -> shopService.updateCommunicationDetails(customer.getId(), newComms));
+                () -> shopService.updateCommunicationDetails(customerId, newComms));
     }
 
     @Test
@@ -614,19 +642,24 @@ class ShopServiceImplIntegrationTest {
                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                 createDefaultAddress("Street_", "1", "12345", "City_", "Country_"),
                 createDefaultCommunicationDetails("user_@test-domain.com", "+49-123-456789")));
-        assertThrows(CustomerNotActiveException.class, () -> shopService.generateInvoice(customer.getId()));
+
+        UUID customerId = customer.getId();
+
+        assertThrows(CustomerNotActiveException.class, () -> shopService.generateInvoice(customerId));
     }
 
     @Test
     @DisplayName("Negative - Generate Invoice: Fails for non-existent customer")
     void shouldThrowExceptionWhenGeneratingInvoiceForNonExistentCustomer() {
-        assertThrows(CustomerNotFoundException.class, () -> shopService.generateInvoice(UUID.randomUUID()));
+        UUID randomUUIDid = UUID.randomUUID();
+        assertThrows(CustomerNotFoundException.class, () -> shopService.generateInvoice(randomUUIDid));
     }
 
     @Test
     @DisplayName("Negative - Remove Customer: Fails for non-existent ID")
     void shouldThrowExceptionWhenRemovingNonExistentCustomer() {
-        assertThrows(CustomerNotFoundException.class, () -> shopService.removeCustomer(UUID.randomUUID()));
+        UUID randomUUIDid = UUID.randomUUID();
+        assertThrows(CustomerNotFoundException.class, () -> shopService.removeCustomer(randomUUIDid));
     }
 
     @Test

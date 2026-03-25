@@ -36,6 +36,7 @@ class InvoiceDiscountValidatorTest {
         MockitoAnnotations.openMocks(this);
         validator = new InvoiceDiscountValidator();
         ReflectionTestUtils.setField(validator, "minimalDiscountAmount", DISCOUNT_LIMIT);
+        ReflectionTestUtils.setField(validator, "zeroAmount", BigDecimal.ZERO);
 
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         when(violationBuilder.addConstraintViolation()).thenReturn(context);

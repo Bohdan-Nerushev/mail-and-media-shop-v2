@@ -53,7 +53,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @DisplayName(value = "Shop Tests")
 @WebMvcTest(controllers = ShopController.class)
-public class ShopControllerTest {
+class ShopControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

@@ -74,8 +74,8 @@ class BillingServiceTest {
         final Address address = new Address("Street", "1", "12345", "City", "Country");
         final CommunicationDetails communication = new CommunicationDetails("test@test.com", "123456789");
 
-        testCustomer =
-                Customer.create("John", "Doe", LocalDate.of(1990, 1, 1), address, null, communication, Brand.GMX);
+        testCustomer = Customer.create("John", "Doe", LocalDate.of(1990, 1, 1), address, null, communication,
+                Brand.GMX);
         testCustomer.setId(UUID.randomUUID());
         customerId = testCustomer.getId();
 
@@ -175,19 +175,9 @@ class BillingServiceTest {
     }
 
     @DisplayName("Invalid small positive discount validation checks")
-    @ParameterizedTest(name = "Invalid small positive discount validation - value: {0}")
-    @ValueSource(strings = {"0.01", "0.05", "0.10"})
+    @ParameterizedTest(name = "Invalid small positive and negative discount validation - value: {0}")
+    @ValueSource(strings = { "0.01", "0.05", "0.10", "-0.01", "-1.00" })
     void shouldThrowExceptionWhenDiscountIsSmallPositive(final String invalidDiscountStr) {
-        final BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
-        assertThrows(
-                InvalidInvoiceDiscountException.class,
-                () -> billingService.generateInvoice(customerId, invalidDiscount));
-    }
-
-    @DisplayName("Invalid negative discount validation checks")
-    @ParameterizedTest(name = "Invalid negative discount validation - value: {0}")
-    @ValueSource(strings = {"-0.01", "-1.00"})
-    void shouldThrowExceptionWhenDiscountIsNegative(final String invalidDiscountStr) {
         final BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
         assertThrows(
                 InvalidInvoiceDiscountException.class,
@@ -221,9 +211,8 @@ class BillingServiceTest {
 
     @DisplayName("Null arguments validation for generateInvoice")
     @ParameterizedTest(name = "Null arguments validation - customerId={0}, discount={1}")
-    @CsvSource(
-            value = {"null, 10.00", "550e8400-e29b-41d4-a716-446655440000, null", "null, null"},
-            nullValues = {"null"})
+    @CsvSource(value = { "null, 10.00", "550e8400-e29b-41d4-a716-446655440000, null", "null, null" }, nullValues = {
+            "null" })
     void shouldThrowExceptionWhenArgumentsAreNull(final UUID cid, final BigDecimal disc) {
         if (cid == null) {
             assertThrows(InvoiceValidationException.class, () -> billingService.generateInvoice(cid, disc));
@@ -240,7 +229,7 @@ class BillingServiceTest {
 
     @Test
     @DisplayName("Handling scenario when product is not found for a contract")
-    void shouldThrowExceptionWhenProductInContractDoesNotExist() throws Exception {
+    void shouldThrowExceptionWhenProductInContractDoesNotExist() {
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
         final Contract contract = mock(Contract.class);
         when(contract.getStatus()).thenReturn(ContractStatus.ACTIVE);
@@ -253,7 +242,7 @@ class BillingServiceTest {
 
     @DisplayName("Verification of valid boundary discount values")
     @ParameterizedTest(name = "Boundary discount values - value: {0}")
-    @ValueSource(strings = {"0.00", "0.11", "0.10001", "1.00", "5.00", "100.00"})
+    @ValueSource(strings = { "0.00", "0.11", "0.10001", "1.00", "5.00", "100.00" })
     void shouldGenerateInvoiceWhenValidBoundaryDiscountsProvided(final String validDiscountStr) throws Exception {
         final BigDecimal validDiscount = new BigDecimal(validDiscountStr);
         when(customerService.findCustomerById(customerId)).thenReturn(Optional.of(testCustomer));
