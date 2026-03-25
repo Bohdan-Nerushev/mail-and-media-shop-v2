@@ -8,6 +8,7 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.MailProduct;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.validation.ConstraintViolationException;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
@@ -22,11 +23,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
-import jakarta.validation.ConstraintViolationException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProductService Tests")
@@ -283,7 +283,8 @@ class ProductServiceTest {
         final BigDecimal boundaryInvalidFee = new BigDecimal("0.10");
         UUID productId = product.getId();
         assertThrows(
-                ConstraintViolationException.class, () -> productService.updateMonthlyFee(productId, boundaryInvalidFee));
+                ConstraintViolationException.class,
+                () -> productService.updateMonthlyFee(productId, boundaryInvalidFee));
     }
 
     @Test

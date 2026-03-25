@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -105,43 +105,41 @@ class CustomerServiceTest {
         verify(customerRepository).save(any(Customer.class));
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n" })
-    @DisplayName("Create customer with invalid first name: validated by service layer")
-    void shouldThrowExceptionWhenFirstNameIsInvalid(final String firstName) {
-        if (firstName == null) {
-            assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(null));
-        } else {
-            final Customer customer = createDefaultCustomer(
-                    firstName, "Doe", LocalDate.of(1990, 1, 1), address, null, communicationDetails, Brand.WEB_DE);
-            assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
-        }
+    @Test
+    @DisplayName("Negative: createCustomer throws ConstraintViolationException when customer argument is null")
+    void shouldThrowConstraintViolationWhenCustomerIsNull() {
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(null));
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = { " ", "\t", "\n" })
-    @DisplayName("Create customer with invalid last name: validated by service layer")
-    void shouldThrowExceptionWhenLastNameIsInvalid(final String lastName) {
-        if (lastName == null) {
-            assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(null));
-        } else {
-            final Customer customer = createDefaultCustomer(
-                    "John", lastName, LocalDate.of(1990, 1, 1), address, null, communicationDetails, Brand.WEB_DE);
-            assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
-        }
+    @EmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    @DisplayName("Negative: createCustomer throws ConstraintViolationException when first name is blank or empty")
+    void shouldThrowConstraintViolationWhenFirstNameIsBlankOrEmpty(final String firstName) {
+        final Customer customer = createDefaultCustomer(
+                firstName, "Doe", LocalDate.of(1990, 1, 1), address, null, communicationDetails, Brand.WEB_DE);
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
+    }
+
+    @ParameterizedTest
+    @EmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    @DisplayName("Negative: createCustomer throws ConstraintViolationException when last name is blank or empty")
+    void shouldThrowConstraintViolationWhenLastNameIsBlankOrEmpty(final String lastName) {
+        final Customer customer = createDefaultCustomer(
+                "John", lastName, LocalDate.of(1990, 1, 1), address, null, communicationDetails, Brand.WEB_DE);
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
     }
 
     @ParameterizedTest
     @CsvSource({
-            "1900-01-01, Boundary: very old birth date",
-            "2026-01-14, Boundary: today birth date",
-            "2024-05-14, Boundary: future birth date",
-            "2010-04-14, Boundary: future birth1 date",
-            "2010-04-14, Boundary: future birth1 date",
-            "1000-01-01, Boundary: future birth2 date",
-            "1500-01-01, Boundary: future birth3 date"
+        "1900-01-01, Boundary: very old birth date",
+        "2026-01-14, Boundary: today birth date",
+        "2024-05-14, Boundary: future birth date",
+        "2010-04-14, Boundary: future birth1 date",
+        "2010-04-14, Boundary: future birth1 date",
+        "1000-01-01, Boundary: future birth2 date",
+        "1500-01-01, Boundary: future birth3 date"
     })
     @DisplayName("Create customer with boundary birth dates should succeed")
     void shouldCreateCustomerWithBoundaryBirthDates(final String dateStr) {
@@ -252,43 +250,55 @@ class CustomerServiceTest {
     @Test
     @DisplayName("Create customer with null first name: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullFirstName() {
-        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
-                createDefaultCustomer(null, "Doe", LocalDate.now(), address, null, communicationDetails, Brand.GMX)));
+        assertThrows(
+                ConstraintViolationException.class,
+                () -> customerService.createCustomer(createDefaultCustomer(
+                        null, "Doe", LocalDate.now(), address, null, communicationDetails, Brand.GMX)));
     }
 
     @Test
     @DisplayName("Create customer with null last name: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullLastName() {
-        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
-                createDefaultCustomer("John", null, LocalDate.now(), address, null, communicationDetails, Brand.GMX)));
+        assertThrows(
+                ConstraintViolationException.class,
+                () -> customerService.createCustomer(createDefaultCustomer(
+                        "John", null, LocalDate.now(), address, null, communicationDetails, Brand.GMX)));
     }
 
     @Test
     @DisplayName("Create customer with null birth date: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullBirthDate() {
-        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
-                createDefaultCustomer("John", "Doe", null, address, null, communicationDetails, Brand.GMX)));
+        assertThrows(
+                ConstraintViolationException.class,
+                () -> customerService.createCustomer(
+                        createDefaultCustomer("John", "Doe", null, address, null, communicationDetails, Brand.GMX)));
     }
 
     @Test
     @DisplayName("Create customer with null address: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullAddress() {
-        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
-                createDefaultCustomer("John", "Doe", LocalDate.now(), null, null, communicationDetails, Brand.GMX)));
+        assertThrows(
+                ConstraintViolationException.class,
+                () -> customerService.createCustomer(createDefaultCustomer(
+                        "John", "Doe", LocalDate.now(), null, null, communicationDetails, Brand.GMX)));
     }
 
     @Test
     @DisplayName("Create customer with null communication details: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullCommunicationDetails() {
-        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
-                createDefaultCustomer("John", "Doe", LocalDate.now(), address, null, null, Brand.GMX)));
+        assertThrows(
+                ConstraintViolationException.class,
+                () -> customerService.createCustomer(
+                        createDefaultCustomer("John", "Doe", LocalDate.now(), address, null, null, Brand.GMX)));
     }
 
     @Test
     @DisplayName("Create customer with null brand: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullBrand() {
-        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(
-                createDefaultCustomer("John", "Doe", LocalDate.now(), address, null, communicationDetails, null)));
+        assertThrows(
+                ConstraintViolationException.class,
+                () -> customerService.createCustomer(createDefaultCustomer(
+                        "John", "Doe", LocalDate.now(), address, null, communicationDetails, null)));
     }
 
     @Test

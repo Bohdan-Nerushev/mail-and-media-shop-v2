@@ -9,6 +9,7 @@ import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import jakarta.validation.executable.ExecutableValidator;
 import java.math.BigDecimal;
 import java.util.Set;
 import org.assertj.core.api.Assertions;
@@ -108,7 +109,7 @@ class BundleProductTest {
     void shouldThrowExceptionWhenCreatingBundleWithNullMail() {
         final PartnerProduct partner = createDefaultPartnerProduct("P", Brand.GMX, BigDecimal.ZERO, BigDecimal.ONE);
 
-        assertThrows(ProductValidationException.class, () -> createDefaultBundleProduct(null, partner));
+        assertThrows(NullPointerException.class, () -> createDefaultBundleProduct(null, partner));
     }
 
     @Test
@@ -117,13 +118,27 @@ class BundleProductTest {
         final dev.mam.buizsol.mamshop.product.model.MailProduct mail =
                 createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
 
-        assertThrows(ProductValidationException.class, () -> createDefaultBundleProduct(mail, null));
+        assertThrows(NullPointerException.class, () -> createDefaultBundleProduct(mail, null));
     }
 
     @Test
     @DisplayName("Negative: Failure with both components null")
     void shouldThrowExceptionWhenCreatingBundleWithBothComponentsNull() {
-        assertThrows(ProductValidationException.class, () -> createDefaultBundleProduct(null, null));
+        assertThrows(NullPointerException.class, () -> createDefaultBundleProduct(null, null));
+    }
+
+    @Test
+    @DisplayName("Verify @NotNull constructor annotations via ExecutableValidator")
+    void shouldValidateConstructorAnnotationsWithExecutableValidator() throws NoSuchMethodException {
+        ExecutableValidator executableValidator = validator.forExecutables();
+        java.lang.reflect.Constructor<BundleProduct> constructor = BundleProduct.class.getConstructor(
+                MailProduct.class, PartnerProduct.class);
+
+        var violations = executableValidator.validateConstructorParameters(
+                constructor, new Object[] {null, null});
+
+        org.junit.jupiter.api.Assertions.assertFalse(violations.isEmpty());
+        org.junit.jupiter.api.Assertions.assertEquals(2, violations.size());
     }
 
     @Test
@@ -211,20 +226,22 @@ class BundleProductTest {
         var setupFeeMethod =
                 BundleProduct.class.getDeclaredMethod("calculateTotalSetupFee", Product.class, Product.class);
         setupFeeMethod.setAccessible(true);
-        assertEquals(BigDecimal.ZERO, setupFeeMethod.invoke(null, null, null));
+        var setupException = assertThrows(
+                java.lang.reflect.InvocationTargetException.class, () -> setupFeeMethod.invoke(null, null, null));
+        Assertions.assertThat(setupException.getCause()).isInstanceOf(NullPointerException.class);
 
         var monthlyFeeMethod =
                 BundleProduct.class.getDeclaredMethod("calculateTotalMonthlyFee", Product.class, Product.class);
         monthlyFeeMethod.setAccessible(true);
-        assertEquals(BigDecimal.ZERO, monthlyFeeMethod.invoke(null, null, null));
+        var monthlyException = assertThrows(
+                java.lang.reflect.InvocationTargetException.class, () -> monthlyFeeMethod.invoke(null, null, null));
+        Assertions.assertThat(monthlyException.getCause()).isInstanceOf(NullPointerException.class);
 
         var validateBrandsMethod =
                 BundleProduct.class.getDeclaredMethod("validateBrands", Product.class, Product.class);
         validateBrandsMethod.setAccessible(true);
         var exception = assertThrows(
                 java.lang.reflect.InvocationTargetException.class, () -> validateBrandsMethod.invoke(null, null, null));
-        Assertions.assertThat(exception.getCause())
-                .isInstanceOf(ProductValidationException.class)
-                .hasMessage("Mail and Partner products must not be null");
+        Assertions.assertThat(exception.getCause()).isInstanceOf(NullPointerException.class);
     }
 }

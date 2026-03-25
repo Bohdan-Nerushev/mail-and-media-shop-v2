@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
+import dev.mam.buizsol.mamshop.billing.validation.InvoiceDiscountValidator;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.contract.service.ContractService;
@@ -23,6 +24,8 @@ import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import dev.mam.buizsol.mamshop.product.service.ProductService;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorFactory;
 import jakarta.validation.ConstraintViolationException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,20 +37,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import dev.mam.buizsol.mamshop.billing.validation.InvoiceDiscountValidator;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -92,6 +92,7 @@ class BillingServiceTest {
                     throw new RuntimeException(e);
                 }
             }
+
             @Override
             public void releaseInstance(ConstraintValidator<?, ?> instance) {}
         });
@@ -213,8 +214,7 @@ class BillingServiceTest {
     void shouldThrowExceptionWhenDiscountIsSmallPositive(final String invalidDiscountStr) {
         final BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
         assertThrows(
-                ConstraintViolationException.class,
-                () -> billingService.generateInvoice(customerId, invalidDiscount));
+                ConstraintViolationException.class, () -> billingService.generateInvoice(customerId, invalidDiscount));
     }
 
     @Test

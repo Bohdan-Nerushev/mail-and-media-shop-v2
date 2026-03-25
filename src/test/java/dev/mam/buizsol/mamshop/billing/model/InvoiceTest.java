@@ -15,6 +15,9 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.executable.ExecutableValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,8 +61,8 @@ class InvoiceTest {
     @Test
     @DisplayName("Successful creation with zero discount (boundary value)")
     void shouldAllowCreationWhenDiscountIsZero() {
-        Invoice invoice =
-                new Invoice(Brand.GMX, customer, testAddress, testAddress, Collections.emptyList(), BigDecimal.ZERO);
+        Invoice invoice = new Invoice(Brand.GMX, customer, testAddress, testAddress, Collections.emptyList(),
+                BigDecimal.ZERO);
 
         assertEquals(BigDecimal.ZERO, invoice.getDiscount());
         assertEquals(BigDecimal.ZERO, invoice.getTotalAmount());
@@ -67,7 +70,7 @@ class InvoiceTest {
 
     @DisplayName("Verification that invalid discounts (negative/null) throw exception")
     @ParameterizedTest(name = "Invalid discount validation - value: {0}")
-    @ValueSource(strings = {"-0.01", "-10.00"})
+    @ValueSource(strings = { "-0.01", "-10.00" })
     void shouldThrowExceptionWhenDiscountIsNegative(BigDecimal negativeDiscount) {
         List<InvoiceItem> items = Collections.emptyList();
         assertThrows(
@@ -80,17 +83,17 @@ class InvoiceTest {
     void shouldThrowExceptionWhenDiscountIsNull() {
         List<InvoiceItem> items = Collections.emptyList();
         assertThrows(
-                InvalidInvoiceDiscountException.class,
+                NullPointerException.class,
                 () -> new Invoice(Brand.GMX, customer, testAddress, testAddress, items, null));
     }
 
     @DisplayName("Verification of totals calculation using parameterized discounts")
     @ParameterizedTest(name = "Calculation logic with various item counts and discount: {0}")
-    @CsvSource({"0.00, 0.00", "10.50,-10.50", "100.00,-100.00"})
+    @CsvSource({ "0.00, 0.00", "10.50,-10.50", "100.00,-100.00" })
     void shouldCalculateAmountCorrectlyWhenDiscountsAreProvided(BigDecimal discount, BigDecimal expectedTotal) {
 
-        Invoice invoice =
-                new Invoice(Brand.MAIL_COM, customer, testAddress, testAddress, Collections.emptyList(), discount);
+        Invoice invoice = new Invoice(Brand.MAIL_COM, customer, testAddress, testAddress, Collections.emptyList(),
+                discount);
 
         assertEquals(expectedTotal, invoice.getTotalAmount());
     }
@@ -98,8 +101,8 @@ class InvoiceTest {
     @Test
     @DisplayName("Verification of items list mutability (reflecting current class state)")
     void shouldReturnMutableItemsList() {
-        InvoiceItem item =
-                new InvoiceItem(UUID.randomUUID(), "P1", contract, LocalDate.now(), BigDecimal.ZERO, BigDecimal.TEN);
+        InvoiceItem item = new InvoiceItem(UUID.randomUUID(), "P1", contract, LocalDate.now(), BigDecimal.ZERO,
+                BigDecimal.TEN);
         List<InvoiceItem> items = new java.util.ArrayList<>();
         items.add(item);
 
@@ -115,8 +118,8 @@ class InvoiceTest {
     void shouldStoreDifferentMailingAndInvoiceAddresses() {
         Address invoiceAddress = new Address("Invoice St", "2", "54321", "City2", "Country");
 
-        Invoice invoice =
-                new Invoice(Brand.GMX, customer, testAddress, invoiceAddress, Collections.emptyList(), BigDecimal.ZERO);
+        Invoice invoice = new Invoice(Brand.GMX, customer, testAddress, invoiceAddress, Collections.emptyList(),
+                BigDecimal.ZERO);
 
         assertEquals(testAddress, invoice.getAddress());
         assertEquals(invoiceAddress, invoice.getInvoiceAddress());
@@ -126,8 +129,23 @@ class InvoiceTest {
     @DisplayName("Null items list validation (negative scenario)")
     void shouldThrowExceptionWhenItemsListIsNull() {
         assertThrows(
-                InvoiceValidationException.class,
+                NullPointerException.class,
                 () -> new Invoice(Brand.GMX, customer, testAddress, testAddress, null, BigDecimal.ZERO));
+    }
+
+    @Test
+    @DisplayName("Verify @NotNull constructor annotations via ExecutableValidator")
+    void shouldValidateConstructorAnnotationsWithExecutableValidator() throws NoSuchMethodException {
+        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        ExecutableValidator executableValidator = validator.forExecutables();
+        java.lang.reflect.Constructor<Invoice> constructor = Invoice.class.getConstructor(
+                Brand.class, Customer.class, Address.class, Address.class, List.class, BigDecimal.class);
+
+        var violations = executableValidator.validateConstructorParameters(
+                constructor, new Object[] { null, null, null, null, null, null });
+
+        org.junit.jupiter.api.Assertions.assertFalse(violations.isEmpty());
+        org.junit.jupiter.api.Assertions.assertEquals(6, violations.size());
     }
 
     @Test
@@ -137,8 +155,8 @@ class InvoiceTest {
         InvoiceItem item1 = new InvoiceItem(UUID.randomUUID(), "P1", contract, LocalDate.now(), fee, fee);
         InvoiceItem item2 = new InvoiceItem(UUID.randomUUID(), "P2", contract, LocalDate.now(), fee, fee);
 
-        Invoice invoice =
-                new Invoice(Brand.GMX, customer, testAddress, testAddress, List.of(item1, item2), BigDecimal.ZERO);
+        Invoice invoice = new Invoice(Brand.GMX, customer, testAddress, testAddress, List.of(item1, item2),
+                BigDecimal.ZERO);
 
         BigDecimal expectedSetup = fee.add(fee);
         BigDecimal expectedMonthly = fee.add(fee);

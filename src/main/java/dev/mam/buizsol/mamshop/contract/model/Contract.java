@@ -69,9 +69,6 @@ public class Contract {
 
     public static Contract create(@NotNull @Valid final Customer customer, @NotNull @Valid final Product product) {
 
-        if (customer == null || product == null) {
-            throw new ContractValidationException("Customer and Product must not be null");
-        }
         if (!customer.getBrand().equals(product.getBrand())) {
             throw new BrandMismatchException(String.format(
                     "Customer brand %s does not match product brand %s", customer.getBrand(), product.getBrand()));

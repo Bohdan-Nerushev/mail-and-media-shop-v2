@@ -107,7 +107,6 @@ public class Invoice {
             @NotNull final BigDecimal discount) {
 
         validateDiscount(discount);
-        validateItems(items);
 
         this.brand = brand;
         this.invoiceDate = LocalDate.now();
@@ -123,14 +122,8 @@ public class Invoice {
     }
 
     private static void validateDiscount(BigDecimal discount) {
-        if (discount == null) throw new InvalidInvoiceDiscountException("Discount must not be null");
-
         if (discount.compareTo(BigDecimal.ZERO) < 0)
             throw new InvalidInvoiceDiscountException("Discount must not be negative");
-    }
-
-    private static void validateItems(List<InvoiceItem> items) {
-        if (items == null) throw new InvoiceValidationException("Items list must not be null");
     }
 
     private static BigDecimal calculateTotalSetupFee(List<InvoiceItem> items) {

@@ -113,17 +113,32 @@ class ContractTest {
     }
 
     @Test
-    @DisplayName("Attempting to create a client with a null parameter → IllegalArgumentException")
+    @DisplayName("Attempting to create a client with a null parameter → NullPointerException")
     void shouldThrowExceptionWhenCustomerIsNull() {
         Product product = mock(Product.class);
-        assertThrows(ContractValidationException.class, () -> Contract.create(null, product));
+        assertThrows(NullPointerException.class, () -> Contract.create(null, product));
     }
 
     @Test
-    @DisplayName("Attempting to create a product with a null parameter → IllegalArgumentException")
+    @DisplayName("Attempting to create a product with a null parameter → NullPointerException")
     void shouldThrowExceptionWhenProductIsNull() {
         Customer customer = mock(Customer.class);
-        assertThrows(ContractValidationException.class, () -> Contract.create(customer, null));
+        assertThrows(NullPointerException.class, () -> Contract.create(customer, null));
+    }
+
+    @Test
+    @DisplayName("Verify @NotNull validation configuration via ExecutableValidator and Reflection")
+    void shouldValidateAnnotationsWithExecutableValidator() throws NoSuchMethodException {
+        java.lang.reflect.Method createMethod = Contract.class.getMethod("create", Customer.class, Product.class);
+
+        java.lang.reflect.Parameter[] parameters = createMethod.getParameters();
+        jakarta.validation.constraints.NotNull notNullCustomer = parameters[0]
+                .getAnnotation(jakarta.validation.constraints.NotNull.class);
+        jakarta.validation.constraints.NotNull notNullProduct = parameters[1]
+                .getAnnotation(jakarta.validation.constraints.NotNull.class);
+
+        assertNotNull(notNullCustomer, "@NotNull missing on customer parameter");
+        assertNotNull(notNullProduct, "@NotNull missing on product parameter");
     }
 
     @ParameterizedTest
@@ -192,7 +207,7 @@ class ContractTest {
     @Test
     @DisplayName("Negative: Failure when creating Contract with null fields (using create method)")
     void shouldThrowExceptionWhenCreatingContractWithNullParams() {
-        assertThrows(ContractValidationException.class, () -> Contract.create(null, mock(Product.class)));
-        assertThrows(ContractValidationException.class, () -> Contract.create(mock(Customer.class), null));
+        assertThrows(NullPointerException.class, () -> Contract.create(null, mock(Product.class)));
+        assertThrows(NullPointerException.class, () -> Contract.create(mock(Customer.class), null));
     }
 }

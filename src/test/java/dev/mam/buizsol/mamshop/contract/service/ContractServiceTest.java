@@ -13,8 +13,11 @@ import static org.mockito.Mockito.when;
 
 import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
-import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
@@ -31,8 +34,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,13 +46,23 @@ class ContractServiceTest {
     private ContractRepository contractRepository;
 
     @InjectMocks
-    private ContractServiceImpl contractService;
+    private ContractServiceImpl contractServiceImpl;
+
+    private ContractService contractService;
+    private LocalValidatorFactoryBean validatorFactory;
 
     private Customer activeCustomer;
     private Product matchingProduct;
 
     @BeforeEach
     void setUp() {
+        validatorFactory = new LocalValidatorFactoryBean();
+        validatorFactory.afterPropertiesSet();
+
+        ProxyFactory proxyFactory = new ProxyFactory(contractServiceImpl);
+        proxyFactory.addAdvice(new MethodValidationInterceptor((jakarta.validation.Validator) validatorFactory));
+        contractService = (ContractService) proxyFactory.getProxy();
+
         activeCustomer = mock(Customer.class);
 
         matchingProduct = new StandardMailProduct("Test Product", Brand.WEB_DE, new BigDecimal("10.00"));
@@ -63,7 +74,7 @@ class ContractServiceTest {
         setupActiveCustomer();
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Contract created = contractService.createContract(activeCustomer, matchingProduct);
+        Contract created = contractServiceImpl.createContract(activeCustomer, matchingProduct);
 
         assertNotNull(created);
         assertEquals(activeCustomer.getId(), created.getCustomer().getId());
@@ -124,35 +135,43 @@ class ContractServiceTest {
                 () -> contractService.updateContractStatus(contractId, ContractStatus.INACTIVE));
     }
 
-    @DisplayName("Boundary/Negative: createContract throws exception on null parameters")
-    @ParameterizedTest
-    @CsvSource({"true, false", "false, true", "true, true"})
-    void shouldThrowExceptionWhenCreatingContractWithNullParameters(boolean customerIsNull, boolean productIsNull) {
-        Customer customer = customerIsNull ? null : activeCustomer;
-        Product product = productIsNull ? null : matchingProduct;
-        assertThrows(ContractValidationException.class, () -> contractService.createContract(customer, product));
+    @Test
+    @DisplayName("Negative: createContract throws ConstraintViolationException when customer is null")
+    void shouldThrowConstraintViolationWhenCustomerIsNull() {
+        assertThrows(ConstraintViolationException.class, () -> contractService.createContract(null, matchingProduct));
+    }
+
+    @Test
+    @DisplayName("Negative: createContract throws ConstraintViolationException when product is null")
+    void shouldThrowConstraintViolationWhenProductIsNull() {
+        assertThrows(ConstraintViolationException.class, () -> contractService.createContract(activeCustomer, null));
+    }
+
+    @Test
+    @DisplayName("Negative: createContract throws ConstraintViolationException when both parameters are null")
+    void shouldThrowConstraintViolationWhenBothParametersAreNull() {
+        assertThrows(ConstraintViolationException.class, () -> contractService.createContract(null, null));
     }
 
     @Test
     @DisplayName("Negative: createContract throws exception on brand mismatch")
     void shouldThrowExceptionWhenCreatingContractWithBrandMismatch() {
-        lenient().when(activeCustomer.getBrand()).thenReturn(Brand.WEB_DE);
+        setupActiveCustomer();
         Product mismatchProduct = new StandardMailProduct("Mismatch Brand", Brand.GMX, new BigDecimal("10.00"));
 
         assertThrows(
-                BrandMismatchException.class, () -> contractService.createContract(activeCustomer, mismatchProduct));
+                BrandMismatchException.class, () -> contractServiceImpl.createContract(activeCustomer, mismatchProduct));
     }
 
     @Test
     @DisplayName("Negative: createContract throws exception when customer is inactive")
     void shouldThrowExceptionWhenCreatingContractForInactiveCustomer() {
-        Customer inactiveCustomer = mock(Customer.class);
-        when(inactiveCustomer.getStatus()).thenReturn(CustomerStatus.INACTIVE);
-        when(inactiveCustomer.getBrand()).thenReturn(Brand.WEB_DE);
+        setupActiveCustomer();
+        when(activeCustomer.getStatus()).thenReturn(CustomerStatus.INACTIVE);
 
         assertThrows(
                 CustomerNotActiveException.class,
-                () -> contractService.createContract(inactiveCustomer, matchingProduct));
+                () -> contractServiceImpl.createContract(activeCustomer, matchingProduct));
     }
 
     @Test
@@ -233,7 +252,7 @@ class ContractServiceTest {
         setupActiveCustomer();
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Contract created = contractService.createContract(activeCustomer, matchingProduct);
+        Contract created = contractServiceImpl.createContract(activeCustomer, matchingProduct);
 
         assertEquals(LocalDate.now(), created.getCreationDate());
         verify(contractRepository).save(any(Contract.class));

@@ -5,7 +5,6 @@ import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.CommunicationDetails;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
-import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
