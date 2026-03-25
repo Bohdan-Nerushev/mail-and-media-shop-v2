@@ -20,7 +20,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 @DisplayName("BundleProduct Tests")
 class BundleProductTest {
 
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final Validator validator =
+            Validation.buildDefaultValidatorFactory().getValidator();
 
     private StandardMailProduct createDefaultStandardMailProduct(
             final String name, final Brand brand, final BigDecimal monthlyFee) {
@@ -65,8 +66,8 @@ class BundleProductTest {
     @DisplayName("Success: Create BundleProduct and verify summation logic for different brands")
     @ParameterizedTest(name = "[{index}] Brand: {0}, Mail: {1}, Partner: {3}")
     @CsvSource({
-            "GMX, S-Mail, 1.00, P-Cloud, 5.00, 2.00, 9.99, 3.00",
-            "WEB_DE, P-Mail, 10.00, P-Music, 15.00, 5.00, 24.99, 15.00"
+        "GMX, S-Mail, 1.00, P-Cloud, 5.00, 2.00, 9.99, 3.00",
+        "WEB_DE, P-Mail, 10.00, P-Music, 15.00, 5.00, 24.99, 15.00"
     })
     void shouldCreateBundleProductAndCalculateTotalsWhenValidDataProvided(
             final Brand brand,
@@ -96,8 +97,8 @@ class BundleProductTest {
     @DisplayName("Negative: Failure when creating bundle with mismatched brands")
     void shouldThrowExceptionWhenCreatingBundleWithMismatchedBrands() {
         StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, new BigDecimal("1.00"));
-        PartnerProduct partner = createDefaultPartnerProduct("Cloud", Brand.WEB_DE, BigDecimal.ZERO,
-                new BigDecimal("2.00"));
+        PartnerProduct partner =
+                createDefaultPartnerProduct("Cloud", Brand.WEB_DE, BigDecimal.ZERO, new BigDecimal("2.00"));
 
         assertThrows(ProductValidationException.class, () -> createDefaultBundleProduct(mail, partner));
     }
@@ -113,8 +114,8 @@ class BundleProductTest {
     @Test
     @DisplayName("Negative: Failure with null PartnerProduct")
     void shouldThrowExceptionWhenCreatingBundleWithNullPartner() {
-        final dev.mam.buizsol.mamshop.product.model.MailProduct mail = createDefaultStandardMailProduct("M", Brand.GMX,
-                BigDecimal.ONE);
+        final dev.mam.buizsol.mamshop.product.model.MailProduct mail =
+                createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
 
         assertThrows(ProductValidationException.class, () -> createDefaultBundleProduct(mail, null));
     }
@@ -141,8 +142,8 @@ class BundleProductTest {
     @Test
     @DisplayName("Polymorphism: Verify calls via Product base class")
     void shouldCalculateTotalsCorrectlyWhenCalledPolymorphically() {
-        dev.mam.buizsol.mamshop.product.model.MailProduct mail = createDefaultStandardMailProduct("Base Mail",
-                Brand.WEB_DE, new BigDecimal("1.50"));
+        dev.mam.buizsol.mamshop.product.model.MailProduct mail =
+                createDefaultStandardMailProduct("Base Mail", Brand.WEB_DE, new BigDecimal("1.50"));
         PartnerProduct partner = createDefaultPartnerProduct(
                 "Base Cloud", Brand.WEB_DE, new BigDecimal("10.00"), new BigDecimal("3.50"));
 
@@ -161,8 +162,8 @@ class BundleProductTest {
     @DisplayName("Success: Verify getters for components")
     void shouldReturnCorrectComponentsWhenGettersCalled() {
         StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, new BigDecimal("1.00"));
-        PartnerProduct partner = createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO,
-                new BigDecimal("1.00"));
+        PartnerProduct partner =
+                createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO, new BigDecimal("1.00"));
 
         BundleProduct bundle = createDefaultBundleProduct(mail, partner);
 
@@ -174,8 +175,8 @@ class BundleProductTest {
     @DisplayName("Negative: setMonthlyFee throws UnsupportedOperationException")
     void shouldThrowExceptionWhenAttemptingToSetMonthlyFee() {
         StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, new BigDecimal("1.00"));
-        PartnerProduct partner = createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO,
-                new BigDecimal("1.00"));
+        PartnerProduct partner =
+                createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO, new BigDecimal("1.00"));
         BundleProduct bundle = createDefaultBundleProduct(mail, partner);
         BigDecimal newFee = new BigDecimal("5.00");
         assertThrows(UnsupportedOperationException.class, () -> bundle.withMonthlyFee(newFee));
@@ -186,8 +187,8 @@ class BundleProductTest {
     void shouldCalculateBundleFeeFromComponentsAtCreation() {
         BigDecimal initialFee = new BigDecimal("1.00");
         StandardMailProduct mail = createDefaultStandardMailProduct("Mail", Brand.GMX, initialFee);
-        PartnerProduct partner = createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO,
-                new BigDecimal("1.00"));
+        PartnerProduct partner =
+                createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO, new BigDecimal("1.00"));
         BundleProduct bundle = createDefaultBundleProduct(mail, partner);
 
         assertEquals(new BigDecimal("2.00"), bundle.getMonthlyFee());
@@ -207,18 +208,18 @@ class BundleProductTest {
     @DisplayName("Coverage: Test private calculation methods with nulls using reflection")
     void shouldReturnZeroOrThrowWhenCallingPrivateMethodsWithNulls() throws Exception {
 
-        var setupFeeMethod = BundleProduct.class.getDeclaredMethod("calculateTotalSetupFee", Product.class,
-                Product.class);
+        var setupFeeMethod =
+                BundleProduct.class.getDeclaredMethod("calculateTotalSetupFee", Product.class, Product.class);
         setupFeeMethod.setAccessible(true);
         assertEquals(BigDecimal.ZERO, setupFeeMethod.invoke(null, null, null));
 
-        var monthlyFeeMethod = BundleProduct.class.getDeclaredMethod("calculateTotalMonthlyFee", Product.class,
-                Product.class);
+        var monthlyFeeMethod =
+                BundleProduct.class.getDeclaredMethod("calculateTotalMonthlyFee", Product.class, Product.class);
         monthlyFeeMethod.setAccessible(true);
         assertEquals(BigDecimal.ZERO, monthlyFeeMethod.invoke(null, null, null));
 
-        var validateBrandsMethod = BundleProduct.class.getDeclaredMethod("validateBrands", Product.class,
-                Product.class);
+        var validateBrandsMethod =
+                BundleProduct.class.getDeclaredMethod("validateBrands", Product.class, Product.class);
         validateBrandsMethod.setAccessible(true);
         var exception = assertThrows(
                 java.lang.reflect.InvocationTargetException.class, () -> validateBrandsMethod.invoke(null, null, null));

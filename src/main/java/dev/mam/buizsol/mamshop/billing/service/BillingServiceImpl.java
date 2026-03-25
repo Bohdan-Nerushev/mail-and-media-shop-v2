@@ -102,11 +102,6 @@ class BillingServiceImpl implements BillingService {
         }
 
         return new Invoice(
-                customer.getBrand(),
-                customer,
-                customer.getAddress(),
-                customer.getInvoiceAddress(),
-                items,
-                discount);
+                customer.getBrand(), customer, customer.getAddress(), customer.getInvoiceAddress(), items, discount);
     }
 }

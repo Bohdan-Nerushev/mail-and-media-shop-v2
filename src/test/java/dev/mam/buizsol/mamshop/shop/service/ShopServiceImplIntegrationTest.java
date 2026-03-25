@@ -369,7 +369,7 @@ class ShopServiceImplIntegrationTest {
     }
 
     @ParameterizedTest
-    @CsvSource({ "GMX, WEB_DE", "WEB_DE, MAIL_COM", "MAIL_COM, GMX" })
+    @CsvSource({"GMX, WEB_DE", "WEB_DE, MAIL_COM", "MAIL_COM, GMX"})
     @DisplayName("Purchase Product: Throws exception when brands do not match (Negative)")
     void shouldThrowExceptionWhenPurchaseBrandsDoNotMatch(Brand customerBrand, Brand productBrand) throws Exception {
         Customer customer = shopService.registerCustomer(createDefaultTestCustomer(
@@ -388,8 +388,7 @@ class ShopServiceImplIntegrationTest {
         UUID customerId = customer.getId();
         UUID productId = product.getId();
 
-        assertThrows(
-                BrandMismatchException.class, () -> shopService.purchaseProduct(customerId, productId));
+        assertThrows(BrandMismatchException.class, () -> shopService.purchaseProduct(customerId, productId));
     }
 
     @ParameterizedTest
@@ -409,8 +408,7 @@ class ShopServiceImplIntegrationTest {
         UUID randomUUIDid = UUID.randomUUID();
         UUID customerId = customer.getId();
 
-        assertThrows(
-                ProductNotFoundException.class, () -> shopService.purchaseProduct(customerId, randomUUIDid));
+        assertThrows(ProductNotFoundException.class, () -> shopService.purchaseProduct(customerId, randomUUIDid));
     }
 
     @ParameterizedTest
@@ -430,8 +428,7 @@ class ShopServiceImplIntegrationTest {
 
         UUID customerId = customer.getId();
         UUID productId = product.getId();
-        assertThrows(
-                CustomerNotActiveException.class, () -> shopService.purchaseProduct(customerId, productId));
+        assertThrows(CustomerNotActiveException.class, () -> shopService.purchaseProduct(customerId, productId));
     }
 
     @ParameterizedTest
@@ -452,8 +449,7 @@ class ShopServiceImplIntegrationTest {
         UUID customerId = customer.getId();
         UUID productId = product.getId();
 
-        assertThrows(
-                CustomerNotActiveException.class, () -> shopService.purchaseProduct(customerId, productId));
+        assertThrows(CustomerNotActiveException.class, () -> shopService.purchaseProduct(customerId, productId));
     }
 
     @ParameterizedTest
@@ -607,8 +603,7 @@ class ShopServiceImplIntegrationTest {
 
         UUID customerId = customer.getId();
 
-        assertThrows(
-                CustomerNotActiveException.class, () -> shopService.updateInvoiceAddress(customerId, newInv));
+        assertThrows(CustomerNotActiveException.class, () -> shopService.updateInvoiceAddress(customerId, newInv));
     }
 
     @Test
@@ -627,8 +622,7 @@ class ShopServiceImplIntegrationTest {
         UUID customerId = customer.getId();
 
         assertThrows(
-                CustomerNotActiveException.class,
-                () -> shopService.updateCommunicationDetails(customerId, newComms));
+                CustomerNotActiveException.class, () -> shopService.updateCommunicationDetails(customerId, newComms));
     }
 
     @Test

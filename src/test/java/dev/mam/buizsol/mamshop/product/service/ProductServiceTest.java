@@ -160,7 +160,7 @@ class ProductServiceTest {
     }
 
     @ParameterizedTest
-    @CsvSource({ "0.11, GMX", "0.50, WEB_DE", "1.00, MAIL_COM", "5.99, GMX", "10.00, WEB_DE", "99.99, MAIL_COM" })
+    @CsvSource({"0.11, GMX", "0.50, WEB_DE", "1.00, MAIL_COM", "5.99, GMX", "10.00, WEB_DE", "99.99, MAIL_COM"})
     @DisplayName("Should update monthly fee for various valid values and brands")
     void shouldUpdateMonthlyFeeForVariousValidValuesAndBrands(final String feeValue, final Brand brand)
             throws Exception {
@@ -188,27 +188,25 @@ class ProductServiceTest {
     }
 
     @ParameterizedTest
-    @CsvSource({ "0.10", "0.09", "0.05", "0.01", "0.00" })
+    @CsvSource({"0.10", "0.09", "0.05", "0.01", "0.00"})
     @DisplayName("Should throw IllegalArgumentException when monthly fee is at or below minimum" + " threshold")
     void shouldThrowIllegalArgumentExceptionWhenMonthlyFeeIsAtOrBelowMinimumThreshold(final String feeValue) {
         final Product product = createDefaultProduct("Low Fee Test", Brand.GMX, "1.00", "0.50");
 
         final BigDecimal invalidFee = new BigDecimal(feeValue);
         UUID productId = product.getId();
-        assertThrows(
-                ProductValidationException.class, () -> productService.updateMonthlyFee(productId, invalidFee));
+        assertThrows(ProductValidationException.class, () -> productService.updateMonthlyFee(productId, invalidFee));
     }
 
     @ParameterizedTest
-    @CsvSource({ "-0.01", "-0.10", "-1.00", "-10.00", "-99.99" })
+    @CsvSource({"-0.01", "-0.10", "-1.00", "-10.00", "-99.99"})
     @DisplayName("Should throw IllegalArgumentException when monthly fee is negative")
     void shouldThrowIllegalArgumentExceptionWhenMonthlyFeeIsNegative(final String feeValue) {
         final Product product = createDefaultProduct("Negative Fee Test", Brand.WEB_DE, "1.00", "0.50");
 
         final BigDecimal negativeFee = new BigDecimal(feeValue);
         UUID productId = product.getId();
-        assertThrows(
-                ProductValidationException.class, () -> productService.updateMonthlyFee(productId, negativeFee));
+        assertThrows(ProductValidationException.class, () -> productService.updateMonthlyFee(productId, negativeFee));
     }
 
     @Test
@@ -252,12 +250,13 @@ class ProductServiceTest {
     @DisplayName("Should handle minimum valid monthly fee boundary (0.11)")
     void shouldHandleMinimumValidMonthlyFeeBoundary() {
         final BigDecimal minimumValidFee = new BigDecimal("0.11");
-        final Product product = createDefaultProduct("Minimum Fee Product", Brand.GMX, "0.00",
-                minimumValidFee.toString());
+        final Product product =
+                createDefaultProduct("Minimum Fee Product", Brand.GMX, "0.00", minimumValidFee.toString());
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         productService.createProduct(product);
-        final Product retrievedProduct = productService.findById(product.getId()).get();
+        final Product retrievedProduct =
+                productService.findById(product.getId()).get();
 
         assertEquals(0, minimumValidFee.compareTo(retrievedProduct.getMonthlyFee()));
         verify(productRepository).save(product);
@@ -272,8 +271,7 @@ class ProductServiceTest {
         final BigDecimal boundaryInvalidFee = new BigDecimal("0.10");
         UUID productId = product.getId();
         assertThrows(
-                ProductValidationException.class,
-                () -> productService.updateMonthlyFee(productId, boundaryInvalidFee));
+                ProductValidationException.class, () -> productService.updateMonthlyFee(productId, boundaryInvalidFee));
     }
 
     @Test
@@ -296,7 +294,8 @@ class ProductServiceTest {
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         productService.createProduct(product);
-        final Product retrievedProduct = productService.findById(product.getId()).get();
+        final Product retrievedProduct =
+                productService.findById(product.getId()).get();
 
         assertEquals(0, BigDecimal.ZERO.compareTo(retrievedProduct.getSetupFee()));
         verify(productRepository).save(product);

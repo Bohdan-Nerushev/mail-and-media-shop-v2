@@ -21,7 +21,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 @DisplayName("PartnerProduct Tests")
 class PartnerProductTest {
 
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final Validator validator =
+            Validation.buildDefaultValidatorFactory().getValidator();
 
     private PartnerProduct createPartnerProduct(
             final String name, final Brand brand, final BigDecimal setupFee, final BigDecimal monthlyFee) {
@@ -36,7 +37,7 @@ class PartnerProductTest {
 
     @DisplayName("Success: Create PartnerProduct with valid diverse data")
     @ParameterizedTest(name = "[{index}] Name: {0}, Brand: {1}")
-    @CsvSource({ "Cloud Storage, GMX", "Video Streaming, WEB_DE", "Security Pack, GMX" })
+    @CsvSource({"Cloud Storage, GMX", "Video Streaming, WEB_DE", "Security Pack, GMX"})
     void shouldCreatePartnerProductWhenValidDataProvided(String name, String brandName) {
         Brand brand = Brand.valueOf(brandName);
         BigDecimal setupFee = new BigDecimal("9.99");
@@ -62,7 +63,7 @@ class PartnerProductTest {
 
     @DisplayName("Boundary/Negative: Failure with monthly fee 0.10 € or less")
     @ParameterizedTest(name = "[{index}] Monthly fee {0} €")
-    @ValueSource(strings = { "0.10", "0.09", "0.00", "-0.01", "-10.00" })
+    @ValueSource(strings = {"0.10", "0.09", "0.00", "-0.01", "-10.00"})
     void shouldThrowExceptionWhenMonthlyFeeIsInvalid(String fee) {
         BigDecimal invalidFee = new BigDecimal(fee);
 
@@ -74,7 +75,7 @@ class PartnerProductTest {
     @DisplayName("Negative: Failure with null, empty or blank name")
     @ParameterizedTest(name = "[{index}] Invalid Name: \"{0}\"")
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "   ", "\t", "\n" })
+    @ValueSource(strings = {" ", "   ", "\t", "\n"})
     void shouldThrowExceptionWhenNameIsInvalid(String name) {
         BigDecimal country = new BigDecimal("1.00");
         assertThrows(
@@ -133,8 +134,8 @@ class PartnerProductTest {
     @Test
     @DisplayName("Success: Verify withMonthlyFee returns new instance with updated fee")
     void shouldReturnNewInstanceWithUpdatedMonthlyFee() {
-        final PartnerProduct initial = createPartnerProduct("Cloud", Brand.GMX, new BigDecimal("5.00"),
-                new BigDecimal("10.00"));
+        final PartnerProduct initial =
+                createPartnerProduct("Cloud", Brand.GMX, new BigDecimal("5.00"), new BigDecimal("10.00"));
 
         final BigDecimal newFee = new BigDecimal("12.00");
         final PartnerProduct updated = initial.withMonthlyFee(newFee);
