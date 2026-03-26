@@ -94,7 +94,9 @@ class BillingServiceTest {
             }
 
             @Override
-            public void releaseInstance(ConstraintValidator<?, ?> instance) {}
+            public void releaseInstance(ConstraintValidator<?, ?> instance) {
+                // No-op: Spring handles validator lifecycle management.
+            }
         });
         validatorFactory.afterPropertiesSet();
 
