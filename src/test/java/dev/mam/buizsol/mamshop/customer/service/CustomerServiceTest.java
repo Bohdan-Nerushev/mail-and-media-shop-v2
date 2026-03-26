@@ -250,55 +250,47 @@ class CustomerServiceTest {
     @Test
     @DisplayName("Create customer with null first name: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullFirstName() {
-        assertThrows(
-                ConstraintViolationException.class,
-                () -> customerService.createCustomer(createDefaultCustomer(
-                        null, "Doe", LocalDate.now(), address, null, communicationDetails, Brand.GMX)));
+        Customer customer =
+                createDefaultCustomer(null, "Doe", LocalDate.now(), address, null, communicationDetails, Brand.GMX);
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
     }
 
     @Test
     @DisplayName("Create customer with null last name: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullLastName() {
-        assertThrows(
-                ConstraintViolationException.class,
-                () -> customerService.createCustomer(createDefaultCustomer(
-                        "John", null, LocalDate.now(), address, null, communicationDetails, Brand.GMX)));
+        Customer customer =
+                createDefaultCustomer("John", null, LocalDate.now(), address, null, communicationDetails, Brand.GMX);
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
     }
 
     @Test
     @DisplayName("Create customer with null birth date: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullBirthDate() {
-        assertThrows(
-                ConstraintViolationException.class,
-                () -> customerService.createCustomer(
-                        createDefaultCustomer("John", "Doe", null, address, null, communicationDetails, Brand.GMX)));
+        Customer customer = createDefaultCustomer("John", "Doe", null, address, null, communicationDetails, Brand.GMX);
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
     }
 
     @Test
     @DisplayName("Create customer with null address: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullAddress() {
-        assertThrows(
-                ConstraintViolationException.class,
-                () -> customerService.createCustomer(createDefaultCustomer(
-                        "John", "Doe", LocalDate.now(), null, null, communicationDetails, Brand.GMX)));
+        Customer customer =
+                createDefaultCustomer("John", "Doe", LocalDate.now(), null, null, communicationDetails, Brand.GMX);
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
     }
 
     @Test
     @DisplayName("Create customer with null communication details: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullCommunicationDetails() {
-        assertThrows(
-                ConstraintViolationException.class,
-                () -> customerService.createCustomer(
-                        createDefaultCustomer("John", "Doe", LocalDate.now(), address, null, null, Brand.GMX)));
+        Customer customer = createDefaultCustomer("John", "Doe", LocalDate.now(), address, null, null, Brand.GMX);
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
     }
 
     @Test
     @DisplayName("Create customer with null brand: validated by service layer")
     void shouldThrowExceptionWhenCreatingCustomerWithNullBrand() {
-        assertThrows(
-                ConstraintViolationException.class,
-                () -> customerService.createCustomer(createDefaultCustomer(
-                        "John", "Doe", LocalDate.now(), address, null, communicationDetails, null)));
+        Customer customer =
+                createDefaultCustomer("John", "Doe", LocalDate.now(), address, null, communicationDetails, null);
+        assertThrows(ConstraintViolationException.class, () -> customerService.createCustomer(customer));
     }
 
     @Test
