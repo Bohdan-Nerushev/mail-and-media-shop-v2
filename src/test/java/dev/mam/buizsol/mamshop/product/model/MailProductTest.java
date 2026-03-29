@@ -3,6 +3,7 @@ package dev.mam.buizsol.mamshop.product.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
@@ -11,6 +12,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.math.BigDecimal;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -248,6 +250,73 @@ class MailProductTest {
 
         final BigDecimal newFee = new BigDecimal("15.00");
         final PremiumMailProduct updated = initial.withMonthlyFee(newFee);
+
+        assertEquals(initial.getId(), updated.getId());
+        assertEquals(initial.getName(), updated.getName());
+        assertEquals(initial.getBrand(), updated.getBrand());
+        assertEquals(initial.getSetupFee(), updated.getSetupFee());
+        assertEquals(newFee, updated.getMonthlyFee());
+        assertEquals(initial.getStorageSize(), updated.getStorageSize());
+    }
+
+    @Test
+    @DisplayName("Success: Create StandardMailProduct with predefined ID")
+    void shouldCreateStandardMailProductWithPredefinedId() {
+        final String name = "Standard Cloud";
+        final Brand brand = Brand.GMX;
+        final BigDecimal monthlyFee = new BigDecimal("2.99");
+
+        final StandardMailProduct product = createDefaultStandardMailProduct(name, brand, monthlyFee);
+
+        assertTrue(product.getId() instanceof UUID);
+        assertEquals(name, product.getName());
+        assertEquals(brand, product.getBrand());
+        assertEquals(new BigDecimal("4.99"), product.getSetupFee());
+        assertEquals(monthlyFee, product.getMonthlyFee());
+    }
+
+    @Test
+    @DisplayName("Success: Create PremiumMailProduct with predefined ID")
+    void shouldCreatePremiumMailProductWithPredefinedId() {
+        final String name = "Premium Plus";
+        final Brand brand = Brand.WEB_DE;
+        final BigDecimal monthlyFee = new BigDecimal("7.99");
+
+        final PremiumMailProduct product = createDefaultPremiumMailProduct(name, brand, monthlyFee);
+
+        assertTrue(product.getId() instanceof UUID);
+        assertEquals(name, product.getName());
+        assertEquals(brand, product.getBrand());
+        assertEquals(new BigDecimal("9.99"), product.getSetupFee());
+        assertEquals(monthlyFee, product.getMonthlyFee());
+    }
+
+    @Test
+    @DisplayName("Success: Create MailProduct via static factory method")
+    void shouldCreateMailProductViaStaticFactory() {
+        final String name = "Generic Mail";
+        final Brand brand = Brand.GMX;
+        final BigDecimal setupFee = new BigDecimal("1.00");
+        final BigDecimal monthlyFee = new BigDecimal("2.00");
+        final Long storageSize = 1024L;
+
+        final MailProduct product = MailProduct.create(name, brand, setupFee, monthlyFee, storageSize);
+
+        assertEquals(name, product.getName());
+        assertEquals(brand, product.getBrand());
+        assertEquals(setupFee, product.getSetupFee());
+        assertEquals(monthlyFee, product.getMonthlyFee());
+        assertEquals(storageSize, product.getStorageSize().orElseThrow());
+    }
+
+    @Test
+    @DisplayName("Success: Verify withMonthlyFee return new instance with same data but new fee for standard product")
+    void shouldReturnNewInstanceWithUpdatedMonthlyFeeForStandardProduct() {
+        final StandardMailProduct initial =
+                createDefaultStandardMailProduct("Standard Basic", Brand.GMX, new BigDecimal("2.00"));
+
+        final BigDecimal newFee = new BigDecimal("3.00");
+        final StandardMailProduct updated = initial.withMonthlyFee(newFee);
 
         assertEquals(initial.getId(), updated.getId());
         assertEquals(initial.getName(), updated.getName());

@@ -212,8 +212,8 @@ class BillingServiceTest {
 
     @DisplayName("Invalid small positive discount validation checks")
     @ParameterizedTest(name = "Invalid small positive and negative discount validation - value: {0}")
-    @ValueSource(strings = {"0.01", "0.05", "0.10", "-0.01", "-1.00"})
-    void shouldThrowExceptionWhenDiscountIsSmallPositive(final String invalidDiscountStr) {
+    @ValueSource(strings = {"0.01", "0.05", "0.09", "0.10", "-0.01", "-1.00", "-0.10"})
+    void shouldThrowExceptionWhenDiscountIsInvalid(final String invalidDiscountStr) {
         final BigDecimal invalidDiscount = new BigDecimal(invalidDiscountStr);
         assertThrows(
                 ConstraintViolationException.class, () -> billingService.generateInvoice(customerId, invalidDiscount));

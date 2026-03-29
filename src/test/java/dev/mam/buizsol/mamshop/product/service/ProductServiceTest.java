@@ -222,6 +222,21 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName(
+            "Should throw ProductValidationException when monthly fee fails manual business " + "validation threshold")
+    void shouldThrowProductValidationExceptionWhenMonthlyFeeFailsManualThreshold() {
+        final ProductServiceImpl target = new ProductServiceImpl(productRepository);
+        ReflectionTestUtils.setField(target, "minimalDiscountAmount", new BigDecimal("1.00"));
+
+        final BigDecimal feeBelowManualButAboveAnnotation = new BigDecimal("0.50");
+        final UUID productId = UUID.randomUUID();
+
+        assertThrows(
+                dev.mam.buizsol.mamshop.product.exception.ProductValidationException.class,
+                () -> target.updateMonthlyFee(productId, feeBelowManualButAboveAnnotation));
+    }
+
+    @Test
     @DisplayName("Should throw ProductNotFoundException when updating non-existent product")
     void shouldThrowProductNotFoundExceptionWhenUpdatingNonExistentProduct() {
         final UUID nonExistentId = UUID.randomUUID();

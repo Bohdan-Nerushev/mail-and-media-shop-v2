@@ -236,6 +236,16 @@ class CustomerServiceTest {
     }
 
     @Test
+    @DisplayName("Delete non-existent customer should throw CustomerNotFoundException")
+    void shouldThrowExceptionWhenDeletingNonExistentCustomer() {
+        final UUID customerId = UUID.randomUUID();
+
+        when(customerRepository.existsById(customerId)).thenReturn(false);
+
+        assertThrows(CustomerNotFoundException.class, () -> customerService.deleteCustomer(customerId));
+    }
+
+    @Test
     @DisplayName("Operations on non-existent customer should throw CustomerNotFoundException")
     void shouldThrowExceptionWhenPerformingOperationsOnNonExistentCustomer() throws CustomerNotFoundException {
         final UUID randomId = UUID.randomUUID();

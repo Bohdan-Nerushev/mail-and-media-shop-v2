@@ -11,6 +11,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.math.BigDecimal;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,6 +47,24 @@ class PartnerProductTest {
         PartnerProduct product = createPartnerProduct(name, brand, setupFee, monthlyFee);
 
         assertNotNull(product.getId());
+        assertEquals(name, product.getName());
+        assertEquals(brand, product.getBrand());
+        assertEquals(setupFee, product.getSetupFee());
+        assertEquals(monthlyFee, product.getMonthlyFee());
+    }
+
+    @Test
+    @DisplayName("Success: Create PartnerProduct with predefined ID")
+    void shouldCreatePartnerProductWithPredefinedId() {
+        final UUID id = UUID.randomUUID();
+        final String name = "Partner Storage";
+        final Brand brand = Brand.GMX;
+        final BigDecimal setupFee = new BigDecimal("10.00");
+        final BigDecimal monthlyFee = new BigDecimal("5.00");
+
+        final PartnerProduct product = new PartnerProduct(id, name, brand, setupFee, monthlyFee);
+
+        assertEquals(id, product.getId());
         assertEquals(name, product.getName());
         assertEquals(brand, product.getBrand());
         assertEquals(setupFee, product.getSetupFee());
