@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -10,6 +11,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.executable.ExecutableValidator;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.Set;
 import org.assertj.core.api.Assertions;
@@ -54,8 +57,7 @@ class BundleProductTest {
         return product;
     }
 
-    private BundleProduct createDefaultBundleProduct(
-            final dev.mam.buizsol.mamshop.product.model.MailProduct mail, final PartnerProduct partner) {
+    private BundleProduct createDefaultBundleProduct(final MailProduct mail, final PartnerProduct partner) {
         BundleProduct product = new BundleProduct(mail, partner);
         Set<ConstraintViolation<BundleProduct>> violations = validator.validate(product);
         if (!violations.isEmpty()) {
@@ -80,7 +82,7 @@ class BundleProductTest {
             final BigDecimal expectedSetup,
             final BigDecimal expectedMonthly) {
 
-        final dev.mam.buizsol.mamshop.product.model.MailProduct mail = mailName.startsWith("S")
+        final MailProduct mail = mailName.startsWith("S")
                 ? createDefaultStandardMailProduct(mailName, brand, mailMonthly)
                 : createDefaultPremiumMailProduct(mailName, brand, mailMonthly);
 
@@ -115,8 +117,7 @@ class BundleProductTest {
     @Test
     @DisplayName("Negative: Failure with null PartnerProduct")
     void shouldThrowExceptionWhenCreatingBundleWithNullPartner() {
-        final dev.mam.buizsol.mamshop.product.model.MailProduct mail =
-                createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
+        final MailProduct mail = createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
 
         assertThrows(NullPointerException.class, () -> createDefaultBundleProduct(mail, null));
     }
@@ -131,13 +132,13 @@ class BundleProductTest {
     @DisplayName("Verify @NotNull constructor annotations via ExecutableValidator")
     void shouldValidateConstructorAnnotationsWithExecutableValidator() throws NoSuchMethodException {
         ExecutableValidator executableValidator = validator.forExecutables();
-        java.lang.reflect.Constructor<BundleProduct> constructor =
+        Constructor<BundleProduct> constructor =
                 BundleProduct.class.getConstructor(MailProduct.class, PartnerProduct.class);
 
         var violations = executableValidator.validateConstructorParameters(constructor, new Object[] {null, null});
 
-        org.junit.jupiter.api.Assertions.assertFalse(violations.isEmpty());
-        org.junit.jupiter.api.Assertions.assertEquals(2, violations.size());
+        assertFalse(violations.isEmpty());
+        assertEquals(2, violations.size());
     }
 
     @Test
@@ -156,8 +157,7 @@ class BundleProductTest {
     @Test
     @DisplayName("Polymorphism: Verify calls via Product base class")
     void shouldCalculateTotalsCorrectlyWhenCalledPolymorphically() {
-        dev.mam.buizsol.mamshop.product.model.MailProduct mail =
-                createDefaultStandardMailProduct("Base Mail", Brand.WEB_DE, new BigDecimal("1.50"));
+        MailProduct mail = createDefaultStandardMailProduct("Base Mail", Brand.WEB_DE, new BigDecimal("1.50"));
         PartnerProduct partner = createDefaultPartnerProduct(
                 "Base Cloud", Brand.WEB_DE, new BigDecimal("10.00"), new BigDecimal("3.50"));
 
@@ -225,22 +225,22 @@ class BundleProductTest {
         var setupFeeMethod =
                 BundleProduct.class.getDeclaredMethod("calculateTotalSetupFee", Product.class, Product.class);
         setupFeeMethod.setAccessible(true);
-        var setupException = assertThrows(
-                java.lang.reflect.InvocationTargetException.class, () -> setupFeeMethod.invoke(null, null, null));
+        var setupException =
+                assertThrows(InvocationTargetException.class, () -> setupFeeMethod.invoke(null, null, null));
         Assertions.assertThat(setupException.getCause()).isInstanceOf(NullPointerException.class);
 
         var monthlyFeeMethod =
                 BundleProduct.class.getDeclaredMethod("calculateTotalMonthlyFee", Product.class, Product.class);
         monthlyFeeMethod.setAccessible(true);
-        var monthlyException = assertThrows(
-                java.lang.reflect.InvocationTargetException.class, () -> monthlyFeeMethod.invoke(null, null, null));
+        var monthlyException =
+                assertThrows(InvocationTargetException.class, () -> monthlyFeeMethod.invoke(null, null, null));
         Assertions.assertThat(monthlyException.getCause()).isInstanceOf(NullPointerException.class);
 
         var validateBrandsMethod =
                 BundleProduct.class.getDeclaredMethod("validateBrands", Product.class, Product.class);
         validateBrandsMethod.setAccessible(true);
-        var exception = assertThrows(
-                java.lang.reflect.InvocationTargetException.class, () -> validateBrandsMethod.invoke(null, null, null));
+        var exception =
+                assertThrows(InvocationTargetException.class, () -> validateBrandsMethod.invoke(null, null, null));
         Assertions.assertThat(exception.getCause()).isInstanceOf(NullPointerException.class);
     }
 }

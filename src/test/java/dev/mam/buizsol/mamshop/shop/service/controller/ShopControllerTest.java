@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -385,9 +386,8 @@ class ShopControllerTest {
         UUID customerId = UUID.randomUUID();
         UUID productId = UUID.randomUUID();
         PurchaseRequestDTO purchaseRequestDTO = CustomerTestFactory.createPurchaseRequestDTO(productId);
-        dev.mam.buizsol.mamshop.customer.model.Customer customer =
-                org.mockito.Mockito.mock(dev.mam.buizsol.mamshop.customer.model.Customer.class);
-        org.mockito.Mockito.when(customer.getId()).thenReturn(customerId);
+        Customer customer = Mockito.mock(Customer.class);
+        Mockito.when(customer.getId()).thenReturn(customerId);
         Contract contract = CustomerTestFactory.createContract(
                 UUID.randomUUID(), customer, "TestProduct", productId, LocalDate.now(), ContractStatus.INACTIVE);
         ContractResponseDTO contractResponseDTO = CustomerTestFactory.createContractResponseDTO(
@@ -479,9 +479,9 @@ class ShopControllerTest {
         final UUID contractId = UUID.randomUUID();
         final UUID productId = UUID.randomUUID();
 
-        final Contract mockContract = org.mockito.Mockito.mock(Contract.class);
-        org.mockito.Mockito.when(mockContract.getId()).thenReturn(contractId);
-        org.mockito.Mockito.when(mockContract.getStatus()).thenReturn(ContractStatus.INACTIVE);
+        final Contract mockContract = Mockito.mock(Contract.class);
+        Mockito.when(mockContract.getId()).thenReturn(contractId);
+        Mockito.when(mockContract.getStatus()).thenReturn(ContractStatus.INACTIVE);
 
         final ContractResponseDTO responseDto =
                 new ContractResponseDTO(contractId, customerId, productId, LocalDate.now(), ContractStatus.INACTIVE);

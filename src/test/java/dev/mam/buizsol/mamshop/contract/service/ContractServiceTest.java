@@ -22,6 +22,7 @@ import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -60,7 +61,7 @@ class ContractServiceTest {
         validatorFactory.afterPropertiesSet();
 
         ProxyFactory proxyFactory = new ProxyFactory(contractServiceImpl);
-        proxyFactory.addAdvice(new MethodValidationInterceptor((jakarta.validation.Validator) validatorFactory));
+        proxyFactory.addAdvice(new MethodValidationInterceptor((Validator) validatorFactory));
         contractService = (ContractService) proxyFactory.getProxy();
 
         activeCustomer = mock(Customer.class);

@@ -13,6 +13,9 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.validation.constraints.NotNull;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -129,13 +132,11 @@ class ContractTest {
     @Test
     @DisplayName("Verify @NotNull validation configuration via ExecutableValidator and Reflection")
     void shouldValidateAnnotationsWithExecutableValidator() throws NoSuchMethodException {
-        java.lang.reflect.Method createMethod = Contract.class.getMethod("create", Customer.class, Product.class);
+        Method createMethod = Contract.class.getMethod("create", Customer.class, Product.class);
 
-        java.lang.reflect.Parameter[] parameters = createMethod.getParameters();
-        jakarta.validation.constraints.NotNull notNullCustomer =
-                parameters[0].getAnnotation(jakarta.validation.constraints.NotNull.class);
-        jakarta.validation.constraints.NotNull notNullProduct =
-                parameters[1].getAnnotation(jakarta.validation.constraints.NotNull.class);
+        Parameter[] parameters = createMethod.getParameters();
+        NotNull notNullCustomer = parameters[0].getAnnotation(NotNull.class);
+        NotNull notNullProduct = parameters[1].getAnnotation(NotNull.class);
 
         assertNotNull(notNullCustomer, "@NotNull missing on customer parameter");
         assertNotNull(notNullProduct, "@NotNull missing on product parameter");
