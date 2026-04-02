@@ -6,6 +6,11 @@ stages:
 # Unit tests
 unit_test_job:
   stage: test
+  variables:
+    REDIS_HOST: redis
+  services:
+    - name: redis:7.0-alpine
+      alias: redis
   script:
     - mvn clean test
   tags:

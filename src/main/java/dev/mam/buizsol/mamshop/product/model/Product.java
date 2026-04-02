@@ -1,5 +1,6 @@
 package dev.mam.buizsol.mamshop.product.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -29,6 +30,9 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "products")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
 @Getter

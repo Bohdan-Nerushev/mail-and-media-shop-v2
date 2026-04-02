@@ -8,6 +8,8 @@ import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +25,14 @@ class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", allEntries = true)
     public Customer createCustomer(final Customer customer) {
         return customerRepository.save(customer);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public void updateAddress(final UUID customerId, final Address address) throws CustomerNotFoundException {
         final Customer customer = customerRepository.getById(customerId);
         customer.setAddress(address);
@@ -37,6 +41,7 @@ class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public void updateInvoiceAddress(final UUID customerId, final Address address) throws CustomerNotFoundException {
         final Customer customer = customerRepository.getById(customerId);
         customer.setInvoiceAddress(address);
@@ -45,6 +50,7 @@ class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public void updateCommunicationDetails(final UUID customerId, final CommunicationDetails communicationDetails)
             throws CustomerNotFoundException {
         final Customer customer = customerRepository.getById(customerId);
@@ -54,6 +60,7 @@ class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public void activateCustomer(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = customerRepository.getById(customerId);
         customer.setStatus(CustomerStatus.ACTIVE);
@@ -62,6 +69,7 @@ class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public void deactivateCustomer(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = customerRepository.getById(customerId);
         customer.setStatus(CustomerStatus.INACTIVE);
@@ -70,6 +78,7 @@ class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public void deleteCustomer(final UUID customerId) throws CustomerNotFoundException {
         if (!customerRepository.existsById(customerId)) {
             throw new CustomerNotFoundException("Customer with ID " + customerId + " not found");
@@ -78,11 +87,13 @@ class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Cacheable(value = "customers", key = "#customerId")
     public Optional<Customer> findCustomerById(final UUID customerId) {
         return customerRepository.findById(customerId);
     }
 
     @Override
+    @Cacheable(value = "customersList")
     public List<Customer> findAllCustomers() {
         return List.copyOf(customerRepository.findAll());
     }

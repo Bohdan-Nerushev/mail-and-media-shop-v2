@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
 
   # Spring Boot application
@@ -12,12 +10,15 @@ services:
     depends_on:
       shop_db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - "${APP_PORT}:8090"
     environment:
       - DB_URL=jdbc:postgresql://${SHOP_DB_CONTAINER_NAME}:5432/${SHOP_DB_NAME}
       - DB_USERNAME=${SHOP_DB_USER}
       - DB_PASSWORD=${SHOP_DB_PASSWORD}
+      - REDIS_HOST=redis
 
   # Shop database
   shop_db:

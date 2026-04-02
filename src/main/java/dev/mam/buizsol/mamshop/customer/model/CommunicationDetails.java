@@ -1,5 +1,7 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,6 +21,10 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "communication_details")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
+@JsonDeserialize(as = CommunicationDetails.class)
 @Getter
 @Setter
 @Builder

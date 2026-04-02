@@ -1,5 +1,6 @@
 package dev.mam.buizsol.mamshop.billing.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
@@ -35,6 +36,9 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "invoices")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
 @Getter
 @Setter
 @Builder

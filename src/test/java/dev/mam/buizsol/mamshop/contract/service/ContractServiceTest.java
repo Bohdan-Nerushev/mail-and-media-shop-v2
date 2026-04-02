@@ -89,7 +89,7 @@ class ContractServiceTest {
     void shouldReturnContractWhenIdExists() {
         UUID contractId = UUID.randomUUID();
         Contract contract = mock(Contract.class);
-        when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
+        when(contractRepository.findWithDetailsById(contractId)).thenReturn(Optional.of(contract));
 
         Optional<Contract> result = contractService.findContractById(contractId);
 
@@ -116,7 +116,7 @@ class ContractServiceTest {
         setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
         Contract contract = Contract.create(activeCustomer, matchingProduct);
-        when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
+        when(contractRepository.findWithDetailsById(contractId)).thenReturn(Optional.of(contract));
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract updated = contractService.updateContractStatus(contractId, ContractStatus.INACTIVE);
@@ -129,7 +129,7 @@ class ContractServiceTest {
     @DisplayName("Negative: updateContractStatus throws exception when contract not found")
     void shouldThrowExceptionWhenUpdatingStatusOfNonExistentContract() {
         UUID contractId = UUID.randomUUID();
-        when(contractRepository.findById(contractId)).thenReturn(Optional.empty());
+        when(contractRepository.findWithDetailsById(contractId)).thenReturn(Optional.empty());
 
         assertThrows(
                 ContractNotFoundException.class,
@@ -217,7 +217,7 @@ class ContractServiceTest {
         setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
         Contract contract = Contract.create(activeCustomer, matchingProduct).withStatus(ContractStatus.ACTIVE);
-        when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
+        when(contractRepository.findWithDetailsById(contractId)).thenReturn(Optional.of(contract));
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract updated = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
@@ -233,7 +233,7 @@ class ContractServiceTest {
         UUID contractId = UUID.randomUUID();
         Contract contract = Contract.create(activeCustomer, matchingProduct);
 
-        when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
+        when(contractRepository.findWithDetailsById(contractId)).thenReturn(Optional.of(contract));
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract updated1 = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);

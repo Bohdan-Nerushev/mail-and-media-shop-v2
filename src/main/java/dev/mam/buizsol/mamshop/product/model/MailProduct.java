@@ -1,5 +1,6 @@
 package dev.mam.buizsol.mamshop.product.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.validation.ValidStorageSize;
 import jakarta.persistence.Column;
@@ -18,6 +19,9 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "mail_products")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
 @DiscriminatorValue("MailProduct")
 @Getter
 @Setter

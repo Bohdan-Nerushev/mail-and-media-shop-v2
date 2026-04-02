@@ -1,5 +1,6 @@
 package dev.mam.buizsol.mamshop.product.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import jakarta.persistence.DiscriminatorValue;
@@ -20,6 +21,9 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "bundle_products")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
 @DiscriminatorValue("BundleProduct")
 @Getter
 @Setter

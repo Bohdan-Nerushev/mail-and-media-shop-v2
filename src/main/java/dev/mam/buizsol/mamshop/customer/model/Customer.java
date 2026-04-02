@@ -1,5 +1,7 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import jakarta.annotation.Nullable;
@@ -35,6 +37,10 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "customers")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
+@JsonDeserialize(as = Customer.class)
 @Getter
 @Setter
 @Builder(toBuilder = true)
@@ -83,10 +89,12 @@ public class Customer {
     private CommunicationDetails communicationDetails;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @Builder.Default
     private List<Contract> contracts = new ArrayList<>();
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @Builder.Default
     private List<Invoice> invoices = new ArrayList<>();
 

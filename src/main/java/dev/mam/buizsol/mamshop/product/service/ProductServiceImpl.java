@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,21 +27,29 @@ class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @CacheEvict(value = "products", allEntries = true)
     public void createProduct(final Product product) {
         repository.save(product);
     }
 
     @Override
+    @Cacheable(value = "products", key = "#id")
     public Optional<Product> findById(final UUID id) {
         return repository.findById(id);
     }
 
     @Override
+    @Cacheable(value = "productsByBrand", key = "#brand")
     public List<Product> findByBrand(final Brand brand) {
         return List.copyOf(repository.findByBrand(brand));
     }
 
     @Override
+    @Caching(
+            evict = {
+                @CacheEvict(value = "products", key = "#id"),
+                @CacheEvict(value = "productsByBrand", allEntries = true)
+            })
     public void updateMonthlyFee(final UUID id, final BigDecimal monthlyFee) throws ProductNotFoundException {
         if (monthlyFee.compareTo(minimalDiscountAmount) <= 0) {
             throw new ProductValidationException("Monthly fee must be greater than " + minimalDiscountAmount);

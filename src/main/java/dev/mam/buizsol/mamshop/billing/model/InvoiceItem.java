@@ -1,5 +1,6 @@
 package dev.mam.buizsol.mamshop.billing.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,6 +27,9 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "invoice_items")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
 @Getter
 @Setter
 @Builder

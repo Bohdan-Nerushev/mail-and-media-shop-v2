@@ -1,5 +1,6 @@
 package dev.mam.buizsol.mamshop.contract.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
@@ -31,6 +32,9 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "contracts")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
 @Getter
 @Setter
 @Builder(toBuilder = true)
