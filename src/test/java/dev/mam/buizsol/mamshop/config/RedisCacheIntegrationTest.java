@@ -21,6 +21,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -50,15 +51,17 @@ class RedisCacheIntegrationTest {
         try (Jedis jedis = new Jedis(System.getenv().getOrDefault("REDIS_HOST", "localhost"), 6379)) {
             redisUp = "PONG".equals(jedis.ping());
         } catch (Exception e) {
-
+            // Redis is absent or not fully initialized yet
+            redisUp = false;
         }
-        Assumptions.assumeTrue(redisUp, "Redis is not running. Skipping integration tests.");
+        Assumptions.assumeTrue(redisUp, "Redis is not running or not ready. Skipping integration tests.");
     }
 
     @BeforeEach
     void clearCache() {
-        Optional.ofNullable(cacheManager.getCache("products")).ifPresent(cache -> cache.clear());
-        Optional.ofNullable(cacheManager.getCache("productsByBrand")).ifPresent(cache -> cache.clear());
+        Optional.ofNullable(cacheManager.getCache("products")).ifPresent(Cache::clear);
+
+        Optional.ofNullable(cacheManager.getCache("productsByBrand")).ifPresent(Cache::clear);
     }
 
     @Test
