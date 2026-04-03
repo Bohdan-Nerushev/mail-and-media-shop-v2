@@ -53,17 +53,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # SonarQube database
-  sonarqube_db:
-    image: postgres:${SONAR_DB_IMAGE_VERSION}
-    container_name: ${SONAR_DB_CONTAINER_NAME}
-    environment:
-      POSTGRES_USER: ${SONAR_DB_USER}
-      POSTGRES_PASSWORD: ${SONAR_DB_PASSWORD}
-      POSTGRES_DB: ${SONAR_DB_NAME}
-    volumes:
-      - sonarqube_postgres_data:/var/lib/postgresql/data
-
   # SonarQube server
   sonarqube:
     image: sonarqube:${SONAR_IMAGE_VERSION}
@@ -81,6 +70,17 @@ services:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
       - sonarqube_logs:/opt/sonarqube/logs
+
+  # SonarQube database
+  sonarqube_db:
+    image: postgres:${SONAR_DB_IMAGE_VERSION}
+    container_name: ${SONAR_DB_CONTAINER_NAME}
+    environment:
+      POSTGRES_USER: ${SONAR_DB_USER}
+      POSTGRES_PASSWORD: ${SONAR_DB_PASSWORD}
+      POSTGRES_DB: ${SONAR_DB_NAME}
+    volumes:
+      - sonarqube_postgres_data:/var/lib/postgresql/data
 
 volumes:
   shop_db_data:

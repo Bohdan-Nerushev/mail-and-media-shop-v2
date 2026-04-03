@@ -218,3 +218,10 @@ __pycache__/
 e2e_tests/controller/__pycache__/
 venv/
 e2e_tests/controller/__init__.py
+
+# Agent Skills 
+.agents/
+.agents/skills/
+skills.json
+SKILLS.md
+skills-lock.json
