@@ -17,6 +17,7 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
   - [Billing API](#billing-api)
 - [Common Response Schemas](#common-response-schemas)
 - [Error Handling](#error-handling)
+- [Redis Caching](#redis-caching)
 - [Maintain Code Cleanliness](#maintain-code-cleanliness)
   - [Spotless](#1-spotless--automatic-code-formatting)
   - [PMD](#2-pmd--anti-pattern-and-code-duplication-detection)
@@ -28,6 +29,16 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 - [Troubleshooting](#troubleshooting)
 
 ---
+
+## Technology Stack
+- **Core**: Java 21, Spring Boot 4.0.5
+- **Database**: PostgreSQL 16, Flyway (Migrations)
+- **Caching**: Redis (Jedis Client)
+- **Quality**: PMD, SpotBugs, Spotless, JaCoCo, SonarQube
+- **Documentation**: Swagger UI (OpenAPI 3.1)
+
+---
+
 ## Swagger UI
 
 Interactive API documentation is available at:
@@ -854,8 +865,23 @@ All error responses share a unified structure defined by `ErrorResponse`:
 | `404`  | Not Found — the requested resource does not exist               |
 | `500`  | Internal Server Error — unexpected server-side failure          |
 
-
 ---
+## Redis Caching
+The application uses **Redis** with the **Jedis** client to optimize read-heavy operations using the **Cache-Aside** pattern.
+### Caching Strategy
+- **Read**: Before hitting the database, the system checks the Redis cache. If data is found (Cache Hit), it's returned immediately. Otherwise (Cache Miss), it loads data from the database and populates the cache for future requests.
+- **Write/Update**: When a record is modified, removed, or deactivated, the corresponding cache entry is evicted (`@CacheEvict`) to ensure data consistency.
+### Configured Caches
+- `customers`: Stores individual customer profiles (keyed by UUID).
+- `products`: Stores product lists filtered by Brand (keyed by Brand enum).
+### Configuration (TTL)
+TTL is externalized and can be configured in `application.yml` or `.env`:
+```properties
+# Default: 10 minutes (600,000 ms)
+spring.cache.redis.time-to-live=600000
+```
+---
+
 
 ## Maintain Code Cleanliness
 

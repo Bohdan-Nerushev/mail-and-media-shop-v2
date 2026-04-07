@@ -21,6 +21,8 @@ import dev.mam.buizsol.mamshop.product.service.ProductService;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +54,7 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Cacheable(value = "customers", key = "#customerId", unless = "#result == null")
     public Customer loadCustomer(final UUID customerId) throws CustomerNotFoundException {
         return customerService
                 .findCustomerById(customerId)
@@ -60,6 +63,7 @@ class ShopServiceImpl implements ShopService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public void removeCustomer(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
         final List<Contract> contracts = contractService.findContractsByCustomerId(customerId);
@@ -74,6 +78,7 @@ class ShopServiceImpl implements ShopService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public void activateCustomer(final UUID customerId) throws CustomerNotFoundException {
         final Customer customer = loadCustomer(customerId);
         if (customer.getStatus() == CustomerStatus.ACTIVE) {
@@ -85,12 +90,14 @@ class ShopServiceImpl implements ShopService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public void deactivateCustomer(final UUID customerId) throws CustomerNotFoundException {
         customerService.deactivateCustomer(customerId);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public Customer updateAddress(final UUID customerId, final Address address) throws CustomerNotFoundException {
         checkCustomerActive(customerId);
         customerService.updateAddress(customerId, address);
@@ -99,6 +106,7 @@ class ShopServiceImpl implements ShopService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public Customer updateInvoiceAddress(final UUID customerId, final Address invoiceAddress)
             throws CustomerNotFoundException {
         checkCustomerActive(customerId);
@@ -108,6 +116,7 @@ class ShopServiceImpl implements ShopService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "customers", key = "#customerId")
     public Customer updateCommunicationDetails(final UUID customerId, final CommunicationDetails details)
             throws CustomerNotFoundException {
         checkCustomerActive(customerId);
@@ -149,6 +158,7 @@ class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Cacheable(value = "products", key = "#brand")
     public List<Product> loadAllProductsForBrand(final Brand brand) {
         return List.copyOf(productService.findByBrand(brand));
     }
