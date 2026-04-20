@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: mail-and-media-shop-test
+
+  datasource:
+    url: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  flyway:
+    enabled: true
+
+  cache:
+    type: none
+
+billing:
+  minimal-discount-amount: "0.10"
+  zero-amount: "0.00"
+
+product:
+  catalog:
+    csv-path: /products.csv
+
+logging:
+  level:
+    dev.mam.buizsol.mamshop: WARN
