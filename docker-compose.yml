@@ -7,9 +7,12 @@ services:
       dockerfile: Dockerfile
     image: ${APP_IMAGE_NAME}
     container_name: ${APP_CONTAINER_NAME}
+    restart: always
     depends_on:
       shop_db:
         condition: service_healthy
+      keycloak:
+        condition: service_started
       redis:
         condition: service_healthy
     ports:

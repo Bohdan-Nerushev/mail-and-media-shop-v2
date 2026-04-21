@@ -42,7 +42,7 @@ sleep 7
 # 1. Get Admin Token
 echo "1. Authenticating as Admin..."
 
-sleep 20
+sleep 30
 
 TOKEN=$(curl -s -X POST "$KC_URL/realms/master/protocol/openid-connect/token" \
      -d "client_id=admin-cli" \
