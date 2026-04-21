@@ -14,6 +14,17 @@ spring:
   cache:
     type: none
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8085/realms/mail-and-media-shop-realm
+
+app:
+  keycloak:
+    external-url: http://localhost:8085
+    realm: mail-and-media-shop-realm
+
 billing:
   minimal-discount-amount: "0.10"
   zero-amount: "0.00"

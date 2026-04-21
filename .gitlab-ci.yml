@@ -1,20 +1,20 @@
-#stages:
-#  - build
-#  - test
+stages:
+  - build
+  - test
 #  - e2e-test
 
 # Unit tests
-#unit_test_job:
-#  stage: test
-#  variables:
-#    REDIS_HOST: redis
-#  services:
-#    - name: redis:7.0-alpine
-#      alias: redis
-#  script:
-#    - mvn clean test
-#  tags:
-#    - maven
+unit_test_job:
+  stage: test
+  variables:
+    REDIS_HOST: redis
+  services:
+    - name: redis:7.0-alpine
+      alias: redis
+  script:
+    - mvn clean test
+  tags:
+    - maven
 
 # E2E tests
 #e2e_test_job:
