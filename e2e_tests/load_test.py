@@ -12,30 +12,35 @@ logger = logging.getLogger(__name__)
 
 class LoadTestConfig:
     """Configuration class for load test parameters."""
+
+    _REQUIRED_KC_KEYS = (
+        "KC_URL",
+        "KC_REALM",
+        "KC_CLIENT_ID",
+        "KC_CLIENT_SECRET",
+        "KC_GRANT_TYPE",
+        "KC_USERNAME",
+        "KC_PASSWORD",
+    )
+
     def __init__(self):
         host = os.getenv("APP_HOST", "http://localhost").rstrip("/")
         port = os.getenv("APP_PORT", "8090")
         app_url = f"{host}:{port}"
-        
+
         self.customers_url = f"{app_url}/api/v1/shop/customers"
         self.products_url = f"{app_url}/api/v1/shop/products"
-        
-        kc_url = os.getenv("KC_URL")
-        kc_realm = os.getenv("KC_REALM")
-        kc_client_id = os.getenv("KC_CLIENT_ID")
-        kc_client_secret = os.getenv("KC_CLIENT_SECRET")
-        kc_grant_type = os.getenv("KC_GRANT_TYPE")
-        kc_username = os.getenv("KC_USERNAME")
-        kc_password = os.getenv("KC_PASSWORD")
-        
+
+        kc_settings = self._resolve_keycloak_settings()
+
         user_token = get_user_token(
-            kc_url=kc_url, 
-            realm=kc_realm, 
-            client_id=kc_client_id, 
-            client_secret=kc_client_secret, 
-            grant_type=kc_grant_type, 
-            username=kc_username,
-            password=kc_password
+            kc_url=kc_settings["KC_URL"],
+            realm=kc_settings["KC_REALM"],
+            client_id=kc_settings["KC_CLIENT_ID"],
+            client_secret=kc_settings["KC_CLIENT_SECRET"],
+            grant_type=kc_settings["KC_GRANT_TYPE"],
+            username=kc_settings["KC_USERNAME"],
+            password=kc_settings["KC_PASSWORD"],
         )
 
         self.headers = {
@@ -47,6 +52,17 @@ class LoadTestConfig:
         self.total_customers = int(os.getenv("LOAD_TOTAL_CUSTOMERS", "100"))
         self.concurrent_workers = int(os.getenv("LOAD_CONCURRENT_WORKERS", "20"))
         self.purchases_per_customer = int(os.getenv("LOAD_PURCHASES_PER_CUSTOMER", "2"))
+
+    @classmethod
+    def _resolve_keycloak_settings(cls) -> Dict[str, str]:
+        """Resolves and validates all required Keycloak environment variables."""
+        settings = {key: os.getenv(key) for key in cls._REQUIRED_KC_KEYS}
+        missing = [key for key, value in settings.items() if not value]
+        if missing:
+            raise ValueError(
+                f"Missing required Keycloak environment variables: {', '.join(missing)}"
+            )
+        return settings
 
 class CustomerLoadService:
     """Service responsible for customer-related load operations."""

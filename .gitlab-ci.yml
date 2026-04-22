@@ -27,14 +27,14 @@ e2e_test_job:
     KC_CLIENT_ID: "mail-and-media-shop-app"
     KC_CLIENT_SECRET: ${KC_CLIENT_SECRET}
     KC_GRANT_TYPE: "password"
-    KC_USERNAME: "postman_user2"
-    KC_PASSWORD: "password123"
+    KC_USERNAME: ${KC_USERNAME}
+    KC_PASSWORD: ${KC_PASSWORD}
   script:
     - chmod +x scripts/1_docker-e2e-setup.sh
-    - chmod +x scripts/2_keycloak_api_setupi.sh
+    - chmod +x scripts/2_keycloak_api_setup.sh
     - chmod +x scripts/3_e2e-test-runner.sh
     - ./scripts/1_docker-e2e-setup.sh
-    - ./scripts/2_keycloak_api_setupi.sh
+    - ./scripts/2_keycloak_api_setup.sh
     - ./scripts/3_e2e-test-runner.sh
   artifacts:
     when: always
