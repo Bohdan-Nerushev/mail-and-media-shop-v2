@@ -5,6 +5,7 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Tuple, Optional, Dict, Any
+from get_user_token_to_test import get_user_token
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -18,7 +19,29 @@ class LoadTestConfig:
         
         self.customers_url = f"{app_url}/api/v1/shop/customers"
         self.products_url = f"{app_url}/api/v1/shop/products"
-        self.headers = {"Content-Type": "application/json"}
+        
+        kc_url = os.getenv("KC_URL")
+        kc_realm = os.getenv("KC_REALM")
+        kc_client_id = os.getenv("KC_CLIENT_ID")
+        kc_client_secret = os.getenv("KC_CLIENT_SECRET")
+        kc_grant_type = os.getenv("KC_GRANT_TYPE")
+        kc_username = os.getenv("KC_USERNAME")
+        kc_password = os.getenv("KC_PASSWORD")
+        
+        user_token = get_user_token(
+            kc_url=kc_url, 
+            realm=kc_realm, 
+            client_id=kc_client_id, 
+            client_secret=kc_client_secret, 
+            grant_type=kc_grant_type, 
+            username=kc_username,
+            password=kc_password
+        )
+
+        self.headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {user_token}"
+        }
         
         # Default load parameters
         self.total_customers = int(os.getenv("LOAD_TOTAL_CUSTOMERS", "100"))
@@ -71,7 +94,7 @@ class CustomerLoadService:
             
             # Step 2: Activation (Required for purchases)
             activation_url = f"{self.config.customers_url}/{customer_id}/activate"
-            act_response = requests.put(activation_url, timeout=10)
+            act_response = requests.put(activation_url, headers=self.config.headers, timeout=10)
             if act_response.status_code != 204:
                 return False, f"Activation failed with status {act_response.status_code} for customer {customer_id}"
                 

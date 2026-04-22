@@ -1,7 +1,7 @@
 stages:
   - build
   - test
- # - e2e-test
+  - e2e-test
 
 # Unit tests
 unit_test_job:
@@ -17,19 +17,28 @@ unit_test_job:
     - maven
 
 # E2E tests
-#e2e_test_job:
-  #stage: e2e-test
-  #variables:
-    #APP_HOST: "http://localhost"
-    #APP_PORT: "8090"
-  #script:
-    # - chmod +x setup_keycloak_api.sh
-    #- ./setup_keycloak_api.sh
-    # - chmod +x e2e_tests/run_e2e.sh
-    #- ./e2e_tests/run_e2e.sh
-  #artifacts:
-    #when: always
-    #paths:
-      #- app_container.log
-  #tags:
-    #- maven
+e2e_test_job:
+  stage: e2e-test
+  variables:
+    APP_HOST: "http://localhost"
+    APP_PORT: "8090"
+    KC_URL: "http://localhost:8085"
+    KC_REALM: "mail-and-media-shop-realm"
+    KC_CLIENT_ID: "mail-and-media-shop-app"
+    KC_CLIENT_SECRET: ${KC_CLIENT_SECRET}
+    KC_GRANT_TYPE: "password"
+    KC_USERNAME: "postman_user2"
+    KC_PASSWORD: "password123"
+  script:
+    - chmod +x scripts/1_docker-e2e-setup.sh
+    - chmod +x scripts/2_keycloak_api_setupi.sh
+    - chmod +x scripts/3_e2e-test-runner.sh
+    - ./scripts/1_docker-e2e-setup.sh
+    - ./scripts/2_keycloak_api_setupi.sh
+    - ./scripts/3_e2e-test-runner.sh
+  artifacts:
+    when: always
+    paths:
+      - app_container.log
+  tags:
+    - maven

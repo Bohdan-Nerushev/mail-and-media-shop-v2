@@ -1,19 +1,6 @@
-#!/bin/bash
-
-#=====================================#
-# DEV ONLY. Do not use in production.
-#=====================================#
-
-set -euo pipefail
-
-# --------------------------------------------------
-# [00] LOAD ENVIRONMENT CONFIGURATION
-# --------------------------------------------------
-if [ -f .env ]; then
-  set -a
-  . ./.env
-  set +a
-fi
+# Source common utilities and load environment
+source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/env_loader.sh"
 
 KC_URL=${KC_URL:-"http://localhost:8085"}
 ADMIN_USER=${KC_ADMIN_USER:-"admin"}
@@ -30,7 +17,7 @@ USER_PASSWORD=${USER_PASSWORD:-"password123"}
 echo "--------------------------------------------------"
 echo "🔧 KEYCLOAK AUTOMATIC CONFIGURATION"
 echo "--------------------------------------------------"
-
+sleep 30
 # --------------------------------------------------
 # [01] VALIDATE REQUIRED ENV VARIABLES
 # --------------------------------------------------
@@ -51,47 +38,60 @@ sleep 20
 echo "✅ Required environment variables are present"
 
 # --------------------------------------------------
-# [02] WAIT FOR DATABASE READINESS
+# [04] PRE-EMPTIVE SSL DISABLE (for HTTP access)
 # --------------------------------------------------
-echo "[02] Waiting for Keycloak database readiness..."
-
-until docker exec keycloak-db psql -U "$KEYCLOAK_DB_USER" -d "$KEYCLOAK_DB_NAME" -c "SELECT 1;" >/dev/null 2>&1; do
-  echo "⏳ Database is not ready yet..."
-  sleep 3
+echo "[04] Waiting for database tables and disabling SSL requirement..."
+# Keycloak might take a few seconds to create tables. We retry until the update succeeds or we timeout.
+DB_RETRY=0
+while [ $DB_RETRY -lt 15 ]; do
+  if docker exec keycloak-db psql -U "$KEYCLOAK_DB_USER" -d "$KEYCLOAK_DB_NAME" \
+    -c "UPDATE realm SET ssl_required = 'NONE';" &>/dev/null; then
+    echo "✅ SSL requirement disabled in database"
+    echo "🔄 Restarting Keycloak to apply SSL changes..."
+    docker restart keycloak
+    break
+  fi
+  echo "⏳ Waiting for Keycloak tables to be ready (attempt $DB_RETRY)..."
+  sleep 5
+  DB_RETRY=$((DB_RETRY + 1))
 done
-
-echo "✅ Database is ready"
-
-# --------------------------------------------------
-# [03] FORCE HTTP / DISABLE SSL IN DATABASE
-# --------------------------------------------------
-echo "[03] Forcing Keycloak to accept HTTP (No SSL)..."
-
-docker exec keycloak-db psql -U "$KEYCLOAK_DB_USER" -d "$KEYCLOAK_DB_NAME" \
-  -c "UPDATE realm SET ssl_required = 'NONE' WHERE name = 'master';"
-
-docker exec keycloak-db psql -U "$KEYCLOAK_DB_USER" -d "$KEYCLOAK_DB_NAME" \
-  -c "UPDATE realm SET ssl_required = 'NONE';"
-
-echo "✅ SSL requirement disabled in database"
-
-# --------------------------------------------------
-# [04] RESTART KEYCLOAK
-# --------------------------------------------------
-echo "[04] Restarting Keycloak..."
-docker compose restart keycloak
 
 # --------------------------------------------------
 # [05] WAIT FOR KEYCLOAK READINESS
 # --------------------------------------------------
-echo "[05] Waiting for Keycloak readiness..."
+log_info "Waiting for Keycloak readiness at $KC_URL..."
 
-until curl -s -f "$KC_URL/realms/master/.well-known/openid-configuration" >/dev/null 2>&1; do
-  echo "⏳ Keycloak is not ready yet..."
+MAX_RETRIES=30
+RETRY_COUNT=0
+
+until curl -s -f --max-time 5 "$KC_URL/realms/master/.well-known/openid-configuration" >/dev/null 2>&1; do
+  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$KC_URL/realms/master/.well-known/openid-configuration" || echo "000")
+  echo "⏳ Keycloak is not ready yet (HTTP $HTTP_STATUS at $KC_URL)..."
+  
+  # Auto-detection: switch between internal and external URLs if one fails
+  if { [ "$HTTP_STATUS" == "000" ] || [ "$HTTP_STATUS" == "403" ]; } && [ "$RETRY_COUNT" -gt 3 ]; then
+      if [[ "$KC_URL" == *"localhost"* ]]; then
+          ALT_URL="http://keycloak:8080"
+      else
+          ALT_URL="http://localhost:8085"
+      fi
+      
+      log_info "Connection issues detected. Probing alternative URL: $ALT_URL..."
+      if curl -s -f --max-time 2 "$ALT_URL/realms/master/.well-known/openid-configuration" >/dev/null 2>&1; then
+          log_info "✅ Connection successful at $ALT_URL! Switching KC_URL."
+          KC_URL="$ALT_URL"
+          break
+      fi
+  fi
+
+  RETRY_COUNT=$((RETRY_COUNT + 1))
+  if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+    error_exit "Keycloak failed to become ready after $MAX_RETRIES attempts."
+  fi
   sleep 5
 done
 
-echo "✅ Keycloak is ready"
+echo "✅ Keycloak is ready at $KC_URL"
 
 # --------------------------------------------------
 # [06] AUTHENTICATE AS ADMIN
@@ -517,7 +517,11 @@ until curl -s -f "$KC_URL/realms/master/.well-known/openid-configuration" >/dev/
   sleep 5
 done
 
+docker compose build --no-cache app || error_exit "Docker build failed."
+docker compose up -d app || error_exit "Docker Compose up failed."
+
 echo "✅ Keycloak is ready after restart"
 echo "=================================================="
 echo "🚀 KEYCLOAK AUTOMATION FINISHED"
 echo "=================================================="
+

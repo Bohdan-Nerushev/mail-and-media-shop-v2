@@ -1,29 +1,51 @@
 services:
 
-  # Spring Boot application
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ${APP_IMAGE_NAME}
-    container_name: ${APP_CONTAINER_NAME}
-    restart: always
-    depends_on:
-      shop_db:
-        condition: service_healthy
-      keycloak:
-        condition: service_started
-      redis:
-        condition: service_healthy
-    ports:
-      - "${APP_PORT}:8090"
+  keycloak-db:
+    image: postgres:15-alpine
+    container_name: keycloak-db
     environment:
-      - DB_URL=jdbc:postgresql://${SHOP_DB_CONTAINER_NAME}:5432/${SHOP_DB_NAME}
-      - DB_USERNAME=${SHOP_DB_USER}
-      - DB_PASSWORD=${SHOP_DB_PASSWORD}
-      - REDIS_HOST=redis
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME}
+      POSTGRES_USER: ${KEYCLOAK_DB_USER}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+    ports:
+      - "${KEYCLOAK_DB_PORT}:5432"
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    #networks:
+    #  - backend
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${KEYCLOAK_DB_USER} -d ${KEYCLOAK_DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  # Shop database
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.0
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB_NAME}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_PORT: ${KEYCLOAK_PORT}
+    ports:
+      - "${KEYCLOAK_PORT}:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    #networks:
+    #  - backend
+
+
+
+    # Shop database
   shop_db:
     image: postgres:${POSTGRES_IMAGE_VERSION}
     container_name: ${SHOP_DB_CONTAINER_NAME}
@@ -84,49 +106,30 @@ services:
       POSTGRES_DB: ${SONAR_DB_NAME}
     volumes:
       - sonarqube_postgres_data:/var/lib/postgresql/data
-
-  keycloak-db:
-    image: postgres:15-alpine
-    container_name: keycloak-db
-    environment:
-      POSTGRES_DB: ${KEYCLOAK_DB_NAME}
-      POSTGRES_USER: ${KEYCLOAK_DB_USER}
-      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+  # Spring Boot application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${APP_IMAGE_NAME}
+    container_name: ${APP_CONTAINER_NAME}
+    restart: always
     ports:
-      - "${KEYCLOAK_DB_PORT}:5432"
-    volumes:
-      - keycloak-db-data:/var/lib/postgresql/data
-    #networks:
-    #  - backend
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${KEYCLOAK_DB_USER} -d ${KEYCLOAK_DB_NAME}" ]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.0.0
-    container_name: keycloak
-    command: start-dev
-    environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB_NAME}
-      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
-      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
-
-      KC_HTTP_ENABLED: "true"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
-      KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_PORT: ${KEYCLOAK_PORT}
-    ports:
-      - "${KEYCLOAK_PORT}:8080"
+      - "${APP_PORT:-8090}:8090"
     depends_on:
-      keycloak-db:
+      shop_db:
         condition: service_healthy
-    #networks:
-    #  - backend
+      keycloak:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATASOURCE_URL: jdbc:postgresql://shop_db:5432/${SHOP_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${SHOP_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${SHOP_DB_PASSWORD}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/${KC_REALM}
 
 volumes:
   shop_db_data:
