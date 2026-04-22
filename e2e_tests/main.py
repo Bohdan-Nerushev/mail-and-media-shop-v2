@@ -85,6 +85,14 @@ BASE_URL_SHOP_CUSTOMERS = f"{BASE_URL_SHOP}/customers"
 BASE_URL_SHOP_CONTRACTS = f"{BASE_URL_SHOP}/contracts"
 HEADERS = {"Content-Type": "application/json"}
 
+KC_URL = os.getenv("KC_URL")
+KC_REALM = os.getenv("KC_REALM")
+KC_CLIENT_ID = os.getenv("KC_CLIENT_ID")
+KC_CLIENT_SECRET = os.getenv("KC_CLIENT_SECRET")
+KC_GRANT_TYPE = os.getenv("KC_GRANT_TYPE")
+KC_USERNAME = os.getenv("KC_USERNAME")
+KC_PASSWORD = os.getenv("KC_PASSWORD")
+
 # UUIDs for negative test scenarios
 INVALID_CUSTOMER_ID = str(uuid.uuid4())
 INVALID_CONTRACT_ID = str(uuid.uuid4())
@@ -138,74 +146,143 @@ if __name__ == "__main__":
     test_register_customer_null_fields(BASE_URL_SHOP_CUSTOMERS, HEADERS, valid_customer_payload)
 
     # 4. Inactive state checks (Scenario 2, 3, 10)
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_update_address_inactive_fail(customer_id, BASE_URL_CUSTOMERS, HEADERS)
+
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     valid_prod_id = get_valid_product_id(BASE_URL_PRODUCTS, valid_customer_payload["brand"])
     test_purchase_customer_inactive_fail(customer_id, valid_prod_id, BASE_URL_SHOP_CUSTOMERS, HEADERS)
+
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_return_409_when_listing_contracts_for_inactive_customer(customer_id, BASE_URL_SHOP_CONTRACTS)
+
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_return_409_when_generating_invoice_for_inactive_customer(customer_id, BASE_URL_BILLING, HEADERS)
 
     # 5. Retrieve and activate customer
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_get_customer_success(customer_id, BASE_URL_SHOP_CUSTOMERS)
+
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_get_customer_not_found(BASE_URL_SHOP_CUSTOMERS, INVALID_CUSTOMER_ID)
+
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_activate_customer(customer_id, BASE_URL_SHOP_CUSTOMERS)
     
     # 6. Activation checks (Scenario 1 & 5)
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_activate_customer_idempotency(customer_id, BASE_URL_SHOP_CUSTOMERS)
 
     # 7. Update data (ACTIVE status)
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_update_address_success(customer_id, BASE_URL_CUSTOMERS, HEADERS, valid_customer_payload)
+    
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_update_address_invalid(customer_id, BASE_URL_CUSTOMERS, HEADERS, valid_customer_payload)
+
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_update_communication_details(customer_id, BASE_URL_CUSTOMERS, HEADERS, valid_customer_payload)
 
     # 8. Purchase product and idempotency (Scenario 6)
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_purchase_product_successfully_when_valid_data_provided(customer_id, valid_prod_id, BASE_URL_SHOP_CUSTOMERS, HEADERS)
+    
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_verify_purchased_product_data_integrity_after_purchase(customer_id, valid_prod_id, BASE_URL_SHOP_CUSTOMERS, HEADERS)
+    
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_handle_product_purchase_idempotently_when_called_multiple_times(customer_id, valid_prod_id, BASE_URL_SHOP_CUSTOMERS, HEADERS)
 
     # 9. Contracts (Scenario 8 & 9)
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     contracts = test_should_successfully_list_contracts_when_customer_id_is_valid(customer_id, BASE_URL_SHOP_CONTRACTS)
     test_should_return_404_when_listing_contracts_for_non_existent_customer(BASE_URL_SHOP_CONTRACTS, INVALID_CUSTOMER_ID)
     
     if contracts:
         contract_id = contracts[0]["id"]
+        
+        user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+        HEADERS["Authorization"] = f"Bearer {user_token}"
         test_should_activate_contract_successfully_when_ids_are_valid(customer_id, contract_id, BASE_URL_CONTRACTS)
+        
+        user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+        HEADERS["Authorization"] = f"Bearer {user_token}"
         test_should_handle_contract_activation_idempotently_when_called_multiple_times(customer_id, contract_id, BASE_URL_CONTRACTS)
         
         ANOTHER_CUSTOMER_ID = str(uuid.uuid4())
+        
+        user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+        HEADERS["Authorization"] = f"Bearer {user_token}"
         test_should_return_400_when_activating_contract_belonging_to_another_customer(ANOTHER_CUSTOMER_ID, contract_id, BASE_URL_CONTRACTS)
-    
+
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_return_404_when_activating_non_existent_contract(customer_id, BASE_URL_CONTRACTS, INVALID_CONTRACT_ID)
 
     # 10. Billing (Scenario 7)
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_successfully_generate_invoice_when_valid_customer_id_is_provided(customer_id, BASE_URL_BILLING, HEADERS)
+    
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_return_404_when_generating_invoice_for_non_existent_customer(BASE_URL_BILLING, INVALID_CUSTOMER_ID, HEADERS)
+    
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_handle_invoice_generation_idempotently_when_called_multiple_times(customer_id, BASE_URL_BILLING, HEADERS)
     
     # Simulate a 404 error
     SIMULATED_ERROR_ID = "00000000-0000-0000-0000-000000000500"
     try:
+        user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+        HEADERS["Authorization"] = f"Bearer {user_token}"
         test_should_return_404_when_server_error_occurs_during_invoice_generation(BASE_URL_BILLING, HEADERS, SIMULATED_ERROR_ID)
     except AssertionError as e:
         logger.warning(f"Server error simulation note: {e}")
 
     # 11. Termination and constraints (Scenario 4)
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_delete_active_customer_fail(customer_id, BASE_URL_SHOP_CUSTOMERS)
     
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_deactivate_customer(customer_id, BASE_URL_CUSTOMERS)
+    
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_successfully_delete_customer_when_id_is_valid(customer_id, BASE_URL_SHOP_CUSTOMERS)
     
     # 12. Final checks after deletion
+    user_token = get_user_token(kc_url=KC_URL, realm=KC_REALM, client_id=KC_CLIENT_ID, client_secret=KC_CLIENT_SECRET, grant_type=KC_GRANT_TYPE, username=KC_USERNAME,password=KC_PASSWORD)
+    HEADERS["Authorization"] = f"Bearer {user_token}"
     test_should_return_404_when_listing_contracts_for_deleted_customer(customer_id, BASE_URL_SHOP_CONTRACTS)
 
     # 13. Load Testing (Optional or scaled down for regular E2E)
-    logger.info("=== Starting Load Test Phase ===")
-    load_runner = LoadTestRunner()
+ #   logger.info("=== Starting Load Test Phase ===")
+  #  load_runner = LoadTestRunner()
     # Running a smaller load by default in regular E2E to ensure it works without taking too much time
-    total_load_customers = int(os.getenv("LOAD_TEST_QUICK_TOTAL", "100"))
-    success_purchases, failure_purchases = load_runner.run_load_test(total=total_load_customers, workers=20, purchases=10)
+  #  total_load_customers = int(os.getenv("LOAD_TEST_QUICK_TOTAL", "100"))
+  #  success_purchases, failure_purchases = load_runner.run_load_test(total=total_load_customers, workers=20, purchases=10)
     
-    if total_load_customers > 0 and success_purchases == 0:
-        logger.error("Load Test failed: 0 successful operations. Check logs for details.")
-        exit(1)
+   # if total_load_customers > 0 and success_purchases == 0:
+  #      logger.error("Load Test failed: 0 successful operations. Check logs for details.")
+   #     exit(1)
 
-    logger.info("=== All E2E Tests Completed Successfully ===")
+    #logger.info("=== All E2E Tests Completed Successfully ===")

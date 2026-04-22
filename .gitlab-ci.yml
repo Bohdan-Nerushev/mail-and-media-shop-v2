@@ -1,7 +1,7 @@
 stages:
   - build
   - test
-#  - e2e-test
+ # - e2e-test
 
 # Unit tests
 unit_test_job:
@@ -18,16 +18,18 @@ unit_test_job:
 
 # E2E tests
 #e2e_test_job:
-#  stage: e2e-test
-#  variables:
-#    APP_HOST: "http://localhost"
-#    APP_PORT: "8090"
-#  script:
-#    - chmod +x e2e_tests/run_e2e.sh
-#    - ./e2e_tests/run_e2e.sh
-#  artifacts:
-#    when: always
-#    paths:
-#      - app_container.log
-#  tags:
-#    - maven
+  #stage: e2e-test
+  #variables:
+    #APP_HOST: "http://localhost"
+    #APP_PORT: "8090"
+  #script:
+    # - chmod +x setup_keycloak_api.sh
+    #- ./setup_keycloak_api.sh
+    # - chmod +x e2e_tests/run_e2e.sh
+    #- ./e2e_tests/run_e2e.sh
+  #artifacts:
+    #when: always
+    #paths:
+      #- app_container.log
+  #tags:
+    #- maven

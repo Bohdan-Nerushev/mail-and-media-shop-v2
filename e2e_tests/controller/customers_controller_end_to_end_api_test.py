@@ -180,6 +180,8 @@ def test_activate_customer_idempotency(customer_id, base_url):
     print("Customer activation idempotency check passed")
 
 def test_update_address_inactive_fail(customer_id, base_url, header):
+
+    
     url = f"{base_url}/{customer_id}/address"
     payload = {
         "street": "Forbidden St",
