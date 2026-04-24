@@ -1,0 +1,119 @@
+pg_database_size:
+  query: |
+    SELECT datname AS database,
+           pg_database_size(datname) AS size_bytes
+    FROM pg_database
+    WHERE datistemplate = false
+  metrics:
+    - datname:
+        usage: LABEL
+        description: Database name
+    - size_bytes:
+        usage: GAUGE
+        description: Database size in bytes
+
+pg_stat_user_tables:
+  query: |
+    SELECT schemaname,
+           relname AS table_name,
+           n_live_tup,
+           n_dead_tup,
+           seq_scan,
+           idx_scan
+    FROM pg_stat_user_tables
+  metrics:
+    - schemaname:
+        usage: LABEL
+    - table_name:
+        usage: LABEL
+    - n_live_tup:
+        usage: GAUGE
+        description: Live rows
+    - n_dead_tup:
+        usage: GAUGE
+        description: Dead rows
+    - seq_scan:
+        usage: COUNTER
+    - idx_scan:
+        usage: COUNTER
+
+shop_customers_total:
+  query: |
+    SELECT status,
+           brand,
+           COUNT(*) AS total
+    FROM customers
+    GROUP BY status, brand
+  metrics:
+    - status:
+        usage: LABEL
+        description: Customer status
+    - brand:
+        usage: LABEL
+        description: Brand
+    - total:
+        usage: GAUGE
+        description: Total number of customers per status and brand
+
+shop_contracts_total:
+  query: |
+    SELECT status,
+           product_type,
+           COUNT(*) AS total
+    FROM contracts
+    GROUP BY status, product_type
+  metrics:
+    - status:
+        usage: LABEL
+        description: Contract status
+    - product_type:
+        usage: LABEL
+        description: Product type associated with the contract
+    - total:
+        usage: GAUGE
+        description: Total number of contracts per status and product type
+
+shop_products_total:
+  query: |
+    SELECT dtype,
+           brand,
+           COUNT(*) AS total
+    FROM products
+    GROUP BY dtype, brand
+  metrics:
+    - dtype:
+        usage: LABEL
+        description: Product discriminator type
+    - brand:
+        usage: LABEL
+        description: Brand
+    - total:
+        usage: GAUGE
+        description: Total number of products per type and brand
+
+shop_invoices_total:
+  query: |
+    SELECT brand,
+           COUNT(*) AS total,
+           SUM(total_amount) AS revenue_total
+    FROM invoices
+    GROUP BY brand
+  metrics:
+    - brand:
+        usage: LABEL
+        description: Brand
+    - total:
+        usage: GAUGE
+        description: Total number of invoices per brand
+    - revenue_total:
+        usage: GAUGE
+        description: Total revenue amount across all invoices per brand
+
+shop_invoice_items_total:
+  query: |
+    SELECT COUNT(*) AS total
+    FROM invoice_items
+  metrics:
+    - total:
+        usage: GAUGE
+        description: Total number of invoice line items

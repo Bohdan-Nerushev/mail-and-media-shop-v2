@@ -17,7 +17,7 @@ USER_PASSWORD=${USER_PASSWORD:-"password123"}
 echo "--------------------------------------------------"
 echo "🔧 KEYCLOAK AUTOMATIC CONFIGURATION"
 echo "--------------------------------------------------"
-sleep 30
+sleep 20
 # --------------------------------------------------
 # [01] VALIDATE REQUIRED ENV VARIABLES
 # --------------------------------------------------

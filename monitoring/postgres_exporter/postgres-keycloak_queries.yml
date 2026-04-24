@@ -1,0 +1,123 @@
+pg_database_size:
+  query: |
+    SELECT datname AS database,
+           pg_database_size(datname) AS size_bytes
+    FROM pg_database
+    WHERE datistemplate = false
+  metrics:
+    - datname:
+        usage: LABEL
+        description: Database name
+    - size_bytes:
+        usage: GAUGE
+        description: Database size in bytes
+
+pg_stat_user_tables:
+  query: |
+    SELECT schemaname,
+           relname AS table_name,
+           n_live_tup,
+           n_dead_tup,
+           seq_scan,
+           idx_scan
+    FROM pg_stat_user_tables
+  metrics:
+    - schemaname:
+        usage: LABEL
+    - table_name:
+        usage: LABEL
+    - n_live_tup:
+        usage: GAUGE
+        description: Live rows
+    - n_dead_tup:
+        usage: GAUGE
+        description: Dead rows
+    - seq_scan:
+        usage: COUNTER
+    - idx_scan:
+        usage: COUNTER
+
+keycloak_realms_total:
+  query: |
+    SELECT COUNT(*) AS total
+    FROM realm
+  metrics:
+    - total:
+        usage: GAUGE
+        description: Total number of configured Keycloak realms
+
+keycloak_users_total:
+  query: |
+    SELECT r.name AS realm,
+           COUNT(u.id) AS total
+    FROM user_entity u
+    JOIN realm r ON u.realm_id = r.id
+    GROUP BY r.name
+  metrics:
+    - realm:
+        usage: LABEL
+        description: Keycloak realm name
+    - total:
+        usage: GAUGE
+        description: Total number of users per realm
+
+keycloak_enabled_users_total:
+  query: |
+    SELECT r.name AS realm,
+           COUNT(u.id) AS total
+    FROM user_entity u
+    JOIN realm r ON u.realm_id = r.id
+    WHERE u.enabled = true
+    GROUP BY r.name
+  metrics:
+    - realm:
+        usage: LABEL
+        description: Keycloak realm name
+    - total:
+        usage: GAUGE
+        description: Total number of enabled users per realm
+
+keycloak_clients_total:
+  query: |
+    SELECT r.name AS realm,
+           COUNT(c.id) AS total
+    FROM client c
+    JOIN realm r ON c.realm_id = r.id
+    GROUP BY r.name
+  metrics:
+    - realm:
+        usage: LABEL
+        description: Keycloak realm name
+    - total:
+        usage: GAUGE
+        description: Total number of clients per realm
+
+keycloak_user_sessions_total:
+  query: |
+    SELECT r.name AS realm,
+           COUNT(s.id) AS total
+    FROM user_session s
+    JOIN realm r ON s.realm_id = r.id
+    GROUP BY r.name
+  metrics:
+    - realm:
+        usage: LABEL
+        description: Keycloak realm name
+    - total:
+        usage: GAUGE
+        description: Total number of active user sessions per realm
+
+keycloak_groups_total:
+  query: |
+    SELECT r.name AS realm,
+           COUNT(g.id) AS total
+    FROM keycloak_group g
+    JOIN realm r ON g.realm_id = r.id
+    GROUP BY r.name
+  metrics:
+    - realm:
+        usage: LABEL
+        description: Keycloak realm name
+    - total:
+        usage: GAUGE
+        description: Total number of groups per realm
