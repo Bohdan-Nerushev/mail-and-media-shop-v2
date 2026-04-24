@@ -27,8 +27,8 @@ e2e_test_job:
     KC_CLIENT_ID: "mail-and-media-shop-app"
     KC_CLIENT_SECRET: ${KC_CLIENT_SECRET}
     KC_GRANT_TYPE: "password"
-    KC_USERNAME: ${KC_USERNAME}
-    KC_PASSWORD: ${KC_PASSWORD}
+    KC_USERNAME: ${KC_USERNAME:-"postman_user2"}
+    KC_PASSWORD: ${KC_PASSWORD:-"password123"}
   script:
     - chmod +x scripts/1_docker-e2e-setup.sh
     - chmod +x scripts/2_keycloak_api_setup.sh
