@@ -1,6 +1,6 @@
 ### Bupro specific
 # Password store for local testing
-src/main/resources/application.yml
+#src/main/resources/application.yml
 
 ### Java template
 # Log files
