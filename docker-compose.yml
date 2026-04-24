@@ -9,6 +9,8 @@ services:
       POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
     ports:
       - "${KEYCLOAK_DB_PORT}:5432"
+    networks:
+      - monitoring
     volumes:
       - keycloak-db-data:/var/lib/postgresql/data
     #networks:
@@ -32,17 +34,20 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
 
       KC_HTTP_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
       KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_PORT: ${KEYCLOAK_PORT}
       KC_HEALTH_ENABLED: "true"
     ports:
       - "${KEYCLOAK_PORT}:8080"
+    networks:
+      - monitoring
     depends_on:
       keycloak-db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/live HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && cat <&3 | grep -q 'UP'"]
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/live HTTP/1.1\r Host: localhost\r Connection: close\r \r ' >&3 && cat <&3 | grep -q 'UP'" ]
       interval: 10s
       timeout: 5s
       retries: 15
@@ -65,6 +70,8 @@ services:
       POSTGRES_PASSWORD: ${SHOP_DB_PASSWORD}
     ports:
       - "${SHOP_DB_PORT}:5432"
+    networks:
+      - monitoring
     volumes:
       - shop_db_data:/var/lib/postgresql/data
 
@@ -74,6 +81,8 @@ services:
     container_name: redis_cache
     ports:
       - "6379:6379"
+    networks:
+      - monitoring
     volumes:
       - redis_data:/data
     command: [ "redis-server", "--appendonly", "yes" ]
@@ -121,6 +130,8 @@ services:
     restart: always
     ports:
       - "${APP_PORT:-8090}:8090"
+    networks:
+      - monitoring
     depends_on:
       shop_db:
         condition: service_healthy
@@ -128,6 +139,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8090/actuator/health || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     environment:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
@@ -135,6 +152,122 @@ services:
       SPRING_DATASOURCE_USERNAME: ${SHOP_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${SHOP_DB_PASSWORD}
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/${KC_REALM}
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring
+    depends_on:
+      app:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+      - loki
+
+  loki:
+    image: grafana/loki:3.1.0
+    container_name: loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    networks:
+      - monitoring
+
+  alloy:
+    image: grafana/alloy:v1.3.0
+    container_name: alloy
+    restart: unless-stopped
+    command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
+    ports:
+      - "12345:12345"
+    volumes:
+      - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitoring
+    depends_on:
+      - loki
+
+  postgres-exporter-shop:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres-exporter-shop
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: postgresql://${SHOP_DB_USER}:${SHOP_DB_PASSWORD}@shop_db:5432/${SHOP_DB_NAME}?sslmode=disable
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres_exporter/queries.yml
+    ports:
+      - "9187:9187"
+    volumes:
+      - ./monitoring/postgres_exporter/queries.yml:/etc/postgres_exporter/queries.yml:ro
+    networks:
+      - monitoring
+    depends_on:
+      shop_db:
+        condition: service_healthy
+
+  postgres-exporter-keycloak:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres-exporter-keycloak
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: postgresql://${KEYCLOAK_DB_USER}:${KEYCLOAK_DB_PASSWORD}@keycloak-db:5432/${KEYCLOAK_DB_NAME}?sslmode=disable
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres_exporter/queries.yml
+    ports:
+      - "9188:9187"
+    volumes:
+      - ./monitoring/postgres_exporter/queries.yml:/etc/postgres_exporter/queries.yml:ro
+    networks:
+      - monitoring
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.62.0
+    container_name: redis-exporter
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: redis://redis_cache:6379
+    ports:
+      - "9121:9121"
+    networks:
+      - monitoring
+    depends_on:
+      redis:
+        condition: service_healthy
 
 volumes:
   shop_db_data:
@@ -144,3 +277,11 @@ volumes:
   sonarqube_postgres_data:
   redis_data:
   keycloak-db-data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+
+
+networks:
+  monitoring:
+    driver: bridge
