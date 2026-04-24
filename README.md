@@ -36,6 +36,28 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 - **Caching**: Redis (Jedis Client)
 - **Quality**: PMD, SpotBugs, Spotless, JaCoCo, SonarQube
 - **Documentation**: Swagger UI (OpenAPI 3.1)
+- **Security**: Spring Security, OAuth2 Resource Server, Keycloak
+
+---
+
+## Security & Authentication (Spring Security + Keycloak)
+
+The application implements a robust security layer using **Spring Security** as an OAuth2 Resource Server and **Keycloak** as the Identity Provider (IdP).
+
+### 1. Secured Endpoints
+By default, all API endpoints require authentication (a valid Bearer JWT token) except the following public endpoints:
+- `POST /api/v1/shop/customers` (Customer Registration)
+- `GET /api/v1/shop/products` (Product Catalog)
+- OpenAPI/Swagger UI endpoints (`/swagger-ui/**`, `/v3/api-docs/**`)
+- Spring Boot Actuator endpoints (`/actuator/**`)
+
+### 2. JWT Token Validation
+The application performs strict token validation using `NimbusJwtDecoder`:
+- **Audience Validation**: Ensures the token's `aud` claim contains the designated `clientId` (e.g., `mail-and-media-shop-app`) or `account`.
+- **Issuer Validation**: Ensures the token was strictly issued by the trusted Keycloak realm (e.g., `/realms/mail-and-media-shop-realm`).
+
+### 3. Role-Based Access Control (RBAC)
+Role extraction is handled by a custom `KeycloakRoleConverter`. It maps Keycloak's JSON structure by extracting roles from the `realm_access.roles` claim and converting them into Spring Security authorities with a `ROLE_` prefix (e.g., `ROLE_USER`, `ROLE_ADMIN`).
 
 ---
 
@@ -99,8 +121,13 @@ The project uses **PostgreSQL 16** as the database.
 - **PostgreSQL**: `5430` (maps to internal `5432`) can be changed in the .env file.
 
 ### Running the entire project
+
+To run it locally, you need to execute the following commands:
+
 ```bash
-docker compose up -d --build
+docker compose down -v
+docker compose up -d
+bash scripts/2_keycloak_api_setup.sh
 ```
 
 ### Stopping the project
