@@ -131,7 +131,7 @@
         "pluginVersion": "7.2.0",
         "targets": [
           {
-            "expr": "sum(jvm_memory_bytes_used{instance=\"$instance\", area=\"heap\"})*100/sum(jvm_memory_bytes_max{instance=\"$instance\", area=\"heap\"})\n",
+            "expr": "sum(jvm_memory_used_bytes{instance=\"$instance\", area=\"heap\"})*100/sum(jvm_memory_max_bytes{instance=\"$instance\", area=\"heap\"})\n",
             "format": "time_series",
             "hide": false,
             "instant": false,
@@ -197,7 +197,7 @@
       "span": 0,
       "targets": [
         {
-          "expr": "sum(jvm_memory_bytes_used{kubernetes_pod_name=\"$instance\", area=\"heap\"})*100/sum(jvm_memory_bytes_max{kubernetes_pod_name=\"$instance\", area=\"heap\"})",
+          "expr": "sum(jvm_memory_used_bytes{instance=\"$instance\", area=\"heap\"})*100/sum(jvm_memory_max_bytes{instance=\"$instance\", area=\"heap\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -265,7 +265,7 @@
         "pluginVersion": "7.2.0",
         "targets": [
           {
-            "expr": "sum(jvm_memory_bytes_used{instance=\"$instance\", area=\"nonheap\"})*100/sum(jvm_memory_bytes_max{instance=\"$instance\", area=\"nonheap\"})",
+            "expr": "sum(jvm_memory_used_bytes{instance=\"$instance\", area=\"nonheap\"})*100/sum(jvm_memory_max_bytes{instance=\"$instance\", area=\"nonheap\"})",
             "format": "time_series",
             "hide": false,
             "instant": false,
@@ -330,7 +330,7 @@
       "span": 0,
       "targets": [
         {
-          "expr": "sum(jvm_memory_bytes_used{kubernetes_pod_name=\"$instance\", area=\"nonheap\"})*100/sum(jvm_memory_bytes_max{kubernetes_pod_name=\"$instance\", area=\"nonheap\"})",
+          "expr": "sum(jvm_memory_used_bytes{instance=\"$instance\", area=\"nonheap\"})*100/sum(jvm_memory_max_bytes{instance=\"$instance\", area=\"nonheap\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -397,7 +397,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(jvm_memory_bytes_max{kubernetes_pod_name=\"$instance\"})",
+          "expr": "sum(jvm_memory_max_bytes{instance=\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -405,7 +405,7 @@
           "refId": "A"
         },
         {
-          "expr": "sum(jvm_memory_bytes_committed{kubernetes_pod_name=\"$instance\"})",
+          "expr": "sum(jvm_memory_committed_bytes{instance=\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -413,7 +413,7 @@
           "refId": "C"
         },
         {
-          "expr": "sum(jvm_memory_bytes_used{kubernetes_pod_name=\"$instance\"})",
+          "expr": "sum(jvm_memory_used_bytes{instance=\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -2363,17 +2363,26 @@
       {
         "allFormat": "",
         "allValue": "",
-        "current": {},
+        "current": {
+          "text": "keycloak:9000",
+          "value": "keycloak:9000"
+        },
         "datasource": {"type":"prometheus","uid":"prometheus"},
-        "definition": "label_values(keycloak_logins,kubernetes_pod_name)",
+        "definition": "label_values(jvm_memory_used_bytes,instance)",
         "hide": 0,
         "includeAll": false,
         "label": "Instance",
         "multi": false,
         "multiFormat": "",
         "name": "instance",
-        "options": [],
-        "query": "label_values(keycloak_logins,kubernetes_pod_name)",
+        "options": [
+          {
+            "selected": true,
+            "text": "keycloak:9000",
+            "value": "keycloak:9000"
+          }
+        ],
+        "query": "label_values(jvm_memory_used_bytes,instance)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -2387,7 +2396,10 @@
       {
         "allFormat": "",
         "allValue": "",
-        "current": {},
+        "current": {
+          "text": "mail-and-media-shop-realm",
+          "value": "mail-and-media-shop-realm"
+        },
         "datasource": {"type":"prometheus","uid":"prometheus"},
         "definition": "",
         "hide": 0,
@@ -2396,7 +2408,13 @@
         "multi": false,
         "multiFormat": "",
         "name": "realm",
-        "options": [],
+        "options": [
+          {
+            "selected": true,
+            "text": "mail-and-media-shop-realm",
+            "value": "mail-and-media-shop-realm"
+          }
+        ],
         "query": "label_values(keycloak_logins{provider=\"keycloak\"},realm)",
         "refresh": 1,
         "regex": "",
@@ -2411,7 +2429,10 @@
       {
         "allFormat": "",
         "allValue": "",
-        "current": {},
+        "current": {
+          "text": "mail-and-media-shop-app",
+          "value": "mail-and-media-shop-app"
+        },
         "datasource": {"type":"prometheus","uid":"prometheus"},
         "definition": "",
         "hide": 0,
