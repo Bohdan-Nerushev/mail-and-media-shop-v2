@@ -6,8 +6,9 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 ---
 
 ## Table of Contents
-
+- [Technology Stack](#technology-stack)
 - [Swagger UI](#swagger-ui)
+- [Security & Authentication (Spring Security + Keycloak)](#security--authentication-spring-security--keycloak)
 - [Testing](#testing)
 - [Dockerization](#dockerization)
 - [API Overview](#api-overview)
@@ -18,6 +19,10 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 - [Common Response Schemas](#common-response-schemas)
 - [Error Handling](#error-handling)
 - [Redis Caching](#redis-caching)
+- [Monitoring & Observability](#monitoring--observability)
+  - [Monitoring Components](#monitoring-components)
+  - [Logging & Metrics Strategy](#logging--metrics-strategy)
+  - [How to Visualize](#how-to-visualize)
 - [Maintain Code Cleanliness](#maintain-code-cleanliness)
   - [Spotless](#1-spotless--automatic-code-formatting)
   - [PMD](#2-pmd--anti-pattern-and-code-duplication-detection)
@@ -37,6 +42,14 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 - **Quality**: PMD, SpotBugs, Spotless, JaCoCo, SonarQube
 - **Documentation**: Swagger UI (OpenAPI 3.1)
 - **Security**: Spring Security, OAuth2 Resource Server, Keycloak
+
+---
+
+## Swagger UI
+
+Interactive API documentation is available at:
+
+[http://localhost:8090/swagger-ui/index.html](http://localhost:8090/swagger-ui/index.html)
 
 ---
 
@@ -60,14 +73,6 @@ The application performs strict token validation using `NimbusJwtDecoder`:
 Role extraction is handled by a custom `KeycloakRoleConverter`. It maps Keycloak's JSON structure by extracting roles from the `realm_access.roles` claim and converting them into Spring Security authorities with a `ROLE_` prefix (e.g., `ROLE_USER`, `ROLE_ADMIN`).
 
 ---
-
-## Swagger UI
-
-Interactive API documentation is available at:
-
-```
-http://localhost:8090/swagger-ui/index.html
-```
 
 ## Testing
 
@@ -907,6 +912,64 @@ TTL is externalized and can be configured in `application.yml` or `.env`:
 # Default: 10 minutes (600,000 ms)
 spring.cache.redis.time-to-live=600000
 ```
+
+---
+
+## Monitoring & Observability
+
+This project includes a comprehensive observability stack for monitoring metrics, logs, and system health. All components are pre-configured to work together out of the box.
+
+### Monitoring Components
+
+### 1. Grafana
+**URL:** [http://localhost:3000](http://localhost:3000)
+
+The primary visualization platform used to create dashboards and analyze metrics collected from Prometheus and logs aggregated by Loki.
+
+- **Health Endpoint:** [http://localhost:3000/api/health](http://localhost:3000/api/health) — Internal endpoint for debugging service availability and status.
+
+### 2. Prometheus
+**URL:** [http://localhost:9090](http://loVcalhost:9090)
+
+The core time-series database and monitoring system that pulls (scrapes) metrics from the application and various infrastructure exporters.
+
+- **Config Check:** [http://localhost:9090/config](http://localhost:9090/config) — Verify the current Prometheus configuration.
+- **Graph UI:** [http://localhost:9090/graph](http://localhost:9090/graph) — Built-in interface for quick metric testing and visualization using PromQL.
+
+### 3. Loki
+**URL:** [http://localhost:3100](http://localhost:3100)
+
+A horizontally scalable, highly available log aggregation system. It allows for efficient log querying and analysis across all containers.
+
+- **Health Check:** [http://localhost:3100/ready](http://localhost:3100/ready) — Returns the readiness status of the Loki instance.
+- **Internal Metrics:** [http://localhost:3100/metrics](http://localhost:3100/metrics) — Exposes Loki's own operational metrics for self-monitoring.
+
+### 4. Alloy (Grafana Alloy)
+**URL:** [http://localhost:12345](http://localhost:12345)
+
+The distribution of the OpenTelemetry Collector used for collecting, transforming, and forwarding telemetry data (logs and metrics) to the backend storage (Loki/Prometheus).
+
+- **Internal Metrics:** [http://localhost:12345/metrics](http://localhost:12345/metrics) — Exposes Alloy's own metrics for performance monitoring of the collector.
+
+### 5. Prometheus Exporters
+Exporters translate internal system states into Prometheus-compatible metrics.
+
+- **PostgreSQL Exporter (Shop):** [http://localhost:9187/metrics](http://localhost:9187/metrics) — Provides detailed database performance and health metrics for the shop database.
+- **PostgreSQL Exporter (Keycloak):** [http://localhost:9188/metrics](http://localhost:9188/metrics) — Provides metrics for the Keycloak identity provider database.
+- **Redis Exporter:** [http://localhost:9121/metrics](http://localhost:9121/metrics) — Exposes performance, memory usage, and health metrics for the Redis cache instance.
+
+### 6. Spring Boot Application (Observability Chain)
+The application exposes management endpoints via Spring Boot Actuator for deep introspection and monitoring.
+
+- **Health Check:** [http://localhost:8090/actuator/health](http://localhost:8090/actuator/health) — Aggregated health status of the application and its critical dependencies.
+- **Prometheus Metrics:** [http://localhost:8090/actuator/prometheus](http://localhost:8090/actuator/prometheus) — Native application metrics formatted specifically for Prometheus scraping.
+
+### 7. How to Visualize
+1. Access **Grafana** at `http://localhost:3000`.
+2. Login with default credentials (admin/admin).
+3. Navigate to **Explore** in the sidebar.
+4. Switch between **Prometheus** (for graphing metrics using PromQL) and **Loki** (for searching logs using LogQL).
+
 ---
 
 

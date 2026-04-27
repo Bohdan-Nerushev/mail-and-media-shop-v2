@@ -119,6 +119,46 @@ valid_customer_payload = {
     },
     "brand": "GMX"
 }
+#======================================================================================#
+#        RUN COMMAND - from the project root directory to run the end-to-end test      #
+#                                                                                      #
+#        > Before running the tests, make sure that the application and all its        #
+#          dependencies are up and running using                                       #
+#          docker compose up -d.                                                       #
+#                                                                                      #
+#======================================================================================#
+'''
+
+To macOS / Linux (bash / zsh)
+
+echo "Switching to e2e_tests directory" && \
+cd e2e_tests/ && \
+echo "Activating virtual environment (venv)" && \
+source venv/bin/activate && \
+echo "Running Python tests (main.py)" && \
+python3 main.py && \
+echo "Deactivating venv" && \
+deactivate && \
+echo "Returning to root directory" && \
+cd ..
+
+
+To Windows (PowerShell)
+
+echo "Switching to e2e_tests directory" && `
+cd e2e_tests && `
+echo "Activating virtual environment (venv)" && `
+.\venv\Scripts\Activate.ps1 && `
+echo "Running Python tests (main.py)" && `
+python main.py && `
+echo "Deactivating venv" && `
+deactivate && `
+echo "Returning to root directory" && `
+cd ..
+
+'''
+#======================================================================================#
+
 
 # ---------------------------
 # Test Execution
