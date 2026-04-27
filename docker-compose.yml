@@ -1,5 +1,4 @@
 services:
-
   keycloak-db:
     image: postgres:15-alpine
     container_name: keycloak-db
@@ -197,6 +196,25 @@ services:
     depends_on:
       app:
         condition: service_healthy
+      node-exporter:
+        condition: service_started
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node-exporter
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/proc:/host/proc:ro'
+      - '/sys:/host/sys:ro'
+      - '/:/rootfs:ro'
+    networks:
+      - monitoring
 
   grafana:
     image: grafana/grafana:11.1.0

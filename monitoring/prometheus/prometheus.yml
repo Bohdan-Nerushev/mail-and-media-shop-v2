@@ -18,6 +18,15 @@ scrape_configs:
     static_configs:
       - targets: ['keycloak:9000']
 
+  - job_name: keycloak-business
+    metrics_path: /realms/mail-and-media-shop-realm/metrics
+    static_configs:
+      - targets: ['keycloak:8090']
+
+  - job_name: node-exporter
+    static_configs:
+      - targets: ['node-exporter:9100']
+
   - job_name: postgres-shop
     static_configs:
       - targets: ['postgres-exporter-shop:9187']

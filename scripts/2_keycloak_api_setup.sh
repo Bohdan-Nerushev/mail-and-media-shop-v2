@@ -155,6 +155,35 @@ docker exec keycloak-db psql -U "$KEYCLOAK_DB_USER" -d "$KEYCLOAK_DB_NAME" \
 echo "✅ HTTPS requirement disabled again"
 
 # --------------------------------------------------
+# [08b] CONFIGURE METRICS LISTENER AND ENABLE EVENTS
+# --------------------------------------------------
+echo "[08b] Configuring metrics-listener and enabling event collection for realm: $REALM..."
+
+EVENTS_CONFIG_RESPONSE=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" -X PUT "$KC_URL/admin/realms/$REALM" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"eventsEnabled\": true,
+    \"eventsListeners\": [\"jboss-logging\", \"metrics-listener\"],
+    \"adminEventsEnabled\": true,
+    \"adminEventsDetailsEnabled\": true
+  }")
+
+EVENTS_CONFIG_BODY=$(printf '%s' "$EVENTS_CONFIG_RESPONSE" | sed '$d')
+EVENTS_CONFIG_STATUS=$(printf '%s' "$EVENTS_CONFIG_RESPONSE" | tail -n1 | sed 's/HTTP_STATUS://')
+
+if [ "$EVENTS_CONFIG_STATUS" = "204" ]; then
+  echo "✅ Metrics listener and event collection configured"
+elif [ "$EVENTS_CONFIG_STATUS" = "409" ]; then
+  echo "⚠️ Events already configured"
+else
+  echo "❌ Failed to configure metrics listener"
+  echo "HTTP status: $EVENTS_CONFIG_STATUS"
+  [ -n "$EVENTS_CONFIG_BODY" ] && (echo "$EVENTS_CONFIG_BODY" | jq . 2>/dev/null || echo "$EVENTS_CONFIG_BODY")
+  exit 1
+fi
+
+# --------------------------------------------------
 # [09] CREATE REALM ROLES
 # --------------------------------------------------
 echo "[09] Creating realm roles: USER, ADMIN..."
