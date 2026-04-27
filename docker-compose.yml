@@ -66,18 +66,22 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./scripts:/scripts
-    env_file:
-      - .env
     environment:
       KC_URL: "http://keycloak:8080"
+      KC_ADMIN_USER: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_ADMIN_PASS: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+      KC_REALM: ${KC_REALM}
+      KC_CLIENT_ID: ${KC_CLIENT_ID}
+      KC_CLIENT_SECRET: ${KC_CLIENT_SECRET}
+      KEYCLOAK_DB_USER: ${KEYCLOAK_DB_USER}
+      KEYCLOAK_DB_NAME: ${KEYCLOAK_DB_NAME}
+      USER_NAME: ${USER_NAME}
+      USER_EMAIL: ${USER_EMAIL}
+      USER_PASSWORD: ${USER_PASSWORD}
     networks:
       - monitoring
     entrypoint: >
-      sh -c "
-      apk add --no-cache bash curl jq postgresql-client &&
-      bash /scripts/2_keycloak_api_setup.sh
-      "
-
+      sh -c " apk add --no-cache bash curl jq postgresql-client && bash /scripts/2_keycloak_api_setup.sh "
     # Shop database
   shop_db:
     image: postgres:${POSTGRES_IMAGE_VERSION}
@@ -305,7 +309,6 @@ volumes:
   prometheus_data:
   grafana_data:
   loki_data:
-
 
 networks:
   monitoring:
