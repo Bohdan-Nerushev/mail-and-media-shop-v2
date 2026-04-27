@@ -929,7 +929,7 @@ The primary visualization platform used to create dashboards and analyze metrics
 - **Health Endpoint:** [http://localhost:3000/api/health](http://localhost:3000/api/health) — Internal endpoint for debugging service availability and status.
 
 ### 2. Prometheus
-**URL:** [http://localhost:9090](http://loVcalhost:9090)
+**URL:** [http://localhost:9090](http://localhost:9090)
 
 The core time-series database and monitoring system that pulls (scrapes) metrics from the application and various infrastructure exporters.
 
@@ -937,8 +937,6 @@ The core time-series database and monitoring system that pulls (scrapes) metrics
 - **Graph UI:** [http://localhost:9090/graph](http://localhost:9090/graph) — Built-in interface for quick metric testing and visualization using PromQL.
 
 ### 3. Loki
-**URL:** [http://localhost:3100](http://localhost:3100)
-
 A horizontally scalable, highly available log aggregation system. It allows for efficient log querying and analysis across all containers.
 
 - **Health Check:** [http://localhost:3100/ready](http://localhost:3100/ready) — Returns the readiness status of the Loki instance.
@@ -965,7 +963,7 @@ The application exposes management endpoints via Spring Boot Actuator for deep i
 - **Prometheus Metrics:** [http://localhost:8090/actuator/prometheus](http://localhost:8090/actuator/prometheus) — Native application metrics formatted specifically for Prometheus scraping.
 
 ### 7. How to Visualize
-1. Access **Grafana** at `http://localhost:3000`.
+1. Access **Grafana** at [http://localhost:3000](http://localhost:3000).
 2. Login with default credentials (admin/admin).
 3. Navigate to **Explore** in the sidebar.
 4. Switch between **Prometheus** (for graphing metrics using PromQL) and **Loki** (for searching logs using LogQL).
