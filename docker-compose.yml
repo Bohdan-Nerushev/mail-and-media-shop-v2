@@ -47,13 +47,36 @@ services:
       keycloak-db:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/live HTTP/1.1\r Host: localhost\r Connection: close\r \r ' >&3 && cat <&3 | grep -q 'UP'" ]
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/live HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q 'UP'" ]
       interval: 10s
       timeout: 5s
       retries: 15
       start_period: 30s
     #networks:
     #  - backend
+
+  keycloak-setup:
+    image: docker:cli
+    container_name: keycloak-setup
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      keycloak-db:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./scripts:/scripts
+    env_file:
+      - .env
+    environment:
+      KC_URL: "http://keycloak:8080"
+    networks:
+      - monitoring
+    entrypoint: >
+      sh -c "
+      apk add --no-cache bash curl jq postgresql-client &&
+      bash /scripts/2_keycloak_api_setup.sh
+      "
 
     # Shop database
   shop_db:
@@ -139,8 +162,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      keycloak-setup:
+        condition: service_completed_successfully
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8090/actuator/health || exit 1" ]
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8090/actuator/health || exit 1" ]
       interval: 15s
       timeout: 5s
       retries: 10

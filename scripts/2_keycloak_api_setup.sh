@@ -17,7 +17,7 @@ USER_PASSWORD=${USER_PASSWORD:-"password123"}
 echo "--------------------------------------------------"
 echo "🔧 KEYCLOAK AUTOMATIC CONFIGURATION"
 echo "--------------------------------------------------"
-sleep 20
+
 # --------------------------------------------------
 # [01] VALIDATE REQUIRED ENV VARIABLES
 # --------------------------------------------------
@@ -33,7 +33,6 @@ if [ -z "${KEYCLOAK_DB_USER:-}" ] || [ -z "${KEYCLOAK_DB_NAME:-}" ]; then
   exit 1
 fi
 
-sleep 20
 
 echo "✅ Required environment variables are present"
 
@@ -501,27 +500,23 @@ echo "--------------------------------------------------"
 echo "✅ CONFIGURATION COMPLETE"
 echo "--------------------------------------------------"
 
-# --------------------------------------------------
-# [21] RESTART KEYCLOAK TO APPLY CHANGES
-# --------------------------------------------------
-echo "[21] Restarting Keycloak to apply changes..."
-docker compose restart keycloak
+# [21] No restart needed as realm changes are immediate
+log_info "[21] Skipping redundant Keycloak restart..."
+# docker compose restart keycloak
 
 # --------------------------------------------------
-# [22] WAIT FOR KEYCLOAK READINESS AFTER RESTART
+# [22] VERIFY KEYCLOAK READINESS
 # --------------------------------------------------
-echo "[22] Waiting for Keycloak after final restart..."
+echo "[22] Verifying Keycloak is ready..."
 
 until curl -s -f "$KC_URL/realms/master/.well-known/openid-configuration" >/dev/null 2>&1; do
-  echo "⏳ Keycloak is not ready yet after restart..."
+  echo "⏳ Keycloak is not ready yet..."
   sleep 5
 done
 
-docker compose build --no-cache app || error_exit "Docker build failed."
-docker compose up -d app || error_exit "Docker Compose up failed."
-
-echo "✅ Keycloak is ready after restart"
+echo "✅ Keycloak is ready"
 echo "=================================================="
 echo "🚀 KEYCLOAK AUTOMATION FINISHED"
 echo "=================================================="
+
 

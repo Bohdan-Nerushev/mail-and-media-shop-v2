@@ -74,6 +74,9 @@ log_info "Activating venv and installing requirements..."
 source "$VENV_DIR/bin/activate" || error_exit "Venv activation failed."
 pip install -r "$PROJECT_ROOT/e2e_tests/requirements.txt" --quiet || error_exit "Pip install failed."
 
+log_info "Waiting 10 seconds for services to stabilize..."
+sleep 10
+
 log_info "Executing Python E2E tests..."
 export PYTHONPATH="$PROJECT_ROOT/e2e_tests"
 
@@ -85,6 +88,10 @@ TEST_EXIT_CODE=$?
 # ==============================================================================
 
 # Capture container logs for analysis (essential for GitLab CI artifacts)
+log_info "Capturing container logs for 'keycloak'..."
+docker compose logs keycloak > "$PROJECT_ROOT/keycloak_container.log"
+log_info "Keycloak logs saved to keycloak_container.log"
+
 log_info "Capturing container logs for 'app'..."
 docker compose logs app > "$PROJECT_ROOT/app_container.log"
 log_info "App logs saved to app_container.log"

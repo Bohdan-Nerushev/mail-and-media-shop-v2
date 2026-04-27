@@ -29,9 +29,14 @@ fi
 log_info "Ensuring clean environment (stopping any existing containers)..."
 docker compose down -v 2>/dev/null || true
 
-log_info "Building and starting containers in detached mode..."
-# Build without cache to ensure latest code changes are included
-docker compose up -d keycloak-db keycloak shop_db redis || error_exit "Docker Compose up failed."
+log_info "Building and starting infrastructure containers..."
+docker compose up -d keycloak-db keycloak shop_db redis || error_exit "Docker Compose infrastructure start failed."
+
+log_info "Starting keycloak-setup (Keycloak configuration automation)..."
+docker compose up --no-build keycloak-setup || error_exit "Keycloak setup failed."
+
+log_info "Building and starting application..."
+docker compose up -d --build app || error_exit "Docker Compose app start failed."
 
 # ==============================================================================
 # PHASE 3: Network Integration (for CI/CD environments)
