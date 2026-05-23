@@ -59,6 +59,9 @@ app:
 
 server:
   port: 8090
+  tomcat:
+    mbeanregistry:
+      enabled: true
 
 billing:
   minimal-discount-amount: "0.10"
