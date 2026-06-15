@@ -1039,7 +1039,7 @@ snyk test --all-projects
 
 ### 5. Git Pre-commit Hook – Automatic Checks Before Commit
 
-Runs Spotless and PMD using the `dev` profile; blocks commit if violations are found.
+Runs Spotless, PMD, and SpotBugs using the `dev` profile; blocks commit if violations are found.
 
 ```bash
 .git/hooks/pre-commit

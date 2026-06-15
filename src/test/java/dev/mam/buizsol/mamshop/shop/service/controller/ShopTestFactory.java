@@ -24,12 +24,10 @@ public final class ShopTestFactory {
     private ShopTestFactory() {}
 
     public static PremiumMailProduct createPremiumProduct(String name, Brand brand, BigDecimal price) {
-
         return new PremiumMailProduct(name, brand, price);
     }
 
     public static StandardMailProduct createStandardProduct(String name, Brand brand, BigDecimal price) {
-
         return new StandardMailProduct(name, brand, price);
     }
 

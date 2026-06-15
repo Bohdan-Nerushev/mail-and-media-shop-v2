@@ -12,9 +12,11 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     @Override
     @EntityGraph(attributePaths = {"address", "invoiceAddress", "communicationDetails"})
-    Optional<Customer> findById(UUID id);
+    @NotNull
+    Optional<Customer> findById(@NotNull UUID id);
 
     default Customer getById(@NotNull final UUID id) throws CustomerNotFoundException {
         return findById(id).orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + id + " not found"));
     }
 }
+

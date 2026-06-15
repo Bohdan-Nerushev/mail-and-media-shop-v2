@@ -79,7 +79,6 @@ class CustomerTest {
     @Test
     @DisplayName("Positive: Invoice address fallback to main address")
     void shouldUseMainAddressAsInvoiceAddressWhenNotProvided() {
-
         LocalDate birthDate = LocalDate.of(1990, 1, 1);
         Customer customer =
                 createDefaultCustomer("John", "Doe", birthDate, mainAddress, null, communicationDetails, Brand.GMX);

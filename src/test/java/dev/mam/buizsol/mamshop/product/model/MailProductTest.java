@@ -139,7 +139,7 @@ class MailProductTest {
         assertEquals(validFee, product.getMonthlyFee());
     }
 
-    @DisplayName("Verify PremiumMailProduct failure when monthly fee is below or at the limit (<=" + " 0.10€)")
+    @DisplayName("Verify PremiumMailProduct failure when monthly fee is below or at the limit (<= 0.10€)")
     @ParameterizedTest(name = "[{index}] Monthly fee {0} € should be invalid")
     @ValueSource(strings = {"0.10", "0.09", "0.00", "-0.01", "-100.00"})
     void shouldThrowExceptionWhenPremiumMailProductMonthlyFeeIsInvalid(final String feeString) {
@@ -243,7 +243,7 @@ class MailProductTest {
     }
 
     @Test
-    @DisplayName("Success: Verify withMonthlyFee return new instance with same data but new fee")
+    @DisplayName("Success: Verify withMonthlyFee return new instance with same data but new fee for premium product")
     void shouldReturnNewInstanceWithUpdatedMonthlyFeeForPremiumProduct() {
         final PremiumMailProduct initial =
                 createDefaultPremiumMailProduct("Premium Pro", Brand.WEB_DE, new BigDecimal("10.00"));

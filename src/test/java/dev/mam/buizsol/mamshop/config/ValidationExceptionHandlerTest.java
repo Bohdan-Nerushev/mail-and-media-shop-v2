@@ -109,7 +109,7 @@ class ValidationExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Should rethrow original exception if no package/annotation mapping matches (fallback" + " branch)")
+    @DisplayName("Should rethrow original exception if no package/annotation mapping matches (fallback branch)")
     void shouldRethrowOriginalExceptionWhenNoMappingMatches() {
         ConstraintViolationException ex = createException(NotNull.class, "Fallback", String.class);
 

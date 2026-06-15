@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.billing.service;
 
 import dev.mam.buizsol.mamshop.billing.exception.InvalidInvoiceDiscountException;
+import dev.mam.buizsol.mamshop.billing.exception.InvoiceValidationException;
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
@@ -47,14 +48,22 @@ class BillingServiceImpl implements BillingService {
     @Override
     @Transactional
     public Invoice generateInvoice(final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
-        return createInvoice(customerId, zeroAmount);
+        if (customerId == null) {
+            throw new InvoiceValidationException("Customer ID must not be null");
+        }
+        return generateInvoice(customerId, zeroAmount);
     }
 
     @Override
     @Transactional
     public Invoice generateInvoice(final UUID customerId, final BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException {
-
+        if (customerId == null) {
+            throw new InvoiceValidationException("Customer ID must not be null");
+        }
+        if (discount == null) {
+            throw new InvalidInvoiceDiscountException("Discount must not be null");
+        }
         if (discount.compareTo(zeroAmount) < 0) {
             throw new InvalidInvoiceDiscountException("Discount cannot be negative");
         }
@@ -64,9 +73,8 @@ class BillingServiceImpl implements BillingService {
         return createInvoice(customerId, discount);
     }
 
-    private Invoice createInvoice(UUID customerId, BigDecimal discount)
+    private Invoice createInvoice(final UUID customerId, final BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException {
-
         final Customer customer = customerService
                 .findCustomerById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + customerId + " not found"));

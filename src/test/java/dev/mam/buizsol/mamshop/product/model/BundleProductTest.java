@@ -12,7 +12,6 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.executable.ExecutableValidator;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.Set;
 import org.assertj.core.api.Assertions;
@@ -111,7 +110,7 @@ class BundleProductTest {
     void shouldThrowExceptionWhenCreatingBundleWithNullMail() {
         final PartnerProduct partner = createDefaultPartnerProduct("P", Brand.GMX, BigDecimal.ZERO, BigDecimal.ONE);
 
-        assertThrows(NullPointerException.class, () -> createDefaultBundleProduct(null, partner));
+        assertThrows(ProductValidationException.class, () -> createDefaultBundleProduct(null, partner));
     }
 
     @Test
@@ -119,13 +118,13 @@ class BundleProductTest {
     void shouldThrowExceptionWhenCreatingBundleWithNullPartner() {
         final MailProduct mail = createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
 
-        assertThrows(NullPointerException.class, () -> createDefaultBundleProduct(mail, null));
+        assertThrows(ProductValidationException.class, () -> createDefaultBundleProduct(mail, null));
     }
 
     @Test
     @DisplayName("Negative: Failure with both components null")
     void shouldThrowExceptionWhenCreatingBundleWithBothComponentsNull() {
-        assertThrows(NullPointerException.class, () -> createDefaultBundleProduct(null, null));
+        assertThrows(ProductValidationException.class, () -> createDefaultBundleProduct(null, null));
     }
 
     @Test
@@ -225,22 +224,20 @@ class BundleProductTest {
         var setupFeeMethod =
                 BundleProduct.class.getDeclaredMethod("calculateTotalSetupFee", Product.class, Product.class);
         setupFeeMethod.setAccessible(true);
-        var setupException =
-                assertThrows(InvocationTargetException.class, () -> setupFeeMethod.invoke(null, null, null));
-        Assertions.assertThat(setupException.getCause()).isInstanceOf(NullPointerException.class);
+        assertEquals(BigDecimal.ZERO, setupFeeMethod.invoke(null, null, null));
 
         var monthlyFeeMethod =
                 BundleProduct.class.getDeclaredMethod("calculateTotalMonthlyFee", Product.class, Product.class);
         monthlyFeeMethod.setAccessible(true);
-        var monthlyException =
-                assertThrows(InvocationTargetException.class, () -> monthlyFeeMethod.invoke(null, null, null));
-        Assertions.assertThat(monthlyException.getCause()).isInstanceOf(NullPointerException.class);
+        assertEquals(BigDecimal.ZERO, monthlyFeeMethod.invoke(null, null, null));
 
         var validateBrandsMethod =
                 BundleProduct.class.getDeclaredMethod("validateBrands", Product.class, Product.class);
         validateBrandsMethod.setAccessible(true);
-        var exception =
-                assertThrows(InvocationTargetException.class, () -> validateBrandsMethod.invoke(null, null, null));
-        Assertions.assertThat(exception.getCause()).isInstanceOf(NullPointerException.class);
+        var exception = assertThrows(
+                java.lang.reflect.InvocationTargetException.class, () -> validateBrandsMethod.invoke(null, null, null));
+        Assertions.assertThat(exception.getCause())
+                .isInstanceOf(ProductValidationException.class)
+                .hasMessage("Mail and Partner products must not be null");
     }
 }

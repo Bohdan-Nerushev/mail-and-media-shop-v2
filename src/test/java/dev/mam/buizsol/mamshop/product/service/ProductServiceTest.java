@@ -206,7 +206,7 @@ class ProductServiceTest {
 
     @ParameterizedTest
     @CsvSource({"0.10", "0.09", "0.05", "0.01", "0.00"})
-    @DisplayName("Should throw IllegalArgumentException when monthly fee is at or below minimum" + " threshold")
+    @DisplayName("Should throw IllegalArgumentException when monthly fee is at or below minimum threshold")
     void shouldThrowIllegalArgumentExceptionWhenMonthlyFeeIsAtOrBelowMinimumThreshold(final String feeValue) {
         final Product product = createDefaultProduct("Low Fee Test", Brand.GMX, "1.00", "0.50");
 
@@ -228,7 +228,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName(
-            "Should throw ProductValidationException when monthly fee fails manual business " + "validation threshold")
+            "Should throw ProductValidationException when monthly fee fails manual business validation threshold")
     void shouldThrowProductValidationExceptionWhenMonthlyFeeFailsManualThreshold() {
         final ProductServiceImpl target = new ProductServiceImpl(productRepository);
         ReflectionTestUtils.setField(target, "minimalDiscountAmount", new BigDecimal("1.00"));

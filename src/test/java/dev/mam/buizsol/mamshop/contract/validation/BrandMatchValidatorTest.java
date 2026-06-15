@@ -30,7 +30,7 @@ class BrandMatchValidatorTest {
     }
 
     @Test
-    @DisplayName("Should return true when values are null or insufficient to allow other validators to handle it")
+    @DisplayName("Should return true when values are null or insufficient to allow other validators to" + " handle it")
     void shouldReturnTrueWhenValuesAreInvalid() {
         assertTrue(validator.isValid(null, context));
         assertTrue(validator.isValid(new Object[] {}, context));

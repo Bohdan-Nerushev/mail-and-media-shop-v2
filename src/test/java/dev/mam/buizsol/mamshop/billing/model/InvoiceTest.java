@@ -90,7 +90,6 @@ class InvoiceTest {
     @ParameterizedTest(name = "Calculation logic with various item counts and discount: {0}")
     @CsvSource({"0.00, 0.00", "10.50,-10.50", "100.00,-100.00"})
     void shouldCalculateAmountCorrectlyWhenDiscountsAreProvided(BigDecimal discount, BigDecimal expectedTotal) {
-
         Invoice invoice =
                 new Invoice(Brand.MAIL_COM, customer, testAddress, testAddress, Collections.emptyList(), discount);
 

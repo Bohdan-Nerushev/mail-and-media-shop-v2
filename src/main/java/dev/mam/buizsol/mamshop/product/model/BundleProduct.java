@@ -60,18 +60,30 @@ public class BundleProduct extends Product {
     }
 
     private static String generateBundleName(final Product mail, final Product partner) {
+        if (mail == null || partner == null) {
+            throw new ProductValidationException("Mail and Partner products must not be null");
+        }
         return "Bundle: " + mail.getName() + " " + partner.getName();
     }
 
     private static BigDecimal calculateTotalSetupFee(final Product mail, final Product partner) {
+        if (mail == null || partner == null) {
+            return BigDecimal.ZERO;
+        }
         return mail.getSetupFee().add(partner.getSetupFee());
     }
 
     private static BigDecimal calculateTotalMonthlyFee(final Product mail, final Product partner) {
+        if (mail == null || partner == null) {
+            return BigDecimal.ZERO;
+        }
         return mail.getMonthlyFee().add(partner.getMonthlyFee());
     }
 
     private static Brand validateBrands(final Product mail, final Product partner) {
+        if (mail == null || partner == null) {
+            throw new ProductValidationException("Mail and Partner products must not be null");
+        }
         if (mail.getBrand() != partner.getBrand()) {
             throw new ProductValidationException("Brands must match for bundle product");
         }
