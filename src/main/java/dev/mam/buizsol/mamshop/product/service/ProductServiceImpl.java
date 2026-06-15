@@ -4,16 +4,15 @@ import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductNotFoundException;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 class ProductServiceImpl implements ProductService {
@@ -48,8 +47,8 @@ class ProductServiceImpl implements ProductService {
     @Override
     @Caching(
             evict = {
-                    @CacheEvict(value = "products", key = "#id"),
-                    @CacheEvict(value = "productsByBrand", allEntries = true)
+                @CacheEvict(value = "products", key = "#id"),
+                @CacheEvict(value = "productsByBrand", allEntries = true)
             })
     public void updateMonthlyFee(final UUID id, final BigDecimal monthlyFee) throws ProductNotFoundException {
         if (monthlyFee.compareTo(minimalDiscountAmount) <= 0) {
