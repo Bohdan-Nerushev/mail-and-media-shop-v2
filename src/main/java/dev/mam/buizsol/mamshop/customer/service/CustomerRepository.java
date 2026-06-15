@@ -19,4 +19,3 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
         return findById(id).orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + id + " not found"));
     }
 }
-

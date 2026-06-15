@@ -227,8 +227,7 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Should throw ProductValidationException when monthly fee fails manual business validation threshold")
+    @DisplayName("Should throw ProductValidationException when monthly fee fails manual business validation threshold")
     void shouldThrowProductValidationExceptionWhenMonthlyFeeFailsManualThreshold() {
         final ProductServiceImpl target = new ProductServiceImpl(productRepository);
         ReflectionTestUtils.setField(target, "minimalDiscountAmount", new BigDecimal("1.00"));
