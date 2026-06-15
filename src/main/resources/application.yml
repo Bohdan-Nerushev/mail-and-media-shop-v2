@@ -83,7 +83,7 @@ springdoc:
       use-pkce-with-authorization-code-grant: true
   api-docs:
     path: /v3/api-docs
-    
+
 management:
   endpoints:
     web:

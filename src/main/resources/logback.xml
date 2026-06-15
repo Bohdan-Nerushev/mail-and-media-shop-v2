@@ -22,10 +22,10 @@
         </encoder>
     </appender>
 
-  <!-- Root logging level -->
+    <!-- Root logging level -->
     <root level="info">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
 
 </configuration>
