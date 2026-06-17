@@ -21,8 +21,10 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 - [Redis Caching](#redis-caching)
 - [Monitoring & Observability](#monitoring--observability)
   - [Monitoring Components](#monitoring-components)
-  - [Logging & Metrics Strategy](#logging--metrics-strategy)
+  - [ELK Stack (Structured Log Pipeline)](#elk-stack-structured-log-pipeline)
+  - [Log Persistence](#log-persistence)
   - [How to Visualize](#how-to-visualize)
+  - [ELK Operations](#elk-operations)
 - [Maintain Code Cleanliness](#maintain-code-cleanliness)
   - [Spotless](#1-spotless--automatic-code-formatting)
   - [PMD](#2-pmd--anti-pattern-and-code-duplication-detection)
@@ -42,6 +44,7 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 - **Quality**: PMD, SpotBugs, Spotless, JaCoCo, SonarQube
 - **Documentation**: Swagger UI (OpenAPI 3.1)
 - **Security**: Spring Security, OAuth2 Resource Server, Keycloak
+- **Logging**: ELK Stack (Elasticsearch 9.4.2, Logstash 9.4.2, Kibana 9.4.2)
 
 ---
 
@@ -962,11 +965,159 @@ The application exposes management endpoints via Spring Boot Actuator for deep i
 - **Health Check:** [http://localhost:8090/actuator/health](http://localhost:8090/actuator/health) — Aggregated health status of the application and its critical dependencies.
 - **Prometheus Metrics:** [http://localhost:8090/actuator/prometheus](http://localhost:8090/actuator/prometheus) — Native application metrics formatted specifically for Prometheus scraping.
 
-### 7. How to Visualize
+---
+
+### ELK Stack (Structured Log Pipeline)
+
+The ELK stack provides a centralized, structured logging pipeline for all infrastructure services.
+All logs are written to the shared host directory `./logs/` and ingested by Logstash.
+
+#### 7. Elasticsearch
+**URL:** [http://localhost:9200](http://localhost:9200)
+
+The search and analytics engine that stores and indexes all structured logs.
+
+- **Cluster Health:** [http://localhost:9200/_cluster/health](http://localhost:9200/_cluster/health)
+- **Index Template:** Verify the registered template:
+  ```bash
+  curl http://localhost:9200/_index_template/app-logs-template
+  ```
+- **View Indices:**
+  ```bash
+  curl http://localhost:9200/_cat/indices?v
+  ```
+
+#### 8. Logstash
+**Monitoring API:** [http://localhost:9600](http://localhost:9600)
+
+The data processing pipeline that reads log files from `./logs/`, parses them per service, and ships structured documents to Elasticsearch.
+
+| Source File | Service Type | Parser |
+|---|---|---|
+| `logs/application.log` | `app` | Dissect + Grok (multiline) |
+| `logs/shop_db.log` | `shop_db` | Grok PostgreSQL format (multiline) |
+| `logs/keycloak-db.log` | `keycloak-db` | Grok PostgreSQL format (multiline) |
+| `logs/keycloak.log` | `keycloak` | Grok Quarkus format (multiline) |
+| `logs/redis.log` | `redis` | Grok Redis format |
+
+Sensitive values (`TrustedClientToken`, `Sec-MS-GEC`) are automatically **redacted** before indexing.
+
+#### 9. Kibana
+**URL:** [http://localhost:5601](http://localhost:5601)
+
+The web UI for exploring, filtering, and visualizing all structured log data stored in Elasticsearch.
+
+---
+
+### Log Persistence
+
+All service logs are written to the `./logs/` directory on the host machine via Docker Bind Mounts.
+This directory **survives** `docker compose down -v` because it is not a Docker named volume.
+
+| Container | Log File | Mount |
+|---|---|---|
+| `app` | `logs/application.log` | `./logs:/app/logs` |
+| `shop_db` | `logs/shop_db.log` | `./logs:/var/log/postgresql` |
+| `keycloak-db` | `logs/keycloak-db.log` | `./logs:/var/log/postgresql` |
+| `keycloak` | `logs/keycloak.log` | `./logs:/opt/keycloak/data/log` |
+| `redis` | `logs/redis.log` | `./logs:/var/log/redis` |
+
+The entire `logs/` directory is excluded from Git via `.gitignore`.
+
+---
+
+### How to Visualize
+
+#### Grafana (Metrics & Loki Logs)
 1. Access **Grafana** at [http://localhost:3000](http://localhost:3000).
 2. Login with default credentials (admin/admin).
 3. Navigate to **Explore** in the sidebar.
 4. Switch between **Prometheus** (for graphing metrics using PromQL) and **Loki** (for searching logs using LogQL).
+
+#### Kibana (Structured ELK Logs)
+1. Access **Kibana** at [http://localhost:5601](http://localhost:5601).
+2. Go to **Management** → **Stack Management** → **Data Views** → **Create data view**.
+3. Set the name to `app-logs-*` and the timestamp field to `@timestamp`.
+4. Navigate to the **Discover** tab to search and filter logs using fields such as `service`, `loglevel`, `correlation_id`, `thread`, `pid`.
+
+---
+
+### ELK Operations
+
+#### Starting the ELK Stack
+
+The ELK services start automatically as part of `docker compose up`. However, `elasticsearch-setup` runs once after Elasticsearch is ready and registers the index template automatically.
+
+```bash
+docker compose up -d
+```
+
+Verify the template was registered:
+```bash
+curl -s http://localhost:9200/_index_template/app-logs-template | python3 -m json.tool
+```
+
+#### Stopping the ELK Stack
+
+Stop all services without deleting volumes (logs and Elasticsearch data are preserved):
+```bash
+docker compose down
+```
+
+Stop and **wipe all Docker volumes** (Elasticsearch index data is lost, but `./logs/` files on disk are preserved):
+```bash
+docker compose down -v
+```
+
+#### Elasticsearch — Diagnostic Commands
+
+Check cluster health:
+```bash
+curl -s http://localhost:9200/_cluster/health?pretty
+```
+
+List all active log indices:
+```bash
+curl -s http://localhost:9200/_cat/indices/app-logs-*?v&s=index
+```
+
+View the last 5 documents from today's index:
+```bash
+curl -s -X GET "http://localhost:9200/app-logs-$(date +%Y.%m.%d)/_search?pretty" \
+  -H "Content-Type: application/json" \
+  -d '{"sort":[{"@timestamp":{"order":"desc"}}],"size":5}'
+```
+
+Delete all log indices (use with caution):
+```bash
+curl -X DELETE "http://localhost:9200/app-logs-*"
+```
+
+#### Logstash — Diagnostics
+
+Check Logstash node stats and pipeline health:
+```bash
+curl -s http://localhost:9600/_node/stats/pipelines?pretty
+```
+
+View Logstash container logs:
+```bash
+docker logs logstash --tail=100 -f
+```
+
+#### Kibana — Useful KQL Filters
+
+Once the Data View `app-logs-*` is created in Kibana **Discover**, the following KQL queries are useful:
+
+| Intent | KQL Query |
+|---|---|
+| All errors across all services | `loglevel: "ERROR"` |
+| Only application errors | `service: "app" and loglevel: "ERROR"` |
+| Specific correlation ID tracing | `correlation_id: "<your-uuid>"` |
+| Keycloak authentication events | `service: "keycloak" and log_message: *auth*` |
+| PostgreSQL slow/error queries | `service: "shop_db" and loglevel: "ERROR"` |
+| Redis warnings | `service: "redis" and loglevel: "WARN"` |
+| API batch generation failures | `log_message: "Batch generation failed"` |
 
 ---
 
