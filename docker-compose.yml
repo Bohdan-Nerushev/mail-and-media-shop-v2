@@ -395,7 +395,7 @@ services:
         curl -s -X PUT "http://elasticsearch:9200/_index_template/app-logs-template" \
           -H "Content-Type: application/json" \
           -d '{
-            "index_patterns": ["app-logs-*"],
+            "index_patterns": ["*-logs-*"],
             "template": {
               "mappings": {
                 "properties": {

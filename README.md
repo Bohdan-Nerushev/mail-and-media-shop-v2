@@ -1037,7 +1037,7 @@ The entire `logs/` directory is excluded from Git via `.gitignore`.
 #### Kibana (Structured ELK Logs)
 1. Access **Kibana** at [http://localhost:5601](http://localhost:5601).
 2. Go to **Management** → **Stack Management** → **Data Views** → **Create data view**.
-3. Set the name to `app-logs-*` and the timestamp field to `@timestamp`.
+3. Set the Index pattern to `*-logs-*` (or service-specific patterns like `app-logs-*`, `shop_db-logs-*`, `keycloak-logs-*`, etc.) and the timestamp field to `@timestamp`.
 4. Navigate to the **Discover** tab to search and filter logs using fields such as `service`, `loglevel`, `correlation_id`, `thread`, `pid`.
 
 ---
@@ -1078,10 +1078,10 @@ curl -s http://localhost:9200/_cluster/health?pretty
 
 List all active log indices:
 ```bash
-curl -s http://localhost:9200/_cat/indices/app-logs-*?v&s=index
+curl -s http://localhost:9200/_cat/indices/*-logs-*?v&s=index
 ```
 
-View the last 5 documents from today's index:
+View the last 5 documents from today's application index:
 ```bash
 curl -s -X GET "http://localhost:9200/app-logs-$(date +%Y.%m.%d)/_search?pretty" \
   -H "Content-Type: application/json" \
@@ -1090,7 +1090,7 @@ curl -s -X GET "http://localhost:9200/app-logs-$(date +%Y.%m.%d)/_search?pretty"
 
 Delete all log indices (use with caution):
 ```bash
-curl -X DELETE "http://localhost:9200/app-logs-*"
+curl -X DELETE "http://localhost:9200/*-logs-*"
 ```
 
 #### Logstash — Diagnostics
@@ -1107,7 +1107,7 @@ docker logs logstash --tail=100 -f
 
 #### Kibana — Useful KQL Filters
 
-Once the Data View `app-logs-*` is created in Kibana **Discover**, the following KQL queries are useful:
+Once the Data View `*-logs-*` (or service-specific data views) is created in Kibana **Discover**, the following KQL queries are useful:
 
 | Intent | KQL Query |
 |---|---|
