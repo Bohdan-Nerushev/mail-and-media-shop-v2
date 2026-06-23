@@ -331,6 +331,7 @@
                                 <excludeRoot>${project.build.directory}/generated-sources</excludeRoot>
                                 <excludeRoot>${project.basedir}/src/test/java</excludeRoot>
                             </excludeRoots>
+                            <linkXRef>false</linkXRef>
                         </configuration>
                         <executions>
                             <execution>
