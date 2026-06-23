@@ -22,7 +22,7 @@ e2e_test_job:
   variables:
     APP_HOST: "http://localhost"
     APP_PORT: "8090"
-    KC_URL: "http://localhost:8085"
+    KC_URL: "https://localhost:8443"
     KC_REALM: "mail-and-media-shop-realm"
     KC_CLIENT_ID: "mail-and-media-shop-app"
     KC_CLIENT_SECRET: ${KC_CLIENT_SECRET}

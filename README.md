@@ -128,9 +128,43 @@ The project uses **PostgreSQL 16** as the database.
 - **Application**: `8090` (maps to internal `8090`) can be changed in the .env file.
 - **PostgreSQL**: `5430` (maps to internal `5432`) can be changed in the .env file.
 
+### Local SSL Certificates (HTTPS Setup)
+
+Since Keycloak is configured to run exclusively over HTTPS (`https://keycloak:8443`), you must generate SSL certificates and a Java Truststore locally before starting the services.
+
+#### 1. Generate SSL Certificates
+Create the certificates directory and generate the self-signed key and certificate. You can use either `mkcert` (recommended) or `openssl`:
+
+**Option A: Using mkcert (Recommended for local development)**
+```bash
+mkdir -p certs
+mkcert -key-file certs/keycloak-key.pem -cert-file certs/keycloak-cert.pem keycloak localhost 127.0.0.1 ::1
+```
+
+**Option B: Using OpenSSL (Fallback)**
+```bash
+mkdir -p certs
+openssl req -x509 -newkey rsa:4096 -nodes -sha256 \
+  -keyout certs/keycloak-key.pem \
+  -out certs/keycloak-cert.pem \
+  -subj "/CN=keycloak" \
+  -days 365 \
+  -addext "subjectAltName=DNS:keycloak,DNS:localhost,IP:127.0.0.1"
+```
+
+#### 2. Create Java Truststore (JKS)
+The Spring Boot container requires a truststore containing the Keycloak public certificate to securely connect to the Identity Provider:
+```bash
+keytool -importcert -noprompt \
+  -keystore certs/truststore.jks \
+  -storepass changeit \
+  -alias keycloak \
+  -file certs/keycloak-cert.pem
+```
+
 ### Running the entire project
 
-To run it locally, you need to execute the following commands:
+To run it locally, you need to execute the following commands (after generating the certificates):
 
 ```bash
 docker compose down -v

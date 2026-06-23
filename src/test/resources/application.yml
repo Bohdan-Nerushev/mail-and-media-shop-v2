@@ -18,11 +18,11 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8085/realms/mail-and-media-shop-realm
+          issuer-uri: https://localhost:8443/realms/mail-and-media-shop-realm
 
 app:
   keycloak:
-    external-url: http://localhost:8085
+    external-url: https://localhost:8443
     realm: mail-and-media-shop-realm
 
 billing:

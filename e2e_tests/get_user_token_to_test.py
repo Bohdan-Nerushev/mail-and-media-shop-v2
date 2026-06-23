@@ -40,11 +40,15 @@ def get_user_token(
         "Content-Type": "application/x-www-form-urlencoded",
     }
 
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
     try:
         response = requests.post(
             url=url,
             data=payload,
             headers=headers,
+            verify=False,
             timeout=15
         )
     except requests.RequestException as exc:

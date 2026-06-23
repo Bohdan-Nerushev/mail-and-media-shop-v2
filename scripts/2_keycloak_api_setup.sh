@@ -2,7 +2,21 @@
 source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/env_loader.sh"
 
-KC_URL=${KC_URL:-"http://localhost:8085"}
+# Wrap curl to automatically inject SSL CA certificate configuration if available
+curl() {
+  local CURL_OPTS=()
+  if [ -f "/certs/keycloak-cert.pem" ]; then
+    CURL_OPTS+=("--cacert" "/certs/keycloak-cert.pem")
+  elif [ -f "$(dirname "${BASH_SOURCE[0]}")/../certs/keycloak-cert.pem" ]; then
+    CURL_OPTS+=("--cacert" "$(dirname "${BASH_SOURCE[0]}")/../certs/keycloak-cert.pem")
+  else
+    # Fallback to insecure if no certificate is found
+    CURL_OPTS+=("-k")
+  fi
+  command curl "${CURL_OPTS[@]}" "$@"
+}
+
+KC_URL=${KC_URL:-"https://localhost:8443"}
 ADMIN_USER=${KC_ADMIN_USER:-"admin"}
 ADMIN_PASS=${KC_ADMIN_PASS:-"admin"}
 
@@ -37,25 +51,6 @@ fi
 echo "✅ Required environment variables are present"
 
 # --------------------------------------------------
-# [04] PRE-EMPTIVE SSL DISABLE (for HTTP access)
-# --------------------------------------------------
-echo "[04] Waiting for database tables and disabling SSL requirement..."
-# Keycloak might take a few seconds to create tables. We retry until the update succeeds or we timeout.
-DB_RETRY=0
-while [ $DB_RETRY -lt 15 ]; do
-  if docker exec keycloak-db psql -U "$KEYCLOAK_DB_USER" -d "$KEYCLOAK_DB_NAME" \
-    -c "UPDATE realm SET ssl_required = 'NONE';" &>/dev/null; then
-    echo "✅ SSL requirement disabled in database"
-    echo "🔄 Restarting Keycloak to apply SSL changes..."
-    docker restart keycloak
-    break
-  fi
-  echo "⏳ Waiting for Keycloak tables to be ready (attempt $DB_RETRY)..."
-  sleep 5
-  DB_RETRY=$((DB_RETRY + 1))
-done
-
-# --------------------------------------------------
 # [05] WAIT FOR KEYCLOAK READINESS
 # --------------------------------------------------
 log_info "Waiting for Keycloak readiness at $KC_URL..."
@@ -70,9 +65,9 @@ until curl -s -f --max-time 5 "$KC_URL/realms/master/.well-known/openid-configur
   # Auto-detection: switch between internal and external URLs if one fails
   if { [ "$HTTP_STATUS" == "000" ] || [ "$HTTP_STATUS" == "403" ]; } && [ "$RETRY_COUNT" -gt 3 ]; then
       if [[ "$KC_URL" == *"localhost"* ]]; then
-          ALT_URL="http://keycloak:8080"
+          ALT_URL="https://keycloak:8443"
       else
-          ALT_URL="http://localhost:8085"
+          ALT_URL="https://localhost:8443"
       fi
       
       log_info "Connection issues detected. Probing alternative URL: $ALT_URL..."
@@ -126,7 +121,7 @@ REALM_CREATE_RESPONSE=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST "$KC_UR
   -d "{
     \"realm\": \"$REALM\",
     \"enabled\": true,
-    \"sslRequired\": \"none\"
+    \"sslRequired\": \"external\"
   }")
 
 REALM_CREATE_BODY=$(printf '%s' "$REALM_CREATE_RESPONSE" | sed '$d')
@@ -145,14 +140,9 @@ else
 fi
 
 # --------------------------------------------------
-# [08] FORCE HTTP AGAIN AFTER REALM CREATION
+# [08] FORCE HTTP AGAIN (deprecated)
 # --------------------------------------------------
-echo "[08] Disabling HTTPS requirement for all realms in database again..."
-
-docker exec keycloak-db psql -U "$KEYCLOAK_DB_USER" -d "$KEYCLOAK_DB_NAME" \
-  -c "UPDATE realm SET ssl_required = 'NONE';"
-
-echo "✅ HTTPS requirement disabled again"
+echo "[08] Forced database SSL modification is deprecated and skipped."
 
 # --------------------------------------------------
 # [08b] CONFIGURE METRICS LISTENER AND ENABLE EVENTS

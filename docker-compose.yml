@@ -1,6 +1,6 @@
 services:
   keycloak-db:
-    image: postgres:15-alpine
+    image: postgres:${KEYCLOAK_DB_IMAGE_VERSION}
     container_name: keycloak-db
     environment:
       POSTGRES_DB: ${KEYCLOAK_DB_NAME}
@@ -42,24 +42,27 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
 
       KC_HTTP_ENABLED: "true"
+      KC_HTTP_MANAGEMENT_SCHEME: "http"
       KC_METRICS_ENABLED: "true"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTPS_PORT: 8443
+      KC_HTTPS_CERTIFICATE_FILE: "/opt/keycloak/certs/keycloak-cert.pem"
+      KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/certs/keycloak-key.pem"
       KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_PORT: ${KEYCLOAK_PORT}
       KC_HEALTH_ENABLED: "true"
       KC_LOG: "console,file"
       KC_LOG_FILE: "/opt/keycloak/data/log/keycloak.log"
     ports:
-      - "${KEYCLOAK_PORT}:8080"
+      - "${KEYCLOAK_HTTPS_PORT:-8443}:8443"
     networks:
       - monitoring
     volumes:
       - ./logs:/opt/keycloak/data/log
+      - ./certs:/opt/keycloak/certs:ro
     depends_on:
       keycloak-db:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/live HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q 'UP'" ]
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000" ]
       interval: 10s
       timeout: 5s
       retries: 15
@@ -76,8 +79,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./scripts:/scripts
+      - ./certs/keycloak-cert.pem:/certs/keycloak-cert.pem:ro
     environment:
-      KC_URL: "http://keycloak:8080"
+      KC_URL: "https://keycloak:8443"
       KC_ADMIN_USER: ${KC_BOOTSTRAP_ADMIN_USERNAME}
       KC_ADMIN_PASS: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
       KC_REALM: ${KC_REALM}
@@ -128,7 +132,7 @@ services:
     image: redis:7.0-alpine
     container_name: redis_cache
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     networks:
       - monitoring
     volumes:
@@ -183,6 +187,7 @@ services:
       - monitoring
     volumes:
       - ./logs:/app/logs
+      - ./certs/truststore.jks:/app/certs/truststore.jks:ro
     depends_on:
       shop_db:
         condition: service_healthy
@@ -204,7 +209,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://shop_db:5432/${SHOP_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${SHOP_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${SHOP_DB_PASSWORD}
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/${KC_REALM}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://keycloak:8443/realms/${KC_REALM}
+      JDK_JAVA_OPTIONS: "-Djavax.net.ssl.trustStore=/app/certs/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit"
 
   prometheus:
     image: prom/prometheus:v2.53.0
@@ -216,7 +222,7 @@ services:
       - '--storage.tsdb.retention.time=15d'
       - '--web.enable-lifecycle'
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_PORT}:9090"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
@@ -250,7 +256,7 @@ services:
     container_name: grafana
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${GRAFANA_PORT}:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
@@ -271,7 +277,7 @@ services:
     restart: unless-stopped
     command: -config.file=/etc/loki/loki-config.yml
     ports:
-      - "3100:3100"
+      - "${LOKI_PORT}:3100"
     volumes:
       - ./monitoring/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       - loki_data:/loki
@@ -284,7 +290,7 @@ services:
     restart: unless-stopped
     command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
     ports:
-      - "12345:12345"
+      - "${ALLOY_PORT}:12345"
     volumes:
       - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -301,7 +307,7 @@ services:
       DATA_SOURCE_NAME: postgresql://${SHOP_DB_USER}:${SHOP_DB_PASSWORD}@shop_db:5432/${SHOP_DB_NAME}?sslmode=disable
       PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres_exporter/queries.yml
     ports:
-      - "9187:9187"
+      - "${POSTGRES_EXPORTER_SHOP_PORT}:9187"
     volumes:
       - ./monitoring/postgres_exporter/queries.yml:/etc/postgres_exporter/queries.yml:ro
     networks:
@@ -318,7 +324,7 @@ services:
       DATA_SOURCE_NAME: postgresql://${KEYCLOAK_DB_USER}:${KEYCLOAK_DB_PASSWORD}@keycloak-db:5432/${KEYCLOAK_DB_NAME}?sslmode=disable
       PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres_exporter/queries.yml
     ports:
-      - "9188:9187"
+      - "${POSTGRES_EXPORTER_KEYCLOAK_PORT}:9187"
     volumes:
       - ./monitoring/postgres_exporter/queries.yml:/etc/postgres_exporter/queries.yml:ro
     networks:
@@ -334,7 +340,7 @@ services:
     environment:
       REDIS_ADDR: redis://redis_cache:6379
     ports:
-      - "9121:9121"
+      - "${REDIS_EXPORTER_PORT}:9121"
     networks:
       - monitoring
     depends_on:
@@ -342,7 +348,7 @@ services:
         condition: service_healthy
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:9.4.2
+    image: docker.elastic.co/logstash/logstash:${LOGSTASH_IMAGE_VERSION}
     container_name: logstash
     environment:
       LS_JAVA_OPTS: "-Xms512m -Xmx512m"
@@ -357,12 +363,12 @@ services:
     depends_on:
       - elasticsearch
     ports:
-      - "9600:9600"
+      - "${LOGSTASH_PORT}:9600"
     networks:
       - elk-mail-and-media-shop-v2
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTICSEARCH_IMAGE_VERSION}
     container_name: elasticsearch
     environment:
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
@@ -375,8 +381,8 @@ services:
         limits:
           memory: 1g
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "${ELASTICSEARCH_PORT}:9200"
+      - "${ELASTICSEARCH_PORT_TRANS}:9300"
     networks:
       - elk-mail-and-media-shop-v2
 
@@ -388,11 +394,11 @@ services:
       - -c
       - |
         echo 'Waiting for Elasticsearch...'
-        until curl -s -f http://elasticsearch:9200 >/dev/null; do
+        until curl -s -f ${ELASTIC_INTERNAL_URL} >/dev/null; do
           sleep 2
         done
         echo 'Elasticsearch is ready. Setting template...'
-        curl -s -X PUT "http://elasticsearch:9200/_index_template/app-logs-template" \
+        curl -s -X PUT "${ELASTIC_INTERNAL_URL}/_index_template/app-logs-template" \
           -H "Content-Type: application/json" \
           -d '{
             "index_patterns": ["*-logs-*"],
@@ -423,10 +429,10 @@ services:
       - elasticsearch
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.4.2
+    image: docker.elastic.co/kibana/kibana:${KIBANA_IMAGE_VERSION}
     container_name: kibana
     environment:
-      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+      ELASTICSEARCH_HOSTS: '${ELASTICSEARCH_HOSTS}'
       NODE_OPTIONS: "--max-old-space-size=1024"
     deploy:
       resources:
@@ -435,7 +441,7 @@ services:
     depends_on:
       - elasticsearch
     ports:
-      - "5601:5601"
+      - "${KIBANA_PORT}:5601"
     networks:
       - elk-mail-and-media-shop-v2
 

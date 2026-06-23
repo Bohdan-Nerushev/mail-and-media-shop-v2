@@ -50,11 +50,11 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: "${KC_ISSUER_URI:http://localhost:8085/realms/mail-and-media-shop-realm}"
+          issuer-uri: "${KC_ISSUER_URI:https://localhost:8443/realms/mail-and-media-shop-realm}"
 
 app:
   keycloak:
-    external-url: ${KC_URL:http://localhost:8085}
+    external-url: ${KC_URL:https://localhost:8443}
     realm: ${KC_REALM:mail-and-media-shop-realm}
 
 server:

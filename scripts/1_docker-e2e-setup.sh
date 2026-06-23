@@ -29,6 +29,10 @@ fi
 log_info "Ensuring clean environment (stopping any existing containers)..."
 docker compose down -v 2>/dev/null || true
 
+# Ensure logs directory exists and is writable by non-root container users
+mkdir -p "$PROJECT_ROOT/logs"
+chmod -R 777 "$PROJECT_ROOT/logs" 2>/dev/null || true
+
 log_info "Building and starting infrastructure containers..."
 docker compose up -d keycloak-db keycloak shop_db redis || error_exit "Docker Compose infrastructure start failed."
 

@@ -225,3 +225,6 @@ e2e_tests/controller/__init__.py
 skills.json
 SKILLS.md
 skills-lock.json
+
+# Local SSL Certificates
+certs/
