@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +56,7 @@ public class BillingController {
                                         schema = @Schema(implementation = ErrorResponse.class)))
             })
     @PostMapping(value = "/invoices")
+    @PreAuthorize("hasRole('USER')")
     public @NotNull InvoiceResponseDTO generateInvoice(@RequestBody @Valid final InvoiceRequestDTO invoiceRequestDTO) {
         log.debug("Generating invoice for customer: {}", invoiceRequestDTO.customerId());
 

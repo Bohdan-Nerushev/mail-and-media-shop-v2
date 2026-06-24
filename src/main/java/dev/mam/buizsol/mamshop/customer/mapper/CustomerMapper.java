@@ -28,15 +28,15 @@ public class CustomerMapper {
 
     public CustomerResponseDTO toResponseDTO(@NotNull final Customer customer) {
         return new CustomerResponseDTO(
-                customer.id(),
-                customer.firstName(),
-                customer.lastName(),
-                customer.birthDate(),
-                toAddressResponseDTO(customer.address()),
-                toAddressResponseDTO(customer.invoiceAddress()),
-                toCommunicationResponseDTO(customer.communicationDetails()),
-                customer.brand(),
-                customer.status());
+                customer.getId(),
+                customer.getFirstName(),
+                customer.getLastName(),
+                customer.getBirthDate(),
+                toAddressResponseDTO(customer.getAddress()),
+                toAddressResponseDTO(customer.getInvoiceAddress()),
+                toCommunicationResponseDTO(customer.getCommunicationDetails()),
+                customer.getBrand(),
+                customer.getStatus());
     }
 
     public Address toAddress(@NotNull final AddressRequestDTO dto) {
@@ -45,7 +45,11 @@ public class CustomerMapper {
 
     public AddressRequestDTO toAddressDTO(@NotNull final Address address) {
         return new AddressRequestDTO(
-                address.street(), address.number(), address.postcode(), address.city(), address.country());
+                address.getStreet(),
+                address.getNumber(),
+                address.getPostcode(),
+                address.getCity(),
+                address.getCountry());
     }
 
     public CommunicationDetails toCommunicationDetails(@NotNull final CommunicationDetailsRequestDTO dto) {
@@ -54,7 +58,7 @@ public class CustomerMapper {
 
     public CommunicationDetailsRequestDTO toCommunicationDetailsDTO(
             @NotNull final CommunicationDetails communicationDetails) {
-        return new CommunicationDetailsRequestDTO(communicationDetails.email(), communicationDetails.telephone());
+        return new CommunicationDetailsRequestDTO(communicationDetails.getEmail(), communicationDetails.getTelephone());
     }
 
     public AddressResponseDTO toAddressResponseDTO(
@@ -68,7 +72,11 @@ public class CustomerMapper {
 
     public AddressResponseDTO toAddressResponseDTO(@NotNull final Address address) {
         return new AddressResponseDTO(
-                address.street(), address.number(), address.postcode(), address.city(), address.country());
+                address.getStreet(),
+                address.getNumber(),
+                address.getPostcode(),
+                address.getCity(),
+                address.getCountry());
     }
 
     public CommunicationDetailsResponseDTO toCommunicationResponseDTO(
@@ -78,6 +86,7 @@ public class CustomerMapper {
 
     public CommunicationDetailsResponseDTO toCommunicationResponseDTO(
             @NotNull final CommunicationDetails communicationDetails) {
-        return new CommunicationDetailsResponseDTO(communicationDetails.email(), communicationDetails.telephone());
+        return new CommunicationDetailsResponseDTO(
+                communicationDetails.getEmail(), communicationDetails.getTelephone());
     }
 }

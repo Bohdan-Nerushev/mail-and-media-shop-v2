@@ -49,7 +49,7 @@ class BrandMatchValidatorTest {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
 
-        when(customer.brand()).thenReturn(Brand.GMX);
+        when(customer.getBrand()).thenReturn(Brand.GMX);
         when(product.getBrand()).thenReturn(Brand.GMX);
 
         assertTrue(validator.isValid(new Object[] {customer, product}, context));
@@ -61,7 +61,7 @@ class BrandMatchValidatorTest {
         Customer customer = mock(Customer.class);
         Product product = mock(Product.class);
 
-        when(customer.brand()).thenReturn(Brand.GMX);
+        when(customer.getBrand()).thenReturn(Brand.GMX);
         when(product.getBrand()).thenReturn(Brand.WEB_DE);
 
         assertFalse(validator.isValid(new Object[] {customer, product}, context));

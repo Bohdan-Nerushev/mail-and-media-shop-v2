@@ -3,9 +3,11 @@ package dev.mam.buizsol.mamshop.billing.validation;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,13 +30,14 @@ class InvoiceDiscountValidatorTest {
     private ConstraintValidatorContext context;
 
     @Mock
-    private ConstraintValidatorContext.ConstraintViolationBuilder violationBuilder;
+    private ConstraintViolationBuilder violationBuilder;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         validator = new InvoiceDiscountValidator();
         ReflectionTestUtils.setField(validator, "minimalDiscountAmount", DISCOUNT_LIMIT);
+        ReflectionTestUtils.setField(validator, "zeroAmount", BigDecimal.ZERO);
 
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         when(violationBuilder.addConstraintViolation()).thenReturn(context);

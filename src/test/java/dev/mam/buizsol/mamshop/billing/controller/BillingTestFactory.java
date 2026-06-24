@@ -1,10 +1,14 @@
-package dev.mam.buizsol.mamshop.shop.service.controller;
+package dev.mam.buizsol.mamshop.billing.controller;
 
+import dev.mam.buizsol.mamshop.billing.dto.InvoiceItemResponseDTO;
 import dev.mam.buizsol.mamshop.billing.dto.InvoiceResponseDTO;
 import dev.mam.buizsol.mamshop.billing.model.Invoice;
 import dev.mam.buizsol.mamshop.billing.model.InvoiceItem;
+import dev.mam.buizsol.mamshop.contract.model.Contract;
+import dev.mam.buizsol.mamshop.customer.dto.AddressResponseDTO;
 import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
+import dev.mam.buizsol.mamshop.customer.model.Customer;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,21 +20,21 @@ public class BillingTestFactory {
 
     public static Invoice createInvoice(
             Brand brand,
-            UUID customerId,
+            Customer customer,
             Address address,
             Address invoiceAddress,
             List<InvoiceItem> items,
             BigDecimal discount) {
-        return new Invoice(brand, customerId, address, invoiceAddress, items, discount);
+        return new Invoice(brand, customer, address, invoiceAddress, items, discount);
     }
 
     public static InvoiceResponseDTO createInvoiceResponseDTO(
             Brand brand,
             LocalDate invoiceDate,
             UUID customerId,
-            Address address,
-            Address invoiceAddress,
-            List<InvoiceItem> items,
+            AddressResponseDTO address,
+            AddressResponseDTO invoiceAddress,
+            List<InvoiceItemResponseDTO> items,
             BigDecimal totalSetupFee,
             BigDecimal totalMonthlyFee,
             BigDecimal discount,
@@ -52,13 +56,29 @@ public class BillingTestFactory {
         return new Address(street, number, postcode, city, country);
     }
 
+    public static AddressResponseDTO createAddressResponseDTO(
+            String street, String number, String postcode, String city, String country) {
+        return new AddressResponseDTO(street, number, postcode, city, country);
+    }
+
     public static InvoiceItem createInvoiceItem(
+            UUID productId,
+            String productName,
+            Contract contract,
+            LocalDate contractCreationDate,
+            BigDecimal setupFee,
+            BigDecimal monthlyFee) {
+        return new InvoiceItem(productId, productName, contract, contractCreationDate, setupFee, monthlyFee);
+    }
+
+    public static InvoiceItemResponseDTO createInvoiceItemResponseDTO(
             UUID productId,
             String productName,
             UUID contractId,
             LocalDate contractCreationDate,
             BigDecimal setupFee,
             BigDecimal monthlyFee) {
-        return new InvoiceItem(productId, productName, contractId, contractCreationDate, setupFee, monthlyFee);
+        return new InvoiceItemResponseDTO(
+                productId, productName, contractId, contractCreationDate, setupFee, monthlyFee);
     }
 }

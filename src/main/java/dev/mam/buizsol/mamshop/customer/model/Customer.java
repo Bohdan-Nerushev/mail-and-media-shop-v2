@@ -1,37 +1,112 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
-import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import dev.mam.buizsol.mamshop.billing.model.Invoice;
+import dev.mam.buizsol.mamshop.contract.model.Contract;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public record Customer(
-        @NotNull UUID id,
-        @NotBlank @Size(min = 1, max = 100) String firstName,
-        @NotBlank @Size(min = 1, max = 100) String lastName,
-        @NotNull @Past LocalDate birthDate,
-        @NotNull @Valid Address address,
-        @NotNull @Valid Address invoiceAddress,
-        @NotNull @Valid CommunicationDetails communicationDetails,
-        @NotNull Brand brand,
-        @NotNull CustomerStatus status) {
+@Entity
+@Table(name = "customers")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
+@JsonDeserialize(as = Customer.class)
+@Getter
+@Setter
+@Builder(toBuilder = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Customer {
 
-    public Customer {
-        if (firstName == null || firstName.isBlank() || lastName == null || lastName.isBlank()) {
-            throw new CustomerValidationException("First name and last name must not be blank");
-        }
-        if (birthDate == null || address == null || communicationDetails == null || brand == null) {
-            throw new CustomerValidationException("Mandatory fields must not be null");
-        }
-        if (invoiceAddress == null) {
-            invoiceAddress = address;
-        }
-    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "customer_id", nullable = false)
+    @EqualsAndHashCode.Include
+    private UUID id;
+
+    @NotBlank
+    @Size(min = 1, max = 100)
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @NotBlank
+    @Size(min = 1, max = 100)
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
+
+    @NotNull
+    @Past
+    @Column(name = "birth_date", nullable = false)
+    private LocalDate birthDate;
+
+    @NotNull
+    @Valid
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id", nullable = false)
+    private Address address;
+
+    @Nullable
+    @Valid
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "invoice_address_id")
+    private Address invoiceAddress;
+
+    @NotNull
+    @Valid
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "communication_details_id")
+    private CommunicationDetails communicationDetails;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Builder.Default
+    private List<Contract> contracts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Builder.Default
+    private List<Invoice> invoices = new ArrayList<>();
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "brand", nullable = false)
+    private Brand brand;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private CustomerStatus status;
 
     public static Customer create(
             @NotBlank final String firstName,
@@ -42,51 +117,16 @@ public record Customer(
             @NotNull @Valid final CommunicationDetails communicationDetails,
             @NotNull final Brand brand) {
 
-        return new Customer(
-                UUID.randomUUID(),
-                firstName,
-                lastName,
-                birthDate,
-                address,
-                invoiceAddress != null ? invoiceAddress : address,
-                communicationDetails,
-                brand,
-                CustomerStatus.INACTIVE);
-    }
-
-    @NotNull
-    public Customer withStatus(@NotNull final CustomerStatus newStatus) {
-        if (newStatus == null) {
-            throw new CustomerValidationException("Status must not be null");
-        }
-        return new Customer(
-                id, firstName, lastName, birthDate, address, invoiceAddress, communicationDetails, brand, newStatus);
-    }
-
-    @NotNull
-    public Customer withAddress(@NotNull @Valid final Address newAddress) {
-        if (newAddress == null) {
-            throw new CustomerValidationException("Address must not be null");
-        }
-        return new Customer(
-                id, firstName, lastName, birthDate, newAddress, invoiceAddress, communicationDetails, brand, status);
-    }
-
-    @NotNull
-    public Customer withInvoiceAddress(@NotNull @Valid final Address newInvoiceAddress) {
-        if (newInvoiceAddress == null) {
-            throw new CustomerValidationException("Invoice address must not be null");
-        }
-        return new Customer(
-                id, firstName, lastName, birthDate, address, newInvoiceAddress, communicationDetails, brand, status);
-    }
-
-    @NotNull
-    public Customer withCommunicationDetails(@NotNull @Valid final CommunicationDetails newDetails) {
-        if (newDetails == null) {
-            throw new CustomerValidationException("Communication details must not be null");
-        }
-        return new Customer(id, firstName, lastName, birthDate, address, invoiceAddress, newDetails, brand, status);
+        return Customer.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .birthDate(birthDate)
+                .address(address)
+                .invoiceAddress(invoiceAddress != null ? invoiceAddress : address)
+                .communicationDetails(communicationDetails)
+                .brand(brand)
+                .status(CustomerStatus.INACTIVE)
+                .build();
     }
 
     @Override

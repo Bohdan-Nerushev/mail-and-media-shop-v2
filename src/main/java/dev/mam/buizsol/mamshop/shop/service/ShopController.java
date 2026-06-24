@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -114,6 +115,7 @@ public class ShopController {
                                         schema = @Schema(implementation = ErrorResponse.class)))
             })
     @GetMapping(value = "/customers/{customerId}")
+    @PreAuthorize("hasRole('USER')")
     public @NotNull CustomerResponseDTO loadCustomerByCustomerId(
             @PathVariable(value = "customerId") @NotNull final UUID customerId) {
         log.debug("Loading customer: {}", customerId);
@@ -142,6 +144,7 @@ public class ShopController {
             })
     @DeleteMapping(value = "/customers/{customerId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('USER')")
     public void removeCustomerByCustomerId(@PathVariable(value = "customerId") @NotNull final UUID customerId) {
         log.debug("Removing customer: {}", customerId);
 
@@ -165,6 +168,7 @@ public class ShopController {
             })
     @PutMapping(value = "/customers/{customerId}/activate")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('USER')")
     public void activateCustomerByCustomerId(@PathVariable(value = "customerId") @NotNull final UUID customerId) {
         log.debug("Activating customer: {}", customerId);
 
@@ -235,6 +239,7 @@ public class ShopController {
             })
     @PostMapping(value = "/customers/{customerId}/purchases")
     @ResponseStatus(value = HttpStatus.CREATED)
+    @PreAuthorize("hasRole('USER')")
     public @NotNull ContractResponseDTO purchaseProduct(
             @PathVariable(value = "customerId") @NotNull final UUID customerId,
             @RequestBody @Valid final PurchaseRequestDTO request) {
@@ -271,6 +276,7 @@ public class ShopController {
                                         schema = @Schema(implementation = ErrorResponse.class)))
             })
     @GetMapping(value = "/contracts/{customerId}")
+    @PreAuthorize("hasRole('USER')")
     public @NotNull List<ContractResponseDTO> loadAllContractsByCustomerId(
             @PathVariable(value = "customerId") @NotNull final UUID customerId) {
         log.debug("Loading all contracts for customer: {}", customerId);

@@ -11,6 +11,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.math.BigDecimal;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,6 +54,24 @@ class PartnerProductTest {
     }
 
     @Test
+    @DisplayName("Success: Create PartnerProduct with predefined ID")
+    void shouldCreatePartnerProductWithPredefinedId() {
+        final UUID id = UUID.randomUUID();
+        final String name = "Partner Storage";
+        final Brand brand = Brand.GMX;
+        final BigDecimal setupFee = new BigDecimal("10.00");
+        final BigDecimal monthlyFee = new BigDecimal("5.00");
+
+        final PartnerProduct product = new PartnerProduct(id, name, brand, setupFee, monthlyFee);
+
+        assertEquals(id, product.getId());
+        assertEquals(name, product.getName());
+        assertEquals(brand, product.getBrand());
+        assertEquals(setupFee, product.getSetupFee());
+        assertEquals(monthlyFee, product.getMonthlyFee());
+    }
+
+    @Test
     @DisplayName("Boundary: Success with minimum allowed monthly fee (0.11 €)")
     void shouldCreatePartnerProductWhenMonthlyFeeIsAtMinimumAllowed() {
         BigDecimal minFee = new BigDecimal("0.11");
@@ -77,25 +96,28 @@ class PartnerProductTest {
     @NullAndEmptySource
     @ValueSource(strings = {" ", "   ", "\t", "\n"})
     void shouldThrowExceptionWhenNameIsInvalid(String name) {
+        BigDecimal country = new BigDecimal("1.00");
         assertThrows(
                 ProductValidationException.class,
-                () -> createPartnerProduct(name, Brand.GMX, BigDecimal.ZERO, new BigDecimal("1.00")));
+                () -> createPartnerProduct(name, Brand.GMX, BigDecimal.ZERO, country));
     }
 
     @Test
     @DisplayName("Negative: Failure with null brand")
     void shouldThrowExceptionWhenBrandIsNull() {
+        BigDecimal country = new BigDecimal("1.00");
         assertThrows(
                 ProductValidationException.class,
-                () -> createPartnerProduct("No Brand", null, BigDecimal.ZERO, new BigDecimal("1.00")));
+                () -> createPartnerProduct("No Brand", null, BigDecimal.ZERO, country));
     }
 
     @Test
     @DisplayName("Negative: Failure with null setup fee")
     void shouldThrowExceptionWhenSetupFeeIsNull() {
+        BigDecimal country = new BigDecimal("1.00");
         assertThrows(
                 ProductValidationException.class,
-                () -> createPartnerProduct("No Setup Fee", Brand.WEB_DE, null, new BigDecimal("1.00")));
+                () -> createPartnerProduct("No Setup Fee", Brand.WEB_DE, null, country));
     }
 
     @Test
@@ -110,10 +132,10 @@ class PartnerProductTest {
     @DisplayName("Negative: Failure with negative setup fee")
     void shouldThrowExceptionWhenSetupFeeIsNegative() {
         BigDecimal negativeFee = new BigDecimal("-1.00");
-
+        BigDecimal country = new BigDecimal("1.00");
         assertThrows(
                 ProductValidationException.class,
-                () -> createPartnerProduct("Bad Setup Fee", Brand.GMX, negativeFee, new BigDecimal("1.00")));
+                () -> createPartnerProduct("Bad Setup Fee", Brand.GMX, negativeFee, country));
     }
 
     @Test
@@ -137,10 +159,10 @@ class PartnerProductTest {
         final BigDecimal newFee = new BigDecimal("12.00");
         final PartnerProduct updated = initial.withMonthlyFee(newFee);
 
-        assertEquals(initial.id(), updated.id());
-        assertEquals(initial.name(), updated.name());
-        assertEquals(initial.brand(), updated.brand());
-        assertEquals(initial.setupFee(), updated.setupFee());
-        assertEquals(newFee, updated.monthlyFee());
+        assertEquals(initial.getId(), updated.getId());
+        assertEquals(initial.getName(), updated.getName());
+        assertEquals(initial.getBrand(), updated.getBrand());
+        assertEquals(initial.getSetupFee(), updated.getSetupFee());
+        assertEquals(newFee, updated.getMonthlyFee());
     }
 }

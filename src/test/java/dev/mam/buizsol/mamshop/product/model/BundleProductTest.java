@@ -1,6 +1,7 @@
 package dev.mam.buizsol.mamshop.product.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -9,6 +10,8 @@ import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import jakarta.validation.executable.ExecutableValidator;
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.util.Set;
 import org.assertj.core.api.Assertions;
@@ -53,7 +56,7 @@ class BundleProductTest {
         return product;
     }
 
-    private BundleProduct createDefaultBundleProduct(final Product mail, final PartnerProduct partner) {
+    private BundleProduct createDefaultBundleProduct(final MailProduct mail, final PartnerProduct partner) {
         BundleProduct product = new BundleProduct(mail, partner);
         Set<ConstraintViolation<BundleProduct>> violations = validator.validate(product);
         if (!violations.isEmpty()) {
@@ -78,7 +81,7 @@ class BundleProductTest {
             final BigDecimal expectedSetup,
             final BigDecimal expectedMonthly) {
 
-        final Product mail = mailName.startsWith("S")
+        final MailProduct mail = mailName.startsWith("S")
                 ? createDefaultStandardMailProduct(mailName, brand, mailMonthly)
                 : createDefaultPremiumMailProduct(mailName, brand, mailMonthly);
 
@@ -113,7 +116,7 @@ class BundleProductTest {
     @Test
     @DisplayName("Negative: Failure with null PartnerProduct")
     void shouldThrowExceptionWhenCreatingBundleWithNullPartner() {
-        final Product mail = createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
+        final MailProduct mail = createDefaultStandardMailProduct("M", Brand.GMX, BigDecimal.ONE);
 
         assertThrows(ProductValidationException.class, () -> createDefaultBundleProduct(mail, null));
     }
@@ -122,6 +125,19 @@ class BundleProductTest {
     @DisplayName("Negative: Failure with both components null")
     void shouldThrowExceptionWhenCreatingBundleWithBothComponentsNull() {
         assertThrows(ProductValidationException.class, () -> createDefaultBundleProduct(null, null));
+    }
+
+    @Test
+    @DisplayName("Verify @NotNull constructor annotations via ExecutableValidator")
+    void shouldValidateConstructorAnnotationsWithExecutableValidator() throws NoSuchMethodException {
+        ExecutableValidator executableValidator = validator.forExecutables();
+        Constructor<BundleProduct> constructor =
+                BundleProduct.class.getConstructor(MailProduct.class, PartnerProduct.class);
+
+        var violations = executableValidator.validateConstructorParameters(constructor, new Object[] {null, null});
+
+        assertFalse(violations.isEmpty());
+        assertEquals(2, violations.size());
     }
 
     @Test
@@ -140,14 +156,19 @@ class BundleProductTest {
     @Test
     @DisplayName("Polymorphism: Verify calls via Product base class")
     void shouldCalculateTotalsCorrectlyWhenCalledPolymorphically() {
-        Product mail = createDefaultStandardMailProduct("Base Mail", Brand.WEB_DE, new BigDecimal("1.50"));
+        MailProduct mail = createDefaultStandardMailProduct("Base Mail", Brand.WEB_DE, new BigDecimal("1.50"));
         PartnerProduct partner = createDefaultPartnerProduct(
                 "Base Cloud", Brand.WEB_DE, new BigDecimal("10.00"), new BigDecimal("3.50"));
 
         Product product = createDefaultBundleProduct(mail, partner);
-
-        assertEquals(mail.getSetupFee().add(partner.getSetupFee()), product.getSetupFee());
-        assertEquals(mail.getMonthlyFee().add(partner.getMonthlyFee()), product.getMonthlyFee());
+        BigDecimal partnerSetupFee = partner.getSetupFee();
+        BigDecimal productSetupFee = product.getSetupFee();
+        BigDecimal partnerMonthlyFee = partner.getMonthlyFee();
+        BigDecimal productMonthlyFee = product.getMonthlyFee();
+        BigDecimal mailSetupFee = mail.getSetupFee();
+        BigDecimal mailMonthlyFee = mail.getMonthlyFee();
+        assertEquals(mailSetupFee.add(partnerSetupFee), productSetupFee);
+        assertEquals(mailMonthlyFee.add(partnerMonthlyFee), productMonthlyFee);
     }
 
     @Test
@@ -159,8 +180,8 @@ class BundleProductTest {
 
         BundleProduct bundle = createDefaultBundleProduct(mail, partner);
 
-        assertEquals(mail, bundle.mailProduct());
-        assertEquals(partner, bundle.partnerProduct());
+        assertEquals(mail, bundle.getMailProduct());
+        assertEquals(partner, bundle.getPartnerProduct());
     }
 
     @Test
@@ -170,8 +191,8 @@ class BundleProductTest {
         PartnerProduct partner =
                 createDefaultPartnerProduct("Partner", Brand.GMX, BigDecimal.ZERO, new BigDecimal("1.00"));
         BundleProduct bundle = createDefaultBundleProduct(mail, partner);
-
-        assertThrows(UnsupportedOperationException.class, () -> bundle.withMonthlyFee(new BigDecimal("5.00")));
+        BigDecimal newFee = new BigDecimal("5.00");
+        assertThrows(UnsupportedOperationException.class, () -> bundle.withMonthlyFee(newFee));
     }
 
     @Test

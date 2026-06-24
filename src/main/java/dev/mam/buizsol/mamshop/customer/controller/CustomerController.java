@@ -18,6 +18,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,6 +56,7 @@ public class CustomerController {
             })
     @PutMapping(value = "/{customerId}/deactivate")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('USER')")
     public void deactivateCustomer(@PathVariable(value = "customerId") @NotNull final UUID customerId) {
         log.debug("Deactivating customer: {}", customerId);
 
@@ -78,6 +80,7 @@ public class CustomerController {
             })
     @PutMapping(value = "/{customerId}/address")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('USER')")
     public void updateAddress(
             @PathVariable(value = "customerId") @NotNull final UUID customerId,
             @RequestBody @Valid final AddressRequestDTO addressRequestDTO) {
@@ -106,6 +109,7 @@ public class CustomerController {
             })
     @PutMapping(value = "/{customerId}/invoice-address")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('USER')")
     public void updateInvoiceAddress(
             @PathVariable(value = "customerId") @NotNull final UUID customerId,
             @RequestBody @Valid final AddressRequestDTO addressRequestDTO) {
@@ -134,6 +138,7 @@ public class CustomerController {
             })
     @PutMapping(value = "/{customerId}/communication-details")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('USER')")
     public void updateCommunicationDetails(
             @PathVariable(value = "customerId") @NotNull final UUID customerId,
             @RequestBody @Valid final CommunicationDetailsRequestDTO communicationDetailsRequestDTO) {

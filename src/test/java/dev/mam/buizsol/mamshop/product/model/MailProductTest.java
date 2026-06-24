@@ -3,6 +3,7 @@ package dev.mam.buizsol.mamshop.product.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.product.exception.ProductValidationException;
@@ -11,6 +12,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.math.BigDecimal;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -60,7 +62,7 @@ class MailProductTest {
 
         assertNotNull(product.getId());
         assertEquals(new BigDecimal("4.99"), product.getSetupFee());
-        assertEquals(4L, product.storageSize());
+        assertEquals(4L, product.getStorageSize().orElseThrow());
     }
 
     @Test
@@ -71,7 +73,7 @@ class MailProductTest {
 
         assertNotNull(product.getId());
         assertEquals(new BigDecimal("9.99"), product.getSetupFee());
-        assertEquals(8L, product.storageSize());
+        assertEquals(8L, product.getStorageSize().orElseThrow());
     }
 
     @Test
@@ -102,19 +104,19 @@ class MailProductTest {
     @NullAndEmptySource
     @ValueSource(strings = {" ", "  ", "", "\t", "\n"})
     void shouldThrowExceptionWhenMailProductNameIsInvalid(final String invalidName) {
-
+        BigDecimal monthlyFee = new BigDecimal("2.50");
         assertThrows(
                 ProductValidationException.class,
-                () -> createDefaultStandardMailProduct(invalidName, Brand.GMX, new BigDecimal("2.50")));
+                () -> createDefaultStandardMailProduct(invalidName, Brand.GMX, monthlyFee));
     }
 
     @Test
     @DisplayName("Verify MailProduct failure with null brand")
     void shouldThrowExceptionWhenMailProductBrandIsNull() {
-
+        BigDecimal monthlyFee = new BigDecimal("3.00");
         assertThrows(
                 ProductValidationException.class,
-                () -> createDefaultStandardMailProduct("No Brand Mail", null, new BigDecimal("3.00")));
+                () -> createDefaultStandardMailProduct("No Brand Mail", null, monthlyFee));
     }
 
     @Test
@@ -137,7 +139,7 @@ class MailProductTest {
         assertEquals(validFee, product.getMonthlyFee());
     }
 
-    @DisplayName("Verify PremiumMailProduct failure when monthly fee is below or at the limit (<=" + " 0.10€)")
+    @DisplayName("Verify PremiumMailProduct failure when monthly fee is below or at the limit (<= 0.10€)")
     @ParameterizedTest(name = "[{index}] Monthly fee {0} € should be invalid")
     @ValueSource(strings = {"0.10", "0.09", "0.00", "-0.01", "-100.00"})
     void shouldThrowExceptionWhenPremiumMailProductMonthlyFeeIsInvalid(final String feeString) {
@@ -154,10 +156,10 @@ class MailProductTest {
     @NullAndEmptySource
     @ValueSource(strings = {" ", "  ", "\t", "\n"})
     void shouldThrowExceptionWhenPremiumMailProductNameIsInvalid(final String invalidName) {
-
+        BigDecimal monthlyFee = new BigDecimal("9.99");
         assertThrows(
                 ProductValidationException.class,
-                () -> createDefaultPremiumMailProduct(invalidName, Brand.WEB_DE, new BigDecimal("9.99")));
+                () -> createDefaultPremiumMailProduct(invalidName, Brand.WEB_DE, monthlyFee));
     }
 
     @DisplayName("Verify PremiumMailProduct success with various valid monthly fees")
@@ -184,10 +186,10 @@ class MailProductTest {
     @Test
     @DisplayName("Verify PremiumMailProduct failure with null brand")
     void shouldThrowExceptionWhenPremiumMailProductBrandIsNull() {
-
+        BigDecimal monthlyFee = new BigDecimal("12.00");
         assertThrows(
                 ProductValidationException.class,
-                () -> createDefaultPremiumMailProduct("Premium Null Brand", null, new BigDecimal("12.00")));
+                () -> createDefaultPremiumMailProduct("Premium Null Brand", null, monthlyFee));
     }
 
     @Test
@@ -241,7 +243,7 @@ class MailProductTest {
     }
 
     @Test
-    @DisplayName("Success: Verify withMonthlyFee return new instance with same data but new fee")
+    @DisplayName("Success: Verify withMonthlyFee return new instance with same data but new fee for premium product")
     void shouldReturnNewInstanceWithUpdatedMonthlyFeeForPremiumProduct() {
         final PremiumMailProduct initial =
                 createDefaultPremiumMailProduct("Premium Pro", Brand.WEB_DE, new BigDecimal("10.00"));
@@ -249,11 +251,78 @@ class MailProductTest {
         final BigDecimal newFee = new BigDecimal("15.00");
         final PremiumMailProduct updated = initial.withMonthlyFee(newFee);
 
-        assertEquals(initial.id(), updated.id());
-        assertEquals(initial.name(), updated.name());
-        assertEquals(initial.brand(), updated.brand());
-        assertEquals(initial.setupFee(), updated.setupFee());
-        assertEquals(newFee, updated.monthlyFee());
-        assertEquals(initial.storageSize(), updated.storageSize());
+        assertEquals(initial.getId(), updated.getId());
+        assertEquals(initial.getName(), updated.getName());
+        assertEquals(initial.getBrand(), updated.getBrand());
+        assertEquals(initial.getSetupFee(), updated.getSetupFee());
+        assertEquals(newFee, updated.getMonthlyFee());
+        assertEquals(initial.getStorageSize(), updated.getStorageSize());
+    }
+
+    @Test
+    @DisplayName("Success: Create StandardMailProduct with predefined ID")
+    void shouldCreateStandardMailProductWithPredefinedId() {
+        final String name = "Standard Cloud";
+        final Brand brand = Brand.GMX;
+        final BigDecimal monthlyFee = new BigDecimal("2.99");
+
+        final StandardMailProduct product = createDefaultStandardMailProduct(name, brand, monthlyFee);
+
+        assertTrue(product.getId() instanceof UUID);
+        assertEquals(name, product.getName());
+        assertEquals(brand, product.getBrand());
+        assertEquals(new BigDecimal("4.99"), product.getSetupFee());
+        assertEquals(monthlyFee, product.getMonthlyFee());
+    }
+
+    @Test
+    @DisplayName("Success: Create PremiumMailProduct with predefined ID")
+    void shouldCreatePremiumMailProductWithPredefinedId() {
+        final String name = "Premium Plus";
+        final Brand brand = Brand.WEB_DE;
+        final BigDecimal monthlyFee = new BigDecimal("7.99");
+
+        final PremiumMailProduct product = createDefaultPremiumMailProduct(name, brand, monthlyFee);
+
+        assertTrue(product.getId() instanceof UUID);
+        assertEquals(name, product.getName());
+        assertEquals(brand, product.getBrand());
+        assertEquals(new BigDecimal("9.99"), product.getSetupFee());
+        assertEquals(monthlyFee, product.getMonthlyFee());
+    }
+
+    @Test
+    @DisplayName("Success: Create MailProduct via static factory method")
+    void shouldCreateMailProductViaStaticFactory() {
+        final String name = "Generic Mail";
+        final Brand brand = Brand.GMX;
+        final BigDecimal setupFee = new BigDecimal("1.00");
+        final BigDecimal monthlyFee = new BigDecimal("2.00");
+        final Long storageSize = 1024L;
+
+        final MailProduct product = MailProduct.create(name, brand, setupFee, monthlyFee, storageSize);
+
+        assertEquals(name, product.getName());
+        assertEquals(brand, product.getBrand());
+        assertEquals(setupFee, product.getSetupFee());
+        assertEquals(monthlyFee, product.getMonthlyFee());
+        assertEquals(storageSize, product.getStorageSize().orElseThrow());
+    }
+
+    @Test
+    @DisplayName("Success: Verify withMonthlyFee return new instance with same data but new fee for standard product")
+    void shouldReturnNewInstanceWithUpdatedMonthlyFeeForStandardProduct() {
+        final StandardMailProduct initial =
+                createDefaultStandardMailProduct("Standard Basic", Brand.GMX, new BigDecimal("2.00"));
+
+        final BigDecimal newFee = new BigDecimal("3.00");
+        final StandardMailProduct updated = initial.withMonthlyFee(newFee);
+
+        assertEquals(initial.getId(), updated.getId());
+        assertEquals(initial.getName(), updated.getName());
+        assertEquals(initial.getBrand(), updated.getBrand());
+        assertEquals(initial.getSetupFee(), updated.getSetupFee());
+        assertEquals(newFee, updated.getMonthlyFee());
+        assertEquals(initial.getStorageSize(), updated.getStorageSize());
     }
 }

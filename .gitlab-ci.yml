@@ -6,6 +6,11 @@ stages:
 # Unit tests
 unit_test_job:
   stage: test
+  variables:
+    REDIS_HOST: redis
+  services:
+    - name: redis:7.0-alpine
+      alias: redis
   script:
     - mvn clean test
   tags:
@@ -16,13 +21,22 @@ e2e_test_job:
   stage: e2e-test
   variables:
     APP_HOST: "http://localhost"
-    APP_PORT: "8080"
+    APP_PORT: "8090"
+    KC_URL: "https://localhost:8443"
+    KC_REALM: "mail-and-media-shop-realm"
+    KC_CLIENT_ID: "mail-and-media-shop-app"
+    KC_CLIENT_SECRET: ${KC_CLIENT_SECRET}
+    KC_GRANT_TYPE: "password"
+    KC_USERNAME: ${KC_USERNAME}
+    KC_PASSWORD: ${KC_PASSWORD}
   script:
-    - chmod +x e2e_tests/run_e2e.sh
-    - ./e2e_tests/run_e2e.sh
+    - chmod +x scripts/1_docker-e2e-setup.sh
+    - chmod +x scripts/3_e2e-test-runner.sh
+    - ./scripts/1_docker-e2e-setup.sh
+    - ./scripts/3_e2e-test-runner.sh
   artifacts:
     when: always
     paths:
-      - app.log  
+      - logs/
   tags:
-    - maven  
+    - maven

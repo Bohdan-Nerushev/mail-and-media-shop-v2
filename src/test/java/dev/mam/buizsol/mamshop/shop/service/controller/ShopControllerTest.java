@@ -3,7 +3,12 @@ package dev.mam.buizsol.mamshop.shop.service.controller;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -45,15 +50,20 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @DisplayName(value = "Shop Tests")
-@WebMvcTest(controllers = ShopController.class)
-public class ShopControllerTest {
+@WebMvcTest(
+        controllers = ShopController.class,
+        excludeAutoConfiguration = {SecurityAutoConfiguration.class, OAuth2ResourceServerAutoConfiguration.class})
+class ShopControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -385,10 +395,12 @@ public class ShopControllerTest {
         UUID customerId = UUID.randomUUID();
         UUID productId = UUID.randomUUID();
         PurchaseRequestDTO purchaseRequestDTO = CustomerTestFactory.createPurchaseRequestDTO(productId);
+        Customer customer = Mockito.mock(Customer.class);
+        Mockito.when(customer.getId()).thenReturn(customerId);
         Contract contract = CustomerTestFactory.createContract(
-                UUID.randomUUID(), customerId, productId, LocalDate.now(), ContractStatus.INACTIVE);
+                UUID.randomUUID(), customer, "TestProduct", productId, LocalDate.now(), ContractStatus.INACTIVE);
         ContractResponseDTO contractResponseDTO = CustomerTestFactory.createContractResponseDTO(
-                contract.id(), customerId, productId, contract.creationDate(), contract.status());
+                contract.getId(), customerId, productId, contract.getCreationDate(), contract.getStatus());
 
         when(shopService.purchaseProduct(customerId, productId)).thenReturn(contract);
         when(contractMapper.toContractResponseDTO(contract)).thenReturn(contractResponseDTO);
@@ -397,7 +409,7 @@ public class ShopControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(purchaseRequestDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(contract.id().toString()))
+                .andExpect(jsonPath("$.id").value(contract.getId().toString()))
                 .andExpect(jsonPath("$.customerId").value(customerId.toString()))
                 .andExpect(jsonPath("$.productId").value(productId.toString()));
 
@@ -473,27 +485,15 @@ public class ShopControllerTest {
     void shouldLoadAllContractsByCustomerId() throws Exception {
         final UUID customerId = UUID.randomUUID();
 
-        final Customer customer = CustomerTestFactory.createCustomer(
-                customerId,
-                "John",
-                "Doe",
-                LocalDate.now().minusYears(19),
-                CustomerTestFactory.createAddress("Street", "123", "City", "State", "Zip"),
-                null,
-                CustomerTestFactory.createCommunicationDetails("John@gmail.com", "123456789"),
-                Brand.GMX,
-                CustomerStatus.ACTIVE);
+        final UUID contractId = UUID.randomUUID();
+        final UUID productId = UUID.randomUUID();
 
-        final Product firstProduct = ShopTestFactory.createPremiumProduct("first", Brand.GMX, new BigDecimal("100.0"));
+        final Contract mockContract = Mockito.mock(Contract.class);
+        Mockito.when(mockContract.getId()).thenReturn(contractId);
+        Mockito.when(mockContract.getStatus()).thenReturn(ContractStatus.INACTIVE);
 
-        final Contract mockContract = Contract.create(customer, firstProduct);
-
-        final ContractResponseDTO responseDto = new ContractResponseDTO(
-                mockContract.id(),
-                mockContract.customerId(),
-                mockContract.productId(),
-                mockContract.creationDate(),
-                mockContract.status());
+        final ContractResponseDTO responseDto =
+                new ContractResponseDTO(contractId, customerId, productId, LocalDate.now(), ContractStatus.INACTIVE);
 
         when(shopService.loadAllContracts(any(UUID.class))).thenReturn(List.of(mockContract, mockContract));
 
@@ -502,7 +502,7 @@ public class ShopControllerTest {
         mockMvc.perform(get("/api/v1/shop/contracts/{customerId}", customerId).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(mockContract.id().toString())))
+                .andExpect(jsonPath("$[0].id", is(contractId.toString())))
                 .andExpect(jsonPath("$[0].status", is(ContractStatus.INACTIVE.name())));
 
         verify(shopService).loadAllContracts(customerId);

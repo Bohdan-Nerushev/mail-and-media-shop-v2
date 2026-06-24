@@ -1,0 +1,114 @@
+spring:
+  application:
+    name: mail-and-media-shop
+
+  aop:
+    proxy-target-class: false
+
+  datasource:
+    url: "${DB_URL:jdbc:postgresql://localhost:5430/shop_db}"
+    username: "${DB_USERNAME:dev_user}"
+    password: "${DB_PASSWORD:secret}"
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+    validate-on-migrate: true
+    clean-disabled: false
+    clean-on-validation-error: true
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  sql:
+    init:
+      mode: never
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000
+      cache-null-values: false
+
+  data:
+    redis:
+      host: "${REDIS_HOST:localhost}"
+      port: 6379
+      jedis:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 1
+          max-wait: 2000
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "${KC_ISSUER_URI:https://localhost:8443/realms/mail-and-media-shop-realm}"
+
+app:
+  keycloak:
+    external-url: ${KC_URL:https://localhost:8443}
+    realm: ${KC_REALM:mail-and-media-shop-realm}
+
+server:
+  port: 8090
+  tomcat:
+    mbeanregistry:
+      enabled: true
+
+billing:
+  minimal-discount-amount: "0.10"
+  zero-amount: "0.00"
+
+product:
+  catalog:
+    csv-path: /products.csv
+
+springdoc:
+  swagger-ui:
+    operationsSorter: method
+    tagsSorter: alpha
+    oauth:
+      client-id: mail-and-media-shop-app
+      client-secret: ${KC_CLIENT_SECRET:}
+      realm: mail-and-media-shop-realm
+      appName: Mail and Media Shop
+      use-pkce-with-authorization-code-grant: true
+  api-docs:
+    path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,loggers
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${APP_ENV:local}
+
+logging:
+  level:
+    dev:
+      mam:
+        buizsol:
+          mamshop: INFO
+    org:
+      flywaydb: DEBUG
+      flywaydb.core.internal.scanner: TRACE
+      hibernate:
+        SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId}] %-5level %logger{36} - %msg%n"

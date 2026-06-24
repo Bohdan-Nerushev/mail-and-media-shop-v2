@@ -34,11 +34,11 @@ class AddressTest {
     @DisplayName("Positive: Successful creation with valid data")
     void shouldCreateAddressInstanceWhenDataIsValid() {
         Address address = createDefaultAddress("Main St", "10", "12345", "Berlin", "Germany");
-        assertEquals("Main St", address.street());
-        assertEquals("10", address.number());
-        assertEquals("12345", address.postcode());
-        assertEquals("Berlin", address.city());
-        assertEquals("Germany", address.country());
+        assertEquals("Main St", address.getStreet());
+        assertEquals("10", address.getNumber());
+        assertEquals("12345", address.getPostcode());
+        assertEquals("Berlin", address.getCity());
+        assertEquals("Germany", address.getCountry());
     }
 
     @ParameterizedTest
@@ -96,7 +96,7 @@ class AddressTest {
     void shouldHandleExtremelyLongStreet() {
         String longStreet = "A".repeat(200);
         Address address = createDefaultAddress(longStreet, "1", "12345", "Berlin", "Germany");
-        assertEquals(longStreet, address.street());
+        assertEquals(longStreet, address.getStreet());
     }
 
     @Test
@@ -193,11 +193,11 @@ class AddressTest {
     @DisplayName("Boundary: Minimal valid input (single characters)")
     void shouldHandleSingleCharacterInputs() {
         Address address = createDefaultAddress("S", "1", "1", "B", "Gt");
-        assertEquals("S", address.street());
-        assertEquals("1", address.number());
-        assertEquals("1", address.postcode());
-        assertEquals("B", address.city());
-        assertEquals("Gt", address.country());
+        assertEquals("S", address.getStreet());
+        assertEquals("1", address.getNumber());
+        assertEquals("1", address.getPostcode());
+        assertEquals("B", address.getCity());
+        assertEquals("Gt", address.getCountry());
     }
 
     @Test

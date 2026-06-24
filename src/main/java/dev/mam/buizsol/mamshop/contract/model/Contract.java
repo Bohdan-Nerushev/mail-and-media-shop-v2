@@ -1,44 +1,93 @@
 package dev.mam.buizsol.mamshop.contract.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public record Contract(
-        @NotNull UUID id,
-        @NotNull UUID customerId,
-        @NotNull UUID productId,
-        @NotNull LocalDate creationDate,
-        @NotNull ContractStatus status) {
+@Entity
+@Table(name = "contracts")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
+@Getter
+@Setter
+@Builder(toBuilder = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Contract {
 
-    public Contract {
-        if (id == null || customerId == null || productId == null || creationDate == null || status == null) {
-            throw new ContractValidationException("All contract fields must not be null");
-        }
-    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false)
+    @EqualsAndHashCode.Include
+    private UUID id;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+
+    @NotNull
+    @Column(name = "product_type", nullable = false)
+    private String productType;
+
+    @NotNull
+    @Column(name = "product_id", nullable = false)
+    private UUID productId;
+
+    @NotNull
+    @Column(name = "creation_date", nullable = false)
+    private LocalDate creationDate;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ContractStatus status;
 
     public static Contract create(@NotNull @Valid final Customer customer, @NotNull @Valid final Product product) {
 
-        if (customer == null || product == null) {
-            throw new ContractValidationException("Customer and Product must not be null");
-        }
-        if (!customer.brand().equals(product.getBrand())) {
+        if (!customer.getBrand().equals(product.getBrand())) {
             throw new BrandMismatchException(String.format(
-                    "Customer brand %s does not match product brand %s", customer.brand(), product.getBrand()));
+                    "Customer brand %s does not match product brand %s", customer.getBrand(), product.getBrand()));
         }
-        if (customer.status() != CustomerStatus.ACTIVE) {
+        if (customer.getStatus() != CustomerStatus.ACTIVE) {
             throw new CustomerNotActiveException("Customer is not active");
         }
 
-        return new Contract(
-                UUID.randomUUID(), customer.id(), product.getId(), LocalDate.now(), ContractStatus.INACTIVE);
+        return Contract.builder()
+                .customer(customer)
+                .productType(product.getName())
+                .productId(product.getId())
+                .creationDate(LocalDate.now())
+                .status(ContractStatus.INACTIVE)
+                .build();
     }
 
     @NotNull
@@ -46,6 +95,7 @@ public record Contract(
         if (newStatus == null) {
             throw new ContractValidationException("Status must not be null");
         }
-        return new Contract(id, customerId, productId, creationDate, newStatus);
+        this.setStatus(newStatus);
+        return this;
     }
 }

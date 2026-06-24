@@ -1,69 +1,51 @@
 package dev.mam.buizsol.mamshop.product.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
-import dev.mam.buizsol.mamshop.product.validation.ValidStorageSize;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-public record StandardMailProduct(
-        @NotNull UUID id,
-
-        @NotBlank @Size(max = 100, message = "Product name must not exceed 100 characters")
-        String name,
-
-        @NotNull Brand brand,
-        @NotNull @DecimalMin(value = "0.00") BigDecimal setupFee,
-        @NotNull @DecimalMin(value = "0.11") BigDecimal monthlyFee,
-        @NotNull @ValidStorageSize Long storageSize)
-        implements Product {
+@Entity
+@Table(name = "standard_mail_products")
+@JsonIgnoreProperties(
+        value = {"hibernateLazyInitializer", "handler"},
+        ignoreUnknown = true)
+@DiscriminatorValue("StandardMailProduct")
+@Getter
+@Setter
+@SuperBuilder(toBuilder = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class StandardMailProduct extends MailProduct {
 
     private static final BigDecimal FIXED_SETUP_FEE = new BigDecimal("4.99");
     private static final Long FIXED_STORAGE_SIZE = 4L;
 
     public StandardMailProduct(
-            @NotBlank @Size(min = 1, max = 100) final String name,
+            @NotNull final String name, @NotNull final Brand brand, @NotNull final BigDecimal monthlyFee) {
+        super(UUID.randomUUID(), name, brand, FIXED_SETUP_FEE, monthlyFee, FIXED_STORAGE_SIZE);
+    }
+
+    public StandardMailProduct(
+            final UUID id,
+            @NotNull final String name,
             @NotNull final Brand brand,
-            @NotNull final BigDecimal monthlyFee) {
-        this(UUID.randomUUID(), name, brand, FIXED_SETUP_FEE, monthlyFee, FIXED_STORAGE_SIZE);
-    }
-
-    @Override
-    public UUID getId() {
-        return id;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Brand getBrand() {
-        return brand;
-    }
-
-    @Override
-    public BigDecimal getSetupFee() {
-        return setupFee;
-    }
-
-    @Override
-    public BigDecimal getMonthlyFee() {
-        return monthlyFee;
-    }
-
-    @Override
-    public Optional<Long> getStorageSize() {
-        return Optional.ofNullable(storageSize);
+            @NotNull final BigDecimal setupFee,
+            @NotNull final BigDecimal monthlyFee,
+            @NotNull final Long storageSize) {
+        super(id, name, brand, setupFee, monthlyFee, storageSize);
     }
 
     @Override
     public StandardMailProduct withMonthlyFee(@NotNull final BigDecimal monthlyFee) {
-        return new StandardMailProduct(id, name, brand, setupFee, monthlyFee, storageSize);
+        return this.toBuilder().monthlyFee(monthlyFee).build();
     }
 }

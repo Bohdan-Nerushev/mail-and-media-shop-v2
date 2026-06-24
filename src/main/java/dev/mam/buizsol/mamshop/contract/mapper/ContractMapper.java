@@ -10,6 +10,10 @@ public class ContractMapper {
 
     public ContractResponseDTO toContractResponseDTO(@NotNull Contract contract) {
         return new ContractResponseDTO(
-                contract.id(), contract.customerId(), contract.productId(), contract.creationDate(), contract.status());
+                contract.getId(),
+                contract.getCustomer().getId(),
+                contract.getProductId(),
+                contract.getCreationDate(),
+                contract.getStatus());
     }
 }

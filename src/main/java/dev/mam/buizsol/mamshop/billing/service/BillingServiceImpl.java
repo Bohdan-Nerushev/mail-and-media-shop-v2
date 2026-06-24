@@ -19,8 +19,10 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 class BillingServiceImpl implements BillingService {
 
     private final CustomerService customerService;
@@ -44,6 +46,7 @@ class BillingServiceImpl implements BillingService {
     }
 
     @Override
+    @Transactional
     public Invoice generateInvoice(final UUID customerId) throws CustomerNotFoundException, ProductNotFoundException {
         if (customerId == null) {
             throw new InvoiceValidationException("Customer ID must not be null");
@@ -52,9 +55,9 @@ class BillingServiceImpl implements BillingService {
     }
 
     @Override
+    @Transactional
     public Invoice generateInvoice(final UUID customerId, final BigDecimal discount)
             throws CustomerNotFoundException, ProductNotFoundException {
-
         if (customerId == null) {
             throw new InvoiceValidationException("Customer ID must not be null");
         }
@@ -67,7 +70,11 @@ class BillingServiceImpl implements BillingService {
         if (discount.compareTo(zeroAmount) > 0 && discount.compareTo(minimalDiscountAmount) <= 0) {
             throw new InvalidInvoiceDiscountException("Discount must be greater than " + minimalDiscountAmount + " €");
         }
+        return createInvoice(customerId, discount);
+    }
 
+    private Invoice createInvoice(final UUID customerId, final BigDecimal discount)
+            throws CustomerNotFoundException, ProductNotFoundException {
         final Customer customer = customerService
                 .findCustomerById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + customerId + " not found"));
@@ -76,25 +83,23 @@ class BillingServiceImpl implements BillingService {
         final List<InvoiceItem> items = new ArrayList<>();
 
         for (final Contract contract : contracts) {
-            if (contract.status() == ContractStatus.ACTIVE) {
+            if (contract.getStatus() == ContractStatus.ACTIVE) {
                 final Product product = productService
-                        .findById(contract.productId())
-                        .orElseThrow(() -> new ProductNotFoundException("Product with ID "
-                                + contract.productId()
-                                + " not found for contract "
-                                + contract.id()));
+                        .findById(contract.getProductId())
+                        .orElseThrow(() -> new ProductNotFoundException("Product with ID " + contract.getProductId()
+                                + " not found for contract " + contract.getId()));
 
                 items.add(new InvoiceItem(
                         product.getId(),
                         product.getName(),
-                        contract.id(),
-                        contract.creationDate(),
+                        contract,
+                        contract.getCreationDate(),
                         product.getSetupFee(),
                         product.getMonthlyFee()));
             }
         }
 
         return new Invoice(
-                customer.brand(), customer.id(), customer.address(), customer.invoiceAddress(), items, discount);
+                customer.getBrand(), customer, customer.getAddress(), customer.getInvoiceAddress(), items, discount);
     }
 }

@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,6 +54,7 @@ public class ContractController {
             })
     @PutMapping(value = "/{contractId}/{customerId}/activate")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('USER')")
     public void activateContract(
             @PathVariable(value = "customerId") @NotNull final UUID customerId,
             @PathVariable(value = "contractId") @NotNull final UUID contractId) {

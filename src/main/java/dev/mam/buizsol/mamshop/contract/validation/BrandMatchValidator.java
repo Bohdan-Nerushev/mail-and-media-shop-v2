@@ -20,6 +20,6 @@ public class BrandMatchValidator implements ConstraintValidator<BrandMatch, Obje
             return true;
         }
 
-        return customer.brand().equals(product.getBrand());
+        return customer.getBrand().equals(product.getBrand());
     }
 }

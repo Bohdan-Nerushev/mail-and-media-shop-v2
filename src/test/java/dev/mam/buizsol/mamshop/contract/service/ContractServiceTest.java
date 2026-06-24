@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import dev.mam.buizsol.mamshop.contract.exception.BrandMismatchException;
 import dev.mam.buizsol.mamshop.contract.exception.ContractNotFoundException;
-import dev.mam.buizsol.mamshop.contract.exception.ContractValidationException;
 import dev.mam.buizsol.mamshop.contract.model.Contract;
 import dev.mam.buizsol.mamshop.contract.model.ContractStatus;
 import dev.mam.buizsol.mamshop.customer.exception.CustomerNotActiveException;
@@ -21,6 +21,8 @@ import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.customer.model.CustomerStatus;
 import dev.mam.buizsol.mamshop.product.model.Product;
 import dev.mam.buizsol.mamshop.product.model.StandardMailProduct;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,11 +32,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ContractService Tests")
@@ -44,13 +47,23 @@ class ContractServiceTest {
     private ContractRepository contractRepository;
 
     @InjectMocks
-    private ContractServiceImpl contractService;
+    private ContractServiceImpl contractServiceImpl;
+
+    private ContractService contractService;
+    private LocalValidatorFactoryBean validatorFactory;
 
     private Customer activeCustomer;
     private Product matchingProduct;
 
     @BeforeEach
     void setUp() {
+        validatorFactory = new LocalValidatorFactoryBean();
+        validatorFactory.afterPropertiesSet();
+
+        ProxyFactory proxyFactory = new ProxyFactory(contractServiceImpl);
+        proxyFactory.addAdvice(new MethodValidationInterceptor((Validator) validatorFactory));
+        contractService = (ContractService) proxyFactory.getProxy();
+
         activeCustomer = mock(Customer.class);
 
         matchingProduct = new StandardMailProduct("Test Product", Brand.WEB_DE, new BigDecimal("10.00"));
@@ -62,12 +75,12 @@ class ContractServiceTest {
         setupActiveCustomer();
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Contract created = contractService.createContract(activeCustomer, matchingProduct);
+        Contract created = contractServiceImpl.createContract(activeCustomer, matchingProduct);
 
         assertNotNull(created);
-        assertEquals(activeCustomer.id(), created.customerId());
-        assertEquals(matchingProduct.getId(), created.productId());
-        assertEquals(ContractStatus.INACTIVE, created.status());
+        assertEquals(activeCustomer.getId(), created.getCustomer().getId());
+        assertEquals(matchingProduct.getId(), created.getProductId());
+        assertEquals(ContractStatus.INACTIVE, created.getStatus());
         verify(contractRepository).save(any(Contract.class));
     }
 
@@ -76,7 +89,7 @@ class ContractServiceTest {
     void shouldReturnContractWhenIdExists() {
         UUID contractId = UUID.randomUUID();
         Contract contract = mock(Contract.class);
-        when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
+        when(contractRepository.findWithDetailsById(contractId)).thenReturn(Optional.of(contract));
 
         Optional<Contract> result = contractService.findContractById(contractId);
 
@@ -103,55 +116,64 @@ class ContractServiceTest {
         setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
         Contract contract = Contract.create(activeCustomer, matchingProduct);
-        when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
-        when(contractRepository.update(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(contractRepository.findWithDetailsById(contractId)).thenReturn(Optional.of(contract));
+        when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract updated = contractService.updateContractStatus(contractId, ContractStatus.INACTIVE);
 
-        assertEquals(ContractStatus.INACTIVE, updated.status());
-        verify(contractRepository).update(any(Contract.class));
+        assertEquals(ContractStatus.INACTIVE, updated.getStatus());
+        verify(contractRepository).save(any(Contract.class));
     }
 
     @Test
     @DisplayName("Negative: updateContractStatus throws exception when contract not found")
     void shouldThrowExceptionWhenUpdatingStatusOfNonExistentContract() {
         UUID contractId = UUID.randomUUID();
-        when(contractRepository.findById(contractId)).thenReturn(Optional.empty());
+        when(contractRepository.findWithDetailsById(contractId)).thenReturn(Optional.empty());
 
         assertThrows(
                 ContractNotFoundException.class,
                 () -> contractService.updateContractStatus(contractId, ContractStatus.INACTIVE));
     }
 
-    @DisplayName("Boundary/Negative: createContract throws exception on null parameters")
-    @ParameterizedTest
-    @CsvSource({"true, false", "false, true", "true, true"})
-    void shouldThrowExceptionWhenCreatingContractWithNullParameters(boolean customerIsNull, boolean productIsNull) {
-        Customer customer = customerIsNull ? null : activeCustomer;
-        Product product = productIsNull ? null : matchingProduct;
-        assertThrows(ContractValidationException.class, () -> contractService.createContract(customer, product));
+    @Test
+    @DisplayName("Negative: createContract throws ConstraintViolationException when customer is null")
+    void shouldThrowConstraintViolationWhenCustomerIsNull() {
+        assertThrows(ConstraintViolationException.class, () -> contractService.createContract(null, matchingProduct));
+    }
+
+    @Test
+    @DisplayName("Negative: createContract throws ConstraintViolationException when product is null")
+    void shouldThrowConstraintViolationWhenProductIsNull() {
+        assertThrows(ConstraintViolationException.class, () -> contractService.createContract(activeCustomer, null));
+    }
+
+    @Test
+    @DisplayName("Negative: createContract throws ConstraintViolationException when both parameters are null")
+    void shouldThrowConstraintViolationWhenBothParametersAreNull() {
+        assertThrows(ConstraintViolationException.class, () -> contractService.createContract(null, null));
     }
 
     @Test
     @DisplayName("Negative: createContract throws exception on brand mismatch")
     void shouldThrowExceptionWhenCreatingContractWithBrandMismatch() {
-        when(activeCustomer.brand()).thenReturn(Brand.WEB_DE);
+        setupActiveCustomer();
         Product mismatchProduct = new StandardMailProduct("Mismatch Brand", Brand.GMX, new BigDecimal("10.00"));
 
         assertThrows(
-                BrandMismatchException.class, () -> contractService.createContract(activeCustomer, mismatchProduct));
+                BrandMismatchException.class,
+                () -> contractServiceImpl.createContract(activeCustomer, mismatchProduct));
     }
 
     @Test
     @DisplayName("Negative: createContract throws exception when customer is inactive")
     void shouldThrowExceptionWhenCreatingContractForInactiveCustomer() {
-        Customer inactiveCustomer = mock(Customer.class);
-        when(inactiveCustomer.status()).thenReturn(CustomerStatus.INACTIVE);
-        when(inactiveCustomer.brand()).thenReturn(Brand.WEB_DE);
+        setupActiveCustomer();
+        when(activeCustomer.getStatus()).thenReturn(CustomerStatus.INACTIVE);
 
         assertThrows(
                 CustomerNotActiveException.class,
-                () -> contractService.createContract(inactiveCustomer, matchingProduct));
+                () -> contractServiceImpl.createContract(activeCustomer, matchingProduct));
     }
 
     @Test
@@ -195,13 +217,13 @@ class ContractServiceTest {
         setupActiveCustomer();
         UUID contractId = UUID.randomUUID();
         Contract contract = Contract.create(activeCustomer, matchingProduct).withStatus(ContractStatus.ACTIVE);
-        when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
-        when(contractRepository.update(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(contractRepository.findWithDetailsById(contractId)).thenReturn(Optional.of(contract));
+        when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract updated = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
 
-        assertEquals(ContractStatus.ACTIVE, updated.status());
-        verify(contractRepository).update(any(Contract.class));
+        assertEquals(ContractStatus.ACTIVE, updated.getStatus());
+        verify(contractRepository).save(any(Contract.class));
     }
 
     @Test
@@ -211,19 +233,19 @@ class ContractServiceTest {
         UUID contractId = UUID.randomUUID();
         Contract contract = Contract.create(activeCustomer, matchingProduct);
 
-        when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
-        when(contractRepository.update(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(contractRepository.findWithDetailsById(contractId)).thenReturn(Optional.of(contract));
+        when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Contract updated1 = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
-        assertEquals(ContractStatus.ACTIVE, updated1.status());
+        assertEquals(ContractStatus.ACTIVE, updated1.getStatus());
 
         Contract updated2 = contractService.updateContractStatus(contractId, ContractStatus.INACTIVE);
-        assertEquals(ContractStatus.INACTIVE, updated2.status());
+        assertEquals(ContractStatus.INACTIVE, updated2.getStatus());
 
         Contract updated3 = contractService.updateContractStatus(contractId, ContractStatus.ACTIVE);
-        assertEquals(ContractStatus.ACTIVE, updated3.status());
+        assertEquals(ContractStatus.ACTIVE, updated3.getStatus());
 
-        verify(contractRepository, times(3)).update(any(Contract.class));
+        verify(contractRepository, times(3)).save(any(Contract.class));
     }
 
     @Test
@@ -232,16 +254,16 @@ class ContractServiceTest {
         setupActiveCustomer();
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Contract created = contractService.createContract(activeCustomer, matchingProduct);
+        Contract created = contractServiceImpl.createContract(activeCustomer, matchingProduct);
 
-        assertEquals(LocalDate.now(), created.creationDate());
+        assertEquals(LocalDate.now(), created.getCreationDate());
         verify(contractRepository).save(any(Contract.class));
     }
 
     private void setupActiveCustomer() {
-        when(activeCustomer.status()).thenReturn(CustomerStatus.ACTIVE);
-        when(activeCustomer.brand()).thenReturn(Brand.WEB_DE);
-        when(activeCustomer.id()).thenReturn(UUID.randomUUID());
+        lenient().when(activeCustomer.getStatus()).thenReturn(CustomerStatus.ACTIVE);
+        lenient().when(activeCustomer.getBrand()).thenReturn(Brand.WEB_DE);
+        lenient().when(activeCustomer.getId()).thenReturn(UUID.randomUUID());
     }
 
     @Test

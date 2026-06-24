@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-// @SpringJUnitConfig
 @DisplayName("ContractNotFoundException Tests")
 class ContractNotFoundExceptionTest {
 

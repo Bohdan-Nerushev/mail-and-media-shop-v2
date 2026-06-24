@@ -6,9 +6,11 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 ---
 
 ## Table of Contents
-
+- [Technology Stack](#technology-stack)
 - [Swagger UI](#swagger-ui)
+- [Security & Authentication (Spring Security + Keycloak)](#security--authentication-spring-security--keycloak)
 - [Testing](#testing)
+- [Dockerization](#dockerization)
 - [API Overview](#api-overview)
   - [Customer API](#customer-api)
   - [Contract API](#contract-api)
@@ -16,7 +18,62 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
   - [Billing API](#billing-api)
 - [Common Response Schemas](#common-response-schemas)
 - [Error Handling](#error-handling)
+- [Redis Caching](#redis-caching)
+- [Monitoring & Observability](#monitoring--observability)
+  - [Monitoring Components](#monitoring-components)
+  - [ELK Stack (Structured Log Pipeline)](#elk-stack-structured-log-pipeline)
+  - [Log Persistence](#log-persistence)
+  - [How to Visualize](#how-to-visualize)
+  - [ELK Operations](#elk-operations)
 - [Maintain Code Cleanliness](#maintain-code-cleanliness)
+  - [Spotless](#1-spotless--automatic-code-formatting)
+  - [PMD](#2-pmd--anti-pattern-and-code-duplication-detection)
+  - [SpotBugs](#3-spotbugs--findsecbugs--bytecode-analysis-and-security)
+  - [OWASP](#4-owasp-dependency-check--snyk--dependency-security)
+  - [Git Pre-commit Hook](#5-git-pre-commit-hook--automatic-checks-before-commit)
+  - [SonarQube](#6-sonarqube--static-analysis-and-quality-gate)
+- [Dependency Management & Build](#dependency-management--build)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## Technology Stack
+- **Core**: Java 21, Spring Boot 4.0.5
+- **Database**: PostgreSQL 16, Flyway (Migrations)
+- **Caching**: Redis (Jedis Client)
+- **Quality**: PMD, SpotBugs, Spotless, JaCoCo, SonarQube
+- **Documentation**: Swagger UI (OpenAPI 3.1)
+- **Security**: Spring Security, OAuth2 Resource Server, Keycloak
+- **Logging**: ELK Stack (Elasticsearch 9.4.2, Logstash 9.4.2, Kibana 9.4.2)
+
+---
+
+## Swagger UI
+
+Interactive API documentation is available at:
+
+[http://localhost:8090/swagger-ui/index.html](http://localhost:8090/swagger-ui/index.html)
+
+---
+
+## Security & Authentication (Spring Security + Keycloak)
+
+The application implements a robust security layer using **Spring Security** as an OAuth2 Resource Server and **Keycloak** as the Identity Provider (IdP).
+
+### 1. Secured Endpoints
+By default, all API endpoints require authentication (a valid Bearer JWT token) except the following public endpoints:
+- `POST /api/v1/shop/customers` (Customer Registration)
+- `GET /api/v1/shop/products` (Product Catalog)
+- OpenAPI/Swagger UI endpoints (`/swagger-ui/**`, `/v3/api-docs/**`)
+- Spring Boot Actuator endpoints (`/actuator/**`)
+
+### 2. JWT Token Validation
+The application performs strict token validation using `NimbusJwtDecoder`:
+- **Audience Validation**: Ensures the token's `aud` claim contains the designated `clientId` (e.g., `mail-and-media-shop-app`) or `account`.
+- **Issuer Validation**: Ensures the token was strictly issued by the trusted Keycloak realm (e.g., `/realms/mail-and-media-shop-realm`).
+
+### 3. Role-Based Access Control (RBAC)
+Role extraction is handled by a custom `KeycloakRoleConverter`. It maps Keycloak's JSON structure by extracting roles from the `realm_access.roles` claim and converting them into Spring Security authorities with a `ROLE_` prefix (e.g., `ROLE_USER`, `ROLE_ADMIN`).
 
 ---
 
@@ -26,6 +83,27 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 To run unit tests, do:
 ```bash
 mvn clean test
+```
+
+To run a specific test class:
+```bash
+mvn test -Dtest=BillingServiceTest
+```
+
+### Code Coverage (JaCoCo)
+To generate the coverage report, run tests with the `dev` profile:
+```bash
+mvn test -P dev
+```
+Then open the HTML report:
+```bash
+open target/site/jacoco/index.html
+```
+
+### Full Validation
+Runs tests and all quality checks (Spotless, PMD, SpotBugs):
+```bash
+mvn verify -P dev
 ```
 
 ### End-to-End (E2E) Tests (Python)
@@ -42,21 +120,99 @@ For a local CI pipeline, do:
 gitlab-ci-local
 ```
 
-## Swagger UI
+## Dockerization
 
-Interactive API documentation is available at:
+The project uses **PostgreSQL 16** as the database.
 
+### Exposed Ports
+- **Application**: `8090` (maps to internal `8090`) can be changed in the .env file.
+- **PostgreSQL**: `5430` (maps to internal `5432`) can be changed in the .env file.
+
+### Local SSL Certificates (HTTPS Setup)
+
+Since Keycloak is configured to run exclusively over HTTPS (`https://keycloak:8443`), you must generate SSL certificates and a Java Truststore locally before starting the services.
+
+#### 1. Generate SSL Certificates
+Create the certificates directory and generate the self-signed key and certificate. You can use either `mkcert` (recommended) or `openssl`:
+
+**Option A: Using mkcert (Recommended for local development)**
+```bash
+mkdir -p certs
+mkcert -key-file certs/keycloak-key.pem -cert-file certs/keycloak-cert.pem keycloak localhost 127.0.0.1 ::1
 ```
-http://localhost:8080/swagger-ui/index.html
+
+**Option B: Using OpenSSL (Fallback)**
+```bash
+mkdir -p certs
+openssl req -x509 -newkey rsa:4096 -nodes -sha256 \
+  -keyout certs/keycloak-key.pem \
+  -out certs/keycloak-cert.pem \
+  -subj "/CN=keycloak" \
+  -days 365 \
+  -addext "subjectAltName=DNS:keycloak,DNS:localhost,IP:127.0.0.1"
 ```
 
+#### 2. Create Java Truststore (JKS)
+The Spring Boot container requires a truststore containing the Keycloak public certificate to securely connect to the Identity Provider:
+```bash
+keytool -importcert -noprompt \
+  -keystore certs/truststore.jks \
+  -storepass changeit \
+  -alias keycloak \
+  -file certs/keycloak-cert.pem
+```
+
+### Running the entire project
+
+To run it locally, you need to execute the following commands (after generating the certificates):
+
+```bash
+docker compose down -v
+docker compose up -d
+bash scripts/2_keycloak_api_setup.sh
+```
+
+### Stopping the project
+```bash
+docker compose down
+```
+
+### Wiping Database Data (useful for clean Flyway migrations)
+```bash
+docker compose down -v
+```
+
+### Viewing application logs
+```bash
+docker compose logs -f app
+```
+
+### Monitoring Container Resources
+```bash
+docker stats
+```
+
+### Access the application container shell:
+```bash
+docker compose exec app bash
+```
+
+### Access the PostgreSQL container shell:
+```bash
+docker compose exec shop_db psql -U dev_user -d shop_db
+```
+
+### Restarting only the application (after code changes - rebuilds the app image)
+```bash
+docker compose up -d --build app
+```
 
 ## API Overview
 
 ### Base URL
 
 ```
-http://localhost:8080/api/v1
+http://localhost:8090/api/v1
 ```
 
 ## Customer API
@@ -109,7 +265,7 @@ Creates a new customer record.
 #### Example Request (curl)
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/shop/customers \
+curl -X POST http://localhost:8090/api/v1/shop/customers \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "Max",
@@ -181,7 +337,7 @@ Returns the customer with the specified UUID.
 #### Example Request (curl)
 
 ```bash
-curl -X GET http://localhost:8080/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
+curl -X GET http://localhost:8090/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
 ```
 
 #### Example Response — `200 OK`
@@ -248,7 +404,7 @@ Deletes the customer by their `customerId`.
 #### Example Request (curl)
 
 ```bash
-curl -X DELETE http://localhost:8080/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
+curl -X DELETE http://localhost:8090/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6
 ```
 
 #### Example Response — `204 No Content`
@@ -280,7 +436,7 @@ Changes the status of the specified customer to `ACTIVE`.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
+curl -X PUT http://localhost:8090/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
 ```
 
 #### Example Response — `204 No Content`
@@ -312,7 +468,7 @@ Changes the status of the specified customer to `INACTIVE`.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/deactivate
+curl -X PUT http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/deactivate
 ```
 
 #### Example Response — `204 No Content`
@@ -348,7 +504,7 @@ Standard `AddressRequestDTO` structure.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/address \
+curl -X PUT http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/address \
   -H "Content-Type: application/json" \
   -d '{
     "street": "Neustraße",
@@ -389,7 +545,7 @@ Standard `AddressRequestDTO` structure.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/invoice-address \
+curl -X PUT http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/invoice-address \
   -H "Content-Type: application/json" \
   -d '{
     "street": "Neustraße",
@@ -430,7 +586,7 @@ Standard `CommunicationDetailsRequestDTO` structure.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/communication-details \
+curl -X PUT http://localhost:8090/api/v1/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/communication-details \
   -H "Content-Type: application/json" \
   -d '{
     "email": "new.email@gmx.de",
@@ -472,7 +628,7 @@ Creates a new contract linking the specified customer to a selected product.
 #### Example Request (curl)
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/purchases \
+curl -X POST http://localhost:8090/api/v1/shop/customers/3fa85f64-5717-4562-b3fc-2c963f66afa6/purchases \
   -H "Content-Type: application/json" \
   -d '{
     "productId": "7cb65f12-1234-4abc-a789-000000000001"
@@ -527,7 +683,7 @@ Returns all contracts associated with the specified customer UUID.
 #### Example Request (curl)
 
 ```bash
-curl -X GET http://localhost:8080/api/v1/shop/contracts/3fa85f64-5717-4562-b3fc-2c963f66afa6
+curl -X GET http://localhost:8090/api/v1/shop/contracts/3fa85f64-5717-4562-b3fc-2c963f66afa6
 ```
 
 #### Example Response — `200 OK`
@@ -570,7 +726,7 @@ Changes the status of a specific contract to `ACTIVE`.
 #### Example Request (curl)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/contracts/a1b2c3d4-e5f6-7890-abcd-ef1234567890/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
+curl -X PUT http://localhost:8090/api/v1/contracts/a1b2c3d4-e5f6-7890-abcd-ef1234567890/3fa85f64-5717-4562-b3fc-2c963f66afa6/activate
 ```
 
 #### Response Status Codes
@@ -657,7 +813,7 @@ Generates an invoice for the specified customer based on their current active co
 #### Example Request (curl)
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/billing/invoices \
+curl -X POST http://localhost:8090/api/v1/billing/invoices \
   -H "Content-Type: application/json" \
   -d '{
     "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
@@ -778,8 +934,227 @@ All error responses share a unified structure defined by `ErrorResponse`:
 | `404`  | Not Found — the requested resource does not exist               |
 | `500`  | Internal Server Error — unexpected server-side failure          |
 
+---
+## Redis Caching
+The application uses **Redis** with the **Jedis** client to optimize read-heavy operations using the **Cache-Aside** pattern.
+### Caching Strategy
+- **Read**: Before hitting the database, the system checks the Redis cache. If data is found (Cache Hit), it's returned immediately. Otherwise (Cache Miss), it loads data from the database and populates the cache for future requests.
+- **Write/Update**: When a record is modified, removed, or deactivated, the corresponding cache entry is evicted (`@CacheEvict`) to ensure data consistency.
+### Configured Caches
+- `customers`: Stores individual customer profiles (keyed by UUID).
+- `products`: Stores product lists filtered by Brand (keyed by Brand enum).
+### Configuration (TTL)
+TTL is externalized and can be configured in `application.yml` or `.env`:
+```properties
+# Default: 10 minutes (600,000 ms)
+spring.cache.redis.time-to-live=600000
+```
 
 ---
+
+## Monitoring & Observability
+
+This project includes a comprehensive observability stack for monitoring metrics, logs, and system health. All components are pre-configured to work together out of the box.
+
+### Monitoring Components
+
+### 1. Grafana
+**URL:** [http://localhost:3000](http://localhost:3000)
+
+The primary visualization platform used to create dashboards and analyze metrics collected from Prometheus and logs aggregated by Loki.
+
+- **Health Endpoint:** [http://localhost:3000/api/health](http://localhost:3000/api/health) — Internal endpoint for debugging service availability and status.
+
+### 2. Prometheus
+**URL:** [http://localhost:9090](http://localhost:9090)
+
+The core time-series database and monitoring system that pulls (scrapes) metrics from the application and various infrastructure exporters.
+
+- **Config Check:** [http://localhost:9090/config](http://localhost:9090/config) — Verify the current Prometheus configuration.
+- **Graph UI:** [http://localhost:9090/graph](http://localhost:9090/graph) — Built-in interface for quick metric testing and visualization using PromQL.
+
+### 3. Loki
+A horizontally scalable, highly available log aggregation system. It allows for efficient log querying and analysis across all containers.
+
+- **Health Check:** [http://localhost:3100/ready](http://localhost:3100/ready) — Returns the readiness status of the Loki instance.
+- **Internal Metrics:** [http://localhost:3100/metrics](http://localhost:3100/metrics) — Exposes Loki's own operational metrics for self-monitoring.
+
+### 4. Alloy (Grafana Alloy)
+**URL:** [http://localhost:12345](http://localhost:12345)
+
+The distribution of the OpenTelemetry Collector used for collecting, transforming, and forwarding telemetry data (logs and metrics) to the backend storage (Loki/Prometheus).
+
+- **Internal Metrics:** [http://localhost:12345/metrics](http://localhost:12345/metrics) — Exposes Alloy's own metrics for performance monitoring of the collector.
+
+### 5. Prometheus Exporters
+Exporters translate internal system states into Prometheus-compatible metrics.
+
+- **PostgreSQL Exporter (Shop):** [http://localhost:9187/metrics](http://localhost:9187/metrics) — Provides detailed database performance and health metrics for the shop database.
+- **PostgreSQL Exporter (Keycloak):** [http://localhost:9188/metrics](http://localhost:9188/metrics) — Provides metrics for the Keycloak identity provider database.
+- **Redis Exporter:** [http://localhost:9121/metrics](http://localhost:9121/metrics) — Exposes performance, memory usage, and health metrics for the Redis cache instance.
+
+### 6. Spring Boot Application (Observability Chain)
+The application exposes management endpoints via Spring Boot Actuator for deep introspection and monitoring.
+
+- **Health Check:** [http://localhost:8090/actuator/health](http://localhost:8090/actuator/health) — Aggregated health status of the application and its critical dependencies.
+- **Prometheus Metrics:** [http://localhost:8090/actuator/prometheus](http://localhost:8090/actuator/prometheus) — Native application metrics formatted specifically for Prometheus scraping.
+
+---
+
+### ELK Stack (Structured Log Pipeline)
+
+The ELK stack provides a centralized, structured logging pipeline for all infrastructure services.
+All logs are written to the shared host directory `./logs/` and ingested by Logstash.
+
+#### 7. Elasticsearch
+**URL:** [http://localhost:9200](http://localhost:9200)
+
+The search and analytics engine that stores and indexes all structured logs.
+
+- **Cluster Health:** [http://localhost:9200/_cluster/health](http://localhost:9200/_cluster/health)
+- **Index Template:** Verify the registered template:
+  ```bash
+  curl http://localhost:9200/_index_template/app-logs-template
+  ```
+- **View Indices:**
+  ```bash
+  curl http://localhost:9200/_cat/indices?v
+  ```
+
+#### 8. Logstash
+**Monitoring API:** [http://localhost:9600](http://localhost:9600)
+
+The data processing pipeline that reads log files from `./logs/`, parses them per service, and ships structured documents to Elasticsearch.
+
+| Source File | Service Type | Parser |
+|---|---|---|
+| `logs/application.log` | `app` | Dissect + Grok (multiline) |
+| `logs/shop_db.log` | `shop_db` | Grok PostgreSQL format (multiline) |
+| `logs/keycloak-db.log` | `keycloak-db` | Grok PostgreSQL format (multiline) |
+| `logs/keycloak.log` | `keycloak` | Grok Quarkus format (multiline) |
+| `logs/redis.log` | `redis` | Grok Redis format |
+
+Sensitive values (`TrustedClientToken`, `Sec-MS-GEC`) are automatically **redacted** before indexing.
+
+#### 9. Kibana
+**URL:** [http://localhost:5601](http://localhost:5601)
+
+The web UI for exploring, filtering, and visualizing all structured log data stored in Elasticsearch.
+
+---
+
+### Log Persistence
+
+All service logs are written to the `./logs/` directory on the host machine via Docker Bind Mounts.
+This directory **survives** `docker compose down -v` because it is not a Docker named volume.
+
+| Container | Log File | Mount |
+|---|---|---|
+| `app` | `logs/application.log` | `./logs:/app/logs` |
+| `shop_db` | `logs/shop_db.log` | `./logs:/var/log/postgresql` |
+| `keycloak-db` | `logs/keycloak-db.log` | `./logs:/var/log/postgresql` |
+| `keycloak` | `logs/keycloak.log` | `./logs:/opt/keycloak/data/log` |
+| `redis` | `logs/redis.log` | `./logs:/var/log/redis` |
+
+The entire `logs/` directory is excluded from Git via `.gitignore`.
+
+---
+
+### How to Visualize
+
+#### Grafana (Metrics & Loki Logs)
+1. Access **Grafana** at [http://localhost:3000](http://localhost:3000).
+2. Login with default credentials (admin/admin).
+3. Navigate to **Explore** in the sidebar.
+4. Switch between **Prometheus** (for graphing metrics using PromQL) and **Loki** (for searching logs using LogQL).
+
+#### Kibana (Structured ELK Logs)
+1. Access **Kibana** at [http://localhost:5601](http://localhost:5601).
+2. Go to **Management** → **Stack Management** → **Data Views** → **Create data view**.
+3. Set the Index pattern to `*-logs-*` (or service-specific patterns like `app-logs-*`, `shop_db-logs-*`, `keycloak-logs-*`, etc.) and the timestamp field to `@timestamp`.
+4. Navigate to the **Discover** tab to search and filter logs using fields such as `service`, `loglevel`, `correlation_id`, `thread`, `pid`.
+
+---
+
+### ELK Operations
+
+#### Starting the ELK Stack
+
+The ELK services start automatically as part of `docker compose up`. However, `elasticsearch-setup` runs once after Elasticsearch is ready and registers the index template automatically.
+
+```bash
+docker compose up -d
+```
+
+Verify the template was registered:
+```bash
+curl -s http://localhost:9200/_index_template/app-logs-template | python3 -m json.tool
+```
+
+#### Stopping the ELK Stack
+
+Stop all services without deleting volumes (logs and Elasticsearch data are preserved):
+```bash
+docker compose down
+```
+
+Stop and **wipe all Docker volumes** (Elasticsearch index data is lost, but `./logs/` files on disk are preserved):
+```bash
+docker compose down -v
+```
+
+#### Elasticsearch — Diagnostic Commands
+
+Check cluster health:
+```bash
+curl -s http://localhost:9200/_cluster/health?pretty
+```
+
+List all active log indices:
+```bash
+curl -s http://localhost:9200/_cat/indices/*-logs-*?v&s=index
+```
+
+View the last 5 documents from today's application index:
+```bash
+curl -s -X GET "http://localhost:9200/app-logs-$(date +%Y.%m.%d)/_search?pretty" \
+  -H "Content-Type: application/json" \
+  -d '{"sort":[{"@timestamp":{"order":"desc"}}],"size":5}'
+```
+
+Delete all log indices (use with caution):
+```bash
+curl -X DELETE "http://localhost:9200/*-logs-*"
+```
+
+#### Logstash — Diagnostics
+
+Check Logstash node stats and pipeline health:
+```bash
+curl -s http://localhost:9600/_node/stats/pipelines?pretty
+```
+
+View Logstash container logs:
+```bash
+docker logs logstash --tail=100 -f
+```
+
+#### Kibana — Useful KQL Filters
+
+Once the Data View `*-logs-*` (or service-specific data views) is created in Kibana **Discover**, the following KQL queries are useful:
+
+| Intent | KQL Query |
+|---|---|
+| All errors across all services | `loglevel: "ERROR"` |
+| Only application errors | `service: "app" and loglevel: "ERROR"` |
+| Specific correlation ID tracing | `correlation_id: "<your-uuid>"` |
+| Keycloak authentication events | `service: "keycloak" and log_message: *auth*` |
+| PostgreSQL slow/error queries | `service: "shop_db" and loglevel: "ERROR"` |
+| Redis warnings | `service: "redis" and loglevel: "WARN"` |
+| API batch generation failures | `log_message: "Batch generation failed"` |
+
+---
+
 
 ## Maintain Code Cleanliness
 
@@ -859,4 +1234,60 @@ Simulates hook execution for testing purposes.
 
 ```bash
 ./.git/hooks/pre-commit
+```
+
+---
+
+### 6. SonarQube – Static Analysis and Quality Gate
+
+Provides comprehensive reports on bugs, vulnerabilities, code smells, and test coverage.
+
+```bash
+mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+  -Pdev -B \
+  -Dsonar.projectKey=mail-and-media-shop-v2 \
+  -Dsonar.projectName='mail-and-media-shop-v2' \
+  -Dsonar.host.url=http://localhost:9000 \
+  -Dsonar.token=[YOUR_SONAR_TOKEN] \
+  -Dspotbugs.skip=true \
+  -Dpmd.skip=true \
+  -Ddependency-check.skip=true
+```
+
+---
+
+## Dependency Management & Build
+
+### 1. View Dependency Tree
+Use this to identify version conflicts or redundant libraries.
+```bash
+mvn dependency:tree
+```
+
+### 2. Fast Build (Skip Tests)
+Use this when you only need common artifacts without running the full test suite.
+```bash
+mvn clean install -DskipTests
+```
+
+### 3. Check Active Profiles
+Verify if the `dev` profile is active.
+```bash
+mvn help:active-profiles
+```
+
+---
+
+## Troubleshooting
+
+### 1. Check Port Availability
+If the application fails to start with "Address already in use", check what process is using the port.
+```bash
+lsof -i :8090
+```
+
+### 2. Clean Docker System
+Remove unused images, networks, and containers.
+```bash
+docker system prune -f
 ```

@@ -1,7 +1,9 @@
 package dev.mam.buizsol.mamshop.billing.model;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
+import dev.mam.buizsol.mamshop.contract.model.Contract;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -18,30 +20,30 @@ class InvoiceItemTest {
     void shouldCreateInvoiceItemWhenValidDataProvided() {
         UUID productId = UUID.randomUUID();
         String productName = "Test Product";
-        UUID contractId = UUID.randomUUID();
+        Contract contract = mock(Contract.class);
         LocalDate creationDate = LocalDate.now();
         BigDecimal setupFee = new BigDecimal("10.00");
         BigDecimal monthlyFee = new BigDecimal("5.00");
 
-        InvoiceItem item = new InvoiceItem(productId, productName, contractId, creationDate, setupFee, monthlyFee);
+        InvoiceItem item = new InvoiceItem(productId, productName, contract, creationDate, setupFee, monthlyFee);
 
-        assertEquals(productId, item.productId());
-        assertEquals(productName, item.productName());
-        assertEquals(contractId, item.contractId());
-        assertEquals(creationDate, item.contractCreationDate());
-        assertEquals(setupFee, item.setupFee());
-        assertEquals(monthlyFee, item.monthlyFee());
+        assertEquals(productId, item.getProductId());
+        assertEquals(productName, item.getProductName());
+        assertEquals(contract, item.getContract());
+        assertEquals(creationDate, item.getContractCreationDate());
+        assertEquals(setupFee, item.getSetupFee());
+        assertEquals(monthlyFee, item.getMonthlyFee());
     }
 
     @ParameterizedTest(name = "Check of fees - setup: {0}, monthly: {1}")
     @DisplayName("Verification of setup and monthly fees using various values")
     @CsvSource({"0.00, 0.11", "4.99, 9.99", "99.99, 149.50", "0.01, 0.11"})
     void shouldSetCorrectFeesWhenValuesAreProvided(BigDecimal setupFee, BigDecimal monthlyFee) {
-        InvoiceItem item =
-                new InvoiceItem(UUID.randomUUID(), "Product", UUID.randomUUID(), LocalDate.now(), setupFee, monthlyFee);
+        InvoiceItem item = new InvoiceItem(
+                UUID.randomUUID(), "Product", mock(Contract.class), LocalDate.now(), setupFee, monthlyFee);
 
-        assertEquals(setupFee, item.setupFee());
-        assertEquals(monthlyFee, item.monthlyFee());
+        assertEquals(setupFee, item.getSetupFee());
+        assertEquals(monthlyFee, item.getMonthlyFee());
     }
 
     @Test
@@ -52,11 +54,11 @@ class InvoiceItemTest {
         InvoiceItem item = new InvoiceItem(
                 UUID.randomUUID(),
                 "Old Contract",
-                UUID.randomUUID(),
+                mock(Contract.class),
                 pastDate,
                 BigDecimal.ZERO,
                 new BigDecimal("10.00"));
 
-        assertEquals(pastDate, item.contractCreationDate());
+        assertEquals(pastDate, item.getContractCreationDate());
     }
 }

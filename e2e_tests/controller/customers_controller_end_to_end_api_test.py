@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def test_register_customer_success(valid_customer_payload, base_url, header):
+def test_register_customer_success(valid_customer_payload, base_url, header=None):
     response = requests.post(base_url, headers=header, json=valid_customer_payload)
     assert response.status_code == 201, f"Expected 201, got {response.status_code}"
     data = response.json()
@@ -111,15 +111,15 @@ def test_register_customer_null_fields(base_url, header, valid_customer_payload)
         print(f"Customer registration null {field} passed")
 
 
-def test_get_customer_success(customer_id, base_url):
+def test_get_customer_success(customer_id, base_url, header=None):
     url = f"{base_url}/{customer_id}"
-    response = requests.get(url)
+    response = requests.get(url, headers=header)
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     print("Get customer success passed")
 
-def test_get_customer_not_found(base_url, invalid_customer_id):
+def test_get_customer_not_found(base_url, invalid_customer_id, header=None):
     url = f"{base_url}/{invalid_customer_id}"
-    response = requests.get(url)
+    response = requests.get(url, headers=header)
     assert response.status_code == 404, f"Expected 404, got {response.status_code}"
     print("Get customer not found passed")
 
@@ -156,30 +156,32 @@ def test_update_address_invalid(customer_id, base_url, header, valid_customer_pa
     print("Update address invalid data passed")
 
 
-def test_deactivate_customer(customer_id, base_url):
+def test_deactivate_customer(customer_id, base_url, header=None):
     url_deactivate = f"{base_url}/{customer_id}/deactivate"
-    response = requests.put(url_deactivate)
+    response = requests.put(url_deactivate, headers=header)
     assert response.status_code == 204, f"Expected 204, got {response.status_code}"
     print("Customer deactivation passed")
 
-def test_activate_customer(customer_id, base_url):
+def test_activate_customer(customer_id, base_url, header=None):
     url_activate = f"{base_url}/{customer_id}/activate"
-    response = requests.put(url_activate)
+    response = requests.put(url_activate, headers=header)
     assert response.status_code == 204, f"Expected 204, got {response.status_code}"
     print("Customer activation passed")
 
-def test_activate_customer_idempotency(customer_id, base_url):
+def test_activate_customer_idempotency(customer_id, base_url, header=None):
     url_activate = f"{base_url}/{customer_id}/activate"
     
-    response = requests.put(url_activate)
+    response = requests.put(url_activate, headers=header)
     assert response.status_code in [204, 409], f"Idempotency check failed: expected 204 or 409, got {response.status_code}"
     
     url_get = f"{base_url}/{customer_id}"
-    get_res = requests.get(url_get)
+    get_res = requests.get(url_get, headers=header)
     assert get_res.json()["status"] == "ACTIVE", "Customer status changed unexpectedly"
     print("Customer activation idempotency check passed")
 
 def test_update_address_inactive_fail(customer_id, base_url, header):
+
+    
     url = f"{base_url}/{customer_id}/address"
     payload = {
         "street": "Forbidden St",
@@ -199,9 +201,9 @@ def test_purchase_customer_inactive_fail(customer_id, product_id, base_url, head
     assert response.status_code in [400, 403, 409], f"Should fail to purchase for inactive customer, got {response.status_code}"
     print("Purchase for inactive customer failure (expected) passed")
 
-def test_delete_active_customer_fail(customer_id, base_url):
+def test_delete_active_customer_fail(customer_id, base_url, header=None):
     url = f"{base_url}/{customer_id}"
-    response = requests.delete(url)
+    response = requests.delete(url, headers=header)
     assert response.status_code in [400, 409], f"Should fail to delete active customer with contracts, got {response.status_code}"
     print("Delete active customer with contracts failure (expected) passed")
 
@@ -265,9 +267,9 @@ def test_should_verify_purchased_product_data_integrity_after_purchase(customer_
     logger.info("Test Success: Product purchase data verification passed.")
 
 
-def test_should_successfully_delete_customer_when_id_is_valid(customer_id,base_url):
+def test_should_successfully_delete_customer_when_id_is_valid(customer_id, base_url, header=None):
     """Verify that a customer can be successfully deleted when they have no active contracts."""
     url = f"{base_url}/{customer_id}"
-    response = requests.delete(url)
+    response = requests.delete(url, headers=header)
     assert response.status_code == 204, f"Expected 204, got {response.status_code}"
     logger.info(f"Test Success: Customer {customer_id} deleted successfully.")
