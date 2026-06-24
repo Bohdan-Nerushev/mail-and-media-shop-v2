@@ -103,4 +103,10 @@ else
     log_error "RESULT: E2E Tests FAILED (Exit Code: $TEST_EXIT_CODE)"
 fi
 
+# Fix log file permissions to prevent GitLab CI artifact upload failures (permission denied on files owned by container root/postgres)
+if [ -d "$PROJECT_ROOT/logs" ]; then
+    log_info "Fixing log file permissions for GitLab CI artifact upload..."
+    docker run --rm -v "$PROJECT_ROOT/logs:/logs" docker:cli chmod -R 777 /logs 2>/dev/null || true
+fi
+
 exit $TEST_EXIT_CODE
