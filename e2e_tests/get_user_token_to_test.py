@@ -1,3 +1,4 @@
+import os
 import requests
 
 def get_user_token(
@@ -40,7 +41,6 @@ def get_user_token(
         "Content-Type": "application/x-www-form-urlencoded",
     }
 
-    import os
     # Try to find rootCA.pem first (mkcert scenario)
     cert_path = "certs/rootCA.pem"
     if not os.path.exists(cert_path) and os.path.exists("../certs/rootCA.pem"):

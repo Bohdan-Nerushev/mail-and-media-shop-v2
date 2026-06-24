@@ -64,7 +64,7 @@ services:
       keycloak-db:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e \"GET /health/live HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && cat <&3 | grep -q \"200 OK\"'" ]
+      test: [ "CMD-SHELL", "timeout 5s bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e \"GET /health/live HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && cat <&3 | grep -q \"200 OK\"'" ]
       interval: 10s
       timeout: 5s
       retries: 15
@@ -212,7 +212,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${SHOP_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${SHOP_DB_PASSWORD}
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://keycloak:8443/realms/${KC_REALM}
-      JDK_JAVA_OPTIONS: "-Djavax.net.ssl.trustStore=/app/certs/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit"
+      JDK_JAVA_OPTIONS: "-Djavax.net.ssl.trustStore=/app/certs/truststore.jks -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD}"
 
   prometheus:
     image: prom/prometheus:v2.53.0

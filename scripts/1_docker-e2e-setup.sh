@@ -12,6 +12,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/env_loader.sh"
 # Configurable Parameters
 export APP_PORT=${APP_PORT:-8090}
 export APP_HOST="${APP_HOST:-http://localhost}"
+export TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD}
 HEALTH_ENDPOINT="$APP_HOST:$APP_PORT/actuator/health"
 
 # Verify Docker tools
@@ -55,7 +56,7 @@ if [ ! -f "$PROJECT_ROOT/certs/truststore.jks" ]; then
     log_info "Java truststore not found. Generating truststore.jks..."
     keytool -importcert -noprompt \
       -keystore "$PROJECT_ROOT/certs/truststore.jks" \
-      -storepass changeit \
+      -storepass "$TRUSTSTORE_PASSWORD" \
       -alias keycloak \
       -file "$PROJECT_ROOT/certs/keycloak-cert.pem" || error_exit "Java truststore generation failed."
 fi
