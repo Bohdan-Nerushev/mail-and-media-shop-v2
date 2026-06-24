@@ -40,15 +40,28 @@ def get_user_token(
         "Content-Type": "application/x-www-form-urlencoded",
     }
 
-    import urllib3
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    import os
+    # Try to find rootCA.pem first (mkcert scenario)
+    cert_path = "certs/rootCA.pem"
+    if not os.path.exists(cert_path) and os.path.exists("../certs/rootCA.pem"):
+        cert_path = "../certs/rootCA.pem"
+
+    # Fallback to keycloak-cert.pem (openssl self-signed scenario)
+    if not os.path.exists(cert_path):
+        cert_path = "certs/keycloak-cert.pem"
+        if not os.path.exists(cert_path) and os.path.exists("../certs/keycloak-cert.pem"):
+            cert_path = "../certs/keycloak-cert.pem"
+
+    verify_opt = cert_path if os.path.exists(cert_path) else True
+
+
 
     try:
         response = requests.post(
             url=url,
             data=payload,
             headers=headers,
-            verify=False,
+            verify=verify_opt,
             timeout=15
         )
     except requests.RequestException as exc:

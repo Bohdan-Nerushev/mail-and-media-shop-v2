@@ -31,7 +31,34 @@ docker compose down -v 2>/dev/null || true
 
 # Ensure logs directory exists and is writable by non-root container users
 mkdir -p "$PROJECT_ROOT/logs"
-chmod -R 777 "$PROJECT_ROOT/logs" 2>/dev/null || true
+chmod 1777 "$PROJECT_ROOT/logs" 2>/dev/null || true
+
+# Ensure certs directory exists
+mkdir -p "$PROJECT_ROOT/certs"
+
+if command -v mkcert &> /dev/null; then
+    log_info "mkcert detected. Copying root CA to certs/rootCA.pem..."
+    cp "$(mkcert -CAROOT)/rootCA.pem" "$PROJECT_ROOT/certs/rootCA.pem" 2>/dev/null || true
+fi
+
+if [ ! -f "$PROJECT_ROOT/certs/keycloak-cert.pem" ] || [ ! -f "$PROJECT_ROOT/certs/keycloak-key.pem" ]; then
+    log_info "Certificates not found. Generating self-signed certificates..."
+    openssl req -x509 -newkey rsa:4096 -nodes -sha256 \
+      -keyout "$PROJECT_ROOT/certs/keycloak-key.pem" \
+      -out "$PROJECT_ROOT/certs/keycloak-cert.pem" \
+      -subj "/CN=keycloak" \
+      -days 365 \
+      -addext "subjectAltName=DNS:keycloak,DNS:localhost,IP:127.0.0.1" || error_exit "Certificate generation failed."
+fi
+
+if [ ! -f "$PROJECT_ROOT/certs/truststore.jks" ]; then
+    log_info "Java truststore not found. Generating truststore.jks..."
+    keytool -importcert -noprompt \
+      -keystore "$PROJECT_ROOT/certs/truststore.jks" \
+      -storepass changeit \
+      -alias keycloak \
+      -file "$PROJECT_ROOT/certs/keycloak-cert.pem" || error_exit "Java truststore generation failed."
+fi
 
 log_info "Building and starting infrastructure containers..."
 docker compose up -d keycloak-db keycloak shop_db redis || error_exit "Docker Compose infrastructure start failed."
@@ -87,5 +114,6 @@ docker inspect "$CURRENT_CONTAINER" -f '{{range $k,$v := .NetworkSettings.Networ
 
 # Capture container logs for analysis (essential for GitLab CI artifacts)
 log_info "Capturing container logs for 'app'..."
-docker compose logs app > "$PROJECT_ROOT/app_container.log"
-log_info "App logs saved to app_container.log"
+mkdir -p "$PROJECT_ROOT/logs"
+docker compose logs app > "$PROJECT_ROOT/logs/app_container.log"
+log_info "App logs saved to logs/app_container.log"

@@ -89,12 +89,13 @@ TEST_EXIT_CODE=$?
 
 # Capture container logs for analysis (essential for GitLab CI artifacts)
 log_info "Capturing container logs for 'keycloak'..."
-docker compose logs keycloak > "$PROJECT_ROOT/keycloak_container.log"
-log_info "Keycloak logs saved to keycloak_container.log"
+mkdir -p "$PROJECT_ROOT/logs"
+docker compose logs keycloak > "$PROJECT_ROOT/logs/keycloak_container.log"
+log_info "Keycloak logs saved to logs/keycloak_container.log"
 
 log_info "Capturing container logs for 'app'..."
-docker compose logs app > "$PROJECT_ROOT/app_container.log"
-log_info "App logs saved to app_container.log"
+docker compose logs app > "$PROJECT_ROOT/logs/app_container.log"
+log_info "App logs saved to logs/app_container.log"
 
 if [ $TEST_EXIT_CODE -eq 0 ]; then
     log_info "RESULT: E2E Tests PASSED"

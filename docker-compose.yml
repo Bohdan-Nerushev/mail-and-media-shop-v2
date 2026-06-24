@@ -49,6 +49,8 @@ services:
       KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/certs/keycloak-key.pem"
       KC_HOSTNAME_STRICT: "false"
       KC_HEALTH_ENABLED: "true"
+      KC_HTTP_MANAGEMENT_HEALTH_ENABLED: "false"
+      KC_LEGACY_OBSERVABILITY_INTERFACE: "true"
       KC_LOG: "console,file"
       KC_LOG_FILE: "/opt/keycloak/data/log/keycloak.log"
     ports:
@@ -62,7 +64,7 @@ services:
       keycloak-db:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000" ]
+      test: [ "CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e \"GET /health/live HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && cat <&3 | grep -q \"200 OK\"'" ]
       interval: 10s
       timeout: 5s
       retries: 15
