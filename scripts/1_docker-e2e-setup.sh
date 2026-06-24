@@ -12,7 +12,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/env_loader.sh"
 # Configurable Parameters
 export APP_PORT=${APP_PORT:-8090}
 export APP_HOST="${APP_HOST:-http://localhost}"
-export TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD}
+export TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD:-changeit}
 HEALTH_ENDPOINT="$APP_HOST:$APP_PORT/actuator/health"
 
 # Verify Docker tools
@@ -49,6 +49,7 @@ if [ ! -f "$PROJECT_ROOT/certs/keycloak-cert.pem" ] || [ ! -f "$PROJECT_ROOT/cer
       -out "$PROJECT_ROOT/certs/keycloak-cert.pem" \
       -subj "/CN=keycloak" \
       -days 365 \
+      -addext "basicConstraints=critical,CA:TRUE" \
       -addext "subjectAltName=DNS:keycloak,DNS:localhost,IP:127.0.0.1" || error_exit "Certificate generation failed."
 fi
 
