@@ -86,6 +86,7 @@ deploy_dev:
       "
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop"'
+  when: manual
   tags:
     - maven
 
