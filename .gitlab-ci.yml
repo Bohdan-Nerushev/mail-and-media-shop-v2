@@ -76,6 +76,7 @@ deploy_dev:
     - $SCP_CMD
     - |
       $SSH_CMD "
+        export KUBECONFIG=/etc/rancher/k3s/k3s.yaml && \
         cd ~/mam-deployments/mail-and-media-shop && \
         helm dependency build && \
         helm upgrade --install mam-dev . \
@@ -100,6 +101,7 @@ deploy_qa:
     - $SCP_CMD
     - |
       $SSH_CMD "
+        export KUBECONFIG=/etc/rancher/k3s/k3s.yaml && \
         cd ~/mam-deployments/mail-and-media-shop && \
         helm dependency build && \
         helm upgrade --install mam-qa . \
@@ -124,6 +126,7 @@ deploy_live:
     - $SCP_CMD
     - |
       $SSH_CMD "
+        export KUBECONFIG=/etc/rancher/k3s/k3s.yaml && \
         cd ~/mam-deployments/mail-and-media-shop && \
         helm dependency build && \
         helm upgrade --install mam-live . \
