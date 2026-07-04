@@ -228,3 +228,7 @@ skills-lock.json
 
 # Local SSL Certificates
 certs/
+
+# Helm Charts
+/helm/*/charts/
+/helm/*/tmpcharts/

@@ -40,11 +40,6 @@ if ! command -v helm &>/dev/null; then
   curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 fi
 
-if ! command -v gitlab-runner &>/dev/null; then
-  echo "Installing GitLab Runner..."
-  curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | sudo bash
-  sudo apt-get install -y gitlab-runner
-fi
 
 echo "Installing Python 3 and build tools..."
 sudo apt-get install -y python3 python3-pip python3-venv maven
