@@ -54,6 +54,7 @@ package_job:
     - unit_test_job
     - e2e_test_job
   script:
+    - $SSH_CMD "rm -rf ~/mam-deployments/mail-and-media-shop"
     - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
     - docker save -o ${IMAGE_NAME}-${IMAGE_TAG}.tar ${IMAGE_NAME}:${IMAGE_TAG}
     - rsync -avz -e "ssh -o StrictHostKeyChecking=no" ${IMAGE_NAME}-${IMAGE_TAG}.tar ${SSH_USER}@${SSH_HOST}:~/
