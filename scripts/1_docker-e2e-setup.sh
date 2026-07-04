@@ -27,6 +27,26 @@ fi
 # PHASE 2: Cleanup & Container Orchestration
 # ==============================================================================
 
+# Ensure certs directory exists
+mkdir -p "$PROJECT_ROOT/certs"
+
+# If any of the expected certificate/truststore files are directories (due to docker pre-creation bug),
+# remove them so we can write files. If root-owned, we try deleting them using a docker run helper.
+for cert_item in "keycloak-cert.pem" "keycloak-key.pem" "truststore.jks"; do
+    if [ -d "$PROJECT_ROOT/certs/$cert_item" ]; then
+        log_warn "certs/$cert_item is a directory. Removing..."
+        rm -rf "$PROJECT_ROOT/certs/$cert_item" 2>/dev/null || \
+          docker run --rm -v "$PROJECT_ROOT/certs:/certs" alpine rm -rf "/certs/$cert_item" || true
+    fi
+done
+
+# Touch placeholders to prevent Docker Compose from pre-creating them as root-owned directories during down/up commands
+for cert_item in "keycloak-cert.pem" "keycloak-key.pem" "truststore.jks"; do
+    if [ ! -e "$PROJECT_ROOT/certs/$cert_item" ]; then
+        touch "$PROJECT_ROOT/certs/$cert_item"
+    fi
+done
+
 log_info "Ensuring clean environment (stopping any existing containers)..."
 docker compose down -v 2>/dev/null || true
 
@@ -34,16 +54,15 @@ docker compose down -v 2>/dev/null || true
 mkdir -p "$PROJECT_ROOT/logs"
 chmod 1777 "$PROJECT_ROOT/logs" 2>/dev/null || true
 
-# Ensure certs directory exists
-mkdir -p "$PROJECT_ROOT/certs"
-
 if command -v mkcert &> /dev/null; then
     log_info "mkcert detected. Copying root CA to certs/rootCA.pem..."
     cp "$(mkcert -CAROOT)/rootCA.pem" "$PROJECT_ROOT/certs/rootCA.pem" 2>/dev/null || true
 fi
 
-if [ ! -f "$PROJECT_ROOT/certs/keycloak-cert.pem" ] || [ ! -f "$PROJECT_ROOT/certs/keycloak-key.pem" ]; then
-    log_info "Certificates not found. Generating self-signed certificates..."
+if [ ! -f "$PROJECT_ROOT/certs/keycloak-cert.pem" ] || [ ! -s "$PROJECT_ROOT/certs/keycloak-cert.pem" ] || \
+   [ ! -f "$PROJECT_ROOT/certs/keycloak-key.pem" ] || [ ! -s "$PROJECT_ROOT/certs/keycloak-key.pem" ]; then
+    log_info "Certificates not found or empty. Generating self-signed certificates..."
+    rm -f "$PROJECT_ROOT/certs/keycloak-cert.pem" "$PROJECT_ROOT/certs/keycloak-key.pem"
     openssl req -x509 -newkey rsa:4096 -nodes -sha256 \
       -keyout "$PROJECT_ROOT/certs/keycloak-key.pem" \
       -out "$PROJECT_ROOT/certs/keycloak-cert.pem" \
@@ -53,14 +72,16 @@ if [ ! -f "$PROJECT_ROOT/certs/keycloak-cert.pem" ] || [ ! -f "$PROJECT_ROOT/cer
       -addext "subjectAltName=DNS:keycloak,DNS:localhost,IP:127.0.0.1" || error_exit "Certificate generation failed."
 fi
 
-if [ ! -f "$PROJECT_ROOT/certs/truststore.jks" ]; then
-    log_info "Java truststore not found. Generating truststore.jks..."
+if [ ! -f "$PROJECT_ROOT/certs/truststore.jks" ] || [ ! -s "$PROJECT_ROOT/certs/truststore.jks" ]; then
+    log_info "Java truststore not found or empty. Generating truststore.jks..."
+    rm -f "$PROJECT_ROOT/certs/truststore.jks"
     keytool -importcert -noprompt \
       -keystore "$PROJECT_ROOT/certs/truststore.jks" \
       -storepass "$TRUSTSTORE_PASSWORD" \
       -alias keycloak \
       -file "$PROJECT_ROOT/certs/keycloak-cert.pem" || error_exit "Java truststore generation failed."
 fi
+
 
 log_info "Building and starting infrastructure containers..."
 docker compose up -d keycloak-db keycloak shop_db redis || error_exit "Docker Compose infrastructure start failed."
