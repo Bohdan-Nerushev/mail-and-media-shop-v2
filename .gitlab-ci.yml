@@ -58,7 +58,7 @@ package_job:
     - docker save -o ${IMAGE_NAME}-${IMAGE_TAG}.tar ${IMAGE_NAME}:${IMAGE_TAG}
     - rsync -avz -e "ssh -o StrictHostKeyChecking=no" ${IMAGE_NAME}-${IMAGE_TAG}.tar ${SSH_USER}@${SSH_HOST}:~/
     - $SSH_CMD "if command -v docker >/dev/null; then docker load -i ~/${IMAGE_NAME}-${IMAGE_TAG}.tar; fi"
-    - $SSH_CMD "if command -v k3s >/dev/null; then k3s ctr images import ~/${IMAGE_NAME}-${IMAGE_TAG}.tar; fi"
+    - $SSH_CMD "if command -v k3s >/dev/null; then sudo k3s ctr images import ~/${IMAGE_NAME}-${IMAGE_TAG}.tar; fi"
     - $SSH_CMD "rm -f ~/${IMAGE_NAME}-${IMAGE_TAG}.tar"
     - rm ${IMAGE_NAME}-${IMAGE_TAG}.tar
   tags:

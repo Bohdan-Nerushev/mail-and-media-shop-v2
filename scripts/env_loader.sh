@@ -30,3 +30,7 @@ if [ -n "$PROJECT_ROOT" ]; then
 else
     load_env_safe ".env"
 fi
+
+export SSH_CMD="ssh ${SSH_USER}@${SSH_HOST} -o StrictHostKeyChecking=no"
+export SCP_CMD="scp -o StrictHostKeyChecking=no -r helm/mail-and-media-shop ${SSH_USER}@${SSH_HOST}:~/mam-deployments/"
+

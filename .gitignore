@@ -201,6 +201,7 @@ $RECYCLE.BIN/
 
 # Maven
 target/
+.m2/
 
 # OS
 .DS_Store
