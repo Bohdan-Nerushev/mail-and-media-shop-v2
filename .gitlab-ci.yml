@@ -2,8 +2,7 @@ stages:
   - test
   - e2e-test
   - package
-  - deploy-dev
-  - deploy-qa
+  - deploy
   - deploy-live
 
 variables:
@@ -66,7 +65,7 @@ package_job:
     - maven
 
 deploy_dev:
-  stage: deploy-dev
+  stage: deploy
   dependencies:
     - package_job
   environment:
@@ -90,7 +89,7 @@ deploy_dev:
     - maven
 
 deploy_qa:
-  stage: deploy-qa
+  stage: deploy
   dependencies:
     - package_job
   environment:
