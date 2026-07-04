@@ -1,0 +1,160 @@
+global:
+  environment: dev
+
+app:
+  image:
+    repository: mail_and_media_shop_v2
+    tag: "app"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 250m
+      memory: 384Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  service:
+    type: NodePort
+    port: 8090
+    nodePort: 30080
+  env:
+    SPRING_PROFILES_ACTIVE: "dev"
+    APP_ENV: "dev"
+
+shopdb:
+  image: postgres:16
+  auth:
+    database: shop_db
+    username: shop_user
+    password: "secret"
+  resources:
+    requests:
+      cpu: 150m
+      memory: 192Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+  persistence:
+    size: 5Gi
+
+keycloakdb:
+  image: postgres:15-alpine
+  auth:
+    database: keycloak
+    username: keycloak
+    password: "keycloak"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 192Mi
+  persistence:
+    size: 2Gi
+
+redis:
+  image: redis:7.0-alpine
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+keycloak:
+  image: quay.io/keycloak/keycloak:26.0.0
+  auth:
+    adminUser: admin
+    adminPassword: "admin"
+    clientSecret: "2BcfsFrhh6WWwMQMhxfyjweZuLdWmfpr"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 384Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+keycloakSetup:
+  enabled: true
+  image: docker:cli
+
+nginx:
+  image: nginx:1.25-alpine
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+sonarqube:
+  enabled: false
+  image: sonarqube:latest
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+sonarqubeDb:
+  enabled: false
+  image: postgres:16
+  auth:
+    database: sonarqube
+    username: sonarqube
+    password: "sonarqube_password"
+
+prometheus:
+  enabled: false
+  image: prom/prometheus:v2.53.0
+
+nodeExporter:
+  enabled: false
+  image: quay.io/prometheus/node-exporter:latest
+
+grafana:
+  enabled: false
+  image: grafana/grafana:11.1.0
+
+loki:
+  enabled: false
+  image: grafana/loki:3.1.0
+
+alloy:
+  enabled: false
+  image: grafana/alloy:v1.3.0
+
+postgresExporterShop:
+  enabled: false
+  image: prometheuscommunity/postgres-exporter:v0.15.0
+
+postgresExporterKeycloak:
+  enabled: false
+  image: prometheuscommunity/postgres-exporter:v0.15.0
+
+redisExporter:
+  enabled: false
+  image: oliver006/redis_exporter:v1.62.0
+
+logstash:
+  enabled: false
+  image: docker.elastic.co/logstash/logstash:9.4.2
+
+elasticsearch:
+  enabled: false
+  image: docker.elastic.co/elasticsearch/elasticsearch:9.4.2
+
+elasticsearchSetup:
+  enabled: false
+  image: curlimages/curl:8.7.1
+
+kibana:
+  enabled: false
+  image: docker.elastic.co/kibana/kibana:9.4.2

@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-keycloak-db
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mail-and-media-shop.labels" . | nindent 4 }}
+    app.kubernetes.io/component: keycloak-db
+spec:
+  serviceName: {{ include "mail-and-media-shop.keycloakdb.svcName" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: keycloak-db
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: keycloak-db
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: postgresql
+          image: {{ .Values.keycloakdb.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: db
+              containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.keycloakdb.auth.database | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.keycloakdb.auth.username | quote }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mail-and-media-shop.fullname" . }}-keycloak-db-secret
+                  key: password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U {{ .Values.keycloakdb.auth.username }} -d {{ .Values.keycloakdb.auth.database }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U {{ .Values.keycloakdb.auth.username }} -d {{ .Values.keycloakdb.auth.database }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 5
+          resources:
+            {{- toYaml .Values.keycloakdb.resources | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.keycloakdb.persistence.size }}

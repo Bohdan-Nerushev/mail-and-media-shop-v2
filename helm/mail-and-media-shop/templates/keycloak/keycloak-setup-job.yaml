@@ -1,0 +1,64 @@
+{{- if .Values.keycloakSetup.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-keycloak-setup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mail-and-media-shop.labels" . | nindent 4 }}
+    app.kubernetes.io/component: keycloak-setup
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: keycloak-setup
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: keycloak-setup
+          image: {{ .Values.keycloakSetup.image | quote }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache bash curl jq postgresql-client
+              bash /scripts/2_keycloak_api_setup.sh
+          env:
+            - name: KC_URL
+              value: "http://{{ include "mail-and-media-shop.keycloak.svcName" . }}:8080"
+            - name: KC_ADMIN_USER
+              value: {{ .Values.keycloak.auth.adminUser | quote }}
+            - name: KC_ADMIN_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mail-and-media-shop.fullname" . }}-keycloak-secret
+                  key: admin-password
+            - name: KC_REALM
+              value: "mail-and-media-shop-realm"
+            - name: KC_CLIENT_ID
+              value: "mail-and-media-shop-app"
+            - name: KC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mail-and-media-shop.fullname" . }}-keycloak-secret
+                  key: client-secret
+            - name: KEYCLOAK_DB_USER
+              value: {{ .Values.keycloakdb.auth.username | quote }}
+            - name: KEYCLOAK_DB_NAME
+              value: {{ .Values.keycloakdb.auth.database | quote }}
+            - name: USER_NAME
+              value: "postman_user2"
+            - name: USER_EMAIL
+              value: "postman2@example.com"
+            - name: USER_PASSWORD
+              value: "password123"
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+      volumes:
+        - name: scripts
+          configMap:
+            name: {{ include "mail-and-media-shop.fullname" . }}-keycloak-setup-scripts
+            defaultMode: 0755
+{{- end }}

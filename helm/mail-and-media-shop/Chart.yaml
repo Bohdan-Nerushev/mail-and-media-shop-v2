@@ -1,0 +1,6 @@
+apiVersion: v2
+name: mail-and-media-shop
+description: Mail and Media Shop v2 — Spring Boot + Keycloak + PostgreSQL + Redis (standalone, no subcharts)
+type: application
+version: 0.2.0
+appVersion: "1.0-SNAPSHOT"

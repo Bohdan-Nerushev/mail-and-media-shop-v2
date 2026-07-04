@@ -1,9 +1,27 @@
 stages:
-  - build
   - test
   - e2e-test
+  - package
+  - deploy-dev
+  - deploy-qa
+  - deploy-live
 
-# Unit tests
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  IMAGE_TAG: "${CI_COMMIT_SHORT_SHA}"
+  SSH_CMD: "ssh ${SSH_USER}@${SSH_HOST} -o StrictHostKeyChecking=no"
+  SCP_CMD: "scp -o StrictHostKeyChecking=no -r helm/mail-and-media-shop ${SSH_USER}@${SSH_HOST}:~/mam-deployments/"
+  
+before_script:
+  - source scripts/utils.sh
+  - source scripts/env_loader.sh
+
+cache:
+  key: "${CI_COMMIT_REF_SLUG}"
+  paths:
+    - .m2/repository/
+    - e2e_tests/venv/
+
 unit_test_job:
   stage: test
   variables:
@@ -12,23 +30,12 @@ unit_test_job:
     - name: redis:7.0-alpine
       alias: redis
   script:
-    - mvn clean test
+    - mvn clean install
   tags:
     - maven
 
-# E2E tests
 e2e_test_job:
   stage: e2e-test
-  variables:
-    APP_HOST: "http://localhost"
-    APP_PORT: "8090"
-    KC_URL: "https://localhost:8443"
-    KC_REALM: "mail-and-media-shop-realm"
-    KC_CLIENT_ID: "mail-and-media-shop-app"
-    KC_CLIENT_SECRET: ${KC_CLIENT_SECRET}
-    KC_GRANT_TYPE: "password"
-    KC_USERNAME: ${KC_USERNAME}
-    KC_PASSWORD: ${KC_PASSWORD}
   script:
     - chmod +x scripts/1_docker-e2e-setup.sh
     - chmod +x scripts/3_e2e-test-runner.sh
@@ -38,5 +45,99 @@ e2e_test_job:
     when: always
     paths:
       - logs/
+  tags:
+    - maven
+
+package_job:
+  stage: package
+  dependencies:
+    - unit_test_job
+    - e2e_test_job
+  script:
+    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+    - docker save -o ${IMAGE_NAME}-${IMAGE_TAG}.tar ${IMAGE_NAME}:${IMAGE_TAG}
+    - rsync -avz -e "ssh -o StrictHostKeyChecking=no" ${IMAGE_NAME}-${IMAGE_TAG}.tar ${SSH_USER}@${SSH_HOST}:~/
+    - $SSH_CMD "if command -v docker >/dev/null; then docker load -i ~/${IMAGE_NAME}-${IMAGE_TAG}.tar; fi"
+    - $SSH_CMD "if command -v k3s >/dev/null; then k3s ctr images import ~/${IMAGE_NAME}-${IMAGE_TAG}.tar; fi"
+    - $SSH_CMD "rm -f ~/${IMAGE_NAME}-${IMAGE_TAG}.tar"
+    - rm ${IMAGE_NAME}-${IMAGE_TAG}.tar
+  tags:
+    - maven
+
+deploy_dev:
+  stage: deploy-dev
+  dependencies:
+    - package_job
+  environment:
+    name: dev
+    url: https://${SSH_HOST}/dev
+  script:
+    - $SSH_CMD "mkdir -p ~/mam-deployments"
+    - $SCP_CMD
+    - |
+      $SSH_CMD "
+        cd ~/mam-deployments/mail-and-media-shop && \
+        helm dependency build && \
+        helm upgrade --install mam-dev . \
+          -f values-dev.yaml \
+          --set app.image.tag=${IMAGE_TAG} \
+          --namespace mam-dev \
+          --wait --timeout 300s
+      "
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+  tags:
+    - maven
+
+deploy_qa:
+  stage: deploy-qa
+  dependencies:
+    - package_job
+  environment:
+    name: qa
+    url: https://${SSH_HOST}/qa
+  script:
+    - $SSH_CMD "mkdir -p ~/mam-deployments"
+    - $SCP_CMD
+    - |
+      $SSH_CMD "
+        cd ~/mam-deployments/mail-and-media-shop && \
+        helm dependency build && \
+        helm upgrade --install mam-qa . \
+          -f values-qa.yaml \
+          --set app.image.tag=${IMAGE_TAG} \
+          --namespace mam-qa \
+          --wait --timeout 300s
+      "
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "release"'
+  when: manual
+  tags:
+    - maven
+
+deploy_live:
+  stage: deploy-live
+  dependencies:
+    - package_job
+  environment:
+    name: live
+    url: https://${SSH_HOST}
+  script:
+    - $SSH_CMD "mkdir -p ~/mam-deployments"
+    - $SCP_CMD
+    - |
+      $SSH_CMD "
+        cd ~/mam-deployments/mail-and-media-shop && \
+        helm dependency build && \
+        helm upgrade --install mam-live . \
+          -f values-live.yaml \
+          --set app.image.tag=${IMAGE_TAG} \
+          --namespace mam-live \
+          --wait --timeout 300s
+      "
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+  when: manual
+  allow_failure: false
   tags:
     - maven
