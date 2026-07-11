@@ -34,8 +34,8 @@ if [ -f "$PROJECT_ROOT/.env" ]; then
 fi
 
 # Configurable Parameters
-export APP_PORT=${APP_PORT:-8090}
-export APP_HOST="${APP_HOST:-http://localhost}"
+export APP_PORT=${APP_PORT}
+export APP_HOST="${APP_HOST}"
 HEALTH_ENDPOINT="$APP_HOST:$APP_PORT/actuator/health"
 
 # Verify Docker tools

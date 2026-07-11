@@ -98,7 +98,6 @@
             <artifactId>micrometer-tracing-bridge-brave</artifactId>
         </dependency>
 
-        <!-- Zipkin Reporter (для Alloy → Tempo, опціонально) -->
         <dependency>
             <groupId>io.zipkin.reporter2</groupId>
             <artifactId>zipkin-reporter-brave</artifactId>
@@ -167,7 +166,6 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
 
-        <!-- Jackson для JSON серіалізації -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
