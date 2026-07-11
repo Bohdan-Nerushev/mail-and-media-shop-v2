@@ -1,25 +1,27 @@
 package dev.mam.buizsol.mamshop.customer.model;
 
-import static dev.mam.buizsol.mamshop.customer.model.CustomerStatus.ACTIVE;
-import static dev.mam.buizsol.mamshop.customer.model.CustomerStatus.INACTIVE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import dev.mam.buizsol.mamshop.customer.exception.CustomerValidationException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import java.time.LocalDate;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.time.LocalDate;
+import java.util.Set;
+
+import static dev.mam.buizsol.mamshop.customer.model.CustomerStatus.ACTIVE;
+import static dev.mam.buizsol.mamshop.customer.model.CustomerStatus.INACTIVE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Customer Record Tests")
 class CustomerTest {
@@ -201,9 +203,9 @@ class CustomerTest {
         Customer customer3 = createDefaultCustomer(
                 "John3", "Doe3", LocalDate.of(1993, 1, 3), mainAddress, null, communicationDetails, Brand.WEB_DE);
 
-        assertTrue(customer1 instanceof Customer);
-        assertTrue(customer2 instanceof Customer);
-        assertTrue(customer3 instanceof Customer);
+        assertInstanceOf(Customer.class, customer1);
+        assertInstanceOf(Customer.class, customer2);
+        assertInstanceOf(Customer.class, customer3);
     }
 
     @Test

@@ -1,12 +1,5 @@
 package dev.mam.buizsol.mamshop.billing.controller;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mam.buizsol.mamshop.billing.dto.InvoiceItemResponseDTO;
 import dev.mam.buizsol.mamshop.billing.dto.InvoiceRequestDTO;
@@ -21,10 +14,6 @@ import dev.mam.buizsol.mamshop.customer.model.Address;
 import dev.mam.buizsol.mamshop.customer.model.Brand;
 import dev.mam.buizsol.mamshop.customer.model.Customer;
 import dev.mam.buizsol.mamshop.shop.service.ShopService;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +24,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @DisplayName("BillingController Tests")
 @WebMvcTest(
         controllers = BillingController.class,
@@ -44,7 +45,7 @@ class BillingControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @MockitoBean
     private ShopService shopService;

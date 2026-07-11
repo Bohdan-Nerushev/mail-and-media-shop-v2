@@ -109,8 +109,8 @@ mvn verify -P dev
 ### End-to-End (E2E) Tests (Python)
 To run the full test cycle (build, start server, run tests, stop) use:
 ```bash
-chmod +x scripts/run_e2e.sh
-./scripts/run_e2e.sh
+chmod +x e2e_tests/run_e2e.sh
+./e2e_tests/run_e2e.sh
 ```
 
  ---
