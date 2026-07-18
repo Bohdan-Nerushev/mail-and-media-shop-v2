@@ -25,6 +25,10 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
   - [Log Persistence](#log-persistence)
   - [How to Visualize](#how-to-visualize)
   - [ELK Operations](#elk-operations)
+- [CI/CD Pipeline & Deployment](#cicd-pipeline--deployment)
+  - [Pipeline Stages](#pipeline-stages)
+  - [Deployment Scripts](#deployment-scripts)
+  - [Environment Configuration](#environment-configuration)
 - [Maintain Code Cleanliness](#maintain-code-cleanliness)
   - [Spotless](#1-spotless--automatic-code-formatting)
   - [PMD](#2-pmd--anti-pattern-and-code-duplication-detection)
@@ -38,7 +42,7 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 ---
 
 ## Technology Stack
-- **Core**: Java 21, Spring Boot 4.0.5
+- **Core**: Java 25, Spring Boot 4.0.5
 - **Database**: PostgreSQL 16, Flyway (Migrations)
 - **Caching**: Redis (Jedis Client)
 - **Quality**: PMD, SpotBugs, Spotless, JaCoCo, SonarQube
@@ -1155,6 +1159,78 @@ Once the Data View `*-logs-*` (or service-specific data views) is created in Kib
 
 ---
 
+## CI/CD Pipeline & Deployment
+
+The project uses **GitLab CI/CD** for automated testing, packaging, and deployment. All deployment logic is externalized into standalone Bash scripts located in the `scripts/` directory, invoked from `.gitlab-ci.yml`.
+
+### Pipeline Stages
+
+The CI/CD pipeline consists of the following stages executed sequentially:
+
+| Stage | Job | Trigger | Description |
+|---|---|---|---|
+| `test` | `unit_test_job` | Automatic | Runs `mvn clean install` with a Redis service container |
+| `e2e-test` | `e2e_test_job` | Automatic | Executes E2E test suite via `1_docker-e2e-setup.sh` and `3_e2e-test-runner.sh` |
+| `package` | `package_job` | Automatic | Builds Docker image, transfers to remote server via `4_docker-package.sh` |
+| `deploy` | `deploy_dev` | Manual | Deploys to **dev** namespace via Helm using `5_deploy-dev.sh` |
+| `deploy` | `deploy_qa` | Manual | Deploys to **qa** namespace via Helm using `6_deploy-qa.sh` |
+| `deploy-live` | `deploy_live` | Manual (tag only) | Deploys to **live** namespace via Helm using `7_deploy-live.sh` |
+
+The `deploy_live` job only triggers on semantic version tags matching `^v\d+\.\d+\.\d+$`.
+
+### Deployment Scripts
+
+All scripts source `utils.sh` and `env_loader.sh` to load environment variables from `.env` (with CI/CD variable priority).
+
+| Script | Purpose |
+|---|---|
+| `scripts/utils.sh` | Shared utilities: logging (`log_info`, `log_error`), dependency checks, `PROJECT_ROOT` resolution |
+| `scripts/env_loader.sh` | Loads `.env` variables in safe mode (existing CI/CD variables take precedence), exports `SSH_CMD` and `SCP_CMD` |
+| `scripts/4_docker-package.sh` | Builds Docker image, saves as tar archive, transfers to remote server via `rsync`, imports into Docker/K3s |
+| `scripts/5_deploy-dev.sh` | Copies Helm chart to remote server, runs `helm upgrade --install` for `mam-dev` namespace with `values-dev.yaml` |
+| `scripts/6_deploy-qa.sh` | Copies Helm chart to remote server, runs `helm upgrade --install` for `mam-qa` namespace with `values-qa.yaml` |
+| `scripts/7_deploy-live.sh` | Copies Helm chart to remote server, runs `helm upgrade --install` for `mam-live` namespace with `values-live.yaml` |
+
+### Environment Configuration
+
+Deployment scripts rely on the following variables from `.env` (or GitLab CI/CD variables):
+
+| Variable | Description |
+|---|---|
+| `IMAGE_NAME` | Base name of the Docker image |
+| `IMAGE_TAG` | Image tag (defaults to `CI_COMMIT_SHORT_SHA` in CI, or `git rev-parse --short HEAD` locally) |
+| `SSH_USER` | Remote server SSH login user |
+| `SSH_HOST` | Remote server hostname or IP address |
+
+The `env_loader.sh` constructs `SSH_CMD` and `SCP_CMD` from these variables automatically.
+
+### Helm Chart Structure
+
+The Helm chart is located at `helm/mail-and-media-shop/` and contains environment-specific value overrides:
+
+```
+helm/mail-and-media-shop/
+├── Chart.yaml
+├── values.yaml            # Default values
+├── values-dev.yaml        # Dev environment overrides
+├── values-qa.yaml         # QA environment overrides
+├── values-live.yaml       # Live/Production environment overrides
+├── templates/
+└── charts/
+```
+
+### Running Deployment Locally
+
+To run any deployment script outside of CI/CD (e.g., from a local machine):
+
+```bash
+chmod +x scripts/4_docker-package.sh
+./scripts/4_docker-package.sh
+```
+
+The scripts will load variables from `.env` automatically. Ensure `SSH_USER` and `SSH_HOST` are set.
+
+---
 
 ## Maintain Code Cleanliness
 
