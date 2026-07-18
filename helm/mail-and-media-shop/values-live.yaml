@@ -1,0 +1,10 @@
+global:
+  environment: live
+
+app:
+  image:
+    tag: "1.0.0-rc1"
+  replicaCount: 1
+  env:
+    APP_ENV: "live"
+    SPRING_PROFILES_ACTIVE: "prod"

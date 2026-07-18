@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-keycloak
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mail-and-media-shop.labels" . | nindent 4 }}
+    app.kubernetes.io/component: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: keycloak
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: keycloak
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: keycloak
+          image: {{ .Values.keycloak.image }}
+          imagePullPolicy: IfNotPresent
+          args: ["start-dev"]
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              value: {{ .Values.keycloak.auth.adminUser | quote }}
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mail-and-media-shop.fullname" . }}-keycloak-secret
+                  key: admin-password
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloak.auth.adminUser | quote }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mail-and-media-shop.fullname" . }}-keycloak-secret
+                  key: admin-password
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://{{ include "mail-and-media-shop.keycloakdb.svcName" . }}:5432/{{ .Values.keycloakdb.auth.database }}"
+            - name: KC_DB_USERNAME
+              value: {{ .Values.keycloakdb.auth.username | quote }}
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mail-and-media-shop.fullname" . }}-keycloak-db-secret
+                  key: password
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_HOSTNAME_STRICT
+              value: "false"
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 240
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 20
+          resources:
+            {{- toYaml .Values.keycloak.resources | nindent 12 }}

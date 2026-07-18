@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mail-and-media-shop.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "mail-and-media-shop.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mail-and-media-shop.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.app.service.port }}
+              protocol: TCP
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.app.env.SPRING_PROFILES_ACTIVE | quote }}
+            - name: APP_ENV
+              value: {{ .Values.app.env.APP_ENV | quote }}
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://{{ include "mail-and-media-shop.shopdb.svcName" . }}:5432/{{ .Values.shopdb.auth.database }}"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ .Values.shopdb.auth.username | quote }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mail-and-media-shop.fullname" . }}-shop-db-secret
+                  key: password
+            - name: SPRING_DATA_REDIS_HOST
+              value: {{ include "mail-and-media-shop.redis.svcName" . | quote }}
+            - name: SPRING_DATA_REDIS_PORT
+              value: "6379"
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
+              value: "http://{{ include "mail-and-media-shop.keycloak.svcName" . }}:8080/realms/mail-and-media-shop-realm"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 150
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 8
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 15
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}

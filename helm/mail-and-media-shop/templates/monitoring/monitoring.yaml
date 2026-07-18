@@ -1,0 +1,339 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-prometheus-config
+  namespace: {{ .Release.Namespace }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+      - job_name: 'spring-boot-app'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['{{ include "mail-and-media-shop.fullname" . }}:{{ .Values.app.service.port }}']
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-prometheus
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: prometheus
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: {{ .Values.prometheus.image | quote }}
+          args:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.path=/prometheus'
+            - '--storage.tsdb.retention.time=15d'
+          ports:
+            - name: web
+              containerPort: 9090
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+            - name: data
+              mountPath: /prometheus
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "mail-and-media-shop.fullname" . }}-prometheus-config
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-prometheus
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 9090
+      targetPort: 9090
+  selector:
+    app.kubernetes.io/component: prometheus
+{{- end }}
+
+---
+{{- if .Values.nodeExporter.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-node-exporter
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: node-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: node-exporter
+    spec:
+      hostPID: true
+      hostNetwork: true
+      containers:
+        - name: node-exporter
+          image: {{ .Values.nodeExporter.image | quote }}
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+            - name: rootfs
+              mountPath: /rootfs
+              readOnly: true
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: rootfs
+          hostPath:
+            path: /
+{{- end }}
+
+---
+{{- if .Values.grafana.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-grafana
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: grafana
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: {{ .Values.grafana.image | quote }}
+          ports:
+            - name: service
+              containerPort: 3000
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              value: "admin"
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "admin"
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: "false"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-grafana
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app.kubernetes.io/component: grafana
+{{- end }}
+
+---
+{{- if .Values.loki.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-loki
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: {{ include "mail-and-media-shop.fullname" . }}-loki
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: loki
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: loki
+    spec:
+      containers:
+        - name: loki
+          image: {{ .Values.loki.image | quote }}
+          ports:
+            - name: http
+              containerPort: 3100
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-loki
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 3100
+      targetPort: 3100
+  selector:
+    app.kubernetes.io/component: loki
+{{- end }}
+
+---
+{{- if .Values.alloy.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-alloy
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: alloy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: alloy
+    spec:
+      containers:
+        - name: alloy
+          image: {{ .Values.alloy.image | quote }}
+          ports:
+            - name: http
+              containerPort: 12345
+{{- end }}
+
+---
+{{- if .Values.postgresExporterShop.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-postgres-exporter-shop
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: postgres-exporter-shop
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: postgres-exporter-shop
+    spec:
+      containers:
+        - name: postgres-exporter
+          image: {{ .Values.postgresExporterShop.image | quote }}
+          env:
+            - name: DATA_SOURCE_NAME
+              value: "postgresql://{{ .Values.shopdb.auth.username }}:{{ .Values.shopdb.auth.password }}@{{ include "mail-and-media-shop.shopdb.svcName" . }}:5432/{{ .Values.shopdb.auth.database }}?sslmode=disable"
+          ports:
+            - name: metrics
+              containerPort: 9187
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-postgres-exporter-shop
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 9187
+      targetPort: 9187
+  selector:
+    app.kubernetes.io/component: postgres-exporter-shop
+{{- end }}
+
+---
+{{- if .Values.postgresExporterKeycloak.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-postgres-exporter-keycloak
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: postgres-exporter-keycloak
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: postgres-exporter-keycloak
+    spec:
+      containers:
+        - name: postgres-exporter
+          image: {{ .Values.postgresExporterKeycloak.image | quote }}
+          env:
+            - name: DATA_SOURCE_NAME
+              value: "postgresql://{{ .Values.keycloakdb.auth.username }}:{{ .Values.keycloakdb.auth.password }}@{{ include "mail-and-media-shop.keycloakdb.svcName" . }}:5432/{{ .Values.keycloakdb.auth.database }}?sslmode=disable"
+          ports:
+            - name: metrics
+              containerPort: 9187
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-postgres-exporter-keycloak
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 9187
+      targetPort: 9187
+  selector:
+    app.kubernetes.io/component: postgres-exporter-keycloak
+{{- end }}
+
+---
+{{- if .Values.redisExporter.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-redis-exporter
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: redis-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: redis-exporter
+    spec:
+      containers:
+        - name: redis-exporter
+          image: {{ .Values.redisExporter.image | quote }}
+          env:
+            - name: REDIS_ADDR
+              value: "redis://{{ include "mail-and-media-shop.redis.svcName" . }}:6379"
+          ports:
+            - name: metrics
+              containerPort: 9121
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-redis-exporter
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 9121
+      targetPort: 9121
+  selector:
+    app.kubernetes.io/component: redis-exporter
+{{- end }}

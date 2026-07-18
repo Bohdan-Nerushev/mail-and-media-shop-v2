@@ -1,0 +1,10 @@
+global:
+  environment: qa
+
+app:
+  image:
+    tag: "qa-latest"
+  replicaCount: 1
+  env:
+    APP_ENV: "qa"
+    SPRING_PROFILES_ACTIVE: "qa"

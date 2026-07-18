@@ -1,0 +1,13 @@
+{{- if and .Values.keycloakdb.inline .Values.keycloakdb.legacyPvc }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-keycloak-db-pvc
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.keycloakdb.primary.persistence.size }}
+{{- end }}

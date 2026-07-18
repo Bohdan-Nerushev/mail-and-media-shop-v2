@@ -1,0 +1,275 @@
+{{- if .Values.sonarqube.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-sonarqube-db
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: {{ include "mail-and-media-shop.fullname" . }}-sonarqube-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: sonarqube-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: sonarqube-db
+    spec:
+      containers:
+        - name: postgres
+          image: {{ .Values.sonarqubeDb.image | quote }}
+          env:
+            - name: POSTGRES_USER
+              value: {{ .Values.sonarqubeDb.auth.username | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.sonarqubeDb.auth.password | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.sonarqubeDb.auth.database | quote }}
+          ports:
+            - name: db
+              containerPort: 5432
+  volumeClaimTemplates:
+    - metadata:
+        name: sonarqube-db-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-sonarqube-db
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app.kubernetes.io/component: sonarqube-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-sonarqube
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: sonarqube
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: sonarqube
+    spec:
+      containers:
+        - name: sonarqube
+          image: {{ .Values.sonarqube.image | quote }}
+          ports:
+            - name: http
+              containerPort: 9000
+          env:
+            - name: SONAR_JDBC_URL
+              value: "jdbc:postgresql://{{ include "mail-and-media-shop.fullname" . }}-sonarqube-db:5432/{{ .Values.sonarqubeDb.auth.database }}"
+            - name: SONAR_JDBC_USERNAME
+              value: {{ .Values.sonarqubeDb.auth.username | quote }}
+            - name: SONAR_JDBC_PASSWORD
+              value: {{ .Values.sonarqubeDb.auth.password | quote }}
+            - name: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
+              value: "true"
+          resources:
+            {{- toYaml .Values.sonarqube.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-sonarqube
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 9000
+      targetPort: 9000
+  selector:
+    app.kubernetes.io/component: sonarqube
+{{- end }}
+
+---
+{{- if .Values.elasticsearch.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-elasticsearch
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: {{ include "mail-and-media-shop.fullname" . }}-elasticsearch
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: elasticsearch
+    spec:
+      containers:
+        - name: elasticsearch
+          image: {{ .Values.elasticsearch.image | quote }}
+          env:
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+            - name: discovery.type
+              value: "single-node"
+            - name: xpack.security.enabled
+              value: "false"
+          ports:
+            - name: http
+              containerPort: 9200
+            - name: transport
+              containerPort: 9300
+  volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-elasticsearch
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - name: http
+      port: 9200
+      targetPort: 9200
+    - name: transport
+      port: 9300
+      targetPort: 9300
+  selector:
+    app.kubernetes.io/component: elasticsearch
+{{- end }}
+
+---
+{{- if and .Values.elasticsearch.enabled .Values.elasticsearchSetup.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-elasticsearch-setup
+  namespace: {{ .Release.Namespace }}
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: elasticsearch-setup
+          image: {{ .Values.elasticsearchSetup.image | quote }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for Elasticsearch...'
+              until curl -s -f http://{{ include "mail-and-media-shop.fullname" . }}-elasticsearch:9200 >/dev/null; do
+                sleep 2
+              done
+              echo 'Elasticsearch is ready. Setting template...'
+              curl -s -X PUT "http://{{ include "mail-and-media-shop.fullname" . }}-elasticsearch:9200/_index_template/app-logs-template" \
+                -H "Content-Type: application/json" \
+                -d '{
+                  "index_patterns": ["*-logs-*"],
+                  "template": {
+                    "mappings": {
+                      "properties": {
+                        "@timestamp": { "type": "date" },
+                        "service": { "type": "keyword" },
+                        "correlation_id": { "type": "keyword" }
+                      }
+                    }
+                  }
+                }'
+              echo 'Template set successfully!'
+{{- end }}
+
+---
+{{- if .Values.logstash.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-logstash
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: logstash
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: logstash
+    spec:
+      containers:
+        - name: logstash
+          image: {{ .Values.logstash.image | quote }}
+          env:
+            - name: LS_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+          ports:
+            - name: monitor
+              containerPort: 9600
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-logstash
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 9600
+      targetPort: 9600
+  selector:
+    app.kubernetes.io/component: logstash
+{{- end }}
+
+---
+{{- if .Values.kibana.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-kibana
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: kibana
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: kibana
+    spec:
+      containers:
+        - name: kibana
+          image: {{ .Values.kibana.image | quote }}
+          env:
+            - name: ELASTICSEARCH_HOSTS
+              value: "http://{{ include "mail-and-media-shop.fullname" . }}-elasticsearch:9200"
+          ports:
+            - name: web
+              containerPort: 5601
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mail-and-media-shop.fullname" . }}-kibana
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 5601
+      targetPort: 5601
+  selector:
+    app.kubernetes.io/component: kibana
+{{- end }}
