@@ -7,10 +7,8 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
 
 ## Table of Contents
 - [Technology Stack](#technology-stack)
+
 - [Swagger UI](#swagger-ui)
-- [Security & Authentication (Spring Security + Keycloak)](#security--authentication-spring-security--keycloak)
-- [Testing](#testing)
-- [Dockerization](#dockerization)
 - [API Overview](#api-overview)
   - [Customer API](#customer-api)
   - [Contract API](#contract-api)
@@ -18,24 +16,31 @@ Built with **Spring Boot** and documented via **Springdoc OpenAPI (Swagger UI)**
   - [Billing API](#billing-api)
 - [Common Response Schemas](#common-response-schemas)
 - [Error Handling](#error-handling)
-- [Redis Caching](#redis-caching)
+
 - [Monitoring & Observability](#monitoring--observability)
   - [Monitoring Components](#monitoring-components)
   - [ELK Stack (Structured Log Pipeline)](#elk-stack-structured-log-pipeline)
   - [Log Persistence](#log-persistence)
   - [How to Visualize](#how-to-visualize)
   - [ELK Operations](#elk-operations)
+
+- [Testing](#testing)
+
+- [Dockerization](#dockerization)
 - [CI/CD Pipeline & Deployment](#cicd-pipeline--deployment)
   - [Pipeline Stages](#pipeline-stages)
   - [Deployment Scripts](#deployment-scripts)
   - [Environment Configuration](#environment-configuration)
+- [Security & Authentication (Spring Security + Keycloak)](#security--authentication-spring-security--keycloak)
+- [Redis Caching](#redis-caching)
 - [Maintain Code Cleanliness](#maintain-code-cleanliness)
+  - [SonarQube](#6-sonarqube--static-analysis-and-quality-gate)
   - [Spotless](#1-spotless--automatic-code-formatting)
   - [PMD](#2-pmd--anti-pattern-and-code-duplication-detection)
   - [SpotBugs](#3-spotbugs--findsecbugs--bytecode-analysis-and-security)
   - [OWASP](#4-owasp-dependency-check--snyk--dependency-security)
   - [Git Pre-commit Hook](#5-git-pre-commit-hook--automatic-checks-before-commit)
-  - [SonarQube](#6-sonarqube--static-analysis-and-quality-gate)
+
 - [Dependency Management & Build](#dependency-management--build)
 - [Troubleshooting](#troubleshooting)
 
@@ -59,157 +64,6 @@ Interactive API documentation is available at:
 [http://localhost:8090/swagger-ui/index.html](http://localhost:8090/swagger-ui/index.html)
 
 ---
-
-## Security & Authentication (Spring Security + Keycloak)
-
-The application implements a robust security layer using **Spring Security** as an OAuth2 Resource Server and **Keycloak** as the Identity Provider (IdP).
-
-### 1. Secured Endpoints
-By default, all API endpoints require authentication (a valid Bearer JWT token) except the following public endpoints:
-- `POST /api/v1/shop/customers` (Customer Registration)
-- `GET /api/v1/shop/products` (Product Catalog)
-- OpenAPI/Swagger UI endpoints (`/swagger-ui/**`, `/v3/api-docs/**`)
-- Spring Boot Actuator endpoints (`/actuator/**`)
-
-### 2. JWT Token Validation
-The application performs strict token validation using `NimbusJwtDecoder`:
-- **Audience Validation**: Ensures the token's `aud` claim contains the designated `clientId` (e.g., `mail-and-media-shop-app`) or `account`.
-- **Issuer Validation**: Ensures the token was strictly issued by the trusted Keycloak realm (e.g., `/realms/mail-and-media-shop-realm`).
-
-### 3. Role-Based Access Control (RBAC)
-Role extraction is handled by a custom `KeycloakRoleConverter`. It maps Keycloak's JSON structure by extracting roles from the `realm_access.roles` claim and converting them into Spring Security authorities with a `ROLE_` prefix (e.g., `ROLE_USER`, `ROLE_ADMIN`).
-
----
-
-## Testing
-
-### Unit Tests (Java/JUnit)
-To run unit tests, do:
-```bash
-mvn clean test
-```
-
-To run a specific test class:
-```bash
-mvn test -Dtest=BillingServiceTest
-```
-
-### Code Coverage (JaCoCo)
-To generate the coverage report, run tests with the `dev` profile:
-```bash
-mvn test -P dev
-```
-Then open the HTML report:
-```bash
-open target/site/jacoco/index.html
-```
-
-### Full Validation
-Runs tests and all quality checks (Spotless, PMD, SpotBugs):
-```bash
-mvn verify -P dev
-```
-
-### End-to-End (E2E) Tests (Python)
-To run the full test cycle (build, start server, run tests, stop) use:
-```bash
-chmod +x scripts/run_e2e.sh
-./scripts/run_e2e.sh
-```
-
- ---
-
-For a local CI pipeline, do:
-```bash
-gitlab-ci-local
-```
-
-## Dockerization
-
-The project uses **PostgreSQL 16** as the database.
-
-### Exposed Ports
-- **Application**: `8090` (maps to internal `8090`) can be changed in the .env file.
-- **PostgreSQL**: `5430` (maps to internal `5432`) can be changed in the .env file.
-
-### Local SSL Certificates (HTTPS Setup)
-
-Since Keycloak is configured to run exclusively over HTTPS (`https://keycloak:8443`), you must generate SSL certificates and a Java Truststore locally before starting the services.
-
-#### 1. Generate SSL Certificates
-Create the certificates directory and generate the self-signed key and certificate. You can use either `mkcert` (recommended) or `openssl`:
-
-**Option A: Using mkcert (Recommended for local development)**
-```bash
-mkdir -p certs
-mkcert -key-file certs/keycloak-key.pem -cert-file certs/keycloak-cert.pem keycloak localhost 127.0.0.1 ::1
-```
-
-**Option B: Using OpenSSL (Fallback)**
-```bash
-mkdir -p certs
-openssl req -x509 -newkey rsa:4096 -nodes -sha256 \
-  -keyout certs/keycloak-key.pem \
-  -out certs/keycloak-cert.pem \
-  -subj "/CN=keycloak" \
-  -days 365 \
-  -addext "subjectAltName=DNS:keycloak,DNS:localhost,IP:127.0.0.1"
-```
-
-#### 2. Create Java Truststore (JKS)
-The Spring Boot container requires a truststore containing the Keycloak public certificate to securely connect to the Identity Provider:
-```bash
-keytool -importcert -noprompt \
-  -keystore certs/truststore.jks \
-  -storepass changeit \
-  -alias keycloak \
-  -file certs/keycloak-cert.pem
-```
-
-### Running the entire project
-
-To run it locally, you need to execute the following commands (after generating the certificates):
-
-```bash
-docker compose down -v
-docker compose up -d
-bash scripts/2_keycloak_api_setup.sh
-```
-
-### Stopping the project
-```bash
-docker compose down
-```
-
-### Wiping Database Data (useful for clean Flyway migrations)
-```bash
-docker compose down -v
-```
-
-### Viewing application logs
-```bash
-docker compose logs -f app
-```
-
-### Monitoring Container Resources
-```bash
-docker stats
-```
-
-### Access the application container shell:
-```bash
-docker compose exec app bash
-```
-
-### Access the PostgreSQL container shell:
-```bash
-docker compose exec shop_db psql -U dev_user -d shop_db
-```
-
-### Restarting only the application (after code changes - rebuilds the app image)
-```bash
-docker compose up -d --build app
-```
 
 ## API Overview
 
@@ -243,7 +97,7 @@ Creates a new customer record.
 |------------------------|------------------------------|----------|------------------------------------------|
 | `firstName`            | `string`                     | Yes      | Not blank, max 100                       |
 | `lastName`             | `string`                     | Yes      | Not blank, max 100                       |
-| `birthDate`            | `string (LocalDate)`         | Yes      | Not null, format: `YYYY-MM-DD`           |
+| `birthDate`            | `string (LocalDate)`         | Yes      | Not null, must be in the past, format: `YYYY-MM-DD` |
 | `address`              | `AddressRequestDTO`          | Yes      | Not null, see sub-fields below           |
 | `invoiceAddress`       | `AddressRequestDTO` / `null` | No       | Nullable, same structure as `address`    |
 | `communicationDetails` | `CommunicationDetailsRequestDTO` | Yes  | Not null, see sub-fields below           |
@@ -257,14 +111,14 @@ Creates a new customer record.
 | `number`   | `string` | Not blank, max 100  |
 | `postcode` | `string` | Not blank, max 100  |
 | `city`     | `string` | Not blank, max 100  |
-| `country`  | `string` | Not blank, max 100  |
+| `country`  | `string` | Not blank, min 2, max 100 |
 
 **`CommunicationDetailsRequestDTO` fields:**
 
-| Field       | Type     | Constraints          |
-|-------------|----------|----------------------|
-| `email`     | `string` | Not blank, valid email format |
-| `telephone` | `string` | Not blank            |
+| Field       | Type     | Constraints                    |
+|-------------|----------|--------------------------------|
+| `email`     | `string` | Not blank, valid email format, max 255 |
+| `telephone` | `string` | Not blank, min 5, max 30       |
 
 #### Example Request (curl)
 
@@ -735,11 +589,12 @@ curl -X PUT http://localhost:8090/api/v1/contracts/a1b2c3d4-e5f6-7890-abcd-ef123
 
 #### Response Status Codes
 
-| Status | Description                      |
-|--------|----------------------------------|
-| `204`  | Contract activated successfully |
-| `404`  | Contract not found               |
-| `500`  | Unexpected internal server error |
+| Status | Description                                                     |
+|--------|-----------------------------------------------------------------|
+| `204`  | Contract activated successfully                                 |
+| `404`  | Contract or customer not found                                  |
+| `422`  | Brand mismatch: contract does not belong to the specified customer |
+| `500`  | Unexpected internal server error                                |
 
 ---
 
@@ -841,8 +696,12 @@ curl -X POST http://localhost:8090/api/v1/billing/invoices \
   "invoiceAddress": null,
   "items": [
     {
-      "description": "GMX ProMail",
-      "amount": 4.99
+      "productId": "7cb65f12-1234-4abc-a789-000000000001",
+      "productName": "GMX ProMail",
+      "contractId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "contractCreationDate": "2026-02-25",
+      "setupFee": 0.00,
+      "monthlyFee": 4.99
     }
   ],
   "totalSetupFee": 0.00,
@@ -872,9 +731,9 @@ curl -X POST http://localhost:8090/api/v1/billing/invoices \
   "firstName": "string",
   "lastName": "string",
   "birthDate": "YYYY-MM-DD",
-  "address": "AddressRequestDTO",
-  "invoiceAddress": "AddressRequestDTO | null",
-  "communicationDetails": "CommunicationDetailsRequestDTO",
+  "address": "AddressResponseDTO",
+  "invoiceAddress": "AddressResponseDTO | null",
+  "communicationDetails": "CommunicationDetailsResponseDTO",
   "brand": "GMX | WEB_DE | MAIL_COM",
   "status": "ACTIVE | INACTIVE"
 }
@@ -937,22 +796,6 @@ All error responses share a unified structure defined by `ErrorResponse`:
 | `400`  | Bad Request — validation failed or malformed input              |
 | `404`  | Not Found — the requested resource does not exist               |
 | `500`  | Internal Server Error — unexpected server-side failure          |
-
----
-## Redis Caching
-The application uses **Redis** with the **Jedis** client to optimize read-heavy operations using the **Cache-Aside** pattern.
-### Caching Strategy
-- **Read**: Before hitting the database, the system checks the Redis cache. If data is found (Cache Hit), it's returned immediately. Otherwise (Cache Miss), it loads data from the database and populates the cache for future requests.
-- **Write/Update**: When a record is modified, removed, or deactivated, the corresponding cache entry is evicted (`@CacheEvict`) to ensure data consistency.
-### Configured Caches
-- `customers`: Stores individual customer profiles (keyed by UUID).
-- `products`: Stores product lists filtered by Brand (keyed by Brand enum).
-### Configuration (TTL)
-TTL is externalized and can be configured in `application.yml` or `.env`:
-```properties
-# Default: 10 minutes (600,000 ms)
-spring.cache.redis.time-to-live=600000
-```
 
 ---
 
@@ -1159,6 +1002,140 @@ Once the Data View `*-logs-*` (or service-specific data views) is created in Kib
 
 ---
 
+## Testing
+
+### Unit Tests (Java/JUnit)
+To run unit tests, do:
+```bash
+mvn clean test
+```
+
+To run a specific test class:
+```bash
+mvn test -Dtest=BillingServiceTest
+```
+
+### Code Coverage (JaCoCo)
+To generate the coverage report, run tests with the `dev` profile:
+```bash
+mvn test -P dev
+```
+Then open the HTML report:
+```bash
+open target/site/jacoco/index.html
+```
+
+### Full Validation
+Runs tests and all quality checks (Spotless, PMD, SpotBugs):
+```bash
+mvn verify -P dev
+```
+
+### End-to-End (E2E) Tests (Python)
+To run the full test cycle (build, start server, run tests, stop) use:
+```bash
+chmod +x scripts/run_e2e.sh
+./scripts/run_e2e.sh
+```
+
+ ---
+
+For a local CI pipeline, do:
+```bash
+gitlab-ci-local
+```
+
+---
+
+## Dockerization
+
+The project uses **PostgreSQL 16** as the database.
+
+### Exposed Ports
+- **Application**: `8090` (maps to internal `8090`) can be changed in the .env file.
+- **PostgreSQL**: `5430` (maps to internal `5432`) can be changed in the .env file.
+
+### Local SSL Certificates (HTTPS Setup)
+
+Since Keycloak is configured to run exclusively over HTTPS (`https://keycloak:8443`), you must generate SSL certificates and a Java Truststore locally before starting the services.
+
+#### 1. Generate SSL Certificates
+Create the certificates directory and generate the self-signed key and certificate. You can use either `mkcert` (recommended) or `openssl`:
+
+**Option A: Using mkcert (Recommended for local development)**
+```bash
+mkdir -p certs
+mkcert -key-file certs/keycloak-key.pem -cert-file certs/keycloak-cert.pem keycloak localhost 127.0.0.1 ::1
+```
+
+**Option B: Using OpenSSL (Fallback)**
+```bash
+mkdir -p certs
+openssl req -x509 -newkey rsa:4096 -nodes -sha256 \
+  -keyout certs/keycloak-key.pem \
+  -out certs/keycloak-cert.pem \
+  -subj "/CN=keycloak" \
+  -days 365 \
+  -addext "subjectAltName=DNS:keycloak,DNS:localhost,IP:127.0.0.1"
+```
+
+#### 2. Create Java Truststore (JKS)
+The Spring Boot container requires a truststore containing the Keycloak public certificate to securely connect to the Identity Provider:
+```bash
+keytool -importcert -noprompt \
+  -keystore certs/truststore.jks \
+  -storepass changeit \
+  -alias keycloak \
+  -file certs/keycloak-cert.pem
+```
+
+### Running the entire project
+
+To run it locally, you need to execute the following commands (after generating the certificates):
+
+```bash
+docker compose down -v
+docker compose up -d
+bash scripts/2_keycloak_api_setup.sh
+```
+
+### Stopping the project
+```bash
+docker compose down
+```
+
+### Wiping Database Data (useful for clean Flyway migrations)
+```bash
+docker compose down -v
+```
+
+### Viewing application logs
+```bash
+docker compose logs -f app
+```
+
+### Monitoring Container Resources
+```bash
+docker stats
+```
+
+### Access the application container shell:
+```bash
+docker compose exec app bash
+```
+
+### Access the PostgreSQL container shell:
+```bash
+docker compose exec shop_db psql -U dev_user -d shop_db
+```
+
+### Restarting only the application (after code changes - rebuilds the app image)
+```bash
+docker compose up -d --build app
+```
+
+---
+
 ## CI/CD Pipeline & Deployment
 
 The project uses **GitLab CI/CD** for automated testing, packaging, and deployment. All deployment logic is externalized into standalone Bash scripts located in the `scripts/` directory, invoked from `.gitlab-ci.yml`.
@@ -1232,7 +1209,63 @@ The scripts will load variables from `.env` automatically. Ensure `SSH_USER` and
 
 ---
 
+## Security & Authentication (Spring Security + Keycloak)
+
+The application implements a robust security layer using **Spring Security** as an OAuth2 Resource Server and **Keycloak** as the Identity Provider (IdP).
+
+### 1. Secured Endpoints
+By default, all API endpoints require authentication (a valid Bearer JWT token) except the following public endpoints:
+- `POST /api/v1/shop/customers` (Customer Registration)
+- `GET /api/v1/shop/products` (Product Catalog)
+- OpenAPI/Swagger UI endpoints (`/swagger-ui/**`, `/v3/api-docs/**`)
+- Spring Boot Actuator endpoints (`/actuator/**`)
+
+### 2. JWT Token Validation
+The application performs strict token validation using `NimbusJwtDecoder`:
+- **Audience Validation**: Ensures the token's `aud` claim contains the designated `clientId` (e.g., `mail-and-media-shop-app`) or `account`.
+- **Issuer Validation**: Ensures the token was strictly issued by the trusted Keycloak realm (e.g., `/realms/mail-and-media-shop-realm`).
+
+### 3. Role-Based Access Control (RBAC)
+Role extraction is handled by a custom `KeycloakRoleConverter`. It maps Keycloak's JSON structure by extracting roles from the `realm_access.roles` claim and converting them into Spring Security authorities with a `ROLE_` prefix (e.g., `ROLE_USER`, `ROLE_ADMIN`).
+
+---
+
+## Redis Caching
+The application uses **Redis** with the **Jedis** client to optimize read-heavy operations using the **Cache-Aside** pattern.
+### Caching Strategy
+- **Read**: Before hitting the database, the system checks the Redis cache. If data is found (Cache Hit), it's returned immediately. Otherwise (Cache Miss), it loads data from the database and populates the cache for future requests.
+- **Write/Update**: When a record is modified, removed, or deactivated, the corresponding cache entry is evicted (`@CacheEvict`) to ensure data consistency.
+### Configured Caches
+- `customers`: Stores individual customer profiles (keyed by UUID).
+- `products`: Stores product lists filtered by Brand (keyed by Brand enum).
+### Configuration (TTL)
+TTL is externalized and can be configured in `application.yml` or `.env`:
+```properties
+# Default: 10 minutes (600,000 ms)
+spring.cache.redis.time-to-live=600000
+```
+
+---
+
 ## Maintain Code Cleanliness
+
+### 6. SonarQube – Static Analysis and Quality Gate
+
+Provides comprehensive reports on bugs, vulnerabilities, code smells, and test coverage.
+
+```bash
+mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+  -Pdev -B \
+  -Dsonar.projectKey=mail-and-media-shop-v2 \
+  -Dsonar.projectName='mail-and-media-shop-v2' \
+  -Dsonar.host.url=http://localhost:9000 \
+  -Dsonar.token=[YOUR_SONAR_TOKEN] \
+  -Dspotbugs.skip=true \
+  -Dpmd.skip=true \
+  -Ddependency-check.skip=true
+```
+
+---
 
 ### 1. Spotless – Automatic Code Formatting
 
@@ -1310,24 +1343,6 @@ Simulates hook execution for testing purposes.
 
 ```bash
 ./.git/hooks/pre-commit
-```
-
----
-
-### 6. SonarQube – Static Analysis and Quality Gate
-
-Provides comprehensive reports on bugs, vulnerabilities, code smells, and test coverage.
-
-```bash
-mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-  -Pdev -B \
-  -Dsonar.projectKey=mail-and-media-shop-v2 \
-  -Dsonar.projectName='mail-and-media-shop-v2' \
-  -Dsonar.host.url=http://localhost:9000 \
-  -Dsonar.token=[YOUR_SONAR_TOKEN] \
-  -Dspotbugs.skip=true \
-  -Dpmd.skip=true \
-  -Ddependency-check.skip=true
 ```
 
 ---
